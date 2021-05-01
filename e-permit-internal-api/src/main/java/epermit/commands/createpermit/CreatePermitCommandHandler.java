@@ -3,12 +3,8 @@ package epermit.commands.createpermit;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Map;
 import javax.transaction.Transactional;
 import com.google.gson.Gson;
-
-import org.springframework.context.ApplicationEventPublisher;
 
 import an.awesome.pipelinr.Command;
 import epermit.common.CommandResult;
@@ -17,7 +13,6 @@ import epermit.common.PermitUtil;
 import epermit.common.PermitProperties;
 import epermit.entities.CreatedEvent;
 import epermit.entities.IssuedPermit;
-import epermit.events.AppEvent;
 import epermit.events.AppEventPublisher;
 import epermit.events.permitcreated.PermitCreatedEventFactory;
 import epermit.repositories.IssuedPermitRepository;
@@ -51,11 +46,10 @@ public class CreatePermitCommandHandler implements Command.Handler<CreatePermitC
                 Integer pid = permitService.generatePermitId(cmd.getIssuedFor(), cmd.getPermitYear(),
                                 cmd.getPermitType());
                 if (pid == null) {
-
+                        return CommandResult.fail("NOT_SUFFICIENT_PERMITID", "Permit id is not sufficient");
                 }
-                String qrCodePayload = Utils.createQrCode(cmd, properties.getIssuerCode());
-                String qrCode = keyService.createJws(qrCodePayload);
-                IssuedPermit permit = Utils.convertCommandToPermit(cmd, properties.getIssuerCode(), qrCode, pid);
+                IssuedPermit permit = Utils.convertCommandToPermit(cmd, properties.getIssuerCode(), pid);
+                permit.setQrCode(permitService.generateQrCode(permit));
                 repository.save(permit);
                 CreatedEvent event = factory.create(permit);
                 eventPublisher.publish(event);
@@ -64,22 +58,17 @@ public class CreatePermitCommandHandler implements Command.Handler<CreatePermitC
         }
 
         public static class Utils {
-                public static String createQrCode(CreatePermitCommand cmd, String issuer) {
-                        return "";
-                }
-
-                public static IssuedPermit convertCommandToPermit(CreatePermitCommand cmd, String issuer, String qrCode,
-                                Integer pid) {
+                public static IssuedPermit convertCommandToPermit(CreatePermitCommand cmd, String issuer, Integer pid) {
                         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
                         Gson gson = JsonUtil.getGson();
                         String serialNumber = PermitUtil.getSerialNumber(issuer, cmd.getIssuedFor(),
                                         cmd.getPermitType(), cmd.getPermitYear(), pid);
+                        String expireDate = "01/01/" + Integer.toString(cmd.getPermitYear() + 1);
                         IssuedPermit permit = new IssuedPermit();
                         permit.setIssuedFor(cmd.getIssuedFor());
                         permit.setClaims(gson.toJson(cmd.getClaims()));
-                        permit.setQrCode(qrCode);
                         permit.setCompanyName(cmd.getCompanyName());
-                        permit.setExpireAt(OffsetDateTime.now().plusYears(1).format(dtf));
+                        permit.setExpireAt(OffsetDateTime.parse(expireDate, dtf).plusMonths(1).format(dtf));
                         permit.setIssuedAt(OffsetDateTime.now().format(dtf));
                         permit.setPermitId(pid);
                         permit.setPermitType(cmd.getPermitType());

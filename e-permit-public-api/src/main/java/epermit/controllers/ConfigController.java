@@ -8,8 +8,9 @@ import org.modelmapper.ModelMapper;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 import epermit.common.JsonUtil;
-import epermit.config.EPermitProperties;
+import epermit.common.PermitProperties;
 import epermit.dtos.PermitConfigAuthorityDto;
 import epermit.dtos.PermitConfigDto;
 import epermit.dtos.PermitConfigKeyDto;
@@ -21,12 +22,12 @@ import epermit.services.KeyService;
 @RestController
 @RequestMapping("/epermit-configuration")
 public class ConfigController {
-    private final EPermitProperties props;
+    private final PermitProperties props;
     private final KeyService keyService;
     private final AuthorityRepository authorityRepository;
     private final ModelMapper modelMapper;
 
-    public ConfigController(EPermitProperties props, KeyService keyService,
+    public ConfigController(PermitProperties props, KeyService keyService,
             AuthorityRepository authorityRepository, ModelMapper modelMapper) {
         this.authorityRepository = authorityRepository;
         this.keyService = keyService;
@@ -37,9 +38,9 @@ public class ConfigController {
     @GetMapping
     public PermitConfigDto get() {
         PermitConfigDto dto = new PermitConfigDto();
-        dto.setCode(props.getIssuer().getCode());
-        dto.setApiUri(props.getIssuer().getApiUri());
-        dto.setVerifyUri(props.getIssuer().getVerifyUri());
+        dto.setCode(props.getIssuerCode());
+        dto.setApiUri(props.getIssuerApiUri());
+        dto.setVerifyUri(props.getIssuerVerifyUri());
         String jwk = keyService.getKey().toPublicJWK().toJSONString();     
         Gson gson = JsonUtil.getGson();
         PermitConfigKeyDto keyDto = gson.fromJson(jwk, PermitConfigKeyDto.class);

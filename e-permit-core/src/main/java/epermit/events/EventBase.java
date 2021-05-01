@@ -14,4 +14,6 @@ public class EventBase {
     private EventType eventType;
 
     private String eventId;
+
+    private String previousEventId;
 }

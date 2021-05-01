@@ -8,8 +8,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
-
-import epermit.common.EventState;
+import epermit.common.EventType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -24,10 +23,13 @@ public class ReceivedEvent {
 
     @Column(name = "event_type", nullable = false)
     @Enumerated(EnumType.STRING)
-    private EventState eventType;
+    private EventType eventType;
 
     @Column(name = "event_id", nullable = false)
     private String eventId;
+    
+    @Column(name = "previous_event_id", nullable = false)
+    private String previousEventId;
 
     @Column(name = "iss", nullable = false)
     private String iss;

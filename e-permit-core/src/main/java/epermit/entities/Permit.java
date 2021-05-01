@@ -1,16 +1,24 @@
 package epermit.entities;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 import epermit.common.PermitType;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
@@ -65,4 +73,14 @@ public class Permit {
 
     @Column(name = "deleted", nullable = false)
     private boolean deleted;
+
+    @OneToMany(cascade = CascadeType.ALL)
+    @EqualsAndHashCode.Exclude
+    private List<PermitActivity> activities = new ArrayList<>();
+  
+    @JsonIgnore
+    public void addActivity(PermitActivity activity) {
+        activities.add(activity);
+        activity.setPermit(this);
+    }
 }

@@ -1,34 +1,32 @@
 package epermit.events;
 
-import javax.print.attribute.HashDocAttributeSet;
-
 import org.springframework.context.event.EventListener;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import epermit.common.EventState;
-import epermit.entities.CreatedEvent;
-import epermit.repositories.AuthorityRepository;
-import epermit.repositories.CreatedEventRepository;
 import lombok.extern.slf4j.Slf4j;
 
 @EnableAsync(proxyTargetClass = true)
 @Component
 @Slf4j
 public class AppEventListener {
-    private final AppEventService service;
+    private final RestTemplate restTemplate;
 
-    public AppEventListener(AppEventService service) {
-        this.service = service;
+    public AppEventListener(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
     }
 
     @Async
     @EventListener
     public void onAppEvent(AppEvent event) {
-        service.send(event.getUri(), event.getJws());
-        service.handle();
-        log.debug("received ticket updated event");
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> request = new HttpEntity<String>(event.getJws(), headers);
+        restTemplate.postForEntity(event.getUri(), request, Boolean.class);
     }
 }

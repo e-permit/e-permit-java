@@ -8,8 +8,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
-
-import epermit.common.EventState;
 import epermit.entities.CreatedEvent;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.CreatedEventRepository;

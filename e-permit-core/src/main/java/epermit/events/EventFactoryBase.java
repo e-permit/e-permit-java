@@ -24,13 +24,15 @@ public abstract class EventFactoryBase {
     protected <T extends EventBase> CreatedEvent persist(T event) {
         CreatedEvent entity = new CreatedEvent();
         entity.setIssuedFor(event.getIssuedFor());
-        entity.setContent(keyService.createJws(event));
+        entity.setJws(keyService.createJws(event));
         createdEventRepository.save(entity);
         return entity;
     }
 
     protected <T extends EventBase> void setCommonClaims(T event, String issuedFor,
             EventType type) {
+        CreatedEvent lastEvent = createdEventRepository.findTopByOrderByIdDesc();
+        event.setPreviousEventId(lastEvent.getEventId());
         event.setCreatedAt(OffsetDateTime.now(ZoneOffset.UTC).toEpochSecond());
         event.setIssuer(props.getIssuerCode());
         event.setIssuedFor(issuedFor);

@@ -1,4 +1,5 @@
 package epermit.events.permitused;
+import epermit.common.PermitActivityType;
 import epermit.events.EventBase;
 import lombok.Builder;
 import lombok.Getter;
@@ -7,4 +8,6 @@ import lombok.Getter;
 @Builder(toBuilder = true)
 public class PermitUsedEvent extends EventBase {
     private String serialNumber;
+
+    private PermitActivityType activityType;
 }

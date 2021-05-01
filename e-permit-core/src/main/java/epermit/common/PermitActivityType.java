@@ -1,11 +1,11 @@
 package epermit.common;
 
-public enum EventState {
-    NEW(1), LOCKED(2), HANDLED(3);
+public enum PermitActivityType {
+    ENTERANCE(1), QUIT(2);
 
     private Integer code;
 
-    private EventState(Integer code) {
+    private PermitActivityType(Integer code) {
         this.code = code;
     }
 

@@ -1,0 +1,56 @@
+version: '3.6'
+services:
+  tr-internal-api:
+    depends_on:
+      - trdb
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    build: 
+      context: .
+    ports:
+      - "3020:8080"
+  tr-public-api:
+    depends_on:
+      - trdb
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    build: 
+      context: .
+    ports:
+      - "3021:8080"
+  uz-internal-api:
+    depends_on:
+      - uzdb
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    build: 
+      context: .
+    ports:
+      - "3030:8080"
+  uz-public-api:
+    depends_on:
+      - uzdb
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    build: 
+      context: .
+    ports:
+      - "3031:8080"
+  trdb:
+    image: 'postgres:13.1-alpine'
+    container_name: trdb
+    environment:
+      - POSTGRES_USER=compose-postgres
+      - POSTGRES_PASSWORD=compose-postgres
+      - POSTGRES_DB=devdb
+  uzdb:
+    image: 'postgres:13.1-alpine'
+    container_name: uzdb
+    environment:
+      - POSTGRES_USER=compose-postgres
+      - POSTGRES_PASSWORD=compose-postgres
+      - POSTGRES_DB=devdb

@@ -5,7 +5,6 @@ import java.time.ZoneOffset;
 import java.util.Optional;
 import epermit.entities.Authority;
 import epermit.entities.IssuerQuota;
-import epermit.events.EventHandleResult;
 import epermit.repositories.AuthorityRepository;
 import lombok.SneakyThrows;
 
@@ -18,7 +17,7 @@ public class QuotaCreatedEventHandler {
     }
 
     @SneakyThrows
-    public EventHandleResult handle(QuotaCreatedEvent e) {
+    public void handle(QuotaCreatedEvent e) {
         Authority authority = repository.findByCode(e.getIssuer()).get();
         IssuerQuota quota = new IssuerQuota();
         quota.setActive(true);
@@ -31,6 +30,5 @@ public class QuotaCreatedEventHandler {
         quota.setPermitYear(e.getPermitYear());
         authority.addIssuerQuota(quota);
         repository.save(authority);
-        return EventHandleResult.success();
     }
 }

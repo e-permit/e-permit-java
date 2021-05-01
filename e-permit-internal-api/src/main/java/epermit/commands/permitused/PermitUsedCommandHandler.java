@@ -26,8 +26,7 @@ public class PermitUsedCommandHandler implements Command.Handler<PermitUsedComma
 
     @Override
     @Transactional
-    @SneakyThrows
-    public CommandResult handle(PermitUsedCommand cmd) {
+    @SneakyThrows    public CommandResult handle(PermitUsedCommand cmd) {
         Permit permit = repository.findById(cmd.getPermitId()).get();
         permit.setUsed(true);
         repository.save(permit);
