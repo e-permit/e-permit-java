@@ -37,8 +37,8 @@ public class AuthorityKey {
     @Column(name = "disabled_at", nullable = true)
     private OffsetDateTime disabledAt;
 
-    @Column(name = "content", nullable = false, length=5000)
-    private String content;
+    @Column(name = "jwk", nullable = false, length=5000)
+    private String jwk;
     
     @ManyToOne
     @JoinColumn(name = "authority_id")

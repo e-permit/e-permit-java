@@ -26,11 +26,12 @@ public class PermitUsedCommandHandler implements Command.Handler<PermitUsedComma
 
     @Override
     @Transactional
-    @SneakyThrows    public CommandResult handle(PermitUsedCommand cmd) {
-        Permit permit = repository.findById(cmd.getPermitId()).get();
+    @SneakyThrows
+    public CommandResult handle(PermitUsedCommand cmd) {
+        Permit permit = repository.findOneByPermitId(cmd.getPermitId()).get();
         permit.setUsed(true);
         repository.save(permit);
-        CreatedEvent event = factory.create(permit);
+        CreatedEvent event = factory.create(permit.getIssuer(), permit.getPermitId(), cmd.getActivityType());
         eventPublisher.publish(event);
         CommandResult result = CommandResult.success();
         return result;

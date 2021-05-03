@@ -24,9 +24,9 @@ public class PermitCreatedEventFactory extends EventFactoryBase {
         Type type = new TypeToken<Map<String, Object>>() {
         }.getType();
         PermitCreatedEvent e = PermitCreatedEvent.builder().companyName(permit.getCompanyName())
-                .permitId(permit.getPermitId()).permitType(permit.getPermitType()).permitYear(permit.getPermitYear())
+                .serialNumber(permit.getSerialNumber()).permitType(permit.getPermitType()).permitYear(permit.getPermitYear())
                 .plateNumber(permit.getPlateNumber()).claims(gson.fromJson(permit.getClaims(), type))
-                .serialNumber(permit.getSerialNumber()).build();
+                .permitId(permit.getPermitId()).build();
         setCommonClaims(e, permit.getIssuedFor(), EventType.PERMIT_CREATED);
         return persist(e);
     }

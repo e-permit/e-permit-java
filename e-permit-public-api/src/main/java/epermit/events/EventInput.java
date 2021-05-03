@@ -1,4 +1,4 @@
-package epermit;
+package epermit.events;
 
 import lombok.Data;
 

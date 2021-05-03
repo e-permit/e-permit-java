@@ -5,6 +5,7 @@ import java.time.ZoneOffset;
 
 import com.google.gson.Gson;
 
+import epermit.common.JsonUtil;
 import epermit.entities.Permit;
 import epermit.repositories.PermitRepository;
 import lombok.SneakyThrows;
@@ -23,8 +24,7 @@ public class PermitCreatedEventHandler {
     public void handle(PermitCreatedEvent event) {
         Boolean valid = validator.validate(event);
         if (valid) {
-            Permit p = new Permit();
-            Gson gson = new Gson();
+            Gson gson = JsonUtil.getGson();
             Permit permit = new Permit();
             permit.setClaims(gson.toJson(event.getClaims()));
             permit.setCompanyName(event.getCompanyName());

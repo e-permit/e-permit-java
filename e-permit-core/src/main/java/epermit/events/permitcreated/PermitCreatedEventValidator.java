@@ -1,41 +1,39 @@
 package epermit.events.permitcreated;
 
 import java.util.Optional;
+
+import org.springframework.stereotype.Component;
+
 import epermit.common.PermitUtil;
 import epermit.common.PermitProperties;
 import epermit.entities.Authority;
 import epermit.entities.VerifierQuota;
 import epermit.repositories.AuthorityRepository;
+import lombok.extern.slf4j.Slf4j;
 
+@Component
+@Slf4j
 public class PermitCreatedEventValidator {
     private final AuthorityRepository authorityRepository;
-    private final PermitProperties props;
 
-    public PermitCreatedEventValidator(AuthorityRepository authorityRepository, PermitProperties props) {
+    public PermitCreatedEventValidator(AuthorityRepository authorityRepository) {
         this.authorityRepository = authorityRepository;
-        this.props = props;
     }
 
     public Boolean validate(PermitCreatedEvent event) {
-        if (!props.getIssuerCode().equals(event.getIssuedFor())) {
-            return false;
-            //return EventHandleResult.fail("INVALID_ISSUER");
-        }
-        String expectedSerialNumber = PermitUtil.getSerialNumber(event.getIssuedFor(), event.getIssuer(),
-        event.getPermitType(), event.getPermitYear(), event.getPermitId());
-        if (!expectedSerialNumber.equals(event.getSerialNumber())) {
-            //return EventHandleResult.fail("INVALID_SERIALNUMBER");
+        String expectedPermitId = PermitUtil.getPermitId(event.getIssuedFor(), event.getIssuer(), event.getPermitType(),
+                event.getPermitYear(), event.getSerialNumber());
+        if (!expectedPermitId.equals(event.getPermitId())) {
+            log.info("INVALID_PERMITID");
             return false;
         }
         Authority authority = authorityRepository.findByCode(event.getIssuer()).get();
         Optional<VerifierQuota> quotaResult = authority.getVerifierQuotas().stream()
-                .filter(x -> x.getPermitYear() == event.getPermitYear()
-                        && event.getPermitId() < x.getEndNumber()
-                        && event.getPermitId() > x.getStartNumber()
-                        && x.getPermitType() == event.getPermitType())
+                .filter(x -> x.getPermitYear() == event.getPermitYear() && event.getSerialNumber() < x.getEndNumber()
+                        && event.getSerialNumber() > x.getStartNumber() && x.getPermitType() == event.getPermitType())
                 .findAny();
         if (!quotaResult.isPresent()) {
-            //return EventHandleResult.fail("QUOTA_DOESNT_MATCH");
+            log.info("QUOTA_DOESNT_MATCH");
             return false;
         }
         return true;

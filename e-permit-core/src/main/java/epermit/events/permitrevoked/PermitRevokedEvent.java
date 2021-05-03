@@ -7,5 +7,5 @@ import lombok.Getter;
 @Getter
 @Builder
 public class PermitRevokedEvent extends EventBase {
-    private String serialNumber;
+    private String permitId;
 }

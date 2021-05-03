@@ -35,17 +35,17 @@ public class Permit {
     @Column(name = "issuer", nullable = false)
     private String issuer;
 
-    @Column(name = "serial_number", nullable = false)
-    private String serialNumber;
-
     @Column(name = "permit_id", nullable = false)
-    private int permitId;
+    private String permitId;
 
     @Column(name = "permit_type", nullable = false)
     private PermitType permitType;
 
     @Column(name = "permit_year", nullable = false)
     private int permitYear;
+
+    @Column(name = "serial_number", nullable = false)
+    private int serialNumber;
 
     @Column(name = "issued_at", nullable = false)
     private String issuedAt;

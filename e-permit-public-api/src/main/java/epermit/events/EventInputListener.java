@@ -1,4 +1,6 @@
-package epermit;
+package epermit.events;
+
+import java.util.Map;
 
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
@@ -9,14 +11,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class EventInputListener {
 
-    private final EventService service;
-    public EventInputListener(EventService service) {
-       this.service = service;
+    private final EventDispatcher dispatcher;
+
+    public EventInputListener(EventDispatcher dispatcher) {
+        this.dispatcher = dispatcher;
     }
 
     @Async
     @EventListener
     public void onEventInputReceived(EventInput event) {
-        service.handle(event.getJws());
+        dispatcher.dispatch(event.getJws());
     }
 }

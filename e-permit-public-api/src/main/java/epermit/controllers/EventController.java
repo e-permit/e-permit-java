@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import epermit.EventInput;
 import epermit.entities.CreatedEvent;
+import epermit.events.EventInput;
 import epermit.repositories.CreatedEventRepository;
 
 @RestController

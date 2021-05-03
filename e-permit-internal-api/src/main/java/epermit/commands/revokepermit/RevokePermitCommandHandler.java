@@ -29,10 +29,10 @@ public class RevokePermitCommandHandler
     @Transactional
     @SneakyThrows
     public CommandResult handle(RevokePermitCommand cmd) {
-        IssuedPermit permit = repository.findById(cmd.getPermitId()).get();
+        IssuedPermit permit = repository.findOneByPermitId(cmd.getPermitId()).get();
         permit.setRevoked(true);
         repository.save(permit);
-        CreatedEvent event = factory.create(permit);
+        CreatedEvent event = factory.create(permit.getIssuedFor(), permit.getPermitId());
         eventPublisher.publish(event);
         CommandResult result = CommandResult.success();
         return result;

@@ -7,7 +7,7 @@ import lombok.Getter;
 @Getter
 @Builder(toBuilder = true)
 public class PermitUsedEvent extends EventBase {
-    private String serialNumber;
+    private String permitId;
 
     private PermitActivityType activityType;
 }

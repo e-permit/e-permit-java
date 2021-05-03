@@ -28,10 +28,10 @@ public class PermitService {
         this.props = props;
     }
 
-    public Integer generatePermitId(String issuedFor, int py, PermitType pt) {
+    public Integer generateSerialNumber(String issuedFor, int py, PermitType pt) {
         Optional<IssuedPermit> revokedCred = issuedCredentialRepository.findFirstByRevokedTrue();
         if (revokedCred.isPresent()) {
-            int nextPid = revokedCred.get().getPermitId();
+            int nextPid = revokedCred.get().getSerialNumber();
             issuedCredentialRepository.delete(revokedCred.get());
             return nextPid;
         }
@@ -56,7 +56,7 @@ public class PermitService {
         String aud = permit.getIssuedFor();
         String year = Integer.toString(permit.getPermitYear());
         String pt = Integer.toString(permit.getPermitType().getCode());
-        String pid = Integer.toString(permit.getPermitId());
+        String pid = Integer.toString(permit.getSerialNumber());
         String iat = permit.getIssuedAt();
         String exp = permit.getExpireAt();
         String sub = permit.getPlateNumber();

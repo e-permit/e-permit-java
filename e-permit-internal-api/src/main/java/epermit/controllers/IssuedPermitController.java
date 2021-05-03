@@ -35,22 +35,19 @@ public class IssuedPermitController {
     @GetMapping()
     public ResponseEntity<Page<IssuedPermitDto>> getAll(Pageable pageable) {
         Page<epermit.entities.IssuedPermit> entities = repository.findAll(pageable);
-        Page<IssuedPermitDto> dtoPage =
-                entities.map(x -> modelMapper.map(x, IssuedPermitDto.class));
+        Page<IssuedPermitDto> dtoPage = entities.map(x -> modelMapper.map(x, IssuedPermitDto.class));
         return new ResponseEntity<>(dtoPage, HttpStatus.OK);
     }
 
     @GetMapping("{id}")
     public IssuedPermitDto getById(Long id) {
-        IssuedPermitDto dto =
-                modelMapper.map(repository.findById(id).get(), IssuedPermitDto.class);
+        IssuedPermitDto dto = modelMapper.map(repository.findById(id).get(), IssuedPermitDto.class);
         return dto;
     }
 
-    @GetMapping("find/{serialNumber}")
-    public IssuedPermitDto getBySerialNumber(String serialNumber) {
-        IssuedPermitDto dto =
-                modelMapper.map(repository.findOneBySerialNumber(serialNumber).get(), IssuedPermitDto.class);
+    @GetMapping("find/{permitId}")
+    public IssuedPermitDto getBySerialNumber(String permitId) {
+        IssuedPermitDto dto = modelMapper.map(repository.findOneByPermitId(permitId).get(), IssuedPermitDto.class);
         return dto;
     }
 
@@ -60,7 +57,7 @@ public class IssuedPermitController {
     }
 
     @PatchMapping("{id}/revoke")
-    public CommandResult revoke(Long id) {
+    public CommandResult revoke(String id) {
         RevokePermitCommand cmd = new RevokePermitCommand();
         cmd.setPermitId(id);
         return cmd.execute(pipeline);

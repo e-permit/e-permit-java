@@ -32,8 +32,8 @@ public class IssuedPermit {
     @GeneratedValue
     private Long id;
 
-    @Column(name = "serial_number", nullable = false)
-    private String serialNumber;
+    @Column(name = "permit_id", nullable = false)
+    private String permitId;
 
     @Column(name = "qr_code", nullable = false, length=1000)
     private String qrCode;
@@ -41,8 +41,8 @@ public class IssuedPermit {
     @Column(name = "issued_for", nullable = false)
     private String issuedFor;
 
-    @Column(name = "permit_id", nullable = false)
-    private int permitId;
+    @Column(name = "serial_number", nullable = false)
+    private int serialNumber;
 
     @Column(name = "permit_type", nullable = false)
     private PermitType permitType;

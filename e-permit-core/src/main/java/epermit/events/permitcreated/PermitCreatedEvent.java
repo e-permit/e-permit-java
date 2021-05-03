@@ -10,10 +10,10 @@ import lombok.Singular;
 @Getter
 @Builder(toBuilder = true)
 public class PermitCreatedEvent extends EventBase {
-    private String serialNumber;
+    private String permitId;
     private PermitType permitType;
     private int permitYear;
-    private int permitId;
+    private int serialNumber;
     private String IssuedAt;
     private String ExpireAt;
     private String companyName;
