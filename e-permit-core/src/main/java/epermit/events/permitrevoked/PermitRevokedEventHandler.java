@@ -1,9 +1,11 @@
 package epermit.events.permitrevoked;
 
+import org.springframework.stereotype.Service;
 import epermit.entities.Permit;
 import epermit.repositories.PermitRepository;
 import lombok.SneakyThrows;
 
+@Service("PERMIT_REVOKED")
 public class PermitRevokedEventHandler {
     private final PermitRepository repository;
     private final PermitRevokedEventValidator validator;

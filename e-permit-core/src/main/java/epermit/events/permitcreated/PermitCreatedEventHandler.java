@@ -4,12 +4,13 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
 import com.google.gson.Gson;
-
+import org.springframework.stereotype.Service;
 import epermit.common.JsonUtil;
 import epermit.entities.Permit;
 import epermit.repositories.PermitRepository;
 import lombok.SneakyThrows;
 
+@Service("PERMIT_CREATED")
 public class PermitCreatedEventHandler {
 
     private final PermitRepository repository;

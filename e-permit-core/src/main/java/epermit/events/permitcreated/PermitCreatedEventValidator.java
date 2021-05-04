@@ -5,7 +5,6 @@ import java.util.Optional;
 import org.springframework.stereotype.Component;
 
 import epermit.common.PermitUtil;
-import epermit.common.PermitProperties;
 import epermit.entities.Authority;
 import epermit.entities.VerifierQuota;
 import epermit.repositories.AuthorityRepository;

@@ -1,6 +1,5 @@
 package epermit.services;
 
-import java.security.interfaces.ECPublicKey;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
@@ -39,7 +38,8 @@ public class KeyService {
     private KeyRepository repository;
     private AuthorityRepository authorityRepository;
 
-    public KeyService(PermitProperties props, KeyRepository repository, AuthorityRepository authorityRepository) {
+    public KeyService(PermitProperties props, KeyRepository repository,
+            AuthorityRepository authorityRepository) {
         this.props = props;
         this.repository = repository;
         this.authorityRepository = authorityRepository;
@@ -95,7 +95,8 @@ public class KeyService {
         }
         JWSObject jwsObject = JWSObject.parse(jws);
         String kid = jwsObject.getHeader().getKeyID();
-        AuthorityKey authorityKey = r.get().getKeys().stream().filter(x -> x.getKid().equals(kid)).findFirst().get();
+        AuthorityKey authorityKey =
+                r.get().getKeys().stream().filter(x -> x.getKid().equals(kid)).findFirst().get();
         ECKey key = ECKey.parse(authorityKey.getJwk()).toPublicJWK();
         JWSVerifier verifier = new ECDSAVerifier(key);
         Boolean valid = jwsObject.verify(verifier);

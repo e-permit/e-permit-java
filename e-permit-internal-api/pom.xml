@@ -12,10 +12,14 @@
 	<name>e-permit-internal-api</name>
 	<description>E-Permit Internal Api</description>
 	<dependencies>
-	  <dependency>
-		  <groupId>epermit</groupId>
-		  <artifactId>e-permit-core</artifactId>
-		  <version>1.0.0</version>
-	  </dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>epermit</groupId>
+			<artifactId>e-permit-core</artifactId>
+			<version>1.0.0</version>
+		</dependency>
 	</dependencies>
 </project>

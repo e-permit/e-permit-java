@@ -13,6 +13,10 @@
 	<description>E-Permit Public Api</description>
 	<dependencies>
 		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>epermit</groupId>
 			<artifactId>e-permit-core</artifactId>
 			<version>1.0.0</version>

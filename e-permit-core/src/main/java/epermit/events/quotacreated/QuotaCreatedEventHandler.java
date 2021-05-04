@@ -2,12 +2,13 @@ package epermit.events.quotacreated;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.Optional;
+import org.springframework.stereotype.Service;
 import epermit.entities.Authority;
 import epermit.entities.IssuerQuota;
 import epermit.repositories.AuthorityRepository;
 import lombok.SneakyThrows;
 
+@Service("QUOTA_CREATED")
 public class QuotaCreatedEventHandler {
 
     private final AuthorityRepository repository;
