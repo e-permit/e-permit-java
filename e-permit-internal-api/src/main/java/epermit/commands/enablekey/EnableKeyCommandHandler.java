@@ -6,24 +6,32 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.annotation.Transactional;
 import an.awesome.pipelinr.Command;
 import epermit.common.CommandResult;
+import epermit.entities.Authority;
 import epermit.entities.CreatedEvent;
 import epermit.entities.Key;
 import epermit.events.AppEvent;
 import epermit.events.AppEventPublisher;
+import epermit.events.keycreated.KeyCreatedEvent;
 import epermit.events.keycreated.KeyCreatedEventFactory;
+import epermit.repositories.AuthorityRepository;
 import epermit.repositories.KeyRepository;
+import epermit.services.EventService;
 import lombok.SneakyThrows;
 
 public class EnableKeyCommandHandler implements Command.Handler<EnableKeyCommand, CommandResult> {
     private final KeyCreatedEventFactory factory;
     private final KeyRepository repository;
+    private final AuthorityRepository authorityRepository;
     private final AppEventPublisher eventPublisher;
+    private final EventService eventService;
 
-    public EnableKeyCommandHandler(KeyRepository repository, KeyCreatedEventFactory factory,
-            AppEventPublisher eventPublisher) {
+    public EnableKeyCommandHandler(KeyRepository repository, AuthorityRepository authorityRepository,
+            KeyCreatedEventFactory factory, AppEventPublisher eventPublisher, EventService eventService) {
         this.repository = repository;
         this.factory = factory;
         this.eventPublisher = eventPublisher;
+        this.authorityRepository = authorityRepository;
+        this.eventService = eventService;
     }
 
     @Override
@@ -33,8 +41,13 @@ public class EnableKeyCommandHandler implements Command.Handler<EnableKeyCommand
         Key key = repository.findOneByKid(cmd.getKeyId()).get();
         key.setEnabled(true);
         repository.save(key);
-        List<CreatedEvent> events = factory.create(key);
-        events.forEach(x -> eventPublisher.publish(x));
+        List<Authority> authorities = authorityRepository.findAll();  
+        authorities.forEach(aud -> {
+            KeyCreatedEvent event = factory.create(key);
+            eventService.setCommon(event, aud.getCode());
+            CreatedEvent e = eventService.persist(event);
+            eventPublisher.publish(e);
+        });
         CommandResult result = CommandResult.success();
         return result;
     }

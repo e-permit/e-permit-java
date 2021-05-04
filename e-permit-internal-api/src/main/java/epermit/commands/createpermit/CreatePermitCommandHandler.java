@@ -1,7 +1,6 @@
 package epermit.commands.createpermit;
 
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import javax.transaction.Transactional;
 import com.google.gson.Gson;
@@ -14,8 +13,10 @@ import epermit.common.PermitProperties;
 import epermit.entities.CreatedEvent;
 import epermit.entities.IssuedPermit;
 import epermit.events.AppEventPublisher;
+import epermit.events.permitcreated.PermitCreatedEvent;
 import epermit.events.permitcreated.PermitCreatedEventFactory;
 import epermit.repositories.IssuedPermitRepository;
+import epermit.services.EventService;
 import epermit.services.PermitService;
 import lombok.SneakyThrows;
 
@@ -25,15 +26,17 @@ public class CreatePermitCommandHandler implements Command.Handler<CreatePermitC
         private final PermitCreatedEventFactory factory;
         private final AppEventPublisher eventPublisher;
         private final PermitService permitService;
+        private final EventService eventService;
 
         public CreatePermitCommandHandler(AppEventPublisher eventPublisher, PermitService permitService,
                         IssuedPermitRepository repository, PermitProperties properties,
-                        PermitCreatedEventFactory factory) {
+                        PermitCreatedEventFactory factory, EventService eventService) {
                 this.repository = repository;
                 this.properties = properties;
                 this.factory = factory;
                 this.eventPublisher = eventPublisher;
                 this.permitService = permitService;
+                this.eventService = eventService;
         }
 
         @Override
@@ -48,8 +51,10 @@ public class CreatePermitCommandHandler implements Command.Handler<CreatePermitC
                 IssuedPermit permit = Utils.convertCommandToPermit(cmd, properties.getIssuerCode(), serialNumber);
                 permit.setQrCode(permitService.generateQrCode(permit));
                 repository.save(permit);
-                CreatedEvent event = factory.create(permit);
-                eventPublisher.publish(event);
+                PermitCreatedEvent event = factory.create(permit);
+                eventService.setCommon(event, permit.getIssuedFor());
+                CreatedEvent createdEvent = eventService.persist(event);
+                eventPublisher.publish(createdEvent);
                 CommandResult result = CommandResult.success();
                 return result;
         }

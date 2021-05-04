@@ -1,23 +1,13 @@
 package epermit.events.permitrevoked;
 
 import epermit.common.EventType;
-import epermit.common.PermitProperties;
-import epermit.entities.CreatedEvent;
-import epermit.events.EventFactoryBase;
-import epermit.repositories.CreatedEventRepository;
-import epermit.services.KeyService;
 
-public class PermitRevokedEventFactory extends EventFactoryBase {
+public class PermitRevokedEventFactory {
 
-    public PermitRevokedEventFactory(PermitProperties props, CreatedEventRepository createdEventRepository,
-            KeyService jwsService) {
-        super(props, createdEventRepository, jwsService);
-    }
-
-    public CreatedEvent create(String issuedFor, String permitId) {
+    public PermitRevokedEvent create(String permitId) {
         PermitRevokedEvent e = PermitRevokedEvent.builder().permitId(permitId).build();
-        setCommonClaims(e, issuedFor, EventType.PERMIT_REVOKED);
-        return persist(e);
+        e.setEventType(EventType.PERMIT_REVOKED);
+        return e;
     }
 
 }
