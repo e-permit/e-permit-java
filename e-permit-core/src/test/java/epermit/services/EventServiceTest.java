@@ -70,7 +70,7 @@ public class EventServiceTest {
         log.info("Event handler size: " + eventHandlers.size());
         EventService service = new EventService(receivedEventRepository, keyService, eventHandlers);
         EventHandleResult r = service.handle(jws);
-        Assertions.assertTrue(r.getSucceed());
+        Assertions.assertTrue(r.isSucceed());
     }
 
     class KeyCreatedEventHandler implements EventHandler{

@@ -7,10 +7,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import epermit.events.EventInput;
 import epermit.services.EventService;
+import lombok.extern.slf4j.Slf4j;
 import epermit.events.EventHandleResult;
 
 @RestController
 @RequestMapping("/events")
+@Slf4j
 public class EventController {
 
     private final EventService eventService;
@@ -21,6 +23,7 @@ public class EventController {
 
     @PostMapping()
     public EventHandleResult receiveEvent(@RequestBody EventInput input) {
+        log.info("Event is received jws: " + input.getJws());
         return eventService.handle(input.getJws());
     }
 

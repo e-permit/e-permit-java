@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class EventHandleResult {
 
-    private Boolean succeed;
+    private boolean succeed;
 
     private String errorCode;
 
