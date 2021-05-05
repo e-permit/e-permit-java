@@ -8,8 +8,14 @@ import com.google.gson.reflect.TypeToken;
 import epermit.common.EventType;
 import epermit.common.JsonUtil;
 import epermit.entities.IssuedPermit;
+import epermit.events.EventFactoryUtil;
 
 public class PermitCreatedEventFactory {
+    private final EventFactoryUtil util;
+
+    public PermitCreatedEventFactory(EventFactoryUtil util) {
+        this.util = util;
+    }
     public PermitCreatedEvent create(IssuedPermit permit) {
         Gson gson = JsonUtil.getGson();
         Type type = new TypeToken<Map<String, Object>>() {
@@ -19,6 +25,7 @@ public class PermitCreatedEventFactory {
                 .permitYear(permit.getPermitYear()).plateNumber(permit.getPlateNumber())
                 .claims(gson.fromJson(permit.getClaims(), type)).permitId(permit.getPermitId()).build();
         e.setEventType(EventType.PERMIT_CREATED);
+        util.setCommon(e, permit.getIssuedFor());
         return e;
     }
 }

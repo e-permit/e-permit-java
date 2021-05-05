@@ -27,15 +27,14 @@ public class EventService {
     private final KeyService keyService;
     private final Map<String, EventHandler> eventHandlers;
     private final CreatedEventRepository createdEventRepository;
-    private final PermitProperties properties;
 
-    public EventService(PermitProperties properties, ReceivedEventRepository repository, KeyService keyService,
-            Map<String, EventHandler> eventHandlers, CreatedEventRepository createdEventRepository) {
+    public EventService(ReceivedEventRepository repository, KeyService keyService,
+            Map<String, EventHandler> eventHandlers,
+            CreatedEventRepository createdEventRepository) {
         this.repository = repository;
         this.keyService = keyService;
         this.eventHandlers = eventHandlers;
         this.createdEventRepository = createdEventRepository;
-        this.properties = properties;
     }
 
     @SneakyThrows
@@ -45,31 +44,21 @@ public class EventService {
         if (!r.isValid()) {
             return EventHandleResult.fail("INVALID_JWS");
         }
+        String issuer = JsonUtil.getClaim(jws, "issuer");
         String eventId = JsonUtil.getClaim(jws, "event_id");
         String previousEventId = JsonUtil.getClaim(jws, "previous_event_id");
-        log.info(eventId);
-        log.info(previousEventId);
-
-        Boolean exist = repository.findOneByEventId(eventId).isPresent();
+        Boolean exist = repository.findOneByIssuerAndEventId(issuer, eventId).isPresent();
         if (exist) {
             return EventHandleResult.fail("EXIST_EVENT");
         }
-        Boolean previousExist = repository.findOneByEventId(previousEventId).isPresent();
+        Boolean previousExist =
+                repository.findOneByIssuerAndEventId(issuer, previousEventId).isPresent();
         if (!previousExist) {
             return EventHandleResult.fail("NOTEXIST_PREVIOUSEVENT");
         }
         String eventType = JsonUtil.getClaim(jws, "event_type");
         EventHandler handler = eventHandlers.get(eventType);
         return handler.handle(JWSObject.parse(jws).getPayload().toString());
-    }
-
-    public <T extends EventBase> void setCommon(T event, String issuedFor) {
-        CreatedEvent lastEvent = createdEventRepository.findTopByOrderByIdDesc();
-        event.setPreviousEventId(lastEvent.getEventId());
-        event.setCreatedAt(OffsetDateTime.now(ZoneOffset.UTC).toEpochSecond());
-        event.setIssuer(properties.getIssuerCode());
-        event.setIssuedFor(issuedFor);
-        event.setEventId(UUID.randomUUID().toString());
     }
 
     public <E extends EventBase> CreatedEvent persist(E event) {

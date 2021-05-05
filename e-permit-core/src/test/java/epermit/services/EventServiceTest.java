@@ -64,8 +64,10 @@ public class EventServiceTest {
         event.setEventId("0");
         event.setPreviousEventId("0");
         event.setEventType(EventType.KEY_CREATED);
-        when(receivedEventRepository.findOneByEventId("1")).thenReturn(Optional.empty());
-        when(receivedEventRepository.findOneByEventId("0")).thenReturn(Optional.of(event));
+        when(receivedEventRepository.findOneByIssuerAndEventId("TR", "1"))
+                .thenReturn(Optional.empty());
+        when(receivedEventRepository.findOneByIssuerAndEventId("TR", "0"))
+                .thenReturn(Optional.of(event));
         Map<String, String> claims = new HashMap<>();
         claims.put("event_type", "KEY_CREATED");
         claims.put("event_id", "1");
@@ -76,7 +78,7 @@ public class EventServiceTest {
         Map<String, EventHandler> eventHandlers = new HashMap<>();
         eventHandlers.put("KEY_CREATED", new KeyCreatedEventHandler());
         log.info("Event handler size: " + eventHandlers.size());
-        EventService service = new EventService(props, receivedEventRepository, keyService, eventHandlers,
+        EventService service = new EventService(receivedEventRepository, keyService, eventHandlers,
                 createdEventRepository);
         EventHandleResult r = service.handle(jws);
         Assertions.assertTrue(r.isSucceed());

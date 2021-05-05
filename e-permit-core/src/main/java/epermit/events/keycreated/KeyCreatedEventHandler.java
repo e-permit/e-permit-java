@@ -15,15 +15,21 @@ import lombok.SneakyThrows;
 public class KeyCreatedEventHandler implements EventHandler {
 
     private final AuthorityRepository repository;
+    private final KeyCreatedEventValidator validator;
 
-    public KeyCreatedEventHandler(AuthorityRepository repository) {
+    public KeyCreatedEventHandler(AuthorityRepository repository, KeyCreatedEventValidator validator) {
         this.repository = repository;
+        this.validator = validator;
     }
 
     @SneakyThrows
     @Override
     public EventHandleResult handle(String payload) {
         KeyCreatedEvent e = JsonUtil.getGson().fromJson(payload, KeyCreatedEvent.class);
+        Boolean valid = validator.validate(e);
+        if (!valid) {
+            return EventHandleResult.fail("INVALID_EVENT");
+        }
         Authority authority = repository.findByCode(e.getIssuer()).get();
         AuthorityKey key = new AuthorityKey();
         key.setAuthority(authority);

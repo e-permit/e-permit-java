@@ -1,12 +1,10 @@
 package epermit.commands.revokepermit;
 
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.annotation.Transactional;
 import an.awesome.pipelinr.Command;
 import epermit.common.CommandResult;
 import epermit.entities.CreatedEvent;
 import epermit.entities.IssuedPermit;
-import epermit.events.AppEvent;
 import epermit.events.AppEventPublisher;
 import epermit.events.permitrevoked.PermitRevokedEvent;
 import epermit.events.permitrevoked.PermitRevokedEventFactory;
@@ -36,8 +34,7 @@ public class RevokePermitCommandHandler
         IssuedPermit permit = repository.findOneByPermitId(cmd.getPermitId()).get();
         permit.setRevoked(true);
         repository.save(permit);
-        PermitRevokedEvent event = factory.create(permit.getPermitId());
-        eventService.setCommon(event, permit.getIssuedFor());
+        PermitRevokedEvent event = factory.create(permit);
         CreatedEvent e = eventService.persist(event);
         eventPublisher.publish(e);
         CommandResult result = CommandResult.success();

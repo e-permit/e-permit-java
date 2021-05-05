@@ -43,8 +43,7 @@ public class EnableKeyCommandHandler implements Command.Handler<EnableKeyCommand
         repository.save(key);
         List<Authority> authorities = authorityRepository.findAll();  
         authorities.forEach(aud -> {
-            KeyCreatedEvent event = factory.create(key);
-            eventService.setCommon(event, aud.getCode());
+            KeyCreatedEvent event = factory.create(key, aud.getCode());
             CreatedEvent e = eventService.persist(event);
             eventPublisher.publish(e);
         });

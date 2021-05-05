@@ -1,5 +1,7 @@
 package epermit.controllers;
 
+import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,9 +29,11 @@ public class EventController {
         return eventService.handle(input.getJws());
     }
 
-    /*
-     * @GetMapping("/{eventId}") public List<String> getEvents() { List<CreatedEvent> events =
-     * eventRepository.findAll(); return events.stream().map(x ->
-     * x.getJws()).collect(Collectors.toList()); }
-     */
+    @GetMapping("/{eventId}")
+    public List<String> getEvents() {
+        return null;
+        //List<CreatedEvent> events = eventRepository.findAll();
+        //return events.stream().map(x -> x.getJws()).collect(Collectors.toList());
+    }
+
 }

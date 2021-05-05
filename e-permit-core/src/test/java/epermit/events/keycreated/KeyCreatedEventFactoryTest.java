@@ -10,32 +10,22 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import epermit.common.EventType;
-import epermit.common.PermitProperties;
 import epermit.entities.Key;
-import epermit.repositories.AuthorityRepository;
-import epermit.repositories.CreatedEventRepository;
-import epermit.services.KeyService;
-import lombok.extern.slf4j.Slf4j;
+import epermit.events.EventFactoryUtil;
 
 @ExtendWith(MockitoExtension.class)
-@Slf4j
 public class KeyCreatedEventFactoryTest {
 
-    @Mock
-    AuthorityRepository authorityRepository;
-    @Mock
-    PermitProperties props;
-    @Mock
-    CreatedEventRepository createdEventRepository;
-    @Mock
-    KeyService keyService;
-
+    @Mock EventFactoryUtil util; 
     @Test
     void createShouldWork() {
-        KeyCreatedEventFactory factory = new KeyCreatedEventFactory();
-        Key key = keyService.create("1");
-        KeyCreatedEvent event = factory.create(key);
+        KeyCreatedEventFactory factory = new KeyCreatedEventFactory(util);
+        Key key = new Key();
+        key.setKid("1");
+        key.setContent("jws");
+        KeyCreatedEvent event = factory.create(key, "UA");
         assertEquals(EventType.KEY_CREATED, event.getEventType());
-  
+        assertEquals("1", event.getKeyId());
+        assertEquals("jws", event.getJwk());
     }
 }

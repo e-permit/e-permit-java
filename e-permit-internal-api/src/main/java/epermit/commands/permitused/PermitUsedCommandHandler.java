@@ -35,8 +35,7 @@ public class PermitUsedCommandHandler implements Command.Handler<PermitUsedComma
         Permit permit = repository.findOneByPermitId(cmd.getPermitId()).get();
         permit.setUsed(true);
         repository.save(permit);
-        PermitUsedEvent event = factory.create(permit.getPermitId(), cmd.getActivityType());
-        eventService.setCommon(event, permit.getIssuer());
+        PermitUsedEvent event = factory.create(permit, cmd.getActivityType());
         CreatedEvent e = eventService.persist(event);
         eventPublisher.publish(e);
         CommandResult result = CommandResult.success();

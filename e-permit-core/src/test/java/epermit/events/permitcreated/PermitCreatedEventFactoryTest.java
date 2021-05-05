@@ -1,4 +1,4 @@
-package epermit.events.permitrevoked;
+package epermit.events.permitcreated;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
@@ -10,13 +10,13 @@ import epermit.entities.IssuedPermit;
 import epermit.events.EventFactoryUtil;
 
 @ExtendWith(MockitoExtension.class)
-public class PermitRevokedEventFactoryTest {
+public class PermitCreatedEventFactoryTest {
     @Mock EventFactoryUtil util; 
     @Test
     void createShouldWork() {
-        PermitRevokedEventFactory factory = new PermitRevokedEventFactory(util);
+        PermitCreatedEventFactory factory = new PermitCreatedEventFactory(util);
         IssuedPermit permit = new IssuedPermit();
-        PermitRevokedEvent event = factory.create(permit);
-        assertEquals(EventType.PERMIT_REVOKED, event.getEventType());
+        PermitCreatedEvent event = factory.create(permit);
+        assertEquals(EventType.PERMIT_CREATED, event.getEventType());
     }
 }

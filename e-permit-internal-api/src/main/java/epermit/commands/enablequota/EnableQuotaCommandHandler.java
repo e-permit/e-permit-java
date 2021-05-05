@@ -36,7 +36,6 @@ public class EnableQuotaCommandHandler implements Command.Handler<EnableQuotaCom
         quota.setActive(true);
         repository.save(quota);
         QuotaCreatedEvent event = factory.create(quota);
-        eventService.setCommon(event, quota.getAuthority().getCode());
         CreatedEvent e = eventService.persist(event);
         eventPublisher.publish(e);
         CommandResult result = CommandResult.success();
