@@ -16,14 +16,17 @@ public class PermitCreatedEventFactory {
     public PermitCreatedEventFactory(EventFactoryUtil util) {
         this.util = util;
     }
+
     public PermitCreatedEvent create(IssuedPermit permit) {
         Gson gson = JsonUtil.getGson();
-        Type type = new TypeToken<Map<String, Object>>() {
-        }.getType();
+        Type type = new TypeToken<Map<String, Object>>() {}.getType();
         PermitCreatedEvent e = PermitCreatedEvent.builder().companyName(permit.getCompanyName())
                 .serialNumber(permit.getSerialNumber()).permitType(permit.getPermitType())
                 .permitYear(permit.getPermitYear()).plateNumber(permit.getPlateNumber())
-                .claims(gson.fromJson(permit.getClaims(), type)).permitId(permit.getPermitId()).build();
+                .permitId(permit.getPermitId()).build();
+        if (permit.getClaims() != null && !permit.getClaims().isEmpty()) {
+            permit.setClaims(gson.fromJson(permit.getClaims(), type));
+        }
         e.setEventType(EventType.PERMIT_CREATED);
         util.setCommon(e, permit.getIssuedFor());
         return e;

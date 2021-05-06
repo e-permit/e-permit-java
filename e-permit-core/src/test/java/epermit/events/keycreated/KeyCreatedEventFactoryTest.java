@@ -1,8 +1,7 @@
 package epermit.events.keycreated;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import java.util.List;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,6 +25,7 @@ public class KeyCreatedEventFactoryTest {
         KeyCreatedEvent event = factory.create(key, "UA");
         assertEquals(EventType.KEY_CREATED, event.getEventType());
         assertEquals("1", event.getKeyId());
+        assertNotNull(event.getValidFrom());
         assertEquals("jws", event.getJwk());
     }
 }

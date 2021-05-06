@@ -1,5 +1,7 @@
 package epermit.events.keycreated;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import epermit.common.EventType;
 import epermit.entities.Key;
 import epermit.events.EventFactoryUtil;
@@ -12,8 +14,9 @@ public class KeyCreatedEventFactory {
     }
 
     public KeyCreatedEvent create(Key key, String issuedFor) {
-        KeyCreatedEvent e =
-                KeyCreatedEvent.builder().keyId(key.getKid()).jwk(key.getContent()).build();
+        KeyCreatedEvent e = KeyCreatedEvent.builder().keyId(key.getKid())
+                .validFrom(OffsetDateTime.now(ZoneOffset.UTC).toEpochSecond()).jwk(key.getContent())
+                .build();
         e.setEventType(EventType.KEY_CREATED);
         util.setCommon(e, issuedFor);
         return e;

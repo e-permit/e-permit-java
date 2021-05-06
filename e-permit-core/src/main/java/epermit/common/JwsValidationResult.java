@@ -5,9 +5,10 @@ import lombok.Data;
 @Data
 public class JwsValidationResult {
     private boolean valid;
+    private String issuer;
     private String errorCode;
 
-    public static JwsValidationResult success(){
+    public static JwsValidationResult success(String issuer){
         JwsValidationResult r = new JwsValidationResult();
         r.setValid(true);
         return r;

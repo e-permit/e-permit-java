@@ -28,7 +28,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import epermit.controllers.EventController;
 import epermit.events.EventHandleResult;
 import epermit.events.EventHandler;
-import epermit.events.EventInput;
+import epermit.events.AppEvent;
 import epermit.repositories.AuthorityRepository;
 import epermit.services.EventService;
 
@@ -52,7 +52,7 @@ public class EventControllerTest {
     @Test
     public void getTest() throws Exception {
         when(eventService.handle(anyString())).thenReturn(EventHandleResult.success());
-        EventInput input = new EventInput();
+        AppEvent input = new AppEvent();
         input.setJws("jws");
         String json = new ObjectMapper().writeValueAsString(input);
         System.out.println(json);

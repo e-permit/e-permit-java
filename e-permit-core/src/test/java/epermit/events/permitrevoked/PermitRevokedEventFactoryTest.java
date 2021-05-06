@@ -18,5 +18,6 @@ public class PermitRevokedEventFactoryTest {
         IssuedPermit permit = new IssuedPermit();
         PermitRevokedEvent event = factory.create(permit);
         assertEquals(EventType.PERMIT_REVOKED, event.getEventType());
+        assertEquals(permit.getPermitId(), event.getPermitId());
     }
 }

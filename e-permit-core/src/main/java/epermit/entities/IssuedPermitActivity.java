@@ -11,7 +11,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import epermit.common.PermitType;
+import epermit.common.PermitActivityType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -24,6 +24,12 @@ public class IssuedPermitActivity {
     @Id
     @GeneratedValue
     private int id;
+
+    @Column(name = "activity_type", nullable = false)
+    private PermitActivityType activityType;
+
+    @Column(name = "created_at", nullable = false)
+    private OffsetDateTime createdAt;
 
     @ManyToOne
     @JoinColumn(name = "issued_permit_id") 

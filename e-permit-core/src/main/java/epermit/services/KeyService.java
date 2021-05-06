@@ -103,6 +103,6 @@ public class KeyService {
         if (!valid) {
             return JwsValidationResult.fail("INVALID_JWS");
         }
-        return JwsValidationResult.success();
+        return JwsValidationResult.success(issuer);
     }
 }

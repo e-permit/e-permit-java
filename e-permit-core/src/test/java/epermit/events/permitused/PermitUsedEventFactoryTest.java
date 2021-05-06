@@ -12,12 +12,17 @@ import epermit.events.EventFactoryUtil;
 
 @ExtendWith(MockitoExtension.class)
 public class PermitUsedEventFactoryTest {
-    @Mock EventFactoryUtil util;
+    @Mock
+    EventFactoryUtil util;
+
     @Test
     void createShouldWork() {
         PermitUsedEventFactory factory = new PermitUsedEventFactory(util);
         Permit permit = new Permit();
+        permit.setPermitId("permitId");
         PermitUsedEvent event = factory.create(permit, PermitActivityType.ENTERANCE);
         assertEquals(EventType.PERMIT_USED, event.getEventType());
+        assertEquals("permitId", event.getPermitId());
+        assertEquals(PermitActivityType.ENTERANCE, event.getActivityType());
     }
 }

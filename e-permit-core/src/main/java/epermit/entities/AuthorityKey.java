@@ -27,19 +27,19 @@ public class AuthorityKey {
 
     @Column(name = "kid", nullable = false)
     private String kid;
+
+    @Column(name = "jwk", nullable = false, length=5000)
+    private String jwk;
+
+    @Column(name = "valid_from", nullable = false)
+    private Long validFrom;
+
+    @Column(name = "valid_to", nullable = true)
+    private Long validTo;
     
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
-    @Column(name = "disabled", nullable = true)
-    private Boolean disabled;
-
-    @Column(name = "disabled_at", nullable = true)
-    private OffsetDateTime disabledAt;
-
-    @Column(name = "jwk", nullable = false, length=5000)
-    private String jwk;
-    
     @ManyToOne
     @JoinColumn(name = "authority_id")
     @EqualsAndHashCode.Exclude

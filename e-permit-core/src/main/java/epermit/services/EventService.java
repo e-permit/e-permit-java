@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import com.nimbusds.jose.JWSObject;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import epermit.common.JsonUtil;
 import epermit.common.JwsValidationResult;
 import epermit.common.PermitProperties;
@@ -38,6 +39,7 @@ public class EventService {
     }
 
     @SneakyThrows
+    @Transactional
     public EventHandleResult handle(String jws) {
         log.info("The message is recived. The message content is: " + jws);
         JwsValidationResult r = keyService.validateJws(jws);

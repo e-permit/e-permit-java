@@ -31,7 +31,7 @@ import epermit.entities.AuthorityKey;
 import epermit.entities.Key;
 import epermit.entities.ReceivedEvent;
 import epermit.events.EventHandleResult;
-import epermit.events.EventInput;
+import epermit.events.AppEvent;
 import epermit.services.KeyService;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -77,11 +77,11 @@ public class EventControllerIT {
                 String jws = keyService.createJws(claims);
                 final String baseUrl = "http://localhost:" + port + "/events/";
                 URI uri = new URI(baseUrl);
-                EventInput input = new EventInput();
+                AppEvent input = new AppEvent();
                 input.setJws(jws);
 
                 HttpHeaders headers = new HttpHeaders();
-                HttpEntity<EventInput> request = new HttpEntity<>(input, headers);
+                HttpEntity<AppEvent> request = new HttpEntity<>(input, headers);
                 ResponseEntity<EventHandleResult> result = this.restTemplate.postForEntity(uri, request,
                                 EventHandleResult.class);
                 Assert.assertEquals(200, result.getStatusCodeValue());

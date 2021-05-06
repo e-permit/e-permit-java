@@ -13,7 +13,8 @@ public class PermitUsedEventFactory {
     }
 
     public PermitUsedEvent create(Permit permit, PermitActivityType activityType) {
-        PermitUsedEvent e = PermitUsedEvent.builder().activityType(activityType).permitId(permit.getPermitId()).build();
+        PermitUsedEvent e = PermitUsedEvent.builder().activityType(activityType)
+                .permitId(permit.getPermitId()).build();
         e.setEventType(EventType.PERMIT_USED);
         util.setCommon(e, permit.getIssuer());
         return e;

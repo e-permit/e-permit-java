@@ -8,6 +8,8 @@ import lombok.Getter;
 @Builder(toBuilder = true)
 public class KeyCreatedEvent extends EventBase {
     private String keyId;
+
+    private Long validFrom;
     
     private String jwk;
 }
