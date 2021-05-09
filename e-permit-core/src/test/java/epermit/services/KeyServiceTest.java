@@ -65,9 +65,9 @@ public class KeyServiceTest {
         Authority authority = new Authority();
         AuthorityKey authorityKey = new AuthorityKey();
         authorityKey.setJwk(service.getKey().toPublicJWK().toJSONString());
-        authorityKey.setKid("1");
+        authorityKey.setKeyId("1");
         authority.addKey(authorityKey);
-        when(authorityRepository.findByCode(anyString())).thenReturn(Optional.of(authority));    
+        when(authorityRepository.findOneByCode(anyString())).thenReturn(Optional.of(authority));    
         Map<String, String> claims = new HashMap<>();
         claims.put("issuer", "TR");
         claims.put("issued_for", "UA");

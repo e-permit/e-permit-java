@@ -46,7 +46,7 @@ public class AuthorityController {
 
     @GetMapping("{code}")
     public AuthorityDto getByCode(String code) {
-        Authority authority = authorityRepository.findByCode(code).get();
+        Authority authority = authorityRepository.findOneByCode(code).get();
         return modelMapper.map(authority, AuthorityDto.class);
     }
 

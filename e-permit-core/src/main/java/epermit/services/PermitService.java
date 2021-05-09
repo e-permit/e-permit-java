@@ -35,7 +35,7 @@ public class PermitService {
             issuedCredentialRepository.delete(revokedCred.get());
             return nextPid;
         }
-        Optional<Authority> authority = authorityRepository.findByCode(issuedFor);
+        Optional<Authority> authority = authorityRepository.findOneByCode(issuedFor);
         Optional<IssuerQuota> quotaResult = authority.get().getIssuerQuotas().stream()
                 .filter(x -> x.getPermitYear() == py && x.isActive() && x.getPermitType() == pt).findFirst();
         if (quotaResult.isPresent()) {

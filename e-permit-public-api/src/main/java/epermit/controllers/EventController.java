@@ -2,6 +2,7 @@ package epermit.controllers;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import epermit.common.JsonUtil;
 import epermit.entities.CreatedEvent;
 import epermit.events.AppEvent;
 import epermit.repositories.CreatedEventRepository;
@@ -22,7 +24,8 @@ public class EventController {
     private final ApplicationEventPublisher eventPublisher;
     private final CreatedEventRepository eventRepository;
 
-    public EventController(ApplicationEventPublisher eventPublisher, CreatedEventRepository eventRepository) {
+    public EventController(ApplicationEventPublisher eventPublisher,
+            CreatedEventRepository eventRepository) {
         this.eventPublisher = eventPublisher;
         this.eventRepository = eventRepository;
     }
@@ -32,14 +35,22 @@ public class EventController {
         log.info("Event is received jws: " + input.get("jws"));
         AppEvent event = new AppEvent();
         event.setJws(input.get("jws"));
-        eventPublisher.publishEvent(input);
+        eventPublisher.publishEvent(event);
         return true;
     }
 
-    @GetMapping("/jws")
+    @GetMapping()
     public List<String> getEvents(String jws) {
-        List<CreatedEvent> events = eventRepository.findAll();
-        return events.stream().map(x -> x.getJws()).collect(Collectors.toList());
+        String issuer = JsonUtil.getClaim(jws, "issuer");
+        String eventId = JsonUtil.getClaim(jws, "event_id");
+        Optional<CreatedEvent> eventResult =
+                eventRepository.findOneByEventIdAndIssuedFor(eventId, issuer);
+        if (eventResult.isPresent()) {
+            List<CreatedEvent> events =
+                    eventRepository.findByIdGreaterThanOrderByIdAsc(eventResult.get().getId());
+            return events.stream().map(x -> x.getJws()).collect(Collectors.toList());
+        }
+        return null;
     }
 
 }

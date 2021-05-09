@@ -25,11 +25,11 @@ public class PermitUsedEventHandler implements EventHandler {
         PermitUsedEvent event = JsonUtil.getGson().fromJson(payload, PermitUsedEvent.class);
         Optional<IssuedPermit> permitR = repository.findOneByPermitId(event.getPermitId());
         if (!permitR.isPresent()) {
-            return EventHandleResult.fail("INVALID_EVENT");
+            return EventHandleResult.fail("INVALID_PERMITID");
         }
         IssuedPermit permit = permitR.get();
-        if (permit.getIssuedFor().equals(event.getIssuer())) {
-            return EventHandleResult.fail("INVALID_EVENT");
+        if (!permit.getIssuedFor().equals(event.getIssuer())) {
+            return EventHandleResult.fail("INVALID_PERMIT_ISSUER");
         }
         permit.setUsed(true);
         IssuedPermitActivity activity = new IssuedPermitActivity();

@@ -1,11 +1,9 @@
-package epermit.dtos;
+package epermit.common;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
-public class PermitConfigKeyDto {
+@Data
+public class PublicJwk {
     private String kty;
     private String use;
     private String crv;

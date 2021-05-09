@@ -9,7 +9,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
+import javax.persistence.UniqueConstraint;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Data;
@@ -25,18 +25,18 @@ public class AuthorityKey {
     @GeneratedValue
     private int id;
 
-    @Column(name = "kid", nullable = false)
-    private String kid;
+    @Column(name = "key_id", nullable = false)
+    private String keyId;
 
-    @Column(name = "jwk", nullable = false, length=5000)
+    @Column(name = "jwk", nullable = false, length = 5000)
     private String jwk;
 
     @Column(name = "valid_from", nullable = false)
     private Long validFrom;
 
-    @Column(name = "valid_to", nullable = true)
-    private Long validTo;
-    
+    @Column(name = "valid_until", nullable = true)
+    private Long validUntil;
+
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 

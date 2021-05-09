@@ -3,6 +3,7 @@ package epermit.events.keycreated;
 import java.text.ParseException;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
 import com.nimbusds.jose.jwk.ECKey;
 import org.springframework.stereotype.Service;
 import epermit.common.JsonUtil;
@@ -14,8 +15,8 @@ import epermit.repositories.AuthorityRepository;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
-@Service("KEY_CREATED")
 @Slf4j
+@Service("KEY_CREATED")
 public class KeyCreatedEventHandler implements EventHandler {
 
     private final AuthorityRepository repository;
@@ -28,19 +29,24 @@ public class KeyCreatedEventHandler implements EventHandler {
     @Override
     public EventHandleResult handle(String payload) {
         KeyCreatedEvent e = JsonUtil.getGson().fromJson(payload, KeyCreatedEvent.class);
-        Boolean valid = validate(e);
-        if (!valid) {
-            return EventHandleResult.fail("INVALID_EVENT");
+        EventHandleResult validation = validate(e);
+        if (!validation.isSucceed()) {
+            return validation;
         }
-        Authority authority = repository.findByCode(e.getIssuer()).get();
-        authority.getKeys().forEach(k -> {
-            if (k.getValidTo() == null) {
-                k.setValidTo(e.getValidFrom());
+        Authority authority = repository.findOneByCode(e.getIssuer()).get();
+        List<AuthorityKey> keys = authority.getKeys();
+
+        if (keys.stream().anyMatch(k -> k.getKeyId().equals(e.getKeyId()))) {
+            return EventHandleResult.fail("KEYID_EXIST");
+        }
+        keys.forEach(k -> {
+            if (k.getValidUntil() == null) {
+                k.setValidUntil(e.getValidFrom());
             }
         });
         AuthorityKey key = new AuthorityKey();
         key.setAuthority(authority);
-        key.setKid(e.getKeyId());
+        key.setKeyId(e.getKeyId());
         key.setJwk(e.getJwk());
         key.setValidFrom(e.getValidFrom());
         key.setCreatedAt(OffsetDateTime.now(ZoneOffset.UTC));
@@ -49,19 +55,17 @@ public class KeyCreatedEventHandler implements EventHandler {
         return EventHandleResult.success();
     }
 
-    private Boolean validate(KeyCreatedEvent e) {
+    private EventHandleResult validate(KeyCreatedEvent e) {
         try {
             ECKey key = ECKey.parse(e.getJwk()).toPublicJWK();
             if (!key.getKeyID().equals(e.getKeyId())) {
-                log.info("INVALID_KID");
                 log.info("The key in jwk doesnt match with event");
-                return false;
+                return EventHandleResult.fail("INVALID_KID");
             }
         } catch (ParseException ex) {
-            log.info("INVALID_JWK");
             log.error(ex.getMessage(), ex);
-            return false;
+            return EventHandleResult.fail("INVALID_KEY");
         }
-        return true;
+        return EventHandleResult.success();
     }
 }

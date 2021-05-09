@@ -46,17 +46,17 @@ public class KeyService {
     }
 
     @SneakyThrows
-    public Key create(String kid) {
+    public Key create(String keyId) {
         final String salt = KeyGenerators.string().generateKey();
         TextEncryptor encryptor = Encryptors.text(props.getKeyPassword(), salt);
-        ECKey key = new ECKeyGenerator(Curve.P_256).keyUse(KeyUse.SIGNATURE).keyID(kid).generate();
+        ECKey key = new ECKeyGenerator(Curve.P_256).keyUse(KeyUse.SIGNATURE).keyID(keyId).generate();
         String jwk = encryptor.encrypt(key.toJSONString());
         Key k = new Key();
-        k.setKid(kid);
+        k.setKeyId(keyId);
         k.setCreatedAt(OffsetDateTime.now());
-        k.setEnabled(false);
         k.setSalt(salt);
-        k.setContent(jwk);
+        k.setPrivateJwk(jwk);
+        k.setPublicJwk(key.toPublicJWK().toJSONString());
         return k;
     }
 
@@ -64,7 +64,7 @@ public class KeyService {
     public ECKey getKey() {
         Key k = repository.findOneByEnabledTrue().get();
         TextEncryptor decryptor = Encryptors.text(props.getKeyPassword(), k.getSalt());
-        ECKey key = ECKey.parse(decryptor.decrypt(k.getContent()));
+        ECKey key = ECKey.parse(decryptor.decrypt(k.getPrivateJwk()));
         return key;
     }
 
@@ -88,7 +88,7 @@ public class KeyService {
             return JwsValidationResult.fail("INVALID_ISSUED_FOR");
         }
         String issuer = JsonUtil.getClaim(jws, "issuer");
-        Optional<Authority> r = authorityRepository.findByCode(issuer);
+        Optional<Authority> r = authorityRepository.findOneByCode(issuer);
         if (!r.isPresent()) {
             log.info("The issuer is not known");
             return JwsValidationResult.fail("NOTKNOWN_ISSUER");
@@ -96,13 +96,13 @@ public class KeyService {
         JWSObject jwsObject = JWSObject.parse(jws);
         String kid = jwsObject.getHeader().getKeyID();
         AuthorityKey authorityKey =
-                r.get().getKeys().stream().filter(x -> x.getKid().equals(kid)).findFirst().get();
+                r.get().getKeys().stream().filter(x -> x.getKeyId().equals(kid)).findFirst().get();
         ECKey key = ECKey.parse(authorityKey.getJwk()).toPublicJWK();
         JWSVerifier verifier = new ECDSAVerifier(key);
         Boolean valid = jwsObject.verify(verifier);
         if (!valid) {
             return JwsValidationResult.fail("INVALID_JWS");
         }
-        return JwsValidationResult.success(issuer);
+        return JwsValidationResult.success();
     }
 }

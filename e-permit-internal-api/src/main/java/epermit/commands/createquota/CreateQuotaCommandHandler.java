@@ -25,7 +25,7 @@ public class CreateQuotaCommandHandler
     @Transactional
     @SneakyThrows
     public CommandResult handle(CreateQuotaCommand command) {
-        Authority authority = repository.findByCode(command.getAuthorityCode()).get();
+        Authority authority = repository.findOneByCode(command.getAuthorityCode()).get();
         VerifierQuota quota = new VerifierQuota();
         quota.setAuthority(authority);
         quota.setPermitType(command.getPermitType());

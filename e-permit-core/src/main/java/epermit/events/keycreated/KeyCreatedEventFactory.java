@@ -14,8 +14,8 @@ public class KeyCreatedEventFactory {
     }
 
     public KeyCreatedEvent create(Key key, String issuedFor) {
-        KeyCreatedEvent e = KeyCreatedEvent.builder().keyId(key.getKid())
-                .validFrom(OffsetDateTime.now(ZoneOffset.UTC).toEpochSecond()).jwk(key.getContent())
+        KeyCreatedEvent e = KeyCreatedEvent.builder().keyId(key.getKeyId())
+                .validFrom(OffsetDateTime.now(ZoneOffset.UTC).toEpochSecond()).jwk(key.getPublicJwk())
                 .build();
         e.setEventType(EventType.KEY_CREATED);
         util.setCommon(e, issuedFor);

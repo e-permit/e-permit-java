@@ -58,7 +58,7 @@ public class PermitServiceTest {
         authority.addIssuerQuota(quota);
         PermitService service = new PermitService(authorityRepository, issuedCredentialRepository, props, keyService);
         when(issuedCredentialRepository.findFirstByRevokedTrue()).thenReturn(Optional.empty());
-        when(authorityRepository.findByCode("UA")).thenReturn(Optional.of(authority));
+        when(authorityRepository.findOneByCode("UA")).thenReturn(Optional.of(authority));
         Integer nextPid = service.generateSerialNumber("UA", 2021, PermitType.BILITERAL);
         Assertions.assertEquals(2, nextPid);
         Assertions.assertEquals(endNumber == 3, quota.isActive());

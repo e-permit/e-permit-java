@@ -19,14 +19,14 @@ public class PermitRevokedEventHandler implements EventHandler {
 
     @SneakyThrows
     public EventHandleResult handle(String payload) {
-        PermitRevokedEvent event = JsonUtil.getGson().fromJson(payload, PermitRevokedEvent.class);
+        PermitRevokedEvent event = JsonUtil.getGson().fromJson(payload, PermitRevokedEvent.class);      
         Optional<Permit> permitR = repository.findOneByPermitId(event.getPermitId());
         if (!permitR.isPresent()) {
-            return EventHandleResult.fail("INVALID_EVENT");
+            return EventHandleResult.fail("INVALID_PERMITID");
         }
         Permit permit = permitR.get();
-        if(permit.getIssuer().equals(event.getIssuer())){
-            return EventHandleResult.fail("INVALID_EVENT");
+        if(!permit.getIssuer().equals(event.getIssuer())){
+            return EventHandleResult.fail("INVALID_PERMIT_ISSUER");
         }
         repository.delete(permit);
         return EventHandleResult.success();

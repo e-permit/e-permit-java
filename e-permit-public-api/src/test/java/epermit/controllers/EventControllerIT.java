@@ -1,4 +1,4 @@
-package epermit.integrations;
+package epermit.controllers;
 
 import java.net.URI;
 import java.util.HashMap;
@@ -62,7 +62,7 @@ public class EventControllerIT {
                 Authority authority = new Authority();
                 AuthorityKey authorityKey = new AuthorityKey();
                 authorityKey.setJwk(keyService.getKey().toPublicJWK().toJSONString());
-                authorityKey.setKid("1");
+                authorityKey.setKeyId("1");
                 authority.addKey(authorityKey);
                 ReceivedEvent event = new ReceivedEvent();
                 event.setEventId("0");

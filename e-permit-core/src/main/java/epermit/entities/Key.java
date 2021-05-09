@@ -20,18 +20,24 @@ public class Key {
     @GeneratedValue
     private int id;
 
-    @Column(name = "kid", nullable = false)
-    private String kid;
+    @Column(name = "key_id", nullable = false)
+    private String keyId;
     
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
-    @Column(name = "enabled", nullable = false)
-    private Boolean enabled;
+    @Column(name = "valid_from", nullable = true)
+    private Long validFrom;
+
+    @Column(name = "valid_until", nullable = true)
+    private Long validUntil;
+
+    @Column(name = "public_jwk", nullable = false, length=4000)
+    private String publicJwk;
 
     @Column(name = "salt", nullable = false)
     private String salt;
 
-    @Column(name = "content", nullable = false, length=4000)
-    private String content;
+    @Column(name = "private_jwk", nullable = false, length=4000)
+    private String privateJwk;
 }

@@ -9,8 +9,6 @@ public class EventHandleResult {
 
     private String errorCode;
 
-    private String lastEventId;
-
     public static EventHandleResult fail(String errorCode){
         EventHandleResult r = new EventHandleResult();
         r.succeed = false;

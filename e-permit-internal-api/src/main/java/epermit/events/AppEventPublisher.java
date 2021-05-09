@@ -18,7 +18,7 @@ public class AppEventPublisher {
     }
 
     public void publish(CreatedEvent event){
-       Authority authority = authorityRepository.findByCode(event.getIssuedFor()).get();
+       Authority authority = authorityRepository.findOneByCode(event.getIssuedFor()).get();
        AppEvent appEvent = new AppEvent();
        appEvent.setJws(event.getJws());
        appEvent.setUri(authority.getApiUri());

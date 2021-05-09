@@ -20,8 +20,8 @@ public class KeyCreatedEventFactoryTest {
     void createShouldWork() {
         KeyCreatedEventFactory factory = new KeyCreatedEventFactory(util);
         Key key = new Key();
-        key.setKid("1");
-        key.setContent("jws");
+        key.setKeyId("1");
+        key.setPublicJwk("jws");
         KeyCreatedEvent event = factory.create(key, "UA");
         assertEquals(EventType.KEY_CREATED, event.getEventType());
         assertEquals("1", event.getKeyId());

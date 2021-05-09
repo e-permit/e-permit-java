@@ -8,5 +8,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 @Repository
 public interface AuthorityRepository extends JpaRepository<Authority, Integer> {
-    Optional<Authority> findByCode(String code);
+    Optional<Authority> findOneByCode(String code);
 }

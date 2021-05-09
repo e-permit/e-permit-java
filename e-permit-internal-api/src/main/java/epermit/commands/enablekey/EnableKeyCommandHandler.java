@@ -1,5 +1,7 @@
 package epermit.commands.enablekey;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
 import org.springframework.context.ApplicationEventPublisher;
@@ -39,7 +41,8 @@ public class EnableKeyCommandHandler implements Command.Handler<EnableKeyCommand
     @SneakyThrows
     public CommandResult handle(EnableKeyCommand cmd) {
         Key key = repository.findOneByKid(cmd.getKeyId()).get();
-        key.setEnabled(true);
+        key.setValidFrom(OffsetDateTime.now(ZoneOffset.UTC).toEpochSecond());
+        // set validTo for latest key
         repository.save(key);
         List<Authority> authorities = authorityRepository.findAll();  
         authorities.forEach(aud -> {

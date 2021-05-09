@@ -22,7 +22,7 @@ public class QuotaCreatedEventHandler implements EventHandler {
     @SneakyThrows
     public EventHandleResult handle(String payload) {
         QuotaCreatedEvent e = JsonUtil.getGson().fromJson(payload, QuotaCreatedEvent.class);
-        Authority authority = repository.findByCode(e.getIssuer()).get();
+        Authority authority = repository.findOneByCode(e.getIssuer()).get();
         IssuerQuota quota = new IssuerQuota();
         quota.setActive(true);
         quota.setAuthority(authority);

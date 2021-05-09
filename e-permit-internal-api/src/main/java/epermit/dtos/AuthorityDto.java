@@ -3,7 +3,7 @@ package epermit.dtos;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
+import epermit.common.PublicKey;
 import lombok.Data;
 
 @Data
@@ -14,11 +14,13 @@ public class AuthorityDto {
 
   private String name;
 
-  private String uri;
+  private String apiUri;
+
+  private String verifyUri;
 
   private Date createdAt;
 
-  private List<AuthorityKeyDto> keys = new ArrayList<>();
+  private List<PublicKey> keys = new ArrayList<>();
 
   private List<VerifierQuotaDto> verifierQuotas = new ArrayList<>();
 

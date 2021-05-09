@@ -17,15 +17,15 @@ import epermit.repositories.PermitRepository;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
-@Service("PERMIT_CREATED")
 @Slf4j
+@Service("PERMIT_CREATED")
 public class PermitCreatedEventHandler implements EventHandler {
 
     private final PermitRepository repository;
     private final AuthorityRepository authorityRepository;
 
     public PermitCreatedEventHandler(PermitRepository repository,
-    AuthorityRepository authorityRepository) {
+            AuthorityRepository authorityRepository) {
         this.repository = repository;
         this.authorityRepository = authorityRepository;
     }
@@ -33,13 +33,15 @@ public class PermitCreatedEventHandler implements EventHandler {
     @SneakyThrows
     public EventHandleResult handle(String payload) {
         PermitCreatedEvent event = JsonUtil.getGson().fromJson(payload, PermitCreatedEvent.class);
-        Boolean valid = validate(event);
-        if (!valid) {
-            return EventHandleResult.fail("INVALID_EVENT");
+        EventHandleResult validation = validate(event);
+        if (!validation.isSucceed()) {
+            return validation;
         }
         Gson gson = JsonUtil.getGson();
         Permit permit = new Permit();
-        permit.setClaims(gson.toJson(event.getClaims()));
+        if (event.getClaims() != null && !event.getClaims().isEmpty()) {
+            permit.setClaims(gson.toJson(event.getClaims()));
+        }
         permit.setCompanyName(event.getCompanyName());
         permit.setCreatedAt(OffsetDateTime.now(ZoneOffset.UTC));
         permit.setExpireAt(event.getExpireAt());
@@ -54,29 +56,29 @@ public class PermitCreatedEventHandler implements EventHandler {
         return EventHandleResult.success();
     }
 
-    private Boolean validate(PermitCreatedEvent event) {
-        String expectedPermitId = PermitUtil.getPermitId(event.getIssuedFor(), event.getIssuer(),
+    private EventHandleResult validate(PermitCreatedEvent event) {
+        String expectedPermitId = PermitUtil.getPermitId(event.getIssuer(), event.getIssuedFor(),
                 event.getPermitType(), event.getPermitYear(), event.getSerialNumber());
         if (!expectedPermitId.equals(event.getPermitId())) {
             log.info("INVALID_PERMITID");
-            return false;
+            return EventHandleResult.fail("INVALID_PERMITID");
         }
         Optional<Permit> exist = repository.findOneByPermitId(event.getPermitId());
-        if(exist.isPresent()){
+        if (exist.isPresent()) {
             log.info("PERMIT_EXIST");
-            return false;
+            return EventHandleResult.fail("PERMIT_EXIST");
         }
-        Authority authority = authorityRepository.findByCode(event.getIssuer()).get();
+        Authority authority = authorityRepository.findOneByCode(event.getIssuer()).get();
         Optional<VerifierQuota> quotaResult = authority.getVerifierQuotas().stream()
                 .filter(x -> x.getPermitYear() == event.getPermitYear()
-                        && event.getSerialNumber() < x.getEndNumber()
-                        && event.getSerialNumber() > x.getStartNumber()
+                        && event.getSerialNumber() <= x.getEndNumber()
+                        && event.getSerialNumber() >= x.getStartNumber()
                         && x.getPermitType() == event.getPermitType())
                 .findAny();
         if (!quotaResult.isPresent()) {
             log.info("QUOTA_DOESNT_MATCH");
-            return false;
+            return EventHandleResult.fail("QUOTA_DOESNT_MATCH");
         }
-        return true;
+        return EventHandleResult.success();
     }
 }
