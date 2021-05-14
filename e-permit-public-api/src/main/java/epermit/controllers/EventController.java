@@ -14,21 +14,17 @@ import epermit.common.JsonUtil;
 import epermit.entities.CreatedEvent;
 import epermit.events.AppEvent;
 import epermit.repositories.CreatedEventRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/events")
 @Slf4j
 public class EventController {
 
     private final ApplicationEventPublisher eventPublisher;
     private final CreatedEventRepository eventRepository;
-
-    public EventController(ApplicationEventPublisher eventPublisher,
-            CreatedEventRepository eventRepository) {
-        this.eventPublisher = eventPublisher;
-        this.eventRepository = eventRepository;
-    }
 
     @PostMapping()
     public Boolean receiveEvent(@RequestBody Map<String, String> input) {

@@ -1,5 +1,6 @@
 package epermit.controllers;
 
+import javax.validation.Valid;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,14 +22,12 @@ public class KeyController {
     }
     
     @PostMapping()
-    public CommandResult create(@RequestBody CreateKeyCommand command) {
+    public CommandResult create(@Valid @RequestBody CreateKeyCommand command) {
         return command.execute(pipeline);
     }
 
     @PatchMapping("{id}/enable")
-    public CommandResult enable(@RequestParam String keyId) {
-        EnableKeyCommand cmd = new EnableKeyCommand();
-        cmd.setKeyId(keyId);
+    public CommandResult enable(@Valid EnableKeyCommand cmd) {
         return cmd.execute(pipeline);
     }
 }

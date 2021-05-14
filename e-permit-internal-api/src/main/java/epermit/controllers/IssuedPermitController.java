@@ -1,5 +1,6 @@
 package epermit.controllers;
 
+import javax.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -7,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,7 +28,8 @@ public class IssuedPermitController {
     private final ModelMapper modelMapper;
     private final Pipeline pipeline;
 
-    public IssuedPermitController(IssuedPermitRepository repository, ModelMapper modelMapper, Pipeline pipeline) {
+    public IssuedPermitController(IssuedPermitRepository repository, ModelMapper modelMapper,
+            Pipeline pipeline) {
         this.repository = repository;
         this.modelMapper = modelMapper;
         this.pipeline = pipeline;
@@ -35,7 +38,8 @@ public class IssuedPermitController {
     @GetMapping()
     public ResponseEntity<Page<IssuedPermitDto>> getAll(Pageable pageable) {
         Page<epermit.entities.IssuedPermit> entities = repository.findAll(pageable);
-        Page<IssuedPermitDto> dtoPage = entities.map(x -> modelMapper.map(x, IssuedPermitDto.class));
+        Page<IssuedPermitDto> dtoPage =
+                entities.map(x -> modelMapper.map(x, IssuedPermitDto.class));
         return new ResponseEntity<>(dtoPage, HttpStatus.OK);
     }
 
@@ -46,20 +50,23 @@ public class IssuedPermitController {
     }
 
     @GetMapping("find/{permitId}")
-    public IssuedPermitDto getBySerialNumber(String permitId) {
-        IssuedPermitDto dto = modelMapper.map(repository.findOneByPermitId(permitId).get(), IssuedPermitDto.class);
+    public IssuedPermitDto getByPermitById(String permitId) {
+        IssuedPermitDto dto = modelMapper.map(repository.findOneByPermitId(permitId).get(),
+                IssuedPermitDto.class);
         return dto;
     }
 
     @PostMapping()
-    public CommandResult post(@RequestBody CreatePermitCommand cmd) {
+    public CommandResult post(@RequestBody @Valid CreatePermitCommand cmd) {
+        // kaydet
+        // event oluştur
+        // kaydet
         return cmd.execute(pipeline);
     }
 
     @PatchMapping("{id}/revoke")
-    public CommandResult revoke(String id) {
-        RevokePermitCommand cmd = new RevokePermitCommand();
-        cmd.setPermitId(id);
-        return cmd.execute(pipeline);
+    public CommandResult revoke(@PathVariable String id) {
+        // event oluştur
+        return CommandResult.success();
     }
 }

@@ -2,6 +2,7 @@ package epermit.controllers;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,20 +52,18 @@ public class AuthorityController {
     }
 
     @PostMapping()
-    public CommandResult create(@RequestBody CreateAuthorityCommand command) {
+    public CommandResult create(@RequestBody @Valid CreateAuthorityCommand command) {
         log.info("Authority create command: " + command.getApiUri());
         return command.execute(pipeline);
     }
 
     @PostMapping("/createquota")
-    public CommandResult createQuota(@RequestBody CreateQuotaCommand command) {
+    public CommandResult createQuota(@RequestBody @Valid CreateQuotaCommand command) {
         return command.execute(pipeline);
     }
 
     @PatchMapping("/{id}/enablequota")
-    public CommandResult enableQuota(@RequestParam Integer id) {
-        EnableQuotaCommand command = new EnableQuotaCommand();
-        command.setQuotaId(id);
+    public CommandResult enableQuota(@Valid EnableQuotaCommand command) {
         return command.execute(pipeline);
     }
 

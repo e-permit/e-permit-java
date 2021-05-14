@@ -6,18 +6,16 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Component;
 import epermit.services.EventService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 @EnableAsync(proxyTargetClass = true)
 public class AppEventListener {
 
     private final EventService eventService;
-
-    public AppEventListener(EventService eventService) {
-        this.eventService = eventService;
-    }
 
     @Async
     @EventListener

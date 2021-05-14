@@ -2,6 +2,7 @@ package epermit.dtos;
 
 import java.util.ArrayList;
 import java.util.List;
+import epermit.common.Authority;
 import epermit.common.PublicKey;
 import lombok.Data;
 
@@ -14,6 +15,6 @@ public class ConfigDto {
 
     private List<PublicKey> keys = new ArrayList<>();
 
-    private List<AuthorityDto> authorities = new ArrayList<>();
+    private List<Authority> authorities = new ArrayList<>();
 }
 

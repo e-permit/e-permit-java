@@ -29,31 +29,9 @@
         </dependency>		
 		<dependency>
 			<groupId>epermit</groupId>
-			<artifactId>e-permit-core</artifactId>
+			<artifactId>e-permit</artifactId>
 			<version>1.0.0</version>
 		</dependency>
-		<dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-		<dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>testcontainers</artifactId>
-            <version>1.15.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>1.15.1</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>1.15.1</version>
-            <scope>test</scope>
-        </dependency>
 	</dependencies>
 	<build>
         <finalName>e-permit-public-api</finalName>
