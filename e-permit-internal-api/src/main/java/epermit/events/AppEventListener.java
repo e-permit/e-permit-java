@@ -7,6 +7,7 @@ import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.web.client.RestTemplate;
 
 import lombok.extern.slf4j.Slf4j;
@@ -22,8 +23,8 @@ public class AppEventListener {
     }
 
     @Async
-    @EventListener
-    public void onAppEvent(AppEvent event) {
+    @TransactionalEventListener
+    public void onAppEvent(CreatedAppEvent event) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> request = new HttpEntity<String>(event.getJws(), headers);

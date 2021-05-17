@@ -3,13 +3,15 @@ package epermit.events;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import epermit.entities.CreatedEvent;
 import epermit.models.EPermitProperties;
-import epermit.services.EventService;
+import epermit.repositories.CreatedEventRepository;
 
 @ExtendWith(MockitoExtension.class)
 public class EventFactoryUtilTest {
@@ -17,20 +19,23 @@ public class EventFactoryUtilTest {
     EPermitProperties properties;
 
     @Mock
-    EventService eventService;
+    CreatedEventRepository createdEventRepository;
 
     @InjectMocks
     EventFactoryUtil util;
 
     @Test
-    void createShouldWork() {
+    void saveAndPublishTest() {
+        CreatedEvent lasEvent = new CreatedEvent();
+        lasEvent.setEventId("0");
         when(properties.getIssuerCode()).thenReturn("TR");
-        when(eventService.getSendedLastEventId("UA")).thenReturn("1");
+        when(createdEventRepository.findTopByIssuedForOrderByIdDesc("UA"))
+                .thenReturn(Optional.of(lasEvent));
         DummyEvent event = new DummyEvent();
-        util.setCommon(event, "UA");
+        util.saveAndPublish(event, "UA");
         assertEquals("TR", event.getIssuer());
         assertEquals("UA", event.getIssuedFor());
-        assertEquals("1", event.getPreviousEventId());
+        assertEquals("0", event.getPreviousEventId());
         assertNotNull(event.getCreatedAt());
         assertNotNull(event.getEventId());
     }

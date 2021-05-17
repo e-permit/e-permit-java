@@ -13,7 +13,7 @@ public class PermitRevokedEventFactory {
         PermitRevokedEvent e = new PermitRevokedEvent();
         e.setPermitId(permitId);
         e.setEventType(EventType.PERMIT_REVOKED);
-        util.setCommon(e, issuedFor);
+        util.saveAndPublish(e, issuedFor);
         return e;
     }
 }

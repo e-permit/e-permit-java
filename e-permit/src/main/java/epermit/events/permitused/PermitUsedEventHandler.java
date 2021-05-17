@@ -1,25 +1,30 @@
 package epermit.events.permitused;
 
+import java.time.Instant;
+import java.time.ZoneOffset;
 import org.springframework.stereotype.Service;
-import epermit.events.EventHandleResult;
+import epermit.entities.IssuedPermit;
+import epermit.entities.IssuedPermitActivity;
 import epermit.events.EventHandler;
-import epermit.services.PermitService;
-import epermit.utils.GsonUtil;
+import epermit.repositories.IssuedPermitRepository;
 import lombok.RequiredArgsConstructor;
 
-@Service("PERMIT_USED")
+@Service("PERMIT_USED_HANDLER")
 @RequiredArgsConstructor
 public class PermitUsedEventHandler implements EventHandler {
 
-    private final PermitService permitService;
+    private final IssuedPermitRepository issuedPermitRepository;
 
     @Override
-    public EventHandleResult handle(String payload) {
-        PermitUsedEvent event = GsonUtil.getGson().fromJson(payload, PermitUsedEvent.class);
-        if(!permitService.isIssuedPermitExist(event.getIssuer(), event.getPermitId())){
-            return EventHandleResult.fail("INVALID_PERMITID_OR_ISSUER");
-        }
-        permitService.handlePermitUsed(event);
-        return EventHandleResult.success();
+    public void handle(Object e) {
+        PermitUsedEvent event = (PermitUsedEvent) e;
+        IssuedPermit permit = issuedPermitRepository
+                .findOneByIssuedForAndPermitId(event.getIssuedFor(), event.getPermitId()).get();
+        permit.setUsed(true);
+        IssuedPermitActivity activity = new IssuedPermitActivity();
+        activity.setActivityType(event.getActivityType());
+        activity.setCreatedAt(Instant.ofEpochSecond(event.getCreatedAt()).atOffset(ZoneOffset.UTC));
+        permit.addActivity(activity);
+        issuedPermitRepository.save(permit);
     }
 }

@@ -1,24 +1,20 @@
 package epermit.events.permitrevoked;
 
 import org.springframework.stereotype.Service;
-import epermit.events.EventHandleResult;
+import epermit.entities.Permit;
 import epermit.events.EventHandler;
-import epermit.services.PermitService;
-import epermit.utils.GsonUtil;
+import epermit.repositories.PermitRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 
-@Service("PERMIT_REVOKED")
+@Service("PERMIT_REVOKED_HANDLER")
 @RequiredArgsConstructor
 public class PermitRevokedEventHandler implements EventHandler {
-    private final PermitService permitService;
-    @SneakyThrows
-    public EventHandleResult handle(String payload) {
-        PermitRevokedEvent event = GsonUtil.getGson().fromJson(payload, PermitRevokedEvent.class);      
-        if(!permitService.isPermitExist(event.getIssuedFor(), event.getPermitId())){
-            return EventHandleResult.fail("INVALID_PERMITID_OR_ISSUER");
-        }
-        permitService.handlePermitRevoked(event);
-        return EventHandleResult.success();
+    private final PermitRepository permitRepository;
+
+    public void handle(Object e) {
+        PermitRevokedEvent event = (PermitRevokedEvent) e;
+        Permit permit = permitRepository
+                .findOneByIssuerAndPermitId(event.getIssuer(), event.getPermitId()).get();
+        permitRepository.delete(permit);
     }
 }

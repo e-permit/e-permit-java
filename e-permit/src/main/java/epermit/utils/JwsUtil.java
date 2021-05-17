@@ -1,5 +1,6 @@
 package epermit.utils;
 
+import java.util.Optional;
 import com.google.gson.Gson;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -11,9 +12,10 @@ import com.nimbusds.jose.crypto.ECDSASigner;
 import com.nimbusds.jose.crypto.ECDSAVerifier;
 import com.nimbusds.jose.jwk.ECKey;
 import org.springframework.stereotype.Component;
+import epermit.entities.AuthorityKey;
 import epermit.models.EPermitProperties;
 import epermit.models.JwsValidationResult;
-import epermit.services.AuthorityService;
+import epermit.repositories.AuthorityKeyRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 public class JwsUtil {
     private final KeyUtil keyUtil;
     private final EPermitProperties properties;
-    private final AuthorityService authorityService;
+    private final AuthorityKeyRepository authorityKeyRepository;
 
     @SneakyThrows
     public <T> String createJws(T payloadObj) {
@@ -53,12 +55,12 @@ public class JwsUtil {
         String issuer = getClaim(jws, "issuer");
         JWSObject jwsObject = JWSObject.parse(jws);
         String keyId = jwsObject.getHeader().getKeyID();
-        String publicJwk = authorityService.getPublicKeyJwk(issuer, keyId);
-        if (publicJwk == null) {
+        Optional<AuthorityKey> k  = authorityKeyRepository.findOneByIssuerAndKeyId(issuer, keyId);
+        if (!k.isPresent()) {
             log.info("The issuer is not known");
             return JwsValidationResult.fail("INVALID_KEYID");
         }
-        ECKey key = ECKey.parse(publicJwk).toPublicJWK();
+        ECKey key = ECKey.parse(k.get().getJwk()).toPublicJWK();
         JWSVerifier verifier = new ECDSAVerifier(key);
         Boolean valid = jwsObject.verify(verifier);
         if (!valid) {
@@ -73,5 +75,4 @@ public class JwsUtil {
         JWSObject jwsObject = JWSObject.parse(jws);
         return (T) jwsObject.getPayload().toJSONObject().get(key);
     }
-
 }

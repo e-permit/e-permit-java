@@ -2,13 +2,17 @@ package epermit.utils;
 
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 import java.util.StringJoiner;
 import org.springframework.stereotype.Component;
+import epermit.entities.Authority;
+import epermit.entities.IssuedPermit;
+import epermit.entities.IssuerQuota;
 import epermit.models.CreatePermitInput;
 import epermit.models.EPermitProperties;
-import epermit.models.IssuedPermit;
 import epermit.models.PermitType;
-import epermit.services.PermitService;
+import epermit.repositories.AuthorityRepository;
+import epermit.repositories.IssuedPermitRepository;
 import lombok.RequiredArgsConstructor;
 
 @Component
@@ -16,7 +20,8 @@ import lombok.RequiredArgsConstructor;
 public class PermitUtil {
     private final JwsUtil jwsUtil;
     private final EPermitProperties properties;
-    private final PermitService permitService;
+    private final IssuedPermitRepository issuedPermitRepository;
+    private final AuthorityRepository authorityRepository;
 
     public String getPermitId(String iss, String aud, PermitType pt, Integer py, int serialNumber) {
         StringJoiner joiner = new StringJoiner("-");
@@ -25,28 +30,37 @@ public class PermitUtil {
         return permitId;
     }
 
-    public IssuedPermit createPermit(CreatePermitInput input) {
-        String issuer = properties.getIssuerCode();
-        Integer serialNumber = permitService.getSerialNumber(input.getIssuedFor(),
-                input.getPermitYear(), input.getPermitType());
-        String permitId = getPermitId(issuer, input.getIssuedFor(), input.getPermitType(),
-                input.getPermitYear(), serialNumber);
-        IssuedPermit permit = new IssuedPermit();
-        permit.setCompanyName(input.getCompanyName());
-        permit.setIssuedFor(input.getIssuedFor());
-        permit.setPermitId(permitId);
-        permit.setPermitType(input.getPermitType());
-        permit.setPermitYear(input.getPermitYear());
-        permit.setPlateNumber(input.getPlateNumber());
-        permit.setSerialNumber(serialNumber);
-        permit.setIssuedAt(createIssuedAt());
-        permit.setExpireAt(createExpireDate(input.getPermitYear()));
-        permit.setQrCode(generateQrCode(permit));
-        permit.setClaims(input.getClaims());
-        return permit;
+    public boolean isQuotaSufficient(String issuer, int permitYear, int serialNumber,
+            PermitType permitType) {
+        return false;
     }
 
-    private String generateQrCode(IssuedPermit permit) {
+    public Integer generateSerialNumber(String issuedFor, int py, PermitType pt) {
+        Optional<IssuedPermit> revokedCred =
+                issuedPermitRepository.findFirstByIssuedForAndRevokedTrue(issuedFor);
+        if (revokedCred.isPresent()) {
+            int nextPid = revokedCred.get().getSerialNumber();
+            issuedPermitRepository.delete(revokedCred.get());
+            return nextPid;
+        }
+        Optional<Authority> authority = authorityRepository.findOneByCode(issuedFor);
+        Optional<IssuerQuota> quotaResult = authority.get().getIssuerQuotas().stream()
+                .filter(x -> x.getPermitYear() == py && x.isActive() && x.getPermitType() == pt)
+                .findFirst();
+        if (quotaResult.isPresent()) {
+            IssuerQuota quota = quotaResult.get();
+            int nextPid = quota.getCurrentNumber() + 1;
+            quota.setCurrentNumber(nextPid);
+            if (quota.getCurrentNumber() == quota.getEndNumber()) {
+                quota.setActive(false);
+            }
+            authorityRepository.save(authority.get());
+            return nextPid;
+        }
+        return null;
+    }
+
+    public String generateQrCode(IssuedPermit permit) {
         String iss = properties.getIssuerCode();
         String aud = permit.getIssuedFor();
         String year = Integer.toString(permit.getPermitYear());
@@ -60,13 +74,4 @@ public class PermitUtil {
         return jwsUtil.createJws(payload);
     }
 
-    private String createExpireDate(int year) {
-        String expireDate = "30/01/" + Integer.toString(year + 1);
-        return expireDate;
-    }
-
-    private String createIssuedAt() {
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        return OffsetDateTime.now().format(dtf);
-    }
 }

@@ -1,48 +1,36 @@
 package epermit.events.keycreated;
 
-import java.text.ParseException;
-import com.nimbusds.jose.jwk.ECKey;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.List;
 import org.springframework.stereotype.Service;
-import epermit.events.EventHandleResult;
+import epermit.entities.Authority;
+import epermit.entities.AuthorityKey;
 import epermit.events.EventHandler;
-import epermit.services.AuthorityService;
-import epermit.utils.GsonUtil;
+import epermit.repositories.AuthorityRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
-@Service("KEY_CREATED")
+@Service("KEY_CREATED_HANDLER")
 @RequiredArgsConstructor
 public class KeyCreatedEventHandler implements EventHandler {
-    private final AuthorityService authorityService;
+    private final AuthorityRepository authorityRepository;
 
-    @SneakyThrows
-    @Override
-    public EventHandleResult handle(String payload) {
-        KeyCreatedEvent e = GsonUtil.getGson().fromJson(payload, KeyCreatedEvent.class);
-        EventHandleResult validation = validate(e);
-        if (!validation.isOk()) {
-            return validation;
-        }
-        if (authorityService.isPublicKeyExist(e.getIssuer(), e.getKeyId())) {
-            return EventHandleResult.fail("KEYID_EXIST");
-        }
-        authorityService.handleKeyCreated(e);
-        return EventHandleResult.success();
-    }
-
-    private EventHandleResult validate(KeyCreatedEvent e) {
-        try {
-            ECKey key = ECKey.parse(e.getJwk()).toPublicJWK();
-            if (!key.getKeyID().equals(e.getKeyId())) {
-                log.info("The key in jwk doesnt match with event");
-                return EventHandleResult.fail("INVALID_KID");
+    public void handle(Object obj) {
+        KeyCreatedEvent e = (KeyCreatedEvent)obj;
+        Authority authority = authorityRepository.findOneByCode(e.getIssuer()).get();
+        List<AuthorityKey> keys = authority.getKeys();
+        keys.forEach(k -> {
+            if (k.getValidUntil() == null) {
+                k.setValidUntil(e.getValidFrom());
             }
-        } catch (ParseException ex) {
-            log.error(ex.getMessage(), ex);
-            return EventHandleResult.fail("INVALID_KEY");
-        }
-        return EventHandleResult.success();
+        });
+        AuthorityKey key = new AuthorityKey();
+        key.setAuthority(authority);
+        key.setKeyId(e.getKeyId());
+        key.setJwk(e.getJwk());
+        key.setValidFrom(e.getValidFrom());
+        key.setCreatedAt(OffsetDateTime.now(ZoneOffset.UTC));
+        authority.addKey(key);
+        authorityRepository.save(authority);
     }
 }

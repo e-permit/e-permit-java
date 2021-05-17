@@ -17,7 +17,7 @@ public class PermitUsedEventFactory {
         e.setActivityType(activityType);
         e.setPermitId(permitId);
         e.setEventType(EventType.PERMIT_USED);
-        util.setCommon(e, issuedFor);
+        util.saveAndPublish(e, issuedFor);
         return e;
     }
 }

@@ -16,7 +16,7 @@ public class KeyCreatedEventFactory {
         e.setKeyId(keyId);
         e.setValidFrom(OffsetDateTime.now(ZoneOffset.UTC).toEpochSecond());
         e.setEventType(EventType.KEY_CREATED);
-        util.setCommon(e, issuedFor);
+        util.saveAndPublish(e, issuedFor);
         return e;
     }
 }

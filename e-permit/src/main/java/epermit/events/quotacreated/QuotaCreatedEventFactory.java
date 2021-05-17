@@ -18,7 +18,7 @@ public class QuotaCreatedEventFactory {
         e.setPermitYear(input.getPermitYear());
         e.setStartNumber(input.getStartNumber());
         e.setEventType(EventType.QUOTA_CREATED);
-        util.setCommon(e, input.getIssuedFor());
+        util.saveAndPublish(e, input.getIssuedFor());
         return e;
     }
 }

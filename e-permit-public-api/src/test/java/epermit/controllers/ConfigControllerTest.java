@@ -14,7 +14,7 @@ import epermit.dtos.ConfigDto;
 import epermit.entities.Key;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.KeyRepository;
-import epermit.services.KeyService;
+import epermit.stores.KeyStore;
 
 @ExtendWith(MockitoExtension.class)
 public class ConfigControllerTest {
@@ -26,7 +26,7 @@ public class ConfigControllerTest {
     AuthorityRepository authorityRepository;
 
     @Mock
-    KeyService keyService;
+    KeyStore keyService;
 
     @InjectMocks
     ConfigController controller;

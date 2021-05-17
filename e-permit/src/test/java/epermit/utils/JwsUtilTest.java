@@ -3,6 +3,7 @@ package epermit.utils;
 import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.ECDSAVerifier;
@@ -16,9 +17,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import epermit.entities.AuthorityKey;
 import epermit.models.EPermitProperties;
 import epermit.models.JwsValidationResult;
-import epermit.services.AuthorityService;
+import epermit.repositories.AuthorityKeyRepository;
 import lombok.SneakyThrows;
 
 @ExtendWith(MockitoExtension.class)
@@ -30,7 +32,7 @@ public class JwsUtilTest {
     KeyUtil keyUtil;
 
     @Mock
-    AuthorityService authorityService;
+    AuthorityKeyRepository authorityKeyRepository;
 
     @InjectMocks
     JwsUtil util;
@@ -59,9 +61,12 @@ public class JwsUtilTest {
         claims.put("issuer", "TR");
         claims.put("issued_for", "UA");
         String jws = util.createJws(key, claims);
+        AuthorityKey authorityKey = new AuthorityKey();
+        authorityKey.setJwk(key.toPublicJWK().toJSONString());
+        when(authorityKeyRepository.findOneByIssuerAndKeyId("TR", "1"))
+                .thenReturn(Optional.of(authorityKey));
         when(properties.getIssuerCode()).thenReturn("UA");
-        when(authorityService.getPublicKeyJwk("TR", "1")).thenReturn(key.toPublicJWK().toJSONString());
-        JwsValidationResult r =  util.validateJws(jws);
+        JwsValidationResult r = util.validateJws(jws);
         Assertions.assertTrue(r.isValid());
     }
 
@@ -74,7 +79,7 @@ public class JwsUtilTest {
         claims.put("issued_for", "UA2");
         String jws = util.createJws(key, claims);
         when(properties.getIssuerCode()).thenReturn("UA");
-        JwsValidationResult r =  util.validateJws(jws);
+        JwsValidationResult r = util.validateJws(jws);
         Assertions.assertFalse(r.isValid());
         Assertions.assertEquals("INVALID_ISSUED_FOR", r.getErrorCode());
     }
@@ -88,7 +93,7 @@ public class JwsUtilTest {
         claims.put("issued_for", "UA");
         String jws = util.createJws(key, claims);
         when(properties.getIssuerCode()).thenReturn("UA");
-        JwsValidationResult r =  util.validateJws(jws);
+        JwsValidationResult r = util.validateJws(jws);
         Assertions.assertFalse(r.isValid());
         Assertions.assertEquals("INVALID_KEYID", r.getErrorCode());
     }

@@ -6,9 +6,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import epermit.entities.IssuedPermit;
 import epermit.events.EventFactoryUtil;
 import epermit.events.EventType;
-import epermit.models.IssuedPermit;
 import epermit.models.PermitType;
 
 @ExtendWith(MockitoExtension.class)

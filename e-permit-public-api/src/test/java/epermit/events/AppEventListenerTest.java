@@ -8,16 +8,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import epermit.services.EventService;
+import epermit.listeners.ReceivedAppEventListener;
+import epermit.stores.EventStore;
 
 @ExtendWith(MockitoExtension.class)
 public class AppEventListenerTest {
-    @Mock EventService eventService;
+    @Mock EventStore eventService;
 
     @Test
     void shouldNotCallGetEvents() {
-        when(eventService.handle("jws")).thenReturn(EventHandleResult.success());
-        AppEventListener listener = new AppEventListener(eventService);
+        when(eventService.handle("jws")).thenReturn(EventValidationResult.success());
+        ReceivedAppEventListener listener = new ReceivedAppEventListener(eventService);
         AppEvent event = new AppEvent();
         event.setJws("jws");
         listener.onAppEvent(event);
@@ -26,8 +27,8 @@ public class AppEventListenerTest {
 
     @Test
     void shouldCallGetEventsIfNotExist() {
-        when(eventService.handle("jws")).thenReturn(EventHandleResult.fail("NOTEXIST_PREVIOUSEVENT"));
-        AppEventListener listener = new AppEventListener(eventService);
+        when(eventService.handle("jws")).thenReturn(EventValidationResult.fail("NOTEXIST_PREVIOUSEVENT"));
+        ReceivedAppEventListener listener = new ReceivedAppEventListener(eventService);
         AppEvent event = new AppEvent();
         event.setJws("jws");
         listener.onAppEvent(event);

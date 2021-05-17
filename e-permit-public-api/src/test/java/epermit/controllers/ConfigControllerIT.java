@@ -20,7 +20,7 @@ import epermit.PermitPostgresContainer;
 import epermit.dtos.ConfigDto;
 import epermit.entities.Key;
 import epermit.repositories.KeyRepository;
-import epermit.services.KeyService;
+import epermit.stores.KeyStore;
 
 @Testcontainers
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -30,7 +30,7 @@ public class ConfigControllerIT {
     private int port;
 
     @Autowired
-    private KeyService keyService;
+    private KeyStore keyService;
 
     @Autowired
     private KeyRepository keyRepository;

@@ -7,27 +7,21 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import an.awesome.pipelinr.Pipeline;
-import epermit.commands.createkey.CreateKeyCommand;
-import epermit.commands.enablekey.EnableKeyCommand;
-import epermit.common.CommandResult;
+import epermit.services.KeyService;
+import lombok.RequiredArgsConstructor;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/keys")
 public class KeyController {
-    private final Pipeline pipeline;
+    private final KeyService keyService;
 
-    public KeyController(Pipeline pipeline) {
-        this.pipeline = pipeline;
-    }
-    
     @PostMapping()
-    public CommandResult create(@Valid @RequestBody CreateKeyCommand command) {
-        return command.execute(pipeline);
+    public void create() {
+        
     }
 
     @PatchMapping("{id}/enable")
-    public CommandResult enable(@Valid EnableKeyCommand cmd) {
-        return cmd.execute(pipeline);
+    public void enable() {
     }
 }

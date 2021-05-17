@@ -1,7 +1,5 @@
 package epermit.events;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.junit.jupiter.api.Test;
@@ -20,7 +18,7 @@ public class AppEventListenerTest {
 
     @Test
     void test(){
-        AppEvent event = new AppEvent();
+        CreatedAppEvent event = new CreatedAppEvent();
         event.setUri("uri");
         event.setJws("jws");
         HttpHeaders headers = new HttpHeaders();

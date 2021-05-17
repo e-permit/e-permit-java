@@ -30,12 +30,12 @@ import epermit.PermitPostgresContainer;
 import epermit.entities.Authority;
 import epermit.entities.Key;
 import epermit.events.EventFactoryUtil;
-import epermit.events.EventHandleResult;
+import epermit.events.EventValidationResult;
 import epermit.events.keycreated.KeyCreatedEvent;
 import epermit.events.keycreated.KeyCreatedEventFactory;
 import epermit.repositories.KeyRepository;
-import epermit.services.EventService;
-import epermit.services.KeyService;
+import epermit.stores.EventStore;
+import epermit.stores.KeyStore;
 import lombok.SneakyThrows;
 
 @Testcontainers
@@ -45,9 +45,9 @@ public class EventControllerIT {
         @LocalServerPort
         private int port;
         @Autowired
-        private KeyService keyService;
+        private KeyStore keyService;
         @Autowired
-        private EventService eventService;
+        private EventStore eventService;
         @Autowired
         private KeyRepository keyRepository;
         @Autowired
@@ -78,7 +78,7 @@ public class EventControllerIT {
         void getTest() {
                 final String baseUrl = "http://localhost:" + port + "/events";
                 String jws = createKeyCreatedEvent();
-                EventHandleResult r = eventService.handle(jws);
+                EventValidationResult r = eventService.handle(jws);
                 assertTrue(r.isSucceed());
                 Map<String, String> input = new HashMap<>();
                 input.put("jws", jws);
