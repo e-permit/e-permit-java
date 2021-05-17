@@ -9,24 +9,26 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import epermit.common.PermitProperties;
-import epermit.dtos.ConfigDto;
 import epermit.entities.Key;
+import epermit.models.AuthorityConfig;
+import epermit.models.EPermitProperties;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.KeyRepository;
-import epermit.stores.KeyStore;
+import epermit.services.KeyService;
 
 @ExtendWith(MockitoExtension.class)
 public class ConfigControllerTest {
     @Mock
-    PermitProperties props;
+    EPermitProperties props;
+
     @Mock
     KeyRepository keyRepository;
+
     @Mock
     AuthorityRepository authorityRepository;
 
     @Mock
-    KeyStore keyService;
+    KeyService keyService;
 
     @InjectMocks
     ConfigController controller;
@@ -40,7 +42,7 @@ public class ConfigControllerTest {
         when(props.getIssuerCode()).thenReturn("TR");
         when(props.getIssuerVerifyUri()).thenReturn("http://localhost");
         when(keyRepository.findAll()).thenReturn(keys);
-        ConfigDto dto = controller.getConfig();
+        AuthorityConfig dto = controller.getConfig();
         assertEquals("http://localhost", dto.getVerifyUri());
         assertEquals("TR", dto.getCode());
     }

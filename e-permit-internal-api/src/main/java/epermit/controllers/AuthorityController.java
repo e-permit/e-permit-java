@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import epermit.models.AuthorityDto;
+import epermit.models.CommandResult;
 import epermit.models.CreateAuthorityInput;
 import epermit.models.CreateQuotaInput;
 import epermit.services.AuthorityService;
@@ -33,18 +34,18 @@ public class AuthorityController {
     }
 
     @PostMapping()
-    public void create(@RequestBody @Valid CreateAuthorityInput input) {
-        service.create(input);
+    public CommandResult create(@RequestBody @Valid CreateAuthorityInput input) {
+        return service.create(input);
     }
 
     @PostMapping("/createquota")
-    public void createQuota(@RequestBody @Valid CreateQuotaInput input) {
-        service.createQuota(input);
+    public CommandResult createQuota(@RequestBody @Valid CreateQuotaInput input) {
+        return service.createQuota(input);
     }
 
     @PatchMapping("/{id}/enablequota")
-    public void enableQuota(@RequestParam Long id) {
-        service.enableQuota(id);
+    public CommandResult enableQuota(@RequestParam Long id) {
+        return service.enableQuota(id);
     }
 
 }

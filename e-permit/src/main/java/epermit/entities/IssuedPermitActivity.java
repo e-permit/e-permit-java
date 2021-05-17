@@ -15,6 +15,7 @@ import epermit.models.PermitActivityType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Data
 @NoArgsConstructor // JPA
@@ -34,6 +35,7 @@ public class IssuedPermitActivity {
     @ManyToOne
     @JoinColumn(name = "issued_permit_id") 
     @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @JsonIgnore
     private IssuedPermit issuedPermit;
 

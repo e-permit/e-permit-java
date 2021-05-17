@@ -1,4 +1,4 @@
-package epermit.config;
+package epermit;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;

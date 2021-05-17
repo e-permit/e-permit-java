@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import epermit.models.CommandResult;
 import epermit.models.PermitActivityType;
 import epermit.models.PermitDto;
 import epermit.services.PermitService;
@@ -27,7 +28,7 @@ public class PermitController {
     }
 
     @PatchMapping("{id}/used")
-    public void setUsed(@PathVariable Long id) {
-        permitService.usePermit(id, PermitActivityType.ENTERANCE);
+    public CommandResult setUsed(@PathVariable Long id) {
+        return permitService.usePermit(id, PermitActivityType.ENTERANCE);
     }
 }

@@ -15,6 +15,4 @@ public class VerifierQuotaDto {
     private int startId;
 
     private int endId;
-
-    private Date createdAt;
 }

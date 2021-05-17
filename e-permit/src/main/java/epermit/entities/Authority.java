@@ -43,6 +43,7 @@ public class Authority {
   
   @OneToMany(cascade = CascadeType.ALL)
   @EqualsAndHashCode.Exclude
+  @ToString.Exclude
   private List<AuthorityKey> keys = new ArrayList<>();
 
   @JsonIgnore
@@ -64,6 +65,7 @@ public class Authority {
 
   @OneToMany(cascade = CascadeType.ALL)
   @EqualsAndHashCode.Exclude
+  @ToString.Exclude
   private List<IssuerQuota> issuerQuotas = new ArrayList<>();
 
   @JsonIgnore

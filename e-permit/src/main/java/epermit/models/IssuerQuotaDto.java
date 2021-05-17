@@ -17,10 +17,4 @@ public class IssuerQuotaDto {
     private int currentId;
 
     private int endId;
-
-    private Boolean active;
-    
-    private Date createdAt;
-
-    private Date disabledAt;
 }

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import epermit.models.CommandResult;
 import epermit.models.CreatePermitInput;
 import epermit.models.IssuedPermitDto;
 import epermit.services.IssuedPermitService;
@@ -35,12 +36,12 @@ public class IssuedPermitController {
     }
 
     @PostMapping()
-    public void post(@RequestBody @Valid CreatePermitInput input) {
-        service.createPermit(input);
+    public CommandResult createPermit(@RequestBody @Valid CreatePermitInput input) {
+        return service.createPermit(input);
     }
 
     @PatchMapping("{id}/revoke")
-    public void revoke(@PathVariable Long id) {
-        service.revokePermit(id, "comment");
+    public CommandResult revoke(@PathVariable Long id) {
+        return service.revokePermit(id, "comment");
     }
 }

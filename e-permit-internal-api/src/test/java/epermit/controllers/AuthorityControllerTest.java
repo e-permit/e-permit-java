@@ -2,6 +2,7 @@ package epermit.controllers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -10,7 +11,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import epermit.models.AuthorityDto;
+import epermit.models.CommandResult;
 import epermit.models.CreateAuthorityInput;
+import epermit.models.CreateQuotaInput;
 import epermit.services.AuthorityService;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,16 +45,20 @@ public class AuthorityControllerTest {
     @Test
     void createTest() {
         CreateAuthorityInput input = new CreateAuthorityInput();
-        controller.create(input);
+        CommandResult r =  controller.create(input);
+        assertTrue(r.isOk());
     }
 
     @Test
     void createQuotaTest() {
-        
+        CreateQuotaInput input = new CreateQuotaInput();
+        CommandResult r =  controller.createQuota(input);
+        assertTrue(r.isOk());
     }
 
     @Test
     void enableQuotaTest() {
-        
+        CommandResult r =  controller.enableQuota(Long.valueOf(1));
+        assertTrue(r.isOk());
     }
 }

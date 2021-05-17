@@ -20,6 +20,7 @@ import epermit.models.PermitType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Data
 @NoArgsConstructor // JPA
@@ -82,6 +83,7 @@ public class IssuedPermit {
 
     @OneToMany(cascade = CascadeType.ALL)
     @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     private List<IssuedPermitActivity> activities = new ArrayList<>();
   
     @JsonIgnore

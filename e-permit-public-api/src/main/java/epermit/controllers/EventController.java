@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import epermit.services.EventService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,14 +20,14 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class EventController {
 
-    private final 
+    private final EventService eventService;
 
     @PostMapping()
     public Boolean receiveEvent(@RequestBody Map<String, String> input) {
         log.info("Event is received jws: " + input.get("jws"));
-        AppEvent event = new AppEvent();
-        event.setJws(input.get("jws"));
-        eventPublisher.publishEvent(event);
+        //AppEvent event = new AppEvent();
+        //event.setJws(input.get("jws"));
+        //eventPublisher.publishEvent(event);
         return true;
     }
 
@@ -34,13 +35,13 @@ public class EventController {
     public List<String> getEvents(String jws) {
         String issuer = "";//JsonUtil.getClaim(jws, "issuer");
         String eventId = ""; //JsonUtil.getClaim(jws, "event_id");
-        Optional<CreatedEvent> eventResult =
+        /*Optional<CreatedEvent> eventResult =
                 eventRepository.findOneByEventIdAndIssuedFor(eventId, issuer);
         if (eventResult.isPresent()) {
             List<CreatedEvent> events =
                     eventRepository.findByIdGreaterThanOrderByIdAsc(eventResult.get().getId());
             return events.stream().map(x -> x.getJws()).collect(Collectors.toList());
-        }
+        }*/
         return null;
     }
 

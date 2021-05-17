@@ -1,4 +1,4 @@
-package epermit.events;
+package epermit;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -11,6 +11,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
+import epermit.events.CreatedAppEvent;
 
 @ExtendWith(MockitoExtension.class)
 public class AppEventListenerTest {

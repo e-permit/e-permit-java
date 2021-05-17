@@ -17,10 +17,10 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import epermit.PermitPostgresContainer;
-import epermit.dtos.ConfigDto;
 import epermit.entities.Key;
+import epermit.models.AuthorityConfig;
 import epermit.repositories.KeyRepository;
-import epermit.stores.KeyStore;
+import epermit.services.KeyService;
 
 @Testcontainers
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -30,7 +30,7 @@ public class ConfigControllerIT {
     private int port;
 
     @Autowired
-    private KeyStore keyService;
+    private KeyService keyService;
 
     @Autowired
     private KeyRepository keyRepository;
@@ -55,8 +55,8 @@ public class ConfigControllerIT {
     @Test
     void getTest() {
         final String baseUrl = "http://localhost:" + port + "/epermit-configuration";
-        ResponseEntity<ConfigDto> result =
-                restTemplate.getForEntity(baseUrl, ConfigDto.class);
+        ResponseEntity<AuthorityConfig> result =
+                restTemplate.getForEntity(baseUrl, AuthorityConfig.class);
         Assert.assertEquals(200, result.getStatusCodeValue());
         Assert.assertEquals("TR", result.getBody().getCode()); 
                

@@ -1,5 +1,6 @@
 package epermit.controllers;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
@@ -12,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import epermit.models.CommandResult;
 import epermit.models.CreatePermitInput;
 import epermit.models.IssuedPermitDto;
 import epermit.services.IssuedPermitService;
@@ -42,14 +44,14 @@ import epermit.services.IssuedPermitService;
 
     @Test
     void createTest() {
-        CreatePermitInput cmd = new CreatePermitInput();
-        controller.post(cmd);
-        //assertTrue(r.isOk());
+        CreatePermitInput input = new CreatePermitInput();
+        CommandResult r = controller.createPermit(input);
+        assertTrue(r.isOk());
     }
 
     @Test
     void revokeTest() {
-        controller.revoke(Long.valueOf(1));
-        //assertTrue(r.isOk());
+        CommandResult r =  controller.revoke(Long.valueOf(1));
+        assertTrue(r.isOk());
     }
 }

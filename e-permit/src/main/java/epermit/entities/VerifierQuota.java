@@ -15,6 +15,7 @@ import epermit.models.PermitType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Data
 @NoArgsConstructor // JPA
@@ -49,6 +50,7 @@ public class VerifierQuota {
     @ManyToOne
     @JoinColumn(name = "authority_id") 
     @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @JsonIgnore
     private Authority authority;
 }

@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import epermit.entities.IssuedPermit;
 import epermit.events.permitcreated.PermitCreatedEventFactory;
 import epermit.events.permitrevoked.PermitRevokedEventFactory;
+import epermit.models.CommandResult;
 import epermit.models.CreatePermitInput;
 import epermit.models.EPermitProperties;
 import epermit.models.IssuedPermitDto;
@@ -45,7 +46,8 @@ public class IssuedPermitService {
     }
 
     @Transactional
-    public void createPermit(CreatePermitInput input) {
+    public CommandResult createPermit(CreatePermitInput input) {
+        // check issuedFor, serialNumber, companyName(annotation), plateNumber(annotation)
         log.info("Permit create started");
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         String issuer = properties.getIssuerCode();
@@ -67,10 +69,11 @@ public class IssuedPermitService {
         issuedPermitRepository.save(permit);
         permitCreatedEventFactory.create(permit);
         log.info("Permit create finished");
+        return CommandResult.success();
     }
 
     @Transactional
-    public void revokePermit(Long id, String comment) {
+    public CommandResult revokePermit(Long id, String comment) {
         Optional<IssuedPermit> permitOptional = issuedPermitRepository.findById(id);
         if (!permitOptional.isPresent()) {
 
@@ -80,6 +83,7 @@ public class IssuedPermitService {
         permit.setRevokedAt(OffsetDateTime.now(ZoneOffset.UTC));
         issuedPermitRepository.save(permit);
         permitRevokedEventFactory.create(permit.getIssuedFor(), permit.getPermitId());
+        return CommandResult.success();
     }
 
 }

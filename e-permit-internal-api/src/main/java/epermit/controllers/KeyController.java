@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import epermit.models.CommandResult;
 import epermit.services.KeyService;
 import lombok.RequiredArgsConstructor;
 
@@ -17,11 +18,12 @@ public class KeyController {
     private final KeyService keyService;
 
     @PostMapping()
-    public void create() {
-        
+    public CommandResult create() {
+        return CommandResult.fail("error");
     }
 
     @PatchMapping("{id}/enable")
-    public void enable() {
+    public CommandResult enable() {
+        return CommandResult.fail("error");
     }
 }
