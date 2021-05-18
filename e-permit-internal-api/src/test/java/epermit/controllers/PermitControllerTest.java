@@ -13,8 +13,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import epermit.entities.Permit;
-import epermit.models.CommandResult;
-import epermit.models.PermitDto;
+import epermit.models.dtos.PermitDto;
+import epermit.models.results.CommandResult;
 import epermit.services.PermitService;
 
 @ExtendWith(MockitoExtension.class)

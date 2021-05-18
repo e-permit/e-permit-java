@@ -11,7 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import epermit.events.EventValidationResult;
-import epermit.models.PermitType;
+import epermit.models.enums.PermitType;
 import epermit.utils.GsonUtil;
 
 @ExtendWith(MockitoExtension.class)

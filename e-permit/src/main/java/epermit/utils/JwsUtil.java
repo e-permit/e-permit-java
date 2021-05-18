@@ -14,7 +14,7 @@ import com.nimbusds.jose.jwk.ECKey;
 import org.springframework.stereotype.Component;
 import epermit.entities.AuthorityKey;
 import epermit.models.EPermitProperties;
-import epermit.models.JwsValidationResult;
+import epermit.models.results.JwsValidationResult;
 import epermit.repositories.AuthorityKeyRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;

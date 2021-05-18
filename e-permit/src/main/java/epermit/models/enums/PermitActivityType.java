@@ -1,4 +1,4 @@
-package epermit.models;
+package epermit.models.enums;
 
 public enum PermitActivityType {
     ENTERANCE(1), EXIT(2);

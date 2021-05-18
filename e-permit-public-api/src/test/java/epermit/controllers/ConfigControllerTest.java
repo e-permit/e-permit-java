@@ -10,11 +10,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import epermit.entities.Key;
-import epermit.models.AuthorityConfig;
 import epermit.models.EPermitProperties;
+import epermit.models.dtos.AuthorityConfig;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.KeyRepository;
 import epermit.services.KeyService;
+import epermit.utils.KeyUtil;
 
 @ExtendWith(MockitoExtension.class)
 public class ConfigControllerTest {
@@ -28,7 +29,7 @@ public class ConfigControllerTest {
     AuthorityRepository authorityRepository;
 
     @Mock
-    KeyService keyService;
+    KeyUtil keyUtil;
 
     @InjectMocks
     ConfigController controller;
@@ -36,7 +37,7 @@ public class ConfigControllerTest {
     @Test
     void getTest() {
         when(props.getKeyPassword()).thenReturn("123456");
-        Key key = keyService.create("1");
+        Key key = keyUtil.create("1");
         List<Key> keys = new ArrayList<>();
         keys.add(key);
         when(props.getIssuerCode()).thenReturn("TR");

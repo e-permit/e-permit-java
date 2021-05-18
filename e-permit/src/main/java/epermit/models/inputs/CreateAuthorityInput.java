@@ -1,4 +1,4 @@
-package epermit.models;
+package epermit.models.inputs;
 
 import lombok.Data;
 import javax.validation.constraints.NotBlank;

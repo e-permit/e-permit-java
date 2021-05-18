@@ -1,4 +1,4 @@
-package epermit.models;
+package epermit.models.dtos;
 
 
 import java.util.ArrayList;

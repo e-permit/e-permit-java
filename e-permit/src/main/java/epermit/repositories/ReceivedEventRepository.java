@@ -10,4 +10,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface ReceivedEventRepository extends JpaRepository<ReceivedEvent, Long> {
      boolean existsByIssuerAndEventId(String issuer, String eventId);
      Optional<ReceivedEvent> findOneByIssuerAndEventId(String issuer, String eventId);
+     Optional<ReceivedEvent> findTopByIssuerOrderByIdDesc(String issuer);
 }

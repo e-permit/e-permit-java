@@ -1,7 +1,8 @@
-package epermit.models;
+package epermit.models.inputs;
 
 import java.util.HashMap;
 import java.util.Map;
+import epermit.models.enums.PermitType;
 import lombok.Data;
 
 @Data

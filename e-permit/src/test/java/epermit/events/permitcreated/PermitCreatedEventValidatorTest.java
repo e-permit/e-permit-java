@@ -13,7 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import epermit.events.EventValidationResult;
-import epermit.models.PermitType;
+import epermit.models.enums.PermitType;
 import epermit.repositories.PermitRepository;
 import epermit.utils.GsonUtil;
 import epermit.utils.PermitUtil;

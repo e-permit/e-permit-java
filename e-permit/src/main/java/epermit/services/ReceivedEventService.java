@@ -1,15 +1,19 @@
 package epermit.services;
 
 import org.springframework.stereotype.Service;
-import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
+import java.util.HashMap;
 import java.util.Map;
 import com.nimbusds.jose.JWSObject;
 import epermit.events.EventBase;
 import epermit.events.EventValidationResult;
 import epermit.events.EventValidator;
 import epermit.events.ReceivedAppEvent;
+import epermit.models.EPermitProperties;
+import epermit.models.results.JwsValidationResult;
 import epermit.events.EventHandler;
-import epermit.models.JwsValidationResult;
+import epermit.repositories.AuthorityRepository;
 import epermit.repositories.ReceivedEventRepository;
 import epermit.utils.GsonUtil;
 import epermit.utils.JwsUtil;
@@ -20,13 +24,17 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class EventService {
+public class ReceivedEventService {
     private final JwsUtil jwsUtil;
     private final ReceivedEventRepository receivedEventRepository;
     private final Map<String, EventHandler> eventHandlers;
     private final Map<String, EventValidator> eventValidators;
+    private final RestTemplate restTemplate;
+    private final AuthorityRepository authorityRepository;
+    private final EPermitProperties properties;
 
     @SneakyThrows
+    @Transactional
     public EventValidationResult handle(String jws) {
         log.info("The message is recived. The message content is: " + jws);
         JwsValidationResult r = jwsUtil.validateJws(jws);
@@ -53,18 +61,23 @@ public class EventService {
         return null;
     }
 
-    public void handleReceivedEvent(ReceivedAppEvent event){
+    @SneakyThrows
+    public void handleReceivedEvent(ReceivedAppEvent event) {
         EventValidationResult r = handle(event.getJws());
         if (!r.isOk() && r.getErrorCode().equals("NOTEXIST_PREVIOUSEVENT")) {
-            List<String> jwsList = getEvents(event.getJws());
-            jwsList.forEach(jws -> {
-                handle(event.getJws());
-            });
+            EventBase eBase = (EventBase) r.getEvent();
+            String url = authorityRepository.findOneByCode(eBase.getIssuer()).get().getApiUri();
+            String lastEventId = receivedEventRepository
+                    .findTopByIssuerOrderByIdDesc(eBase.getIssuer()).get().getEventId();
+            Map<String, String> claims = new HashMap<>();
+            claims.put("last_event_id", lastEventId);
+            claims.put("issuer", properties.getIssuerCode());
+            String requestJws = jwsUtil.createJws(claims);
+            String[] jwsList = restTemplate.getForObject(url + "/" + requestJws, String[].class);
+            for (String jws : jwsList) {
+                handle(jws);
+            }
         }
     }
 
-    private List<String> getEvents(String jws) {
-        return null;
-    }
-    
 }

@@ -17,7 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import epermit.entities.IssuedPermit;
 import epermit.entities.IssuedPermitActivity;
-import epermit.models.PermitActivityType;
+import epermit.models.enums.PermitActivityType;
 import epermit.repositories.IssuedPermitRepository;
 
 @ExtendWith(MockitoExtension.class)

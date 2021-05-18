@@ -18,9 +18,10 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import epermit.PermitPostgresContainer;
 import epermit.entities.Key;
-import epermit.models.AuthorityConfig;
+import epermit.models.dtos.AuthorityConfig;
 import epermit.repositories.KeyRepository;
 import epermit.services.KeyService;
+import epermit.utils.KeyUtil;
 
 @Testcontainers
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -30,7 +31,7 @@ public class ConfigControllerIT {
     private int port;
 
     @Autowired
-    private KeyService keyService;
+    private KeyUtil keyUtil;
 
     @Autowired
     private KeyRepository keyRepository;
@@ -46,7 +47,7 @@ public class ConfigControllerIT {
     @BeforeEach
     @Transactional
     void setUp() {
-        Key key = keyService.create("1");
+        Key key = keyUtil.create("1");
         key.setActive(true);
         key.setValidFrom(OffsetDateTime.now(ZoneOffset.UTC).toEpochSecond());
         keyRepository.save(key);

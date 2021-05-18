@@ -2,15 +2,14 @@ package epermit.controllers;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import epermit.services.EventService;
+import epermit.events.ReceivedAppEvent;
+import epermit.services.CreatedEventService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,14 +19,15 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class EventController {
 
-    private final EventService eventService;
+    private final ApplicationEventPublisher applicationEventPublisher;
+    private final CreatedEventService createdEventService;
 
     @PostMapping()
     public Boolean receiveEvent(@RequestBody Map<String, String> input) {
         log.info("Event is received jws: " + input.get("jws"));
-        //AppEvent event = new AppEvent();
-        //event.setJws(input.get("jws"));
-        //eventPublisher.publishEvent(event);
+        ReceivedAppEvent appEvent = new ReceivedAppEvent();
+        appEvent.setJws(input.get("jws"));
+        applicationEventPublisher.publishEvent(appEvent);
         return true;
     }
 

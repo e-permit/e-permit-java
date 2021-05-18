@@ -1,4 +1,4 @@
-package epermit.models;
+package epermit.models.results;
 
 import lombok.Data;
 

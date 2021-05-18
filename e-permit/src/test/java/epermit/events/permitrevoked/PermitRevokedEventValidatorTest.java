@@ -3,10 +3,6 @@ package epermit.events.permitrevoked;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,7 +28,7 @@ public class PermitRevokedEventValidatorTest {
         event.setIssuer("UA");
         event.setIssuedFor("TR");
         String payload = GsonUtil.getGson().toJson(event);
-        when(permitRepository.existsByIssuerAndPermitId(anyString(), anyString())).thenReturn(true);
+        when(permitRepository.existsByIssuerAndPermitId("UA", "UA-TR-2021-1-1")).thenReturn(true);
         EventValidationResult r = validator.validate(payload);
         assertTrue(r.isOk());
     }
@@ -45,7 +41,6 @@ public class PermitRevokedEventValidatorTest {
         event.setIssuedFor("TR");
         String payload = GsonUtil.getGson().toJson(event);
         EventValidationResult r = validator.validate(payload);
-        when(permitRepository.existsByIssuerAndPermitId(anyString(), anyString())).thenReturn(true);
         assertFalse(r.isOk());
         assertEquals("INVALID_PERMITID_OR_ISSUER", r.getErrorCode());
     }

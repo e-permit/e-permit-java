@@ -16,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
-import epermit.models.PermitType;
+import epermit.models.enums.PermitType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;

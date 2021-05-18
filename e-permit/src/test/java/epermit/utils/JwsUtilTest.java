@@ -19,7 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import epermit.entities.AuthorityKey;
 import epermit.models.EPermitProperties;
-import epermit.models.JwsValidationResult;
+import epermit.models.results.JwsValidationResult;
 import epermit.repositories.AuthorityKeyRepository;
 import lombok.SneakyThrows;
 

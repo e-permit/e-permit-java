@@ -1,13 +1,11 @@
 package epermit.listeners;
 
-import java.util.List;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Component;
-import epermit.events.EventValidationResult;
 import epermit.events.ReceivedAppEvent;
-import epermit.services.EventService;
+import epermit.services.ReceivedEventService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @EnableAsync(proxyTargetClass = true)
 public class ReceivedAppEventListener {
-    private final EventService eventService;
+    private final ReceivedEventService eventService;
 
     @Async
     @EventListener

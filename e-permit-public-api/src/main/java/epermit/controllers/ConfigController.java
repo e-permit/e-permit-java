@@ -3,7 +3,7 @@ package epermit.controllers;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import epermit.models.AuthorityConfig;
+import epermit.models.dtos.AuthorityConfig;
 import epermit.services.AuthorityService;
 import lombok.RequiredArgsConstructor;
 

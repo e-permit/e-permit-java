@@ -8,16 +8,15 @@ import java.util.Optional;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import epermit.entities.IssuedPermit;
 import epermit.events.permitcreated.PermitCreatedEventFactory;
 import epermit.events.permitrevoked.PermitRevokedEventFactory;
-import epermit.models.CommandResult;
-import epermit.models.CreatePermitInput;
 import epermit.models.EPermitProperties;
-import epermit.models.IssuedPermitDto;
+import epermit.models.dtos.IssuedPermitDto;
+import epermit.models.inputs.CreatePermitInput;
+import epermit.models.results.CommandResult;
 import epermit.repositories.IssuedPermitRepository;
 import epermit.utils.PermitUtil;
 import lombok.RequiredArgsConstructor;
@@ -47,12 +46,14 @@ public class IssuedPermitService {
 
     @Transactional
     public CommandResult createPermit(CreatePermitInput input) {
-        // check issuedFor, serialNumber, companyName(annotation), plateNumber(annotation)
         log.info("Permit create started");
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         String issuer = properties.getIssuerCode();
         Integer serialNumber = permitUtil.generateSerialNumber(input.getIssuedFor(),
                 input.getPermitYear(), input.getPermitType());
+        if (serialNumber == null) {
+            return CommandResult.fail("SERIAL_NUMBER_NULL");
+        }
         String permitId = permitUtil.getPermitId(issuer, input.getIssuedFor(),
                 input.getPermitType(), input.getPermitYear(), serialNumber);
         IssuedPermit permit = new IssuedPermit();
@@ -76,7 +77,7 @@ public class IssuedPermitService {
     public CommandResult revokePermit(Long id, String comment) {
         Optional<IssuedPermit> permitOptional = issuedPermitRepository.findById(id);
         if (!permitOptional.isPresent()) {
-
+            return CommandResult.fail("PERMIT_NOTFOUND");
         }
         IssuedPermit permit = permitOptional.get();
         permit.setRevoked(true);

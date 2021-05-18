@@ -10,10 +10,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import epermit.models.AuthorityDto;
-import epermit.models.CommandResult;
-import epermit.models.CreateAuthorityInput;
-import epermit.models.CreateQuotaInput;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import epermit.models.dtos.AuthorityDto;
+import epermit.models.inputs.CreateAuthorityInput;
+import epermit.models.inputs.CreateQuotaInput;
+import epermit.models.results.CommandResult;
 import epermit.services.AuthorityService;
 
 @ExtendWith(MockitoExtension.class)
@@ -45,8 +47,9 @@ public class AuthorityControllerTest {
     @Test
     void createTest() {
         CreateAuthorityInput input = new CreateAuthorityInput();
-        CommandResult r =  controller.create(input);
-        assertTrue(r.isOk());
+        ResponseEntity<CommandResult> r =  controller.create(input);
+        assertEquals(HttpStatus.ACCEPTED, r.getStatusCode());
+        assertTrue(r.getBody().isOk());
     }
 
     @Test

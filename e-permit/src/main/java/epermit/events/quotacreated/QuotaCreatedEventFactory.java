@@ -1,9 +1,9 @@
 package epermit.events.quotacreated;
 
 import org.springframework.stereotype.Component;
+import epermit.entities.VerifierQuota;
 import epermit.events.EventFactoryUtil;
 import epermit.events.EventType;
-import epermit.models.PermitType;
 import lombok.RequiredArgsConstructor;
 
 @Component
@@ -11,14 +11,14 @@ import lombok.RequiredArgsConstructor;
 public class QuotaCreatedEventFactory {
     private final EventFactoryUtil util;
 
-    public QuotaCreatedEvent create(QuotaCreatedEventInput input) {
+    public QuotaCreatedEvent create(VerifierQuota quota) {
         QuotaCreatedEvent e = new QuotaCreatedEvent();
-        e.setEndNumber(input.getEndNumber());
-        e.setPermitType(input.getPermitType());
-        e.setPermitYear(input.getPermitYear());
-        e.setStartNumber(input.getStartNumber());
+        e.setEndNumber(quota.getEndNumber());
+        e.setPermitType(quota.getPermitType());
+        e.setPermitYear(quota.getPermitYear());
+        e.setStartNumber(quota.getStartNumber());
         e.setEventType(EventType.QUOTA_CREATED);
-        util.saveAndPublish(e, input.getIssuedFor());
+        util.saveAndPublish(e, quota.getAuthority().getCode());
         return e;
     }
 }

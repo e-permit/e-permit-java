@@ -16,7 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import epermit.entities.Authority;
 import epermit.entities.IssuerQuota;
 import epermit.events.EventValidationResult;
-import epermit.models.PermitType;
+import epermit.models.enums.PermitType;
 import epermit.repositories.AuthorityRepository;
 
 @ExtendWith(MockitoExtension.class)

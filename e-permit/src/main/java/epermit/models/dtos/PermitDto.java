@@ -1,15 +1,14 @@
-package epermit.models;
+package epermit.models.dtos;
 
 import java.util.Date;
+import epermit.models.enums.PermitType;
 import lombok.Data;
 
 @Data
-public class IssuedPermitDto {
+public class PermitDto {
     private Long id;
-
+    
     private String permitId;
-
-    private String qrCode;
 
     private int serialNumber;
 
@@ -33,3 +32,4 @@ public class IssuedPermitDto {
 
     private Date revokedAt;
 }
+

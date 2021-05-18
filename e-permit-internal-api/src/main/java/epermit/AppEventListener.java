@@ -1,6 +1,5 @@
 package epermit;
 
-import org.springframework.context.event.EventListener;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -10,11 +9,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.web.client.RestTemplate;
 import epermit.events.CreatedAppEvent;
-import lombok.extern.slf4j.Slf4j;
 
 @EnableAsync(proxyTargetClass = true)
 @Component
-@Slf4j
 public class AppEventListener {
     private final RestTemplate restTemplate;
 

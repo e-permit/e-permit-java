@@ -8,9 +8,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import epermit.entities.Permit;
 import epermit.events.permitused.PermitUsedEventFactory;
-import epermit.models.CommandResult;
-import epermit.models.PermitActivityType;
-import epermit.models.PermitDto;
+import epermit.models.dtos.PermitDto;
+import epermit.models.inputs.PermitUsedInput;
+import epermit.models.results.CommandResult;
 import epermit.repositories.PermitRepository;
 import lombok.RequiredArgsConstructor;
 
@@ -32,14 +32,14 @@ public class PermitService {
     }
 
     @Transactional
-    public CommandResult usePermit(Long id, PermitActivityType activityType) {
-        Optional<Permit> permitOptional = permitRepository.findById(id);
+    public CommandResult usePermit(PermitUsedInput input) {
+        Optional<Permit> permitOptional = permitRepository.findOneByPermitId(input.getPermitId());
         if (!permitOptional.isPresent()) {
-            return CommandResult.fail("error");
+            return CommandResult.fail("PERMIT_NOTFOUND");
         }
         Permit permit = permitOptional.get();
         permitRepository.save(permit);
-        permitUsedEventFactory.create(permit.getIssuer(), permit.getPermitId(), activityType);
+        permitUsedEventFactory.create(permit, input.getActivityType());
         return CommandResult.success();
     }
 

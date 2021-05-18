@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import epermit.models.CommandResult;
-import epermit.models.CreatePermitInput;
-import epermit.models.IssuedPermitDto;
+import epermit.models.dtos.IssuedPermitDto;
+import epermit.models.inputs.CreatePermitInput;
+import epermit.models.results.CommandResult;
 import epermit.services.IssuedPermitService;
 import lombok.RequiredArgsConstructor;
 
@@ -36,12 +36,22 @@ public class IssuedPermitController {
     }
 
     @PostMapping()
-    public CommandResult createPermit(@RequestBody @Valid CreatePermitInput input) {
-        return service.createPermit(input);
+    public ResponseEntity<CommandResult> createPermit(@RequestBody @Valid CreatePermitInput input) {
+        CommandResult r = service.createPermit(input);
+        if (r.isOk()) {
+            return new ResponseEntity<CommandResult>(r, HttpStatus.CREATED);
+        } else {
+            return new ResponseEntity<CommandResult>(r, HttpStatus.BAD_REQUEST);
+        }
     }
 
     @PatchMapping("{id}/revoke")
-    public CommandResult revoke(@PathVariable Long id) {
-        return service.revokePermit(id, "comment");
+    public ResponseEntity<CommandResult> revoke(@PathVariable Long id) {
+        CommandResult r =  service.revokePermit(id, "comment");
+        if (r.isOk()) {
+            return new ResponseEntity<CommandResult>(r, HttpStatus.CREATED);
+        } else {
+            return new ResponseEntity<CommandResult>(r, HttpStatus.BAD_REQUEST);
+        }
     }
 }

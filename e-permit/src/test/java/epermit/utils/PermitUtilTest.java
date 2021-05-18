@@ -18,7 +18,7 @@ import epermit.entities.Authority;
 import epermit.entities.IssuedPermit;
 import epermit.entities.IssuerQuota;
 import epermit.models.EPermitProperties;
-import epermit.models.PermitType;
+import epermit.models.enums.PermitType;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.IssuedPermitRepository;
 import lombok.SneakyThrows;

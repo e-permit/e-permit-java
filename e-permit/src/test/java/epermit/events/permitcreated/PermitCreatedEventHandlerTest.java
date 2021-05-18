@@ -10,7 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import epermit.entities.Permit;
-import epermit.models.PermitType;
+import epermit.models.enums.PermitType;
 import epermit.repositories.PermitRepository;
 
 @ExtendWith(MockitoExtension.class)

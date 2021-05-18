@@ -1,4 +1,4 @@
-package epermit.models;
+package epermit.models.enums;
 
 public enum PermitType {
     BILITERAL(1), TRANSIT(2), THIRDCOUNTRY(3);

@@ -6,9 +6,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import epermit.entities.Authority;
+import epermit.entities.VerifierQuota;
 import epermit.events.EventFactoryUtil;
 import epermit.events.EventType;
-import epermit.models.PermitType;
+import epermit.models.enums.PermitType;
 
 @ExtendWith(MockitoExtension.class)
 public class QuotaCreatedEventFactoryTest {
@@ -20,9 +22,11 @@ public class QuotaCreatedEventFactoryTest {
 
     @Test
     void createTest() {
-        QuotaCreatedEventInput input = new QuotaCreatedEventInput();
+        VerifierQuota input = new VerifierQuota();
+        Authority authority = new Authority();
+        authority.setCode("UA");
         input.setEndNumber(4);
-        input.setIssuedFor("UA");
+        input.setAuthority(authority);
         input.setPermitType(PermitType.BILITERAL);
         input.setPermitYear(2021);
         input.setStartNumber(1);

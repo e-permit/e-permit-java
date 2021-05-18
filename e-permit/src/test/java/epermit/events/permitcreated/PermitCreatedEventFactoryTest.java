@@ -9,7 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import epermit.entities.IssuedPermit;
 import epermit.events.EventFactoryUtil;
 import epermit.events.EventType;
-import epermit.models.PermitType;
+import epermit.models.enums.PermitType;
 
 @ExtendWith(MockitoExtension.class)
 public class PermitCreatedEventFactoryTest {

@@ -21,16 +21,6 @@ public class EventFactoryUtil {
     private final JwsUtil jwsUtil;
     private final AuthorityRepository authorityRepository;
 
-    /*public <T extends EventBase> void setCommon(T event, String issuedFor) {
-        CreatedEvent lastEvent =
-                createdEventRepository.findTopByIssuedForOrderByIdDesc(issuedFor).get();
-        event.setPreviousEventId(lastEvent.getEventId());
-        event.setCreatedAt(OffsetDateTime.now(ZoneOffset.UTC).toEpochSecond());
-        event.setIssuer(properties.getIssuerCode());
-        event.setIssuedFor(issuedFor);
-        event.setEventId(UUID.randomUUID().toString());
-    }*/
-
     public <T extends EventBase> void saveAndPublish(T event, String issuedFor) {
         CreatedEvent lastEvent =
                 createdEventRepository.findTopByIssuedForOrderByIdDesc(issuedFor).get();

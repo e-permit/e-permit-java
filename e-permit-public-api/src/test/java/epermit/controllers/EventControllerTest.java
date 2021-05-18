@@ -16,9 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
-import epermit.common.JsonUtil;
 import epermit.entities.CreatedEvent;
-import epermit.events.AppEvent;
 import epermit.repositories.CreatedEventRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -27,7 +25,7 @@ public class EventControllerTest {
     @Mock
     CreatedEventRepository eventRepository;
 
-    @Test
+    /*@Test
     void receiveEventShouldReturnTrue() {
         EventPublisher publisher = new EventPublisher();
         EventController controller = new EventController(publisher, eventRepository);
@@ -54,7 +52,7 @@ public class EventControllerTest {
         EventController controller = new EventController(null, eventRepository);
         List<String> r = controller.getEvents(jws);
         assertEquals(1, r.size());
-    }
+    }*/
 
     class EventPublisher implements ApplicationEventPublisher {
         private Object event;

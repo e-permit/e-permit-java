@@ -1,6 +1,6 @@
 package epermit.events.quotacreated;
 
-import epermit.models.PermitType;
+import epermit.models.enums.PermitType;
 import lombok.Data;
 
 @Data

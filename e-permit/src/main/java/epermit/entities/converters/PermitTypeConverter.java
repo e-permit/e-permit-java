@@ -3,7 +3,7 @@ package epermit.entities.converters;
 import java.util.stream.Stream;
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
-import epermit.models.PermitType;
+import epermit.models.enums.PermitType;
 
 @Converter(autoApply = true)
 public class PermitTypeConverter implements AttributeConverter<PermitType, Integer> {

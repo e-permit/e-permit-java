@@ -2,7 +2,7 @@ package epermit.events.permitcreated;
 
 import java.util.Map;
 import epermit.events.EventBase;
-import epermit.models.PermitType;
+import epermit.models.enums.PermitType;
 import lombok.Getter;
 import lombok.Setter;
 

@@ -1,7 +1,7 @@
 package epermit.events.permitused;
 
 import epermit.events.EventBase;
-import epermit.models.PermitActivityType;
+import epermit.models.enums.PermitActivityType;
 import lombok.Getter;
 import lombok.Setter;
 

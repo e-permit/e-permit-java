@@ -1,5 +1,6 @@
-package epermit.models;
+package epermit.models.inputs;
 
+import epermit.models.enums.PermitType;
 import lombok.Data;
 
 @Data

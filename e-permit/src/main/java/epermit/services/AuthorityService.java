@@ -2,22 +2,28 @@ package epermit.services;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import com.google.gson.Gson;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import epermit.entities.Authority;
-import epermit.models.AuthorityConfig;
-import epermit.models.AuthorityDto;
-import epermit.models.CommandResult;
-import epermit.models.CreateAuthorityInput;
-import epermit.models.CreateQuotaInput;
+import epermit.entities.AuthorityKey;
+import epermit.entities.VerifierQuota;
+import epermit.events.quotacreated.QuotaCreatedEventFactory;
 import epermit.models.EPermitProperties;
-import epermit.models.PublicJwk;
-import epermit.models.PublicKey;
-import epermit.models.TrustedAuthority;
+import epermit.models.dtos.AuthorityConfig;
+import epermit.models.dtos.AuthorityDto;
+import epermit.models.dtos.PublicJwk;
+import epermit.models.dtos.PublicKey;
+import epermit.models.dtos.TrustedAuthority;
+import epermit.models.inputs.CreateAuthorityInput;
+import epermit.models.inputs.CreateQuotaInput;
+import epermit.models.results.CommandResult;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.KeyRepository;
+import epermit.repositories.VerifierQuotaRepository;
 import epermit.utils.GsonUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -28,6 +34,8 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class AuthorityService {
     private final AuthorityRepository authorityRepository;
+    private final VerifierQuotaRepository verifierQuotaRepository;
+    private final QuotaCreatedEventFactory quotaCreatedEventFactory;
     private final KeyRepository keyRepository;
     private final ModelMapper modelMapper;
     private final EPermitProperties properties;
@@ -82,16 +90,46 @@ public class AuthorityService {
         return dto;
     }
 
-    public CommandResult create(CreateAuthorityInput input) {
+    @Transactional
+    public CommandResult create(CreateAuthorityInput input, AuthorityConfig config) {
         log.info("Authority create command: " + input.getApiUri());
-        return CommandResult.fail("fail");
+        Authority authority = new Authority();
+        authority.setApiUri(input.getApiUri());
+        authority.setCode(input.getCode());
+        authority.setName(input.getName());
+        authority.setVerifyUri(config.getVerifyUri());
+        authority.setKeys(config.getKeys().stream().map(x -> modelMapper.map(x, AuthorityKey.class))
+                .collect(Collectors.toList()));
+        return CommandResult.success();
     }
-
+    @Transactional
     public CommandResult createQuota(CreateQuotaInput input) {
-        return CommandResult.fail("fail");
+        Optional<Authority> authorityR = authorityRepository.findOneByCode(input.getAuthorityCode());
+        if(!authorityR.isPresent()){
+            return CommandResult.fail("INVALID_AUTHORITYCODE");
+        }
+        Authority authority = authorityR.get();
+        VerifierQuota quota = new VerifierQuota();
+        quota.setEndNumber(input.getEndId());
+        quota.setStartNumber(input.getStartId());
+        quota.setPermitType(input.getPermitType());
+        quota.setPermitYear(input.getPermitYear());
+        quota.setAuthority(authority);
+        authority.addVerifierQuota(quota);
+        authorityRepository.save(authority);
+        return CommandResult.success();
     }
-
-    public CommandResult enableQuota(Long id) {
-        return CommandResult.fail("fail");
+    
+    @Transactional
+    public CommandResult enableQuota(Integer id) {
+        Optional<VerifierQuota> quotaR = verifierQuotaRepository.findById(id);
+        if(!quotaR.isPresent()){
+            return CommandResult.fail("INVALID_AUTHORITYCODE");
+        }
+        VerifierQuota quota = quotaR.get();
+        quota.setActive(true);
+        verifierQuotaRepository.save(quota);
+        quotaCreatedEventFactory.create(quota);
+        return CommandResult.success();
     }
 }

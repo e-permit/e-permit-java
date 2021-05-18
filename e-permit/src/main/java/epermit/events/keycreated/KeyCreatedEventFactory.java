@@ -1,8 +1,7 @@
 package epermit.events.keycreated;
 
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import org.springframework.stereotype.Component;
+import epermit.entities.Key;
 import epermit.events.EventFactoryUtil;
 import epermit.events.EventType;
 import lombok.RequiredArgsConstructor;
@@ -11,11 +10,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class KeyCreatedEventFactory {
     private final EventFactoryUtil util;
-    public KeyCreatedEvent create(String keyId, String issuedFor) {
+
+    public KeyCreatedEvent create(Key key, String issuedFor) {
         KeyCreatedEvent e = new KeyCreatedEvent();
-        e.setKeyId(keyId);
-        e.setValidFrom(OffsetDateTime.now(ZoneOffset.UTC).toEpochSecond());
+        e.setKeyId(key.getKeyId());
+        e.setValidFrom(key.getValidFrom());
         e.setEventType(EventType.KEY_CREATED);
+        e.setJwk(key.getPublicJwk());
         util.saveAndPublish(e, issuedFor);
         return e;
     }

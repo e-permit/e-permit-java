@@ -13,9 +13,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import epermit.models.CommandResult;
-import epermit.models.CreatePermitInput;
-import epermit.models.IssuedPermitDto;
+import epermit.models.dtos.IssuedPermitDto;
+import epermit.models.inputs.CreatePermitInput;
+import epermit.models.results.CommandResult;
 import epermit.services.IssuedPermitService;
 
 @ExtendWith(MockitoExtension.class)public class IssuedPermitControllerTest {

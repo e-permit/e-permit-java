@@ -10,7 +10,6 @@ import org.springframework.security.crypto.keygen.KeyGenerators;
 import org.springframework.stereotype.Component;
 import epermit.entities.Key;
 import epermit.models.EPermitProperties;
-import epermit.models.PrivateKey;
 import epermit.repositories.KeyRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;

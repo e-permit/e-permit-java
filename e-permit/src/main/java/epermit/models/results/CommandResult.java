@@ -1,9 +1,8 @@
-package epermit.models;
+package epermit.models.results;
 
 
 import java.time.OffsetDateTime;
 import java.util.Map;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 @Data
