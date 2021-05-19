@@ -4,13 +4,14 @@ import java.util.Optional;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 import epermit.entities.Permit;
 import epermit.events.permitused.PermitUsedEventFactory;
 import epermit.models.dtos.PermitDto;
 import epermit.models.inputs.PermitUsedInput;
-import epermit.models.results.CommandResult;
 import epermit.repositories.PermitRepository;
 import lombok.RequiredArgsConstructor;
 
@@ -32,15 +33,14 @@ public class PermitService {
     }
 
     @Transactional
-    public CommandResult usePermit(PermitUsedInput input) {
+    public void usePermit(PermitUsedInput input) {
         Optional<Permit> permitOptional = permitRepository.findOneByPermitId(input.getPermitId());
         if (!permitOptional.isPresent()) {
-            return CommandResult.fail("PERMIT_NOTFOUND");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "PERMIT_NOTFOUND");
         }
         Permit permit = permitOptional.get();
         permitRepository.save(permit);
         permitUsedEventFactory.create(permit, input.getActivityType());
-        return CommandResult.success();
     }
 
 }

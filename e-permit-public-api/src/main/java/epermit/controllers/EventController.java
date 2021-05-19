@@ -33,16 +33,7 @@ public class EventController {
 
     @GetMapping()
     public List<String> getEvents(String jws) {
-        String issuer = "";//JsonUtil.getClaim(jws, "issuer");
-        String eventId = ""; //JsonUtil.getClaim(jws, "event_id");
-        /*Optional<CreatedEvent> eventResult =
-                eventRepository.findOneByEventIdAndIssuedFor(eventId, issuer);
-        if (eventResult.isPresent()) {
-            List<CreatedEvent> events =
-                    eventRepository.findByIdGreaterThanOrderByIdAsc(eventResult.get().getId());
-            return events.stream().map(x -> x.getJws()).collect(Collectors.toList());
-        }*/
-        return null;
+        return createdEventService.getEvents(jws);
     }
 
 }

@@ -1,20 +1,23 @@
 package epermit.controllers;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
-import epermit.entities.Permit;
 import epermit.models.dtos.PermitDto;
-import epermit.models.results.CommandResult;
+import epermit.models.inputs.PermitUsedInput;
 import epermit.services.PermitService;
 
 @ExtendWith(MockitoExtension.class)
@@ -27,15 +30,24 @@ public class PermitControllerTest {
 
     @Test
     void getAllTest() {
-        Pageable pageable = PageRequest.of(2, 23);
-        Page<Permit> permits;
-        when(permitService.getAll(isA(Pageable.class))).thenReturn(null);
-        ResponseEntity<Page<PermitDto>> p = controller.getAll(pageable);
+        Pageable pageable = PageRequest.of(2, 20);
+        List<PermitDto> permits = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            PermitDto dto = new PermitDto();
+            permits.add(dto);
+        }
+        Page<PermitDto> pagedList = new PageImpl<>(permits);
+        
+        when(permitService.getAll(isA(Pageable.class))).thenReturn(pagedList);
+        Page<PermitDto> result = controller.getAll(pageable);
+        assertEquals(10, result.getTotalElements());
+        verify(permitService, times(1)).getAll(pageable);
     }
 
     @Test
     void usedTest() {
-        CommandResult r = controller.setUsed(Long.valueOf(1));
-        assertTrue(r.isOk());
+        PermitUsedInput input = new PermitUsedInput();
+        controller.setUsed(input);
+        verify(permitService, times(1)).usePermit(input);
     }
 }

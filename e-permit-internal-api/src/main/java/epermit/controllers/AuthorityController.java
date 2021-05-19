@@ -39,35 +39,20 @@ public class AuthorityController {
     }
 
     @PostMapping()
-    public ResponseEntity<CommandResult> create(@RequestBody @Valid CreateAuthorityInput input) {
+    public void create(@RequestBody @Valid CreateAuthorityInput input) {
         AuthorityConfig config =
                 restTemplate.getForObject(input.getApiUri(), AuthorityConfig.class);
-        CommandResult r = service.create(input, config);
-        if (r.isOk()) {
-            return new ResponseEntity<CommandResult>(r, HttpStatus.CREATED);
-        } else {
-            return new ResponseEntity<CommandResult>(r, HttpStatus.BAD_REQUEST);
-        }
+        service.create(input, config);
     }
 
     @PostMapping("/createquota")
-    public ResponseEntity<CommandResult> createQuota(@RequestBody @Valid CreateQuotaInput input) {
-        CommandResult r = service.createQuota(input);
-        if (r.isOk()) {
-            return new ResponseEntity<CommandResult>(r, HttpStatus.CREATED);
-        } else {
-            return new ResponseEntity<CommandResult>(r, HttpStatus.BAD_REQUEST);
-        }
+    public void createQuota(@RequestBody @Valid CreateQuotaInput input) {
+        service.createQuota(input);
     }
 
     @PatchMapping("/{id}/enablequota")
-    public ResponseEntity<CommandResult> enableQuota(@RequestParam Integer id) {
-        CommandResult r = service.enableQuota(id);
-        if (r.isOk()) {
-            return new ResponseEntity<CommandResult>(r, HttpStatus.CREATED);
-        } else {
-            return new ResponseEntity<CommandResult>(r, HttpStatus.BAD_REQUEST);
-        }
+    public  void enableQuota(@RequestParam Integer id) {
+        service.enableQuota(id);
     }
 
 }

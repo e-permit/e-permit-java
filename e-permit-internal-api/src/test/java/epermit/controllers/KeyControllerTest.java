@@ -1,5 +1,10 @@
 package epermit.controllers;
 
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,13 +22,15 @@ public class KeyControllerTest {
 
     @Test
     void createTest() {
-        controller.create();
-        //assertTrue(r.isOk());
+        Map<String, String> input = new HashMap<>();
+        input.put("key_id", "value");
+        controller.create(input);
+        verify(keyService, times(1)).create("value");
     }
 
     @Test
     void enableTest() {
-        controller.enable();
-        //assertTrue(r.isOk());
+        controller.enable(1);
+        verify(keyService, times(1)).enable(1);
     }
 }

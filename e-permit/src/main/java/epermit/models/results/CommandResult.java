@@ -2,32 +2,32 @@ package epermit.models.results;
 
 
 import java.time.OffsetDateTime;
-import java.util.Map;
 import lombok.Data;
 
 @Data
-public class CommandResult {
+public class CommandResult<T> {
 
     private boolean ok;
 
-    private String error;
+    private String errorCode;
 
-    private OffsetDateTime date;
+    private String errorMessage;
 
-    private Map<String, String> result;
+    private OffsetDateTime timestamp;
 
-    public static CommandResult success() {
-        CommandResult cr = new CommandResult();
-        cr.date = OffsetDateTime.now();
-        cr.setOk(true);
-        return cr;
+    private T data;
+
+    public CommandResult(T data) {
+        this.timestamp = OffsetDateTime.now();
+        this.ok = true;
+        this.data = data;
     }
 
-    public static CommandResult fail(String error) {
-        CommandResult cr = new CommandResult();
-        cr.date = OffsetDateTime.now();
-        cr.setOk(false);
-        return cr;
+    public CommandResult(String errorCode, String errorMessage) {
+        this.timestamp = OffsetDateTime.now();
+        this.ok = false;
+        this.errorCode = errorCode;
+        this.errorMessage = errorMessage;
     }
 }
 

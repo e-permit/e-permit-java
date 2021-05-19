@@ -2,72 +2,95 @@ package epermit.controllers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
-import epermit.entities.CreatedEvent;
+import epermit.events.ReceivedAppEvent;
 import epermit.repositories.CreatedEventRepository;
+import epermit.services.CreatedEventService;
 
 @ExtendWith(MockitoExtension.class)
 
 public class EventControllerTest {
-    @Mock
-    CreatedEventRepository eventRepository;
+    @Mock 
+    ApplicationEventPublisher applicationEventPublisher;
 
-    /*@Test
-    void receiveEventShouldReturnTrue() {
-        EventPublisher publisher = new EventPublisher();
-        EventController controller = new EventController(publisher, eventRepository);
-        Map<String, String> input = new HashMap<>();
-        input.put("jws", "jws");
-        Boolean r = controller.receiveEvent(input);
-        AppEvent event = (AppEvent)publisher.getEvent();
-        assertEquals("jws", event.getJws());
-        assertTrue(r);
+    @Mock
+    CreatedEventService createdEventService;
+
+    @InjectMocks
+    EventController controller;
+
+    @Test
+    void receiveEventTest(){ 
+       Boolean r =  controller.receiveEvent(Map.of("jws", "jws"));
+       assertTrue(r);
+       ReceivedAppEvent appEvent = new ReceivedAppEvent();
+       appEvent.setJws("jws");
+       verify(applicationEventPublisher, times(1)).publishEvent(appEvent);
     }
 
     @Test
     void getEventsTest(){
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("issuer", "TR");
-        claims.put("event_id", "1");
-        String jws = JsonUtil.createDummyJws(claims);
-        CreatedEvent e = new CreatedEvent();
-        e.setId(15);
-        List<CreatedEvent> list = new ArrayList<>();
-        list.add(e);
-        when(eventRepository.findOneByEventIdAndIssuedFor("1", "TR")).thenReturn(Optional.of(e));
-        when(eventRepository.findByIdGreaterThanOrderByIdAsc(Long.valueOf(15))).thenReturn(list);
-        EventController controller = new EventController(null, eventRepository);
-        List<String> r = controller.getEvents(jws);
-        assertEquals(1, r.size());
-    }*/
-
-    class EventPublisher implements ApplicationEventPublisher {
-        private Object event;
-
-        public Object getEvent() {
-            return event;
-        }
-
-        @Override
-        public void publishEvent(Object event) {
-            this.event = event;
-        }
-
+       when(createdEventService.getEvents("jws")).thenReturn(List.of("abc"));
+       List<String> r = controller.getEvents("jws");
+       assertEquals(1, r.size());
     }
 
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+     * @Test void receiveEventShouldReturnTrue() { EventPublisher publisher = new EventPublisher();
+     * EventController controller = new EventController(publisher, eventRepository); Map<String,
+     * String> input = new HashMap<>(); input.put("jws", "jws"); Boolean r =
+     * controller.receiveEvent(input); AppEvent event = (AppEvent)publisher.getEvent();
+     * assertEquals("jws", event.getJws()); assertTrue(r); }
+     * 
+     * @Test void getEventsTest(){ Map<String, Object> claims = new HashMap<>();
+     * claims.put("issuer", "TR"); claims.put("event_id", "1"); String jws =
+     * JsonUtil.createDummyJws(claims); CreatedEvent e = new CreatedEvent(); e.setId(15);
+     * List<CreatedEvent> list = new ArrayList<>(); list.add(e);
+     * when(eventRepository.findOneByEventIdAndIssuedFor("1", "TR")).thenReturn(Optional.of(e));
+     * when(eventRepository.findByIdGreaterThanOrderByIdAsc(Long.valueOf(15))).thenReturn(list);
+     * EventController controller = new EventController(null, eventRepository); List<String> r =
+     * controller.getEvents(jws); assertEquals(1, r.size()); }
+     */
+
+    /*
+     * void getTest() { when(props.getKeyPassword()).thenReturn("123456"); Key key =
+     * keyUtil.create("1"); List<Key> keys = new ArrayList<>(); keys.add(key);
+     * when(props.getIssuerCode()).thenReturn("TR");
+     * when(props.getIssuerVerifyUri()).thenReturn("http://localhost");
+     * when(keyRepository.findAll()).thenReturn(keys); AuthorityConfig dto = controller.getConfig();
+     * assertEquals("http://localhost", dto.getVerifyUri()); assertEquals("TR", dto.getCode()); }
+     */
     // @Test
     /*
      * public void getTest() throws Exception {
@@ -90,4 +113,3 @@ public class EventControllerTest {
      * MAPPER.readValue(contentAsString, responseClass); } catch (IOException e) { throw new
      * RuntimeException(e); } }
      */
-}

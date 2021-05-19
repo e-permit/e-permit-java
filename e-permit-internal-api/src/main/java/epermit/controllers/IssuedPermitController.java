@@ -1,5 +1,6 @@
 package epermit.controllers;
 
+import java.util.Map;
 import javax.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import epermit.models.dtos.IssuedPermitDto;
 import epermit.models.inputs.CreatePermitInput;
@@ -26,8 +28,9 @@ public class IssuedPermitController {
     private final IssuedPermitService service;
 
     @GetMapping()
-    public ResponseEntity<Page<IssuedPermitDto>> getAll(Pageable pageable) {
-        return new ResponseEntity<>(service.getAll(pageable), HttpStatus.OK);
+    public Page<IssuedPermitDto> getAll(@RequestParam(required = false) String issuedFor,
+            Pageable pageable) {
+        return service.getAll(issuedFor, pageable);
     }
 
     @GetMapping("{id}")
@@ -36,22 +39,13 @@ public class IssuedPermitController {
     }
 
     @PostMapping()
-    public ResponseEntity<CommandResult> createPermit(@RequestBody @Valid CreatePermitInput input) {
-        CommandResult r = service.createPermit(input);
-        if (r.isOk()) {
-            return new ResponseEntity<CommandResult>(r, HttpStatus.CREATED);
-        } else {
-            return new ResponseEntity<CommandResult>(r, HttpStatus.BAD_REQUEST);
-        }
+    public Map<String, String> createPermit(@RequestBody @Valid CreatePermitInput input) {
+        String permitId = service.createPermit(input);
+        return Map.of("permitId", permitId);
     }
 
     @PatchMapping("{id}/revoke")
-    public ResponseEntity<CommandResult> revoke(@PathVariable Long id) {
-        CommandResult r =  service.revokePermit(id, "comment");
-        if (r.isOk()) {
-            return new ResponseEntity<CommandResult>(r, HttpStatus.CREATED);
-        } else {
-            return new ResponseEntity<CommandResult>(r, HttpStatus.BAD_REQUEST);
-        }
+    public void revoke(@PathVariable Long id) {
+        service.revokePermit(id, "comment");
     }
 }

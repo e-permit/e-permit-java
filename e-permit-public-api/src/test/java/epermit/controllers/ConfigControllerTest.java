@@ -14,37 +14,26 @@ import epermit.models.EPermitProperties;
 import epermit.models.dtos.AuthorityConfig;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.KeyRepository;
-import epermit.services.KeyService;
+import epermit.services.AuthorityService;
+import epermit.services.CreatedEventService;
 import epermit.utils.KeyUtil;
 
 @ExtendWith(MockitoExtension.class)
 public class ConfigControllerTest {
     @Mock
-    EPermitProperties props;
-
-    @Mock
-    KeyRepository keyRepository;
-
-    @Mock
-    AuthorityRepository authorityRepository;
-
-    @Mock
-    KeyUtil keyUtil;
+    AuthorityService authorityService;
 
     @InjectMocks
     ConfigController controller;
 
     @Test
-    void getTest() {
-        when(props.getKeyPassword()).thenReturn("123456");
-        Key key = keyUtil.create("1");
-        List<Key> keys = new ArrayList<>();
-        keys.add(key);
-        when(props.getIssuerCode()).thenReturn("TR");
-        when(props.getIssuerVerifyUri()).thenReturn("http://localhost");
-        when(keyRepository.findAll()).thenReturn(keys);
-        AuthorityConfig dto = controller.getConfig();
-        assertEquals("http://localhost", dto.getVerifyUri());
-        assertEquals("TR", dto.getCode());
+    void getConfigTest(){
+        AuthorityConfig config = new AuthorityConfig();
+        config.setCode("TR");
+        config.setName("Turkey");
+        config.setVerifyUri("https://localhost:3001");
+        when(authorityService.getConfig()).thenReturn(config);
+        AuthorityConfig result = controller.getConfig();
+        assertEquals(config, result);
     }
 }

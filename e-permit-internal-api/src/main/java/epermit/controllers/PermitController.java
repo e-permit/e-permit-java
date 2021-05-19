@@ -24,17 +24,12 @@ public class PermitController {
     private final PermitService permitService;
 
     @GetMapping()
-    public ResponseEntity<Page<PermitDto>> getAll(Pageable pageable) {
-        return new ResponseEntity<>(permitService.getAll(pageable), HttpStatus.OK);
+    public Page<PermitDto> getAll(Pageable pageable) {
+        return permitService.getAll(pageable);
     }
 
     @PatchMapping("{id}/used")
-    public ResponseEntity<CommandResult> setUsed(@RequestBody @Valid PermitUsedInput input ) {
-        CommandResult r = permitService.usePermit(input);
-        if (r.isOk()) {
-            return new ResponseEntity<CommandResult>(r, HttpStatus.CREATED);
-        } else {
-            return new ResponseEntity<CommandResult>(r, HttpStatus.BAD_REQUEST);
-        }
+    public void setUsed(@RequestBody @Valid PermitUsedInput input) {
+        permitService.usePermit(input);
     }
 }

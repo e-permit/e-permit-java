@@ -6,8 +6,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import com.google.gson.Gson;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 import epermit.entities.Authority;
 import epermit.entities.AuthorityKey;
 import epermit.entities.VerifierQuota;
@@ -20,7 +22,6 @@ import epermit.models.dtos.PublicKey;
 import epermit.models.dtos.TrustedAuthority;
 import epermit.models.inputs.CreateAuthorityInput;
 import epermit.models.inputs.CreateQuotaInput;
-import epermit.models.results.CommandResult;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.KeyRepository;
 import epermit.repositories.VerifierQuotaRepository;
@@ -91,7 +92,7 @@ public class AuthorityService {
     }
 
     @Transactional
-    public CommandResult create(CreateAuthorityInput input, AuthorityConfig config) {
+    public void create(CreateAuthorityInput input, AuthorityConfig config) {
         log.info("Authority create command: " + input.getApiUri());
         Authority authority = new Authority();
         authority.setApiUri(input.getApiUri());
@@ -100,13 +101,14 @@ public class AuthorityService {
         authority.setVerifyUri(config.getVerifyUri());
         authority.setKeys(config.getKeys().stream().map(x -> modelMapper.map(x, AuthorityKey.class))
                 .collect(Collectors.toList()));
-        return CommandResult.success();
     }
+
     @Transactional
-    public CommandResult createQuota(CreateQuotaInput input) {
-        Optional<Authority> authorityR = authorityRepository.findOneByCode(input.getAuthorityCode());
-        if(!authorityR.isPresent()){
-            return CommandResult.fail("INVALID_AUTHORITYCODE");
+    public void createQuota(CreateQuotaInput input) {
+        Optional<Authority> authorityR =
+                authorityRepository.findOneByCode(input.getAuthorityCode());
+        if (!authorityR.isPresent()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "AUTHORITY_NOTFOUND");
         }
         Authority authority = authorityR.get();
         VerifierQuota quota = new VerifierQuota();
@@ -117,19 +119,17 @@ public class AuthorityService {
         quota.setAuthority(authority);
         authority.addVerifierQuota(quota);
         authorityRepository.save(authority);
-        return CommandResult.success();
     }
-    
+
     @Transactional
-    public CommandResult enableQuota(Integer id) {
+    public void enableQuota(Integer id) {
         Optional<VerifierQuota> quotaR = verifierQuotaRepository.findById(id);
-        if(!quotaR.isPresent()){
-            return CommandResult.fail("INVALID_AUTHORITYCODE");
+        if (!quotaR.isPresent()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "VERIFIER_QUOTA_NOTFOUND");
         }
         VerifierQuota quota = quotaR.get();
         quota.setActive(true);
         verifierQuotaRepository.save(quota);
         quotaCreatedEventFactory.create(quota);
-        return CommandResult.success();
     }
 }
