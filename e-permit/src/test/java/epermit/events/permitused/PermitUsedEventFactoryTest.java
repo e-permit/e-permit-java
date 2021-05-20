@@ -22,6 +22,7 @@ public class PermitUsedEventFactoryTest {
     @Test
     void createTest() {
         Permit permit = new Permit();
+        permit.setPermitId("TR-UA");
         PermitUsedEvent event = factory.create(permit, PermitActivityType.ENTERANCE);
         assertEquals(EventType.PERMIT_USED, event.getEventType());
         assertEquals("TR-UA", event.getPermitId());

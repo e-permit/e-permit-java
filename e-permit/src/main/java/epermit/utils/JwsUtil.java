@@ -66,7 +66,7 @@ public class JwsUtil {
         if (!valid) {
             return JwsValidationResult.fail("INVALID_JWS");
         }
-        return JwsValidationResult.success();
+        return JwsValidationResult.success(jwsObject.getPayload().toJSONObject());
     }
 
     @SneakyThrows

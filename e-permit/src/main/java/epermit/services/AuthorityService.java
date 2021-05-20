@@ -57,6 +57,7 @@ public class AuthorityService {
         AuthorityConfig dto = new AuthorityConfig();
         dto.setCode(properties.getIssuerCode());
         dto.setVerifyUri(properties.getIssuerVerifyUri());
+        dto.setName(properties.getIssuerTitle());
         Gson gson = GsonUtil.getGson();
         List<PublicKey> keyDtoList = new ArrayList<>();
         keyRepository.findAll().forEach(key -> {
@@ -101,6 +102,7 @@ public class AuthorityService {
         authority.setVerifyUri(config.getVerifyUri());
         authority.setKeys(config.getKeys().stream().map(x -> modelMapper.map(x, AuthorityKey.class))
                 .collect(Collectors.toList()));
+        authorityRepository.save(authority);
     }
 
     @Transactional

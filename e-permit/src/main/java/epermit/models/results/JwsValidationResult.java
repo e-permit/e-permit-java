@@ -1,15 +1,18 @@
 package epermit.models.results;
 
+import java.util.Map;
 import lombok.Data;
 
 @Data
 public class JwsValidationResult {
     private boolean valid;
     private String errorCode;
+    private Map<String, Object> payload;
 
-    public static JwsValidationResult success(){
+    public static JwsValidationResult success(Map<String, Object> payload){
         JwsValidationResult r = new JwsValidationResult();
         r.setValid(true);
+        r.setPayload(payload);
         return r;
     }
 
