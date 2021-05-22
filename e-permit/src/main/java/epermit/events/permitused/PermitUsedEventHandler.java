@@ -9,7 +9,7 @@ import epermit.events.EventHandler;
 import epermit.repositories.IssuedPermitRepository;
 import lombok.RequiredArgsConstructor;
 
-@Service("PERMIT_USED_HANDLER")
+@Service("PERMIT_USED_EVENT_HANDLER")
 @RequiredArgsConstructor
 public class PermitUsedEventHandler implements EventHandler {
 

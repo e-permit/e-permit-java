@@ -7,6 +7,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -35,8 +36,7 @@ public class PermitCreatedEventValidatorTest {
         when(permitUtil.isQuotaSufficient("UA", 2021, 1, PermitType.BILITERAL)).thenReturn(true);
         when(permitUtil.getPermitId("UA", "TR", PermitType.BILITERAL, 2021, 1))
                 .thenCallRealMethod();
-        String payload = getPermitCreatedEvent("UA-TR-2021-1-1");
-        EventValidationResult r = validator.validate(payload);
+        EventValidationResult r = validator.validate(getPermitCreatedEvent("UA-TR-2021-1-1"));
         assertTrue(r.isOk());
     }
 
@@ -44,8 +44,7 @@ public class PermitCreatedEventValidatorTest {
     void invalidPermitIdTest() {
         when(permitUtil.getPermitId("UA", "TR", PermitType.BILITERAL, 2021, 1))
                 .thenCallRealMethod();
-        String payload = getPermitCreatedEvent("UA-TR-2021-2");
-        EventValidationResult r = validator.validate(payload);
+        EventValidationResult r = validator.validate(getPermitCreatedEvent("UA-TR-2021-2"));
         assertFalse(r.isOk());
         assertEquals("INVALID_PERMITID", r.getErrorCode());
     }
@@ -55,8 +54,7 @@ public class PermitCreatedEventValidatorTest {
         when(permitUtil.getPermitId("UA", "TR", PermitType.BILITERAL, 2021, 1))
                 .thenCallRealMethod();
         when(permitRepository.existsByIssuerAndPermitId("UA", "UA-TR-2021-1-1")).thenReturn(true);
-        String payload = getPermitCreatedEvent("UA-TR-2021-1-1");
-        EventValidationResult r = validator.validate(payload);
+        EventValidationResult r = validator.validate(getPermitCreatedEvent("UA-TR-2021-1-1"));
         assertFalse(r.isOk());
         assertEquals("PERMIT_EXIST", r.getErrorCode());
     }
@@ -69,13 +67,12 @@ public class PermitCreatedEventValidatorTest {
         when(permitUtil.isQuotaSufficient("UA", 2021, 1, PermitType.BILITERAL))
                 .thenReturn(false);
 
-        String payload = getPermitCreatedEvent("UA-TR-2021-1-1");
-        EventValidationResult r = validator.validate(payload);
+        EventValidationResult r = validator.validate(getPermitCreatedEvent("UA-TR-2021-1-1"));
         assertFalse(r.isOk());
         assertEquals("QUOTA_DOESNT_MATCH", r.getErrorCode());
     }
 
-    private String getPermitCreatedEvent(String permitId) {
+    private Map<String, Object> getPermitCreatedEvent(String permitId) {
         PermitCreatedEvent event = new PermitCreatedEvent();
         event.setExpireAt("A");
         event.setIssuedAt("A");
@@ -87,7 +84,7 @@ public class PermitCreatedEventValidatorTest {
         event.setSerialNumber(1);
         event.setIssuer("UA");
         event.setIssuedFor("TR");
-        return GsonUtil.getGson().toJson(event);
+        return GsonUtil.toMap(event);
     }
 
 }

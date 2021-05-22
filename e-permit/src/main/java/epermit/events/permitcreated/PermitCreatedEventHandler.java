@@ -10,7 +10,7 @@ import epermit.repositories.PermitRepository;
 import epermit.utils.GsonUtil;
 import lombok.RequiredArgsConstructor;
 
-@Service("PERMIT_CREATED_HANDLER")
+@Service("PERMIT_CREATED_EVENT_HANDLER")
 @RequiredArgsConstructor
 public class PermitCreatedEventHandler implements EventHandler {
     private final PermitRepository permitRepository;

@@ -43,7 +43,7 @@ public class KeyService {
     }
 
     @Transactional
-    public CommandResult<String> enable(Integer id) {
+    public void enable(Integer id) {
         Long date = OffsetDateTime.now(ZoneOffset.UTC).toEpochSecond();
         Optional<Key> keyR = keyRepository.findById(id);
         if (!keyR.isPresent()) {
@@ -64,7 +64,6 @@ public class KeyService {
         authorityRepository.findAll().forEach(a -> {
             factory.create(key, a.getCode());
         });
-        return new CommandResult<String>(key.getKeyId());
     }
 
 }

@@ -14,6 +14,6 @@ public interface KeyRepository extends JpaRepository<Key, Integer> {
 
      Optional<Key> findOneByKeyId(String kid);
 
-     boolean isExistByKeyId(String keyId);
+     boolean existsByKeyId(String keyId);
 }
 

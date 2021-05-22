@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import com.google.gson.Gson;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,6 +28,8 @@ public class KeyCreatedEventValidatorTest {
     @InjectMocks
     KeyCreatedEventValidator validator;
 
+    Gson gson = GsonUtil.getGson();
+
     @Test
     void okTest() {
         String jwk =
@@ -37,8 +40,7 @@ public class KeyCreatedEventValidatorTest {
         event.setJwk(jwk);
         event.setValidFrom(utc);
         event.setIssuer("UA");
-        String payload = GsonUtil.getGson().toJson(event);
-        EventValidationResult r = validator.validate(payload);
+        EventValidationResult r = validator.validate(GsonUtil.toMap(event));
         assertTrue(r.isOk());
     }
 
@@ -52,8 +54,7 @@ public class KeyCreatedEventValidatorTest {
         event.setJwk(jwk);
         event.setValidFrom(utc);
         event.setIssuer("UA");
-        String payload = GsonUtil.getGson().toJson(event);
-        EventValidationResult r = validator.validate(payload);
+        EventValidationResult r = validator.validate(GsonUtil.toMap(event));
         assertFalse(r.isOk());
         assertEquals("INVALID_KID", r.getErrorCode());
     }
@@ -68,8 +69,7 @@ public class KeyCreatedEventValidatorTest {
         event.setJwk(jwk);
         event.setValidFrom(utc);
         event.setIssuer("UA");
-        String payload = GsonUtil.getGson().toJson(event);
-        EventValidationResult r = validator.validate(payload);
+        EventValidationResult r = validator.validate(GsonUtil.toMap(event));
         assertFalse(r.isOk());
         assertEquals("INVALID_KEY", r.getErrorCode());
     }

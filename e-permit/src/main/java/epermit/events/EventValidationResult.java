@@ -11,7 +11,15 @@ public class EventValidationResult {
 
     private Object event;
 
-    public static EventValidationResult fail(String errorCode){
+    public static EventValidationResult fail(String errorCode, Object event){
+        EventValidationResult r = new EventValidationResult();
+        r.ok = false;
+        r.errorCode = errorCode;
+        r.event = event;
+        return r;
+    }
+
+    public static EventValidationResult jwsFail(String errorCode){
         EventValidationResult r = new EventValidationResult();
         r.ok = false;
         r.errorCode = errorCode;

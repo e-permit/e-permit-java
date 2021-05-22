@@ -5,7 +5,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import java.util.HashMap;
 import java.util.Map;
-import com.nimbusds.jose.JWSObject;
 import epermit.events.EventBase;
 import epermit.events.EventValidationResult;
 import epermit.events.EventValidator;
@@ -39,26 +38,32 @@ public class ReceivedEventService {
         log.info("The message is recived. The message content is: " + jws);
         JwsValidationResult r = jwsUtil.validateJws(jws);
         if (!r.isValid()) {
-            return EventValidationResult.fail(r.getErrorCode());
+            return EventValidationResult.jwsFail(r.getErrorCode());
         }
-        EventBase e = GsonUtil.getGson().fromJson(JWSObject.parse(jws).getPayload().toString(),
-                EventBase.class);
+        EventBase e = GsonUtil.fromMap(r.getPayload(), EventBase.class);
         if (receivedEventRepository.existsByIssuerAndEventId(e.getIssuer(), e.getEventId())) {
-            return EventValidationResult.fail("EVENT_EXIST");
+            return EventValidationResult.fail("EVENT_EXIST", e);
         }
-        if (receivedEventRepository.existsByIssuerAndEventId(e.getIssuer(),
+        if (!receivedEventRepository.existsByIssuerAndEventId(e.getIssuer(),
                 e.getPreviousEventId())) {
-            return EventValidationResult.fail("NOTEXIST_PREVIOUSEVENT");
+            return EventValidationResult.fail("NOTEXIST_PREVIOUSEVENT", e);
         }
         EventValidator eventValidator =
-                eventValidators.get(e.getEventType().toString() + "_VALIDATOR");
-        EventValidationResult result =
-                eventValidator.validate(JWSObject.parse(jws).getPayload().toString());
-        if (result.isOk()) {
-            EventHandler eventHandler = eventHandlers.get(e.getEventType().toString() + "_HANDLER");
-            eventHandler.handle(result.getEvent());
+                eventValidators.get(e.getEventType().toString() + "_EVENT_VALIDATOR");
+        if(eventValidator == null){
+            throw new Exception("NOT_IMPLEMENTED_EVENT_VALIDATOR");
         }
-        return null;
+        EventValidationResult result =
+                eventValidator.validate(r.getPayload());
+        if (result.isOk()) {
+            EventHandler eventHandler = eventHandlers.get(e.getEventType().toString() + "_EVENT_HANDLER");
+            if(eventHandler == null){
+                throw new Exception("NOT_IMPLEMENTED_EVENT_HANDLER");
+            }
+            eventHandler.handle(result.getEvent());
+            return EventValidationResult.success(result.getEvent());
+        }
+        return result;
     }
 
     @SneakyThrows
@@ -72,6 +77,7 @@ public class ReceivedEventService {
             Map<String, String> claims = new HashMap<>();
             claims.put("last_event_id", lastEventId);
             claims.put("issuer", properties.getIssuerCode());
+            claims.put("issued_for", eBase.getIssuer());
             String requestJws = jwsUtil.createJws(claims);
             String[] jwsList = restTemplate.getForObject(url + "/" + requestJws, String[].class);
             for (String jws : jwsList) {
@@ -80,4 +86,8 @@ public class ReceivedEventService {
         }
     }
 
+    /*private ObjectMapper jacksonObjectMapper() {
+        return new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }*/
 }

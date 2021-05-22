@@ -27,9 +27,8 @@ public class PermitRevokedEventValidatorTest {
         event.setPermitId("UA-TR-2021-1-1");
         event.setIssuer("UA");
         event.setIssuedFor("TR");
-        String payload = GsonUtil.getGson().toJson(event);
         when(permitRepository.existsByIssuerAndPermitId("UA", "UA-TR-2021-1-1")).thenReturn(true);
-        EventValidationResult r = validator.validate(payload);
+        EventValidationResult r = validator.validate(GsonUtil.toMap(event));
         assertTrue(r.isOk());
     }
 
@@ -39,8 +38,7 @@ public class PermitRevokedEventValidatorTest {
         event.setPermitId("UA-TR-2021-1-1");
         event.setIssuer("UA");
         event.setIssuedFor("TR");
-        String payload = GsonUtil.getGson().toJson(event);
-        EventValidationResult r = validator.validate(payload);
+        EventValidationResult r = validator.validate(GsonUtil.toMap(event));
         assertFalse(r.isOk());
         assertEquals("INVALID_PERMITID_OR_ISSUER", r.getErrorCode());
     }

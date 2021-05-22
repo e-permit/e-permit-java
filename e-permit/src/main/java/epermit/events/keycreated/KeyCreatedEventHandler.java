@@ -10,7 +10,7 @@ import epermit.events.EventHandler;
 import epermit.repositories.AuthorityRepository;
 import lombok.RequiredArgsConstructor;
 
-@Service("KEY_CREATED_HANDLER")
+@Service("KEY_CREATED_EVENT_HANDLER")
 @RequiredArgsConstructor
 public class KeyCreatedEventHandler implements EventHandler {
     private final AuthorityRepository authorityRepository;

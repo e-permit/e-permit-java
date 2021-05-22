@@ -1,8 +1,11 @@
 package epermit.services;
 
+import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import java.time.OffsetDateTime;
@@ -20,6 +23,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.server.ResponseStatusException;
 import epermit.entities.IssuedPermit;
 import epermit.events.permitcreated.PermitCreatedEventFactory;
 import epermit.events.permitrevoked.PermitRevokedEventFactory;
@@ -63,18 +67,20 @@ public class IssuedPermitServiceTest {
         IssuedPermitDto dto = issuedPermitService.getById(id);
         assertNotNull(dto);
     }
+
     @Test
     void getAllTest() {
         IssuedPermit permit = new IssuedPermit();
         permit.setPermitId("permitId");
-        
+
         Pageable pageable = PageRequest.of(2, 20);
         Page<IssuedPermit> pagedList = new PageImpl<>(List.of(permit));
-        
+
         when(issuedPermitRepository.findAll(pageable)).thenReturn(pagedList);
         Page<IssuedPermitDto> result = issuedPermitService.getAll("UA", pageable);
         assertEquals(1, result.getContent().size());
     }
+
     @Test
     void createPermitTest() {
         CreatePermitInput input = new CreatePermitInput();
@@ -84,7 +90,8 @@ public class IssuedPermitServiceTest {
         input.setPermitYear(2021);
         input.setPlateNumber("plate");
         when(permitUtil.generateSerialNumber("UZ", 2021, PermitType.BILITERAL)).thenReturn(5);
-        when(permitUtil.getPermitId("TR", input.getIssuedFor(), input.getPermitType(), input.getPermitYear(), 5)).thenReturn("TR-UA-2021-1-5");
+        when(permitUtil.getPermitId("TR", input.getIssuedFor(), input.getPermitType(),
+                input.getPermitYear(), 5)).thenReturn("TR-UA-2021-1-5");
         when(properties.getIssuerCode()).thenReturn("TR");
         when(permitUtil.generateQrCode(any())).thenReturn("QRCODE");
         String permitId = issuedPermitService.createPermit(input);
@@ -103,63 +110,41 @@ public class IssuedPermitServiceTest {
         permit.setSerialNumber(5);
         verify(issuedPermitRepository).save(permit);
     }
+
     @Test
-    void revokePermitTest() {}
-}
-
-/**
-  public IssuedPermitDto getById(Long id) {
-        IssuedPermitDto dto =
-                modelMapper.map(issuedPermitRepository.findById(id).get(), IssuedPermitDto.class);
-        return dto;
+    void createPermitInsufficientSerialNumberTest() {
+        CreatePermitInput input = new CreatePermitInput();
+        input.setCompanyName("companyName");
+        input.setIssuedFor("UZ");
+        input.setPermitType(PermitType.BILITERAL);
+        input.setPermitYear(2021);
+        input.setPlateNumber("plate");
+        when(permitUtil.generateSerialNumber("UZ", 2021, PermitType.BILITERAL)).thenReturn(null);
+        assertThrows(ResponseStatusException.class, () -> {
+            issuedPermitService.createPermit(input);
+        });
     }
 
-    public Page<IssuedPermitDto> getAll(String issuedFor, Pageable pageable) {
-        Page<epermit.entities.IssuedPermit> entities = issuedPermitRepository.findAll(pageable);
-        return entities.map(x -> modelMapper.map(x, IssuedPermitDto.class));
-    }
-
-    @Transactional
-    public String createPermit(CreatePermitInput input) {
-        log.info("Permit create started");
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        String issuer = properties.getIssuerCode();
-        Integer serialNumber = permitUtil.generateSerialNumber(input.getIssuedFor(),
-                input.getPermitYear(), input.getPermitType());
-        if (serialNumber == null) {
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
-                    "INSUFFICIENT_SERIALNUMBER");
-        }
-        String permitId = permitUtil.getPermitId(issuer, input.getIssuedFor(),
-                input.getPermitType(), input.getPermitYear(), serialNumber);
+    @Test
+    void revokePermitTest() {
+        Long id = Long.valueOf(1);
         IssuedPermit permit = new IssuedPermit();
-        permit.setCompanyName(input.getCompanyName());
-        permit.setIssuedFor(input.getIssuedFor());
-        permit.setPermitId(permitId);
-        permit.setPermitType(input.getPermitType());
-        permit.setPermitYear(input.getPermitYear());
-        permit.setPlateNumber(input.getPlateNumber());
-        permit.setSerialNumber(serialNumber);
-        permit.setIssuedAt(OffsetDateTime.now().format(dtf));
-        permit.setExpireAt("30/01/" + Integer.toString(input.getPermitYear() + 1));
-        permit.setQrCode(permitUtil.generateQrCode(permit));
-        issuedPermitRepository.save(permit);
-        permitCreatedEventFactory.create(permit);
-        log.info("Permit create finished");
-        return permit.getPermitId();
+        permit.setIssuedFor("issuedFor");
+        permit.setPermitId("permitId");
+        when(issuedPermitRepository.findById(id)).thenReturn(Optional.of(permit));
+        issuedPermitService.revokePermit(id, "comment");
+        assertTrue(permit.isRevoked());
+        assertNotNull(permit.getRevokedAt());
+        verify(issuedPermitRepository, times(1)).save(permit);
+        verify(permitRevokedEventFactory, times(1)).create("issuedFor", "permitId");
     }
 
-    @Transactional
-    public void revokePermit(Long id, String comment) {
-        Optional<IssuedPermit> permitOptional = issuedPermitRepository.findById(id);
-        if (!permitOptional.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "PERMIT_NOTFOUND");
-        }
-        IssuedPermit permit = permitOptional.get();
-        permit.setRevoked(true);
-        permit.setRevokedAt(OffsetDateTime.now(ZoneOffset.UTC));
-        issuedPermitRepository.save(permit);
-        permitRevokedEventFactory.create(permit.getIssuedFor(), permit.getPermitId());
+    @Test
+    void revokePermitNotFoundTest() {
+        Long id = Long.valueOf(1);
+        when(issuedPermitRepository.findById(id)).thenReturn(Optional.empty());
+        assertThrows(ResponseStatusException.class, () -> {
+            issuedPermitService.revokePermit(id, "comment");
+        });
     }
-
- */
+}

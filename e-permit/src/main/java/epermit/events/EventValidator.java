@@ -1,5 +1,7 @@
 package epermit.events;
 
+import java.util.Map;
+
 public interface EventValidator {
-    EventValidationResult validate(String payload);
+    EventValidationResult validate(Map<String, Object> claims);
 }

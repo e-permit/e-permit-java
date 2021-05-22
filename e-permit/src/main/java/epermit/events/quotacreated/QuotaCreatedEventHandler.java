@@ -10,7 +10,7 @@ import epermit.repositories.AuthorityRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
-@Service("QUOTA_CREATED")
+@Service("QUOTA_CREATED_EVENT_HANDLER")
 @RequiredArgsConstructor
 public class QuotaCreatedEventHandler implements EventHandler {
     private final AuthorityRepository authorityRepository;

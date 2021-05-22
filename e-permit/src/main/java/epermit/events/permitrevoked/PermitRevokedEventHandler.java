@@ -6,7 +6,7 @@ import epermit.events.EventHandler;
 import epermit.repositories.PermitRepository;
 import lombok.RequiredArgsConstructor;
 
-@Service("PERMIT_REVOKED_HANDLER")
+@Service("PERMIT_REVOKED_EVENT_HANDLER")
 @RequiredArgsConstructor
 public class PermitRevokedEventHandler implements EventHandler {
     private final PermitRepository permitRepository;

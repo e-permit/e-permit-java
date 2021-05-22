@@ -12,8 +12,6 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -36,10 +34,9 @@ public class PermitUsedEventValidatorTest {
         event.setIssuedFor("UA");
         event.setPermitId("TR-UA");
         event.setCreatedAt(OffsetDateTime.now(ZoneOffset.UTC).toEpochSecond());
-        String payload = GsonUtil.getGson().toJson(event);
         when(issuedPermitRepository.existsByIssuedForAndPermitId(anyString(), anyString()))
                 .thenReturn(true);
-        EventValidationResult r = validator.validate(payload);
+        EventValidationResult r = validator.validate(GsonUtil.toMap(event));
         assertTrue(r.isOk());
     }
 
@@ -50,10 +47,9 @@ public class PermitUsedEventValidatorTest {
         event.setIssuedFor("UA");
         event.setPermitId("TR-UA");
         event.setCreatedAt(OffsetDateTime.now(ZoneOffset.UTC).toEpochSecond());
-        String payload = GsonUtil.getGson().toJson(event);
         when(issuedPermitRepository.existsByIssuedForAndPermitId(anyString(), anyString()))
                 .thenReturn(false);
-        EventValidationResult r = validator.validate(payload);
+        EventValidationResult r = validator.validate(GsonUtil.toMap(event));
         assertFalse(r.isOk());
         assertEquals("INVALID_PERMITID_OR_ISSUER", r.getErrorCode());
     }

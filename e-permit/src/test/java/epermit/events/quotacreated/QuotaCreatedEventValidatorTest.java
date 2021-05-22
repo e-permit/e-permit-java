@@ -1,14 +1,9 @@
 package epermit.events.quotacreated;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import epermit.events.EventValidationResult;
 import epermit.models.enums.PermitType;
@@ -28,7 +23,7 @@ public class QuotaCreatedEventValidatorTest {
         event.setEndNumber(40);
         event.setPermitType(PermitType.BILITERAL);
         event.setPermitYear(4);
-        EventValidationResult r = validator.validate(GsonUtil.getGson().toJson(event));
+        EventValidationResult r = validator.validate(GsonUtil.toMap(event));
         assertTrue(r.isOk());
     }
 }
