@@ -2,6 +2,8 @@ package epermit.utils;
 
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
 import org.springframework.stereotype.Component;
@@ -10,7 +12,6 @@ import epermit.entities.IssuedPermit;
 import epermit.entities.IssuerQuota;
 import epermit.models.EPermitProperties;
 import epermit.models.enums.PermitType;
-import epermit.models.inputs.CreatePermitInput;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.IssuedPermitRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PermitUtil {
     private final JwsUtil jwsUtil;
-    private final EPermitProperties properties;
     private final IssuedPermitRepository issuedPermitRepository;
     private final AuthorityRepository authorityRepository;
 
@@ -61,17 +61,13 @@ public class PermitUtil {
     }
 
     public String generateQrCode(IssuedPermit permit) {
-        String iss = properties.getIssuerCode();
-        String aud = permit.getIssuedFor();
-        String year = Integer.toString(permit.getPermitYear());
-        String pt = Integer.toString(permit.getPermitType().getCode());
-        String pid = Integer.toString(permit.getSerialNumber());
-        String iat = permit.getIssuedAt();
-        String exp = permit.getExpireAt();
-        String sub = permit.getPlateNumber();
-        String cn = permit.getCompanyName();
-        String payload = String.join("#", iss, aud, year, pt, pid, iat, exp, sub, cn);
-        return jwsUtil.createJws(payload);
+        Map<String, String> claims = new HashMap<>();
+        claims.put("id", permit.getPermitId());
+        claims.put("iat", permit.getIssuedAt());
+        claims.put("exp", permit.getExpireAt());
+        claims.put("pn", permit.getPlateNumber());
+        claims.put("cn", permit.getCompanyName());
+        return jwsUtil.createJws(claims);
     }
 
 }

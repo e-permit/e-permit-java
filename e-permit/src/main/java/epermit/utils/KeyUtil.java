@@ -1,5 +1,7 @@
 package epermit.utils;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.jwk.KeyUse;
@@ -39,6 +41,7 @@ public class KeyUtil {
         k.setSalt(salt);
         k.setPrivateJwk(encryptedJwk);
         k.setPublicJwk(key.toPublicJWK().toJSONString());
+        k.setCreatedAt(OffsetDateTime.now(ZoneOffset.UTC));
         log.info("Key created jwk: " + k.getPublicJwk());
         return k;
     }
