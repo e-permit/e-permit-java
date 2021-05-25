@@ -3,6 +3,7 @@ package epermit.controllers;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -14,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.client.RestTemplate;
+import epermit.models.dtos.AuthorityConfig;
 import epermit.models.dtos.AuthorityDto;
 import epermit.models.inputs.CreateAuthorityInput;
 import epermit.models.inputs.CreateQuotaInput;
@@ -25,7 +27,7 @@ public class AuthorityControllerTest {
     @Mock
     AuthorityService authorityService;
 
-    @Mock 
+    @Mock
     RestTemplate restTemplate;
 
     @InjectMocks
@@ -49,10 +51,17 @@ public class AuthorityControllerTest {
         assertNotNull(dto);
         assertEquals("UA", dto.getCode());
     }
-    
+
     @Test
     void createTest() {
         CreateAuthorityInput input = new CreateAuthorityInput();
+        input.setApiUri("apiUri");
+        input.setCode("code");
+        input.setName("Name");
+        AuthorityConfig config = new AuthorityConfig();
+        config.setVerifyUri("verifyUri");
+        when(restTemplate.getForObject("apiUri/epermit-configuration", String.class)).thenReturn(
+                "{\"code\":\"UZ\",\"verify_uri\":\"https://e-permit.github.io/verify\"}");
         controller.create(input);
         verify(authorityService, times(1)).create(eq(input), any());
     }

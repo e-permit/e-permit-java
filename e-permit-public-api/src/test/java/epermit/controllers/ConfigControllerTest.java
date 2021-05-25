@@ -30,7 +30,6 @@ public class ConfigControllerTest {
     void getConfigTest(){
         AuthorityConfig config = new AuthorityConfig();
         config.setCode("TR");
-        config.setName("Turkey");
         config.setVerifyUri("https://localhost:3001");
         when(authorityService.getConfig()).thenReturn(config);
         AuthorityConfig result = controller.getConfig();

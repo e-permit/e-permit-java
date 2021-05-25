@@ -1,16 +1,16 @@
 package epermit.utils;
 
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 import epermit.entities.Authority;
 import epermit.entities.IssuedPermit;
 import epermit.entities.IssuerQuota;
-import epermit.models.EPermitProperties;
+import epermit.entities.VerifierQuota;
 import epermit.models.enums.PermitType;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.IssuedPermitRepository;
@@ -32,7 +32,9 @@ public class PermitUtil {
 
     public boolean isQuotaSufficient(String issuer, int permitYear, int serialNumber,
             PermitType permitType) {
-        return false;
+        Authority authority = authorityRepository.findOneByCode(issuer).get();
+        return authority.getVerifierQuotas().stream().anyMatch(x -> x.getPermitType() == permitType
+                && serialNumber >= x.getStartNumber() && serialNumber <= x.getEndNumber());
     }
 
     public Integer generateSerialNumber(String issuedFor, int py, PermitType pt) {

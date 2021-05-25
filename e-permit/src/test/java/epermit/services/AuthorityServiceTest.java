@@ -85,12 +85,12 @@ public class AuthorityServiceTest {
     @Test
     void getConfigTest() {
         when(properties.getIssuerCode()).thenReturn("TR");
-        when(properties.getIssuerTitle()).thenReturn("Turkey");
         when(properties.getIssuerVerifyUri()).thenReturn("VeirfyUri");
         Key key = new Key();
         key.setKeyId("1");
         key.setValidFrom(OffsetDateTime.now().toEpochSecond());
         key.setValidUntil(OffsetDateTime.now().toEpochSecond());
+        key.setActive(true);
         key.setPublicJwk(publicJwk);
         Authority authority = new Authority();
         authority.setCode("UZ");
@@ -101,14 +101,13 @@ public class AuthorityServiceTest {
         authorityKey.setValidUntil(OffsetDateTime.now().toEpochSecond());
         authorityKey.setJwk(publicJwk);
         authority.addKey(authorityKey);
-        when(keyRepository.findAll()).thenReturn(List.of(key));
+        when(keyRepository.findAllByActiveTrue()).thenReturn(List.of(key));
         when(authorityRepository.findAll()).thenReturn(List.of(authority));
         AuthorityConfig config = authorityService.getConfig();
         assertNotNull(config);
         assertEquals("TR", config.getCode());
-        assertEquals("Turkey", config.getName());
         assertEquals(1, config.getKeys().size());
-        assertEquals(1, config.getAuthorities().size());
+        assertEquals(1, config.getTrustedAuthorities().size());
     }
 
     @Test

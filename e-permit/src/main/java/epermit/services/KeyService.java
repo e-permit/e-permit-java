@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import epermit.entities.Key;
 import epermit.events.keycreated.KeyCreatedEventFactory;
-import epermit.models.results.CommandResult;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.KeyRepository;
 import epermit.utils.KeyUtil;
@@ -28,6 +27,8 @@ public class KeyService {
         Long keyCount = keyRepository.count();
         if (keyCount == 0) {
             Key key = keyUtil.create("1");
+            key.setValidFrom(OffsetDateTime.now(ZoneOffset.UTC).toEpochSecond());
+            key.setActive(true);
             keyRepository.save(key);
         }
     }

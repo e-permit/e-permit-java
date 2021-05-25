@@ -2,8 +2,6 @@ package epermit.controllers;
 
 import java.util.List;
 import javax.validation.Valid;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,10 +14,12 @@ import epermit.models.dtos.AuthorityConfig;
 import epermit.models.dtos.AuthorityDto;
 import epermit.models.inputs.CreateAuthorityInput;
 import epermit.models.inputs.CreateQuotaInput;
-import epermit.models.results.CommandResult;
 import epermit.services.AuthorityService;
+import epermit.utils.GsonUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/authorities")
@@ -40,8 +40,10 @@ public class AuthorityController {
 
     @PostMapping()
     public void create(@RequestBody @Valid CreateAuthorityInput input) {
-        AuthorityConfig config =
-                restTemplate.getForObject(input.getApiUri(), AuthorityConfig.class);
+        log.info("Authority create request. Uri: " + input.getApiUri());
+        String r = restTemplate.getForObject(input.getApiUri() + "/epermit-configuration", String.class);
+        AuthorityConfig config = GsonUtil.getGson().fromJson(r, AuthorityConfig.class);
+        log.info(GsonUtil.getGson().toJson(config));
         service.create(input, config);
     }
 

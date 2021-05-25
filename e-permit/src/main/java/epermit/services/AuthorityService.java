@@ -1,5 +1,7 @@
 package epermit.services;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -41,15 +43,23 @@ public class AuthorityService {
     private final ModelMapper modelMapper;
     private final EPermitProperties properties;
 
+    private AuthorityDto entityToDto(Authority authority) {
+        AuthorityDto dto = modelMapper.map(authority, AuthorityDto.class);
+        for (int i = 0; i < dto.getKeys().size(); i++) {
+            dto.getKeys().get(i).setJwk(GsonUtil.getGson()
+                    .fromJson(authority.getKeys().get(i).getJwk(), PublicJwk.class));
+        }
+        return dto;
+    }
+
     public List<AuthorityDto> getAll() {
         List<epermit.entities.Authority> all = authorityRepository.findAll();
-        return all.stream().map(x -> modelMapper.map(x, AuthorityDto.class))
-                .collect(Collectors.toList());
+        return all.stream().map(x -> entityToDto(x)).collect(Collectors.toList());
     }
 
     public AuthorityDto getByCode(String code) {
         Authority authority = authorityRepository.findOneByCode(code).get();
-        return modelMapper.map(authority, AuthorityDto.class);
+        return entityToDto(authority);
     }
 
     @SneakyThrows
@@ -57,10 +67,9 @@ public class AuthorityService {
         AuthorityConfig dto = new AuthorityConfig();
         dto.setCode(properties.getIssuerCode());
         dto.setVerifyUri(properties.getIssuerVerifyUri());
-        dto.setName(properties.getIssuerTitle());
         Gson gson = GsonUtil.getGson();
         List<PublicKey> keyDtoList = new ArrayList<>();
-        keyRepository.findAll().forEach(key -> {
+        keyRepository.findAllByActiveTrue().forEach(key -> {
             PublicKey publicKey = new PublicKey();
             publicKey.setKeyId(key.getKeyId());
             publicKey.setValidFrom(key.getValidFrom());
@@ -88,7 +97,7 @@ public class AuthorityService {
             trustedAuthorities.add(trustedAuthority);
         });
 
-        dto.setAuthorities(trustedAuthorities);
+        dto.setTrustedAuthorities(trustedAuthorities);
         return dto;
     }
 
@@ -100,8 +109,15 @@ public class AuthorityService {
         authority.setCode(input.getCode());
         authority.setName(input.getName());
         authority.setVerifyUri(config.getVerifyUri());
-        authority.setKeys(config.getKeys().stream().map(x -> modelMapper.map(x, AuthorityKey.class))
-                .collect(Collectors.toList()));
+        config.getKeys().forEach(k -> {
+            AuthorityKey authorityKey = new AuthorityKey();
+            log.info(GsonUtil.getGson().toJson(k.getJwk()));
+            authorityKey.setJwk(GsonUtil.getGson().toJson(k.getJwk()));
+            authorityKey.setCreatedAt(OffsetDateTime.now(ZoneOffset.UTC));
+            authorityKey.setKeyId(k.getKeyId());
+            authorityKey.setValidFrom(k.getValidFrom());
+            authority.addKey(authorityKey);
+        });
         authorityRepository.save(authority);
     }
 
@@ -119,6 +135,7 @@ public class AuthorityService {
         quota.setPermitType(input.getPermitType());
         quota.setPermitYear(input.getPermitYear());
         quota.setAuthority(authority);
+        quota.setCreatedAt(OffsetDateTime.now(ZoneOffset.UTC));
         authority.addVerifierQuota(quota);
         authorityRepository.save(authority);
     }

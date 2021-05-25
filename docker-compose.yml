@@ -5,9 +5,10 @@ services:
       - trdb
     environment:
       - SPRING_PROFILES_ACTIVE=dev
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    env_file: 
+      - tr.env
     build: 
-      context: .
+      context: ./e-permit-internal-api
     ports:
       - "3020:8080"
   tr-public-api:
@@ -15,9 +16,10 @@ services:
       - trdb
     environment:
       - SPRING_PROFILES_ACTIVE=dev
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    env_file: 
+      - tr.env
     build: 
-      context: .
+      context: ./e-permit-public-api
     ports:
       - "3021:8080"
   uz-internal-api:
@@ -25,9 +27,10 @@ services:
       - uzdb
     environment:
       - SPRING_PROFILES_ACTIVE=dev
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    env_file: 
+      - uz.env
     build: 
-      context: .
+      context: ./e-permit-internal-api
     ports:
       - "3030:8080"
   uz-public-api:
@@ -35,9 +38,10 @@ services:
       - uzdb
     environment:
       - SPRING_PROFILES_ACTIVE=dev
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    env_file: 
+      - uz.env
     build: 
-      context: .
+      context: ./e-permit-public-api
     ports:
       - "3031:8080"
   trdb:
