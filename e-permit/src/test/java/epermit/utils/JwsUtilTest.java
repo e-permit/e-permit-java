@@ -1,6 +1,11 @@
 package epermit.utils;
 
 import static org.mockito.Mockito.when;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -96,5 +101,20 @@ public class JwsUtilTest {
         JwsValidationResult r = util.validateJws(jws);
         Assertions.assertFalse(r.isValid());
         Assertions.assertEquals("INVALID_KEYID", r.getErrorCode());
+    }
+
+    @Test
+    void timeTest(){
+        Long t =  OffsetDateTime.now(ZoneOffset.UTC).toEpochSecond();
+        Long l = Instant.now().toEpochMilli();
+        Timestamp timestamp = new Timestamp(l);
+        System.out.println(t);
+        System.out.println(timestamp.toInstant());
+        System.out.println(l);
+        System.out.println(Instant.now().getEpochSecond());
+        System.out.println(LocalDateTime.now());
+        System.out.println(OffsetDateTime.now());
+        System.out.println(LocalDateTime.now(ZoneOffset.UTC));
+        System.out.println(LocalDateTime.now(ZoneOffset.UTC).toInstant(ZoneOffset.UTC).toEpochMilli());
     }
 }

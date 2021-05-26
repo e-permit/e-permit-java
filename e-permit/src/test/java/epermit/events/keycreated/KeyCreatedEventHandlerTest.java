@@ -1,9 +1,12 @@
 package epermit.events.keycreated;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Optional;
@@ -34,7 +37,7 @@ public class KeyCreatedEventHandlerTest {
     void saveKeyTest() {
         when(authorityRepository.findOneByCode("UA")).thenReturn(Optional.of(new Authority()));
         String jwk = "jwk";
-        Long utc = OffsetDateTime.now(ZoneOffset.UTC).toEpochSecond();
+        Long utc = Instant.now().getEpochSecond();
         KeyCreatedEvent event = new KeyCreatedEvent();
         event.setKeyId("1");
         event.setJwk(jwk);
@@ -55,7 +58,7 @@ public class KeyCreatedEventHandlerTest {
         authority.addKey(oldAuthorityKey);
         when(authorityRepository.findOneByCode("UA")).thenReturn(Optional.of(authority));
         String jwk = "jwk";
-        Long utc = OffsetDateTime.now(ZoneOffset.UTC).toEpochSecond();
+        Long utc = Instant.now().getEpochSecond();
         KeyCreatedEvent event = new KeyCreatedEvent();
         event.setKeyId("1");
         event.setJwk(jwk);
@@ -64,7 +67,7 @@ public class KeyCreatedEventHandlerTest {
         handler.handle(event);
         verify(authorityRepository).save(captor.capture());
         AuthorityKey authorityKey = captor.getValue().getKeys().get(0);
-        assertNotNull(authorityKey.getValidUntil());
+        assertFalse(authorityKey.isActive());
     }
 }
 

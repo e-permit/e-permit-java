@@ -46,18 +46,20 @@ public class ReceivedEventService {
         }
         if (!receivedEventRepository.existsByIssuerAndEventId(e.getIssuer(),
                 e.getPreviousEventId())) {
-            return EventValidationResult.fail("NOTEXIST_PREVIOUSEVENT", e);
+            if (receivedEventRepository.existsByIssuer(e.getIssuer())) {
+                return EventValidationResult.fail("NOTEXIST_PREVIOUSEVENT", e);
+            }
         }
         EventValidator eventValidator =
                 eventValidators.get(e.getEventType().toString() + "_EVENT_VALIDATOR");
-        if(eventValidator == null){
+        if (eventValidator == null) {
             throw new Exception("NOT_IMPLEMENTED_EVENT_VALIDATOR");
         }
-        EventValidationResult result =
-                eventValidator.validate(r.getPayload());
+        EventValidationResult result = eventValidator.validate(r.getPayload());
         if (result.isOk()) {
-            EventHandler eventHandler = eventHandlers.get(e.getEventType().toString() + "_EVENT_HANDLER");
-            if(eventHandler == null){
+            EventHandler eventHandler =
+                    eventHandlers.get(e.getEventType().toString() + "_EVENT_HANDLER");
+            if (eventHandler == null) {
                 throw new Exception("NOT_IMPLEMENTED_EVENT_HANDLER");
             }
             eventHandler.handle(result.getEvent());
@@ -86,8 +88,9 @@ public class ReceivedEventService {
         }
     }
 
-    /*private ObjectMapper jacksonObjectMapper() {
-        return new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    }*/
+    /*
+     * private ObjectMapper jacksonObjectMapper() { return new
+     * ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
+     * .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false); }
+     */
 }

@@ -73,7 +73,6 @@ public class AuthorityService {
             PublicKey publicKey = new PublicKey();
             publicKey.setKeyId(key.getKeyId());
             publicKey.setValidFrom(key.getValidFrom());
-            publicKey.setValidUntil(key.getValidUntil());
             publicKey.setJwk(gson.fromJson(key.getPublicJwk(), PublicJwk.class));
             keyDtoList.add(publicKey);
         });
@@ -89,7 +88,6 @@ public class AuthorityService {
                 PublicJwk publicJwk = gson.fromJson(k.getJwk(), PublicJwk.class);
                 publicKey.setKeyId(k.getKeyId());
                 publicKey.setValidFrom(k.getValidFrom());
-                publicKey.setValidUntil(k.getValidUntil());
                 publicKey.setJwk(publicJwk);
                 publicKeys.add(publicKey);
             });
@@ -113,7 +111,6 @@ public class AuthorityService {
             AuthorityKey authorityKey = new AuthorityKey();
             log.info(GsonUtil.getGson().toJson(k.getJwk()));
             authorityKey.setJwk(GsonUtil.getGson().toJson(k.getJwk()));
-            authorityKey.setCreatedAt(OffsetDateTime.now(ZoneOffset.UTC));
             authorityKey.setKeyId(k.getKeyId());
             authorityKey.setValidFrom(k.getValidFrom());
             authority.addKey(authorityKey);
@@ -135,7 +132,6 @@ public class AuthorityService {
         quota.setPermitType(input.getPermitType());
         quota.setPermitYear(input.getPermitYear());
         quota.setAuthority(authority);
-        quota.setCreatedAt(OffsetDateTime.now(ZoneOffset.UTC));
         authority.addVerifierQuota(quota);
         authorityRepository.save(authority);
     }

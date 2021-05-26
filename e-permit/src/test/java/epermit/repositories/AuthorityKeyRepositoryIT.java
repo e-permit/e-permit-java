@@ -1,21 +1,15 @@
 package epermit.repositories;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.Example;
 import epermit.entities.Authority;
 import epermit.entities.AuthorityKey;
-import epermit.models.dtos.AuthorityConfig;
-import epermit.models.dtos.PublicJwk;
-import epermit.models.dtos.PublicKey;
-import epermit.models.inputs.CreateAuthorityInput;
-import epermit.services.AuthorityService;
-import epermit.utils.GsonUtil;
 
 @DataJpaTest
 public class AuthorityKeyRepositoryIT {
@@ -25,25 +19,31 @@ public class AuthorityKeyRepositoryIT {
     @Autowired
     private AuthorityRepository authorityRepository;
 
-    @Autowired
-    private AuthorityKeyRepository authorityKeyRepository;
-
     @Test
-    void test(){
+    void saveTest(){
         Authority authority = new Authority();
         authority.setCode("TR");
         authority.setApiUri("apiUri");
         authority.setName("name");
         authority.setVerifyUri("verifyUri");
-        authority.setCreatedAt(OffsetDateTime.now());
         AuthorityKey key = new AuthorityKey();
         key.setAuthority(authority);
-        key.setCreatedAt(OffsetDateTime.now());
         key.setJwk("jwk");
         key.setKeyId("1");
         key.setValidFrom(Long.valueOf(1));
         authority.addKey(key);
-        AuthorityService authorityService = new AuthorityService(authorityRepository, null, null, null, new ModelMapper(), null);
+        authorityRepository.save(authority);
+        Example<Authority> example = Example.of(authority);
+        assertTrue(authorityRepository.exists(example));
+        //assertEquals(null, authority.getCreatedAt());
+    }
+    
+}
+
+
+/**
+ * 
+ * AuthorityService authorityService = new AuthorityService(authorityRepository, null, null, null, new ModelMapper(), null);
         CreateAuthorityInput input = new CreateAuthorityInput();
         input.setApiUri("apiUri");
         input.setCode("UZ");
@@ -58,9 +58,16 @@ public class AuthorityKeyRepositoryIT {
         publicKey.setJwk(GsonUtil.getGson().fromJson(publicJwk, PublicJwk.class));
         config.setKeys(List.of(publicKey));
         authorityService.create(input, config);
-        //authorityRepository.save(authority);
-        Optional<AuthorityKey> authorityKeyR = authorityKeyRepository.findOneByIssuerAndKeyId("UZ", "1");
-        assertTrue(authorityKeyR.isPresent());
-    }
-    
-}
+
+         log.info("Private JWk ----------------------------------------------------");
+        log.info(keyR.get().getPrivateJwk());
+        log.info(keyR.get().getSalt());
+        IssuedPermit permit = new IssuedPermit();
+        permit.setPermitId("TR-UZ-2021-1-1");
+        permit.setIssuedAt("3/6/2021");
+        permit.setExpireAt("31/1/2022");
+        permit.setPlateNumber("06AA2021");
+        permit.setCompanyName("ABC Limited");
+        String qrCode = permitUtil.generateQrCode(permit);
+        log.info(qrCode);
+ */

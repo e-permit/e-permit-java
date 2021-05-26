@@ -1,6 +1,6 @@
 package epermit.entities;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -8,6 +8,8 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import epermit.events.EventType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -37,6 +39,11 @@ public class CreatedEvent {
     @Column(name = "jws", nullable = false, length=10000)
     private String jws;
 
+    @CreationTimestamp
     @Column(name = "created_at", nullable = false)
-    private OffsetDateTime createdAt;
+    private LocalDateTime createdAt;
+  
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 }

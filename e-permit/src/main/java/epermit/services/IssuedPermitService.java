@@ -1,5 +1,6 @@
 package epermit.services;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -82,7 +83,7 @@ public class IssuedPermitService {
         }
         IssuedPermit permit = permitOptional.get();
         permit.setRevoked(true);
-        permit.setRevokedAt(OffsetDateTime.now(ZoneOffset.UTC));
+        permit.setRevokedAt(LocalDateTime.now());
         issuedPermitRepository.save(permit);
         permitRevokedEventFactory.create(permit.getIssuedFor(), permit.getPermitId());
     }

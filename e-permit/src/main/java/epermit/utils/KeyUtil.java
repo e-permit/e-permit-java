@@ -41,7 +41,6 @@ public class KeyUtil {
         k.setSalt(salt);
         k.setPrivateJwk(encryptedJwk);
         k.setPublicJwk(key.toPublicJWK().toJSONString());
-        k.setCreatedAt(OffsetDateTime.now(ZoneOffset.UTC));
         log.info("Key created jwk: " + k.getPublicJwk());
         return k;
     }

@@ -20,16 +20,14 @@ public class KeyCreatedEventHandler implements EventHandler {
         Authority authority = authorityRepository.findOneByCode(e.getIssuer()).get();
         List<AuthorityKey> keys = authority.getKeys();
         keys.forEach(k -> {
-            if (k.getValidUntil() == null) {
-                k.setValidUntil(e.getValidFrom());
-            }
+            k.setActive(false);
         });
         AuthorityKey key = new AuthorityKey();
         key.setAuthority(authority);
         key.setKeyId(e.getKeyId());
         key.setJwk(e.getJwk());
         key.setValidFrom(e.getValidFrom());
-        key.setCreatedAt(OffsetDateTime.now(ZoneOffset.UTC));
+        key.setActive(true);
         authority.addKey(key);
         authorityRepository.save(authority);
     }

@@ -1,6 +1,5 @@
 package epermit.models.dtos;
 
-import java.util.Date;
 import epermit.models.enums.PermitType;
 import lombok.Data;
 
@@ -13,7 +12,7 @@ public class VerifierQuotaDto {
 
     private PermitType permitType;
 
-    private int startId;
+    private int startNumber;
 
-    private int endId;
+    private int endNumber;
 }

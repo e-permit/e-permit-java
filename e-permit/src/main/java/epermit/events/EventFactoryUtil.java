@@ -1,6 +1,7 @@
 package epermit.events;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.UUID;
 import org.springframework.context.ApplicationEventPublisher;
@@ -25,13 +26,13 @@ public class EventFactoryUtil {
         CreatedEvent lastEvent =
                 createdEventRepository.findTopByIssuedForOrderByIdDesc(issuedFor).get();
         event.setPreviousEventId(lastEvent.getEventId());
-        event.setCreatedAt(OffsetDateTime.now(ZoneOffset.UTC).toEpochSecond());
+        event.setCreatedAt(Instant.now().getEpochSecond());
         event.setIssuer(properties.getIssuerCode());
         event.setIssuedFor(issuedFor);
         event.setEventId(UUID.randomUUID().toString());
         String jws = jwsUtil.createJws(event);
         CreatedEvent createdEvent = new CreatedEvent();
-        createdEvent.setCreatedAt(OffsetDateTime.now(ZoneOffset.UTC));
+        createdEvent.setCreatedAt(LocalDateTime.now(ZoneOffset.UTC));
         createdEvent.setIssuedFor(issuedFor);
         createdEvent.setEventId(event.getEventId());
         createdEvent.setPreviousEventId(lastEvent.getEventId());

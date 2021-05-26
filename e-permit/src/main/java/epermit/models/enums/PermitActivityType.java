@@ -1,14 +1,10 @@
 package epermit.models.enums;
 
 public enum PermitActivityType {
-    ENTERANCE(1), EXIT(2);
-    private Integer code;
+    ENTERANCE("ENTERANCE"), EXIT("EXIT");
+    public final String activityType;
 
-    private PermitActivityType(Integer code) {
-        this.code = code;
-    }
-
-    public Integer getCode() {
-        return code;
+    private PermitActivityType(String activityType) {
+        this.activityType = activityType;
     }
 }

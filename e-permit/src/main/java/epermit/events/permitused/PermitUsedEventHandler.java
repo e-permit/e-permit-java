@@ -23,7 +23,6 @@ public class PermitUsedEventHandler implements EventHandler {
         permit.setUsed(true);
         IssuedPermitActivity activity = new IssuedPermitActivity();
         activity.setActivityType(event.getActivityType());
-        activity.setCreatedAt(Instant.ofEpochSecond(event.getCreatedAt()).atOffset(ZoneOffset.UTC));
         permit.addActivity(activity);
         issuedPermitRepository.save(permit);
     }

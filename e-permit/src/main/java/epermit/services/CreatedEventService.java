@@ -1,18 +1,15 @@
 package epermit.services;
 
-import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import com.google.gson.reflect.TypeToken;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import epermit.entities.CreatedEvent;
 import epermit.models.results.JwsValidationResult;
 import epermit.repositories.CreatedEventRepository;
-import epermit.utils.GsonUtil;
 import epermit.utils.JwsUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;

@@ -127,6 +127,7 @@ public class ReceivedEventServiceTest {
                                 "previous_event_id", "0", "key_id", "1");
 
                 when(jwsUtil.validateJws("jws")).thenReturn(JwsValidationResult.success(claims));
+                when(receivedEventRepository.existsByIssuer("TR")).thenReturn(true);
                 when(receivedEventRepository.existsByIssuerAndEventId("TR", "1")).thenReturn(false);
                 when(receivedEventRepository.existsByIssuerAndEventId("TR", "0")).thenReturn(false);
                 EventValidationResult r = eventService.handle("jws");

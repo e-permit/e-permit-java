@@ -1,5 +1,6 @@
 package epermit.services;
 
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Optional;
@@ -45,7 +46,7 @@ public class KeyService {
 
     @Transactional
     public void enable(Integer id) {
-        Long date = OffsetDateTime.now(ZoneOffset.UTC).toEpochSecond();
+        Long date = Instant.now().getEpochSecond();
         Optional<Key> keyR = keyRepository.findById(id);
         if (!keyR.isPresent()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND , "KEY_NOTFOUND");
@@ -54,7 +55,6 @@ public class KeyService {
         if (currentKeyR.isPresent()) {
             Key currentKey = currentKeyR.get();
             currentKey.setActive(false);
-            currentKey.setValidUntil(date);
             keyRepository.save(currentKey);
         }
         Key key = keyR.get();

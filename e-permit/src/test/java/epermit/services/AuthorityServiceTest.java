@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -88,8 +89,7 @@ public class AuthorityServiceTest {
         when(properties.getIssuerVerifyUri()).thenReturn("VeirfyUri");
         Key key = new Key();
         key.setKeyId("1");
-        key.setValidFrom(OffsetDateTime.now().toEpochSecond());
-        key.setValidUntil(OffsetDateTime.now().toEpochSecond());
+        key.setValidFrom(Instant.now().getEpochSecond());
         key.setActive(true);
         key.setPublicJwk(publicJwk);
         Authority authority = new Authority();
@@ -97,8 +97,7 @@ public class AuthorityServiceTest {
         authority.setName("Uzbekistan");
         AuthorityKey authorityKey = new AuthorityKey();
         authorityKey.setKeyId("1");
-        authorityKey.setValidFrom(OffsetDateTime.now().toEpochSecond());
-        authorityKey.setValidUntil(OffsetDateTime.now().toEpochSecond());
+        authorityKey.setValidFrom(Instant.now().getEpochSecond());
         authorityKey.setJwk(publicJwk);
         authority.addKey(authorityKey);
         when(keyRepository.findAllByActiveTrue()).thenReturn(List.of(key));
@@ -121,8 +120,7 @@ public class AuthorityServiceTest {
         config.setVerifyUri("VerifyUri");
         PublicKey publicKey = new PublicKey();
         publicKey.setKeyId("1");
-        publicKey.setValidFrom(OffsetDateTime.now().toEpochSecond());
-        publicKey.setValidUntil(OffsetDateTime.now().toEpochSecond());
+        publicKey.setValidFrom(Instant.now().getEpochSecond());
         publicKey.setJwk(GsonUtil.getGson().fromJson(publicJwk, PublicJwk.class));
         config.setKeys(List.of(publicKey));
         authorityService.create(input, config);
@@ -134,8 +132,7 @@ public class AuthorityServiceTest {
         authority.setApiUri("apiUri");
         AuthorityKey authorityKey = new AuthorityKey();
         authorityKey.setKeyId("1");
-        authorityKey.setValidFrom(OffsetDateTime.now().toEpochSecond());
-        authorityKey.setValidUntil(OffsetDateTime.now().toEpochSecond());
+        authorityKey.setValidFrom(Instant.now().getEpochSecond());
         authorityKey.setJwk(publicJwk);
         authority.addKey(authorityKey);
         verify(authorityRepository, times(1)).save(authority);

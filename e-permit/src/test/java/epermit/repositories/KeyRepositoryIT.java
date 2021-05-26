@@ -13,16 +13,13 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import epermit.entities.IssuedPermit;
 import epermit.entities.Key;
 import epermit.models.EPermitProperties;
 import epermit.utils.JwsUtil;
 import epermit.utils.KeyUtil;
 import epermit.utils.PermitUtil;
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @DataJpaTest
 public class KeyRepositoryIT {
     @Autowired
@@ -41,7 +38,7 @@ public class KeyRepositoryIT {
                 "ES256");
         ECKey ecKey = ECKey.parse(keyProps);
         KeyUtil keyUtil = new KeyUtil(properties, keyRepository);
-        JwsUtil jwsUtil = new JwsUtil(keyUtil, properties, null);
+        JwsUtil jwsUtil = new JwsUtil(keyUtil, properties, null, null);
         PermitUtil permitUtil = new PermitUtil(jwsUtil, null, null);
         Key key = keyUtil.create(ecKey);
         key.setActive(true);
@@ -49,18 +46,6 @@ public class KeyRepositoryIT {
         keyRepository.save(key);
         Optional<Key> keyR = keyRepository.findOneByKeyId("1");
         assertTrue(keyR.isPresent());
-        log.info("Private JWk ----------------------------------------------------");
-        log.info(keyR.get().getPrivateJwk());
-        log.info(keyR.get().getSalt());
-        IssuedPermit permit = new IssuedPermit();
-        permit.setPermitId("TR-UZ-2021-1-1");
-        permit.setIssuedAt("3/6/2021");
-        permit.setExpireAt("31/1/2022");
-        permit.setPlateNumber("06AA2021");
-        permit.setCompanyName("ABC Limited");
-        String qrCode = permitUtil.generateQrCode(permit);
-        log.info(qrCode);
-        // keyUtil.getKey();
     }
 
 }

@@ -23,7 +23,6 @@ public class PermitCreatedEventHandler implements EventHandler {
             permit.setClaims(gson.toJson(event.getClaims()));
         }
         permit.setCompanyName(event.getCompanyName());
-        permit.setCreatedAt(OffsetDateTime.now(ZoneOffset.UTC));
         permit.setExpireAt(event.getExpireAt());
         permit.setIssuedAt(event.getIssuedAt());
         permit.setIssuer(event.getIssuer());

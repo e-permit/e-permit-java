@@ -3,7 +3,6 @@ package epermit.services;
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -94,8 +93,8 @@ public class KeyServiceTest {
         assertTrue(key.isActive());
         assertFalse(existKey.isActive());
         assertNotNull(key.getValidFrom());
-        assertNull(key.getValidUntil());
-        assertNotNull(existKey.getValidUntil());
+        assertTrue(key.isActive());
+        assertFalse(existKey.isActive());
         verify(keyRepository, times(1)).save(key);
         verify(keyRepository, times(1)).save(existKey);
         verify(factory).create(key, "TR");

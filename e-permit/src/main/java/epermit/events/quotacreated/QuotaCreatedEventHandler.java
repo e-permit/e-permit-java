@@ -1,5 +1,6 @@
 package epermit.events.quotacreated;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,6 @@ public class QuotaCreatedEventHandler implements EventHandler {
         IssuerQuota quota = new IssuerQuota();
         quota.setActive(true);
         quota.setAuthority(authority);
-        quota.setCreatedAt(OffsetDateTime.now(ZoneOffset.UTC));
         quota.setCurrentNumber(event.getStartNumber());
         quota.setEndNumber(event.getEndNumber());
         quota.setPermitType(event.getPermitType());
