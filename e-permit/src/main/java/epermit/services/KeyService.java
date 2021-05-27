@@ -28,7 +28,6 @@ public class KeyService {
         Long keyCount = keyRepository.count();
         if (keyCount == 0) {
             Key key = keyUtil.create("1");
-            key.setValidFrom(OffsetDateTime.now(ZoneOffset.UTC).toEpochSecond());
             key.setActive(true);
             keyRepository.save(key);
         }
@@ -46,7 +45,6 @@ public class KeyService {
 
     @Transactional
     public void enable(Integer id) {
-        Long date = Instant.now().getEpochSecond();
         Optional<Key> keyR = keyRepository.findById(id);
         if (!keyR.isPresent()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND , "KEY_NOTFOUND");
@@ -59,7 +57,6 @@ public class KeyService {
         }
         Key key = keyR.get();
         key.setActive(true);
-        key.setValidFrom(date);
         keyRepository.save(key);
 
         authorityRepository.findAll().forEach(a -> {

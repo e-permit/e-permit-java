@@ -3,9 +3,6 @@ package epermit.events.permitcreated;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -69,7 +66,7 @@ public class PermitCreatedEventValidatorTest {
 
         EventValidationResult r = validator.validate(getPermitCreatedEvent("UA-TR-2021-1-1"));
         assertFalse(r.isOk());
-        assertEquals("QUOTA_DOESNT_MATCH", r.getErrorCode());
+        assertEquals("INSUFFICIENT_QUOTA", r.getErrorCode());
     }
 
     private Map<String, Object> getPermitCreatedEvent(String permitId) {

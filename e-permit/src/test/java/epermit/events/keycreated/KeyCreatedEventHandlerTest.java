@@ -2,13 +2,9 @@ package epermit.events.keycreated;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,7 +44,6 @@ public class KeyCreatedEventHandlerTest {
         AuthorityKey authorityKey = captor.getValue().getKeys().get(0);
         assertEquals("1", authorityKey.getKeyId());
         assertEquals(jwk, authorityKey.getJwk());
-        assertEquals(utc, authorityKey.getValidFrom());
     }
 
     @Test

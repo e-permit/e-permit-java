@@ -26,7 +26,6 @@ public class KeyCreatedEventHandler implements EventHandler {
         key.setAuthority(authority);
         key.setKeyId(e.getKeyId());
         key.setJwk(e.getJwk());
-        key.setValidFrom(e.getValidFrom());
         key.setActive(true);
         authority.addKey(key);
         authorityRepository.save(authority);

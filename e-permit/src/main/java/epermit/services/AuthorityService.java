@@ -1,7 +1,5 @@
 package epermit.services;
 
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -20,7 +18,6 @@ import epermit.models.EPermitProperties;
 import epermit.models.dtos.AuthorityConfig;
 import epermit.models.dtos.AuthorityDto;
 import epermit.models.dtos.PublicJwk;
-import epermit.models.dtos.PublicKey;
 import epermit.models.dtos.TrustedAuthority;
 import epermit.models.inputs.CreateAuthorityInput;
 import epermit.models.inputs.CreateQuotaInput;
@@ -46,8 +43,9 @@ public class AuthorityService {
     private AuthorityDto entityToDto(Authority authority) {
         AuthorityDto dto = modelMapper.map(authority, AuthorityDto.class);
         for (int i = 0; i < dto.getKeys().size(); i++) {
-            dto.getKeys().get(i).setJwk(GsonUtil.getGson()
-                    .fromJson(authority.getKeys().get(i).getJwk(), PublicJwk.class));
+            PublicJwk jwk = GsonUtil.getGson().fromJson(authority.getKeys().get(i).getJwk(),
+                    PublicJwk.class);
+            dto.getKeys().set(i, jwk);
         }
         return dto;
     }
@@ -68,13 +66,9 @@ public class AuthorityService {
         dto.setCode(properties.getIssuerCode());
         dto.setVerifyUri(properties.getIssuerVerifyUri());
         Gson gson = GsonUtil.getGson();
-        List<PublicKey> keyDtoList = new ArrayList<>();
+        List<PublicJwk> keyDtoList = new ArrayList<>();
         keyRepository.findAllByActiveTrue().forEach(key -> {
-            PublicKey publicKey = new PublicKey();
-            publicKey.setKeyId(key.getKeyId());
-            publicKey.setValidFrom(key.getValidFrom());
-            publicKey.setJwk(gson.fromJson(key.getPublicJwk(), PublicJwk.class));
-            keyDtoList.add(publicKey);
+            keyDtoList.add(gson.fromJson(key.getPublicJwk(), PublicJwk.class));
         });
         dto.setKeys(keyDtoList);
         List<TrustedAuthority> trustedAuthorities = new ArrayList<>();
@@ -82,14 +76,10 @@ public class AuthorityService {
         authorities.forEach(authority -> {
             TrustedAuthority trustedAuthority = new TrustedAuthority();
             trustedAuthority.setCode(authority.getCode());
-            List<PublicKey> publicKeys = new ArrayList<>();
+            List<PublicJwk> publicKeys = new ArrayList<>();
             authority.getKeys().forEach(k -> {
-                PublicKey publicKey = new PublicKey();
                 PublicJwk publicJwk = gson.fromJson(k.getJwk(), PublicJwk.class);
-                publicKey.setKeyId(k.getKeyId());
-                publicKey.setValidFrom(k.getValidFrom());
-                publicKey.setJwk(publicJwk);
-                publicKeys.add(publicKey);
+                publicKeys.add(publicJwk);
             });
             trustedAuthority.setKeys(publicKeys);
             trustedAuthorities.add(trustedAuthority);
@@ -109,10 +99,8 @@ public class AuthorityService {
         authority.setVerifyUri(config.getVerifyUri());
         config.getKeys().forEach(k -> {
             AuthorityKey authorityKey = new AuthorityKey();
-            log.info(GsonUtil.getGson().toJson(k.getJwk()));
-            authorityKey.setJwk(GsonUtil.getGson().toJson(k.getJwk()));
-            authorityKey.setKeyId(k.getKeyId());
-            authorityKey.setValidFrom(k.getValidFrom());
+            authorityKey.setJwk(GsonUtil.getGson().toJson(k));
+            authorityKey.setKeyId(k.getKid());
             authority.addKey(authorityKey);
         });
         authorityRepository.save(authority);

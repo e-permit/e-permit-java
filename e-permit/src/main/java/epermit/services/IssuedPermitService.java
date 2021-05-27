@@ -1,7 +1,6 @@
 package epermit.services;
 
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
@@ -66,7 +65,7 @@ public class IssuedPermitService {
         permit.setPermitYear(input.getPermitYear());
         permit.setPlateNumber(input.getPlateNumber());
         permit.setSerialNumber(serialNumber);
-        permit.setIssuedAt(OffsetDateTime.now().format(dtf));
+        permit.setIssuedAt(LocalDateTime.now(ZoneOffset.UTC).format(dtf));
         permit.setExpireAt("30/01/" + Integer.toString(input.getPermitYear() + 1));
         permit.setQrCode(permitUtil.generateQrCode(permit));
         issuedPermitRepository.save(permit);

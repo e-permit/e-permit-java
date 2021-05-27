@@ -42,7 +42,6 @@ public class KeyRepositoryIT {
         PermitUtil permitUtil = new PermitUtil(jwsUtil, null, null);
         Key key = keyUtil.create(ecKey);
         key.setActive(true);
-        key.setValidFrom(OffsetDateTime.now(ZoneOffset.UTC).toEpochSecond());
         keyRepository.save(key);
         Optional<Key> keyR = keyRepository.findOneByKeyId("1");
         assertTrue(keyR.isPresent());

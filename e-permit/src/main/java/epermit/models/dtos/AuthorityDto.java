@@ -17,7 +17,7 @@ public class AuthorityDto {
 
   private String verifyUri;
 
-  private List<PublicKey> keys = new ArrayList<>();
+  private List<PublicJwk> keys = new ArrayList<>();
 
   private List<VerifierQuotaDto> verifierQuotas = new ArrayList<>();
 

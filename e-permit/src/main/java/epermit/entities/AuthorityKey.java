@@ -32,9 +32,6 @@ public class AuthorityKey {
     @Column(name = "jwk", nullable = false, length = 5000)
     private String jwk;
 
-    @Column(name = "valid_from", nullable = false)
-    private Long validFrom;
-
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

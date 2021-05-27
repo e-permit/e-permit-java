@@ -49,7 +49,6 @@ public class ConfigControllerIT {
     void setUp() {
         Key key = keyUtil.create("1");
         key.setActive(true);
-        key.setValidFrom(OffsetDateTime.now(ZoneOffset.UTC).toEpochSecond());
         keyRepository.save(key);
     }
 

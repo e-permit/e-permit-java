@@ -14,7 +14,6 @@ public class KeyCreatedEventFactory {
     public KeyCreatedEvent create(Key key, String issuedFor) {
         KeyCreatedEvent e = new KeyCreatedEvent();
         e.setKeyId(key.getKeyId());
-        e.setValidFrom(key.getValidFrom());
         e.setEventType(EventType.KEY_CREATED);
         e.setJwk(key.getPublicJwk());
         util.saveAndPublish(e, issuedFor);

@@ -83,7 +83,6 @@ public class KeyServiceTest {
         Key key = new Key();
         Key existKey = new Key();
         existKey.setActive(true);
-        existKey.setValidFrom(Long.valueOf(1));
         Authority authority = new Authority();
         authority.setCode("TR");
         when(keyRepository.findById(1)).thenReturn(Optional.of(key));
@@ -92,7 +91,6 @@ public class KeyServiceTest {
         keyService.enable(1);
         assertTrue(key.isActive());
         assertFalse(existKey.isActive());
-        assertNotNull(key.getValidFrom());
         assertTrue(key.isActive());
         assertFalse(existKey.isActive());
         verify(keyRepository, times(1)).save(key);

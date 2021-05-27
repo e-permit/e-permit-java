@@ -35,8 +35,8 @@ public class PermitCreatedEventValidator implements EventValidator {
 
         if (!permitUtil.isQuotaSufficient(event.getIssuer(), event.getPermitYear(),
                 event.getSerialNumber(), event.getPermitType())) {
-            log.info("QUOTA_DOESNT_MATCH");
-            return EventValidationResult.fail("QUOTA_DOESNT_MATCH", event);
+            log.info("INSUFFICIENT_QUOTA");
+            return EventValidationResult.fail("INSUFFICIENT_QUOTA", event);
         }
         return EventValidationResult.success(event);
     }

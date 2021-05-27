@@ -8,5 +8,5 @@ import lombok.Data;
 public class TrustedAuthority {
     private String code;
   
-    private List<PublicKey> keys = new ArrayList<>();
+    private List<PublicJwk> keys = new ArrayList<>();
 }

@@ -33,9 +33,6 @@ public class Key {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @Column(name = "valid_from", nullable = true)
-    private Long validFrom;
-
     @Column(name = "public_jwk", nullable = false, length=4000)
     private String publicJwk;
 

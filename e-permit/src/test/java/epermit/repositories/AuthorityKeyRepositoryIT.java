@@ -30,7 +30,6 @@ public class AuthorityKeyRepositoryIT {
         key.setAuthority(authority);
         key.setJwk("jwk");
         key.setKeyId("1");
-        key.setValidFrom(Long.valueOf(1));
         authority.addKey(key);
         authorityRepository.save(authority);
         Example<Authority> example = Example.of(authority);

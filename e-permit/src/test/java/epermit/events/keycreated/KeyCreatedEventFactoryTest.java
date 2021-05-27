@@ -32,7 +32,6 @@ public class KeyCreatedEventFactoryTest {
         Key key = new Key();
         key.setPublicJwk("publicJwk");
         key.setKeyId("1");
-        key.setValidFrom(OffsetDateTime.now().toEpochSecond());
         KeyCreatedEvent event = factory.create(key, "UA");
         assertEquals(EventType.KEY_CREATED, event.getEventType());
         assertEquals("1", event.getKeyId());

@@ -28,7 +28,6 @@ import epermit.models.EPermitProperties;
 import epermit.models.dtos.AuthorityConfig;
 import epermit.models.dtos.AuthorityDto;
 import epermit.models.dtos.PublicJwk;
-import epermit.models.dtos.PublicKey;
 import epermit.models.enums.PermitType;
 import epermit.models.inputs.CreateAuthorityInput;
 import epermit.models.inputs.CreateQuotaInput;
@@ -40,7 +39,7 @@ import lombok.SneakyThrows;
 
 @ExtendWith(MockitoExtension.class)
 public class AuthorityServiceTest {
-    private String publicJwk =
+    private String jwk =
             "{\"kty\":\"EC\",\"crv\":\"P-256\",\"x\":\"uWFoZ2J2BdSP-eCkqpNO2H4DoXeFNWEWrPiQ09hMJg8\",\"y\":\"FDqdZirvBlV_Au_4971Gd6d92_Z8abzSijr5a64vc9o\",\"use\":\"sig\",\"kid\":\"1\",\"alg\":\"ES256\"}";
 
     @Mock
@@ -89,16 +88,14 @@ public class AuthorityServiceTest {
         when(properties.getIssuerVerifyUri()).thenReturn("VeirfyUri");
         Key key = new Key();
         key.setKeyId("1");
-        key.setValidFrom(Instant.now().getEpochSecond());
         key.setActive(true);
-        key.setPublicJwk(publicJwk);
+        key.setPublicJwk(jwk);
         Authority authority = new Authority();
         authority.setCode("UZ");
         authority.setName("Uzbekistan");
         AuthorityKey authorityKey = new AuthorityKey();
         authorityKey.setKeyId("1");
-        authorityKey.setValidFrom(Instant.now().getEpochSecond());
-        authorityKey.setJwk(publicJwk);
+        authorityKey.setJwk(jwk);
         authority.addKey(authorityKey);
         when(keyRepository.findAllByActiveTrue()).thenReturn(List.of(key));
         when(authorityRepository.findAll()).thenReturn(List.of(authority));
@@ -118,11 +115,8 @@ public class AuthorityServiceTest {
         AuthorityConfig config = new AuthorityConfig();
         config.setCode("UZ");
         config.setVerifyUri("VerifyUri");
-        PublicKey publicKey = new PublicKey();
-        publicKey.setKeyId("1");
-        publicKey.setValidFrom(Instant.now().getEpochSecond());
-        publicKey.setJwk(GsonUtil.getGson().fromJson(publicJwk, PublicJwk.class));
-        config.setKeys(List.of(publicKey));
+        PublicJwk publicJwk = GsonUtil.getGson().fromJson(jwk, PublicJwk.class);
+        config.setKeys(List.of(publicJwk));
         authorityService.create(input, config);
         Authority authority = new Authority();
         authority.setApiUri("apiUri");
@@ -132,8 +126,7 @@ public class AuthorityServiceTest {
         authority.setApiUri("apiUri");
         AuthorityKey authorityKey = new AuthorityKey();
         authorityKey.setKeyId("1");
-        authorityKey.setValidFrom(Instant.now().getEpochSecond());
-        authorityKey.setJwk(publicJwk);
+        authorityKey.setJwk(jwk);
         authority.addKey(authorityKey);
         verify(authorityRepository, times(1)).save(authority);
     }
