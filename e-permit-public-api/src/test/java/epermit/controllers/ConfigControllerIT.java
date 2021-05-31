@@ -48,7 +48,7 @@ public class ConfigControllerIT {
     @Transactional
     void setUp() {
         Key key = keyUtil.create("1");
-        key.setActive(true);
+        key.setEnabled(true);
         keyRepository.save(key);
     }
 

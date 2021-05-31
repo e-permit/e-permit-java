@@ -15,13 +15,14 @@ import epermit.models.dtos.AuthorityConfig;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.KeyRepository;
 import epermit.services.AuthorityService;
+import epermit.services.ConfigService;
 import epermit.services.CreatedEventService;
 import epermit.utils.KeyUtil;
 
 @ExtendWith(MockitoExtension.class)
 public class ConfigControllerTest {
     @Mock
-    AuthorityService authorityService;
+    ConfigService configService;
 
     @InjectMocks
     ConfigController controller;
@@ -31,7 +32,7 @@ public class ConfigControllerTest {
         AuthorityConfig config = new AuthorityConfig();
         config.setCode("TR");
         config.setVerifyUri("https://localhost:3001");
-        when(authorityService.getConfig()).thenReturn(config);
+        when(configService.getConfig()).thenReturn(config);
         AuthorityConfig result = controller.getConfig();
         assertEquals(config, result);
     }

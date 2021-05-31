@@ -39,7 +39,7 @@ public class KeyUtilTest {
         when(properties.getKeyPassword()).thenReturn("123456");
         Key key = util.create("1");
         Assertions.assertThrows(IllegalStateException.class, () -> {
-            when(keyRepository.findOneByActiveTrue()).thenReturn(Optional.of(key));
+            when(keyRepository.findFirstByEnabledTrueOrderByIdDesc()).thenReturn(key);
             when(properties.getKeyPassword()).thenReturn("1234567");
             ECKey ecKey = util.getKey();
             Assertions.assertNotNull(ecKey);

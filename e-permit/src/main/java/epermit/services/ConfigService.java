@@ -30,7 +30,7 @@ public class ConfigService {
         dto.setVerifyUri(properties.getIssuerVerifyUri());
         Gson gson = GsonUtil.getGson();
         List<PublicJwk> keyDtoList = new ArrayList<>();
-        keyRepository.findAllByActiveTrue().forEach(key -> {
+        keyRepository.findAllByEnabledTrue().forEach(key -> {
             keyDtoList.add(gson.fromJson(key.getPublicJwk(), PublicJwk.class));
         });
         dto.setKeys(keyDtoList);

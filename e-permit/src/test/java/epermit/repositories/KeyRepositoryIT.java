@@ -1,11 +1,8 @@
 package epermit.repositories;
 
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import com.nimbusds.jose.jwk.ECKey;
@@ -15,9 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import epermit.entities.Key;
 import epermit.models.EPermitProperties;
-import epermit.utils.JwsUtil;
 import epermit.utils.KeyUtil;
-import epermit.utils.PermitUtil;
 import lombok.SneakyThrows;
 
 @DataJpaTest
@@ -38,13 +33,25 @@ public class KeyRepositoryIT {
                 "ES256");
         ECKey ecKey = ECKey.parse(keyProps);
         KeyUtil keyUtil = new KeyUtil(properties, keyRepository);
-        JwsUtil jwsUtil = new JwsUtil(keyUtil, properties, null, null);
-        PermitUtil permitUtil = new PermitUtil(jwsUtil, null, null);
         Key key = keyUtil.create(ecKey);
-        key.setActive(true);
+        key.setEnabled(true);
         keyRepository.save(key);
         Optional<Key> keyR = keyRepository.findOneByKeyId("1");
         assertTrue(keyR.isPresent());
+    }
+
+    @Test
+    void findFirstByEnabledTrueOrderByIdTest(){
+        when(properties.getKeyPassword()).thenReturn("123456");
+        KeyUtil keyUtil = new KeyUtil(properties, keyRepository);
+        Key key = keyUtil.create("1");
+        key.setEnabled(true);
+        keyRepository.save(key);
+        Key key2 = keyUtil.create("2");
+        key2.setEnabled(true);
+        keyRepository.save(key2);
+        Key k = keyRepository.findFirstByEnabledTrueOrderByIdDesc();
+        assertEquals("2", k.getKeyId());
     }
 
 }

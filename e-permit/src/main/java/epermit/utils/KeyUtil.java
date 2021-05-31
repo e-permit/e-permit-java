@@ -1,7 +1,5 @@
 package epermit.utils;
 
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.jwk.KeyUse;
@@ -47,7 +45,7 @@ public class KeyUtil {
 
     @SneakyThrows
     public ECKey getKey() {
-        Key privateKey = keyRepository.findOneByActiveTrue().get();
+        Key privateKey = keyRepository.findFirstByEnabledTrueOrderByIdDesc();
         TextEncryptor decryptor =
                 Encryptors.text(properties.getKeyPassword(), privateKey.getSalt());
         ECKey key = ECKey.parse(decryptor.decrypt(privateKey.getPrivateJwk()));

@@ -7,8 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import java.time.Instant;
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -80,30 +78,6 @@ public class AuthorityServiceTest {
         when(authorityRepository.findOneByCode("UA")).thenReturn(Optional.of(authority));
         AuthorityDto dto = authorityService.getByCode("UA");
         assertEquals("UA", dto.getCode());
-    }
-
-    @Test
-    void getConfigTest() {
-        when(properties.getIssuerCode()).thenReturn("TR");
-        when(properties.getIssuerVerifyUri()).thenReturn("VeirfyUri");
-        Key key = new Key();
-        key.setKeyId("1");
-        key.setActive(true);
-        key.setPublicJwk(jwk);
-        Authority authority = new Authority();
-        authority.setCode("UZ");
-        authority.setName("Uzbekistan");
-        AuthorityKey authorityKey = new AuthorityKey();
-        authorityKey.setKeyId("1");
-        authorityKey.setJwk(jwk);
-        authority.addKey(authorityKey);
-        when(keyRepository.findAllByActiveTrue()).thenReturn(List.of(key));
-        when(authorityRepository.findAll()).thenReturn(List.of(authority));
-        AuthorityConfig config = authorityService.getConfig();
-        assertNotNull(config);
-        assertEquals("TR", config.getCode());
-        assertEquals(1, config.getKeys().size());
-        assertEquals(1, config.getTrustedAuthorities().size());
     }
 
     @Test

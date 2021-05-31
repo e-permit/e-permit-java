@@ -1,8 +1,6 @@
 package epermit.services;
 
 import static org.junit.Assert.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -82,19 +80,14 @@ public class KeyServiceTest {
     void enableTest() {
         Key key = new Key();
         Key existKey = new Key();
-        existKey.setActive(true);
+        existKey.setEnabled(true);
         Authority authority = new Authority();
         authority.setCode("TR");
         when(keyRepository.findById(1)).thenReturn(Optional.of(key));
-        when(keyRepository.findOneByActiveTrue()).thenReturn(Optional.of(existKey));
         when(authorityRepository.findAll()).thenReturn(List.of(authority));
         keyService.enable(1);
-        assertTrue(key.isActive());
-        assertFalse(existKey.isActive());
-        assertTrue(key.isActive());
-        assertFalse(existKey.isActive());
+        assertTrue(key.isEnabled());
         verify(keyRepository, times(1)).save(key);
-        verify(keyRepository, times(1)).save(existKey);
         verify(factory).create(key, "TR");
     }
     

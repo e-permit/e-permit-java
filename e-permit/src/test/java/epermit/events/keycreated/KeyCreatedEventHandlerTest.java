@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import epermit.entities.Authority;
 import epermit.entities.AuthorityKey;
+import epermit.models.dtos.PublicJwk;
 import epermit.repositories.AuthorityRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,37 +33,15 @@ public class KeyCreatedEventHandlerTest {
     @Test
     void saveKeyTest() {
         when(authorityRepository.findOneByCode("UA")).thenReturn(Optional.of(new Authority()));
-        String jwk = "jwk";
-        Long utc = Instant.now().getEpochSecond();
         KeyCreatedEvent event = new KeyCreatedEvent();
-        event.setKeyId("1");
+        PublicJwk jwk = new PublicJwk();
+        jwk.setKid("1");
         event.setJwk(jwk);
-        event.setValidFrom(utc);
         event.setIssuer("UA");
         handler.handle(event);
         verify(authorityRepository).save(captor.capture());
         AuthorityKey authorityKey = captor.getValue().getKeys().get(0);
         assertEquals("1", authorityKey.getKeyId());
-        assertEquals(jwk, authorityKey.getJwk());
-    }
-
-    @Test
-    void disableOldKeyTest() {
-        Authority authority = new Authority();
-        AuthorityKey oldAuthorityKey = new AuthorityKey();
-        authority.addKey(oldAuthorityKey);
-        when(authorityRepository.findOneByCode("UA")).thenReturn(Optional.of(authority));
-        String jwk = "jwk";
-        Long utc = Instant.now().getEpochSecond();
-        KeyCreatedEvent event = new KeyCreatedEvent();
-        event.setKeyId("1");
-        event.setJwk(jwk);
-        event.setValidFrom(utc);
-        event.setIssuer("UA");
-        handler.handle(event);
-        verify(authorityRepository).save(captor.capture());
-        AuthorityKey authorityKey = captor.getValue().getKeys().get(0);
-        assertFalse(authorityKey.isActive());
     }
 }
 

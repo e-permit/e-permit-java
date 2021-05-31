@@ -4,6 +4,8 @@ import org.springframework.stereotype.Component;
 import epermit.entities.Key;
 import epermit.events.EventFactoryUtil;
 import epermit.events.EventType;
+import epermit.models.dtos.PublicJwk;
+import epermit.utils.GsonUtil;
 import lombok.RequiredArgsConstructor;
 
 @Component
@@ -13,9 +15,9 @@ public class KeyCreatedEventFactory {
 
     public KeyCreatedEvent create(Key key, String issuedFor) {
         KeyCreatedEvent e = new KeyCreatedEvent();
-        e.setKeyId(key.getKeyId());
         e.setEventType(EventType.KEY_CREATED);
-        e.setJwk(key.getPublicJwk());
+        PublicJwk jwk = GsonUtil.getGson().fromJson(key.getPublicJwk(), PublicJwk.class);
+        e.setJwk(jwk);
         util.saveAndPublish(e, issuedFor);
         return e;
     }

@@ -11,14 +11,11 @@ import com.nimbusds.jose.Payload;
 import com.nimbusds.jose.crypto.ECDSASigner;
 import com.nimbusds.jose.crypto.ECDSAVerifier;
 import com.nimbusds.jose.jwk.ECKey;
-import org.hibernate.criterion.Example;
 import org.springframework.stereotype.Component;
-import epermit.entities.Authority;
 import epermit.entities.AuthorityKey;
 import epermit.models.EPermitProperties;
 import epermit.models.results.JwsValidationResult;
 import epermit.repositories.AuthorityKeyRepository;
-import epermit.repositories.AuthorityRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +27,6 @@ public class JwsUtil {
     private final KeyUtil keyUtil;
     private final EPermitProperties properties;
     private final AuthorityKeyRepository authorityKeyRepository;
-    private final AuthorityRepository authorityRepository;
 
     @SneakyThrows
     public <T> String createJws(T payloadObj) {
@@ -59,10 +55,8 @@ public class JwsUtil {
         String issuer = getClaim(jws, "issuer");
         JWSObject jwsObject = JWSObject.parse(jws);
         String keyId = jwsObject.getHeader().getKeyID();
-        Authority authority = authorityRepository.findOneByCode(issuer).get();
-
+       
         Optional<AuthorityKey> k = authorityKeyRepository.findOneByIssuerAndKeyId(issuer, keyId);
-                //authority.getKeys().stream().filter(x -> x.getKeyId().equals(keyId)).findFirst();
         if (!k.isPresent()) {
             log.info("The issuer is not known");
             return JwsValidationResult.fail("INVALID_KEYID");

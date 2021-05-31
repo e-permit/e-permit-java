@@ -8,9 +8,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 @Repository
 public interface KeyRepository extends JpaRepository<Key, Integer> {
-     Optional<Key> findOneByActiveTrue();
 
-     List<Key> findAllByActiveTrue();
+     Key findFirstByEnabledTrueOrderByIdDesc();
+
+     List<Key> findAllByEnabledTrue();
 
      Optional<Key> findOneByKeyId(String kid);
 

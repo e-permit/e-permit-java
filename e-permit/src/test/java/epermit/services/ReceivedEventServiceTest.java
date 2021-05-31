@@ -35,6 +35,7 @@ import epermit.events.keycreated.KeyCreatedEvent;
 import epermit.events.keycreated.KeyCreatedEventHandler;
 import epermit.events.keycreated.KeyCreatedEventValidator;
 import epermit.models.EPermitProperties;
+import epermit.models.dtos.PublicJwk;
 import epermit.models.results.JwsValidationResult;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.ReceivedEventRepository;
@@ -222,10 +223,8 @@ public class ReceivedEventServiceTest {
                 keyCreatedEvent.setEventType(EventType.KEY_CREATED);
                 keyCreatedEvent.setIssuedFor("UZ");
                 keyCreatedEvent.setIssuer("TR");
-                keyCreatedEvent.setJwk("jwk");
-                keyCreatedEvent.setKeyId("1");
+                keyCreatedEvent.setJwk(new PublicJwk());
                 keyCreatedEvent.setPreviousEventId("2");
-                keyCreatedEvent.setValidFrom(OffsetDateTime.now(ZoneOffset.UTC).toEpochSecond());
                 doReturn(EventValidationResult.fail("NOTEXIST_PREVIOUSEVENT", keyCreatedEvent))
                                 .when(eventService2).handle("jws");
                 doReturn(EventValidationResult.success(keyCreatedEvent)).when(eventService2)

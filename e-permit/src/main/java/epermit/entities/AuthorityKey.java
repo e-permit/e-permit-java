@@ -40,8 +40,11 @@ public class AuthorityKey {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @Column(name = "active", nullable = false)
-    private boolean active;
+    @Column(name = "revoked", nullable = false)
+    private boolean revoked;
+
+    @Column(name = "revoked_at", nullable = true)
+    private Long revokedAt;
 
     @ManyToOne
     @JoinColumn(name = "authority_id")

@@ -11,4 +11,6 @@ public class PermitUsedEvent extends EventBase {
     private String permitId;
 
     private PermitActivityType activityType;
+
+    private Long activityTimestamp;
 }

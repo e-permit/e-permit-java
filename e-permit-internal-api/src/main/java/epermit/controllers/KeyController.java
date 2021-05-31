@@ -1,8 +1,7 @@
 package epermit.controllers;
 
 import java.util.Map;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,5 +25,10 @@ public class KeyController {
     @PatchMapping("{id}/enable")
     public void enable(@RequestParam Integer id) {
         keyService.enable(id);
+    }
+
+    @DeleteMapping("{id}")
+    public void delete(@RequestParam Integer id) {
+        keyService.delete(id);
     }
 }

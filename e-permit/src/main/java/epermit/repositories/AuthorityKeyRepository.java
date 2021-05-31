@@ -1,6 +1,5 @@
 package epermit.repositories;
 
-
 import org.springframework.stereotype.Repository;
 import epermit.entities.AuthorityKey;
 import java.util.Optional;

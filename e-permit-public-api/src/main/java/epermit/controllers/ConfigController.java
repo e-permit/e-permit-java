@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import epermit.models.dtos.AuthorityConfig;
 import epermit.services.AuthorityService;
+import epermit.services.ConfigService;
 import lombok.RequiredArgsConstructor;
 
 
@@ -12,10 +13,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @RequestMapping("/epermit-configuration")
 public class ConfigController {
-    private final AuthorityService authorityService;
+    private final ConfigService configService;
 
     @GetMapping
     public AuthorityConfig getConfig() {
-        return authorityService.getConfig();
+        return configService.getConfig();
     }
 }

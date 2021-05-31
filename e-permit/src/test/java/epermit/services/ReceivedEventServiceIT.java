@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 import com.nimbusds.jose.jwk.ECKey;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -42,6 +43,8 @@ import lombok.SneakyThrows;
 @ActiveProfiles("test")
 public class ReceivedEventServiceIT {
 
+    private Key key;
+
     @Autowired
     private KeyUtil keyUtil;
 
@@ -64,15 +67,16 @@ public class ReceivedEventServiceIT {
 
 
     @Transactional
-    Key setUp() {
-        Key key = keyUtil.create("1");
+    @BeforeEach
+    void setUp() {
+        authorityRepository.deleteAll();
+        this.key = keyUtil.create("1");
         Authority authority = new Authority();
         authority.setCode("UZ");
         authority.setApiUri("apiUri");
         authority.setName("Uzbekistan");
         authority.setVerifyUri("verifyUri");
         AuthorityKey authorityKey = new AuthorityKey();
-        authorityKey.setActive(true);
         authorityKey.setAuthority(authority);
         authorityKey.setJwk(key.getPublicJwk());
         authorityKey.setKeyId("1");
@@ -85,13 +89,11 @@ public class ReceivedEventServiceIT {
         quota.setPermitYear(2021);
         authority.addVerifierQuota(quota);
         authorityRepository.save(authority);
-        return key;
     }
 
     @Test
     @SneakyThrows
     void handleQuotaCreatedEventTest() {
-        Key key = setUp();
         QuotaCreatedEvent e = new QuotaCreatedEvent();
         e.setEndNumber(10);
         e.setPermitType(PermitType.BILITERAL);
@@ -103,7 +105,7 @@ public class ReceivedEventServiceIT {
         e.setIssuer("UZ");
         e.setIssuedFor("TR");
         e.setEventId(UUID.randomUUID().toString());
-        String jws = jwsUtil.createJws(getKey(key), e);
+        String jws = jwsUtil.createJws(getKey(), e);
         EventValidationResult r = receivedEventService.handle(jws);
         assertTrue(r.isOk());
     }
@@ -111,7 +113,6 @@ public class ReceivedEventServiceIT {
     @Test
     @SneakyThrows
     void handlePermitCreatedEventTest() {
-        Key key = setUp();
         PermitCreatedEvent e = new PermitCreatedEvent();
         e.setCompanyName("ABC");
         e.setPermitType(PermitType.BILITERAL);
@@ -127,7 +128,7 @@ public class ReceivedEventServiceIT {
         e.setIssuer("UZ");
         e.setIssuedFor("TR");
         e.setEventId(UUID.randomUUID().toString());
-        String jws = jwsUtil.createJws(getKey(key), e);
+        String jws = jwsUtil.createJws(getKey(), e);
         EventValidationResult r = receivedEventService.handle(jws);
         assertTrue(r.isOk());
         Optional<Permit> p = permitRepository.findOneByIssuerAndPermitId("UZ", "UZ-TR-2021-1-5");
@@ -136,7 +137,7 @@ public class ReceivedEventServiceIT {
 
 
     @SneakyThrows
-    public ECKey getKey(Key key) {
+    public ECKey getKey() {
         TextEncryptor decryptor = Encryptors.text("123456", key.getSalt());
         ECKey ecKey = ECKey.parse(decryptor.decrypt(key.getPrivateJwk()));
         return ecKey;

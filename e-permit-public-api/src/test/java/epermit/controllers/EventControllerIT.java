@@ -65,7 +65,7 @@ public class EventControllerIT {
         @Transactional
         void setUp() {
                 Key key = keyUtil.create("1");
-                key.setActive(true);
+                key.setEnabled(true);
                 keyRepository.save(key);
                 Authority authority = new Authority();
                 authority.setApiUri("apiUri");

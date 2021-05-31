@@ -28,7 +28,7 @@ public class KeyService {
         Long keyCount = keyRepository.count();
         if (keyCount == 0) {
             Key key = keyUtil.create("1");
-            key.setActive(true);
+            key.setEnabled(true);
             keyRepository.save(key);
         }
     }
@@ -47,16 +47,10 @@ public class KeyService {
     public void enable(Integer id) {
         Optional<Key> keyR = keyRepository.findById(id);
         if (!keyR.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND , "KEY_NOTFOUND");
-        }
-        Optional<Key> currentKeyR = keyRepository.findOneByActiveTrue();
-        if (currentKeyR.isPresent()) {
-            Key currentKey = currentKeyR.get();
-            currentKey.setActive(false);
-            keyRepository.save(currentKey);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "KEY_NOTFOUND");
         }
         Key key = keyR.get();
-        key.setActive(true);
+        key.setEnabled(true);
         keyRepository.save(key);
 
         authorityRepository.findAll().forEach(a -> {
@@ -64,4 +58,17 @@ public class KeyService {
         });
     }
 
+    @Transactional
+    public void delete(Integer id) {
+        Optional<Key> keyR = keyRepository.findById(id);
+        if (!keyR.isPresent()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "KEY_NOTFOUND");
+        }
+        Key key = keyR.get();
+        keyRepository.delete(key);
+
+        authorityRepository.findAll().forEach(a -> {
+            factory.create(key, a.getCode());
+        });
+    }
 }
