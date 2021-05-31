@@ -236,7 +236,7 @@ public class ReceivedEventServiceTest {
                                 .thenReturn(Optional.of(receivedEvent));
                 Authority authority = new Authority();
                 authority.setApiUri("apiUri");
-                when(authorityRepository.findOneByCode("TR")).thenReturn(Optional.of(authority));
+                when(authorityRepository.findOneByCode("TR")).thenReturn(authority);
                 Map<String, String> claims = new HashMap<>();
                 claims.put("last_event_id", "1");
                 claims.put("issuer", "UZ");

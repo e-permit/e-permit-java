@@ -32,7 +32,7 @@ public class KeyCreatedEventHandlerTest {
 
     @Test
     void saveKeyTest() {
-        when(authorityRepository.findOneByCode("UA")).thenReturn(Optional.of(new Authority()));
+        when(authorityRepository.findOneByCode("UA")).thenReturn(new Authority());
         KeyCreatedEvent event = new KeyCreatedEvent();
         PublicJwk jwk = new PublicJwk();
         jwk.setKid("1");

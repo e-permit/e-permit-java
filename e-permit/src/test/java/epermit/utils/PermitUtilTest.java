@@ -71,7 +71,7 @@ public class PermitUtilTest {
         quota.setEndNumber(endNumber);
         authority.addIssuerQuota(quota);
         when(issuedPermitRepository.findFirstByIssuedForAndRevokedTrue("UA")).thenReturn(Optional.empty());
-        when(authorityRepository.findOneByCode("UA")).thenReturn(Optional.of(authority));
+        when(authorityRepository.findOneByCode("UA")).thenReturn(authority);
         Integer nextPid = util.generateSerialNumber("UA", 2021, PermitType.BILITERAL);
         Assertions.assertEquals(2, nextPid);
         Assertions.assertEquals(endNumber == 3, quota.isActive());

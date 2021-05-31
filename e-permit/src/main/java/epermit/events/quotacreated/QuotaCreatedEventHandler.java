@@ -1,8 +1,5 @@
 package epermit.events.quotacreated;
 
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import org.springframework.stereotype.Service;
 import epermit.entities.Authority;
 import epermit.entities.IssuerQuota;
@@ -18,7 +15,7 @@ public class QuotaCreatedEventHandler implements EventHandler {
     @SneakyThrows
     public void handle(Object e) {
         QuotaCreatedEvent event = (QuotaCreatedEvent)e;
-        Authority authority = authorityRepository.findOneByCode(event.getIssuer()).get();
+        Authority authority = authorityRepository.findOneByCode(event.getIssuer());
         IssuerQuota quota = new IssuerQuota();
         quota.setActive(true);
         quota.setAuthority(authority);

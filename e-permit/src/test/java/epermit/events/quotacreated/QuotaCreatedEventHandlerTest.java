@@ -39,7 +39,7 @@ public class QuotaCreatedEventHandlerTest {
         event.setEndNumber(40);
         event.setPermitType(PermitType.BILITERAL);
         event.setPermitYear(2021);
-        when(authorityRepository.findOneByCode("TR")).thenReturn(Optional.of(new Authority()));
+        when(authorityRepository.findOneByCode("TR")).thenReturn(new Authority());
         handler.handle(event);
         verify(authorityRepository, times(1)).save(captor.capture());
         IssuerQuota quota = captor.getValue().getIssuerQuotas().get(0);

@@ -16,7 +16,7 @@ public class KeyCreatedEventHandler implements EventHandler {
 
     public void handle(Object obj) {
         KeyCreatedEvent e = (KeyCreatedEvent)obj;
-        Authority authority = authorityRepository.findOneByCode(e.getIssuer()).get();
+        Authority authority = authorityRepository.findOneByCode(e.getIssuer());
         AuthorityKey key = new AuthorityKey();
         key.setAuthority(authority);
         key.setKeyId(e.getJwk().getKid());

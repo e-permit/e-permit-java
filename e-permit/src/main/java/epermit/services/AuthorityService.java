@@ -50,7 +50,7 @@ public class AuthorityService {
     }
 
     public AuthorityDto getByCode(String code) {
-        Authority authority = authorityRepository.findOneByCode(code).get();
+        Authority authority = authorityRepository.findOneByCode(code);
         return entityToDto(authority);
     }
 
@@ -73,12 +73,8 @@ public class AuthorityService {
 
     @Transactional
     public void createQuota(CreateQuotaInput input) {
-        Optional<Authority> authorityR =
+        Authority authority =
                 authorityRepository.findOneByCode(input.getAuthorityCode());
-        if (!authorityR.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "AUTHORITY_NOTFOUND");
-        }
-        Authority authority = authorityR.get();
         VerifierQuota quota = new VerifierQuota();
         quota.setEndNumber(input.getEndId());
         quota.setStartNumber(input.getStartId());

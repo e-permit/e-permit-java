@@ -75,7 +75,7 @@ public class AuthorityServiceTest {
     void getByCodeTest() {
         Authority authority = new Authority();
         authority.setCode("UA");
-        when(authorityRepository.findOneByCode("UA")).thenReturn(Optional.of(authority));
+        when(authorityRepository.findOneByCode("UA")).thenReturn(authority);
         AuthorityDto dto = authorityService.getByCode("UA");
         assertEquals("UA", dto.getCode());
     }
@@ -114,7 +114,7 @@ public class AuthorityServiceTest {
         input.setPermitYear(2021);
         input.setStartId(1);
         Authority authority = new Authority();
-        when(authorityRepository.findOneByCode("TR")).thenReturn(Optional.of(authority));
+        when(authorityRepository.findOneByCode("TR")).thenReturn(authority);
         authorityService.createQuota(input);
         VerifierQuota verifierQuota = new VerifierQuota();
         verifierQuota.setEndNumber(20);
@@ -129,8 +129,7 @@ public class AuthorityServiceTest {
     void createQuotaThrowTest() {
         CreateQuotaInput input = new CreateQuotaInput();
         input.setAuthorityCode("TR");
-        when(authorityRepository.findOneByCode("TR")).thenReturn(Optional.empty());
-        assertThrows(ResponseStatusException.class, () -> {
+        assertThrows(NullPointerException.class, () -> {
             authorityService.createQuota(input);
         });
     }

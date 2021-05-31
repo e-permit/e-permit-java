@@ -47,7 +47,7 @@ public class EventFactoryUtilTest {
         when(createdEventRepository.findTopByIssuedForOrderByIdDesc("UA"))
                 .thenReturn(Optional.of(lasEvent));
         when(jwsUtil.createJws(any())).thenReturn("jws");
-        when(authorityRepository.findOneByCode(anyString())).thenReturn(Optional.of(new Authority()));
+        when(authorityRepository.findOneByCode(anyString())).thenReturn(new Authority());
         DummyEvent event = new DummyEvent();
         util.saveAndPublish(event, "UA");
         assertEquals("TR", event.getIssuer());

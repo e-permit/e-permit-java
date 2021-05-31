@@ -73,7 +73,7 @@ public class ReceivedEventService {
         EventValidationResult r = handle(event.getJws());
         if (!r.isOk() && r.getErrorCode().equals("NOTEXIST_PREVIOUSEVENT")) {
             EventBase eBase = (EventBase) r.getEvent();
-            String url = authorityRepository.findOneByCode(eBase.getIssuer()).get().getApiUri();
+            String url = authorityRepository.findOneByCode(eBase.getIssuer()).getApiUri();
             String lastEventId = receivedEventRepository
                     .findTopByIssuerOrderByIdDesc(eBase.getIssuer()).get().getEventId();
             Map<String, String> claims = new HashMap<>();

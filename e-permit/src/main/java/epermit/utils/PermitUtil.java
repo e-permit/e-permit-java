@@ -29,7 +29,7 @@ public class PermitUtil {
 
     public boolean isQuotaSufficient(String issuer, int permitYear, int serialNumber,
             PermitType permitType) {
-        Authority authority = authorityRepository.findOneByCode(issuer).get();
+        Authority authority = authorityRepository.findOneByCode(issuer);
         return authority.getVerifierQuotas().stream().anyMatch(x -> x.getPermitType() == permitType
                 && serialNumber >= x.getStartNumber() && serialNumber <= x.getEndNumber());
     }
@@ -42,8 +42,8 @@ public class PermitUtil {
             issuedPermitRepository.delete(revokedCred.get());
             return nextPid;
         }
-        Optional<Authority> authority = authorityRepository.findOneByCode(issuedFor);
-        Optional<IssuerQuota> quotaResult = authority.get().getIssuerQuotas().stream()
+        Authority authority = authorityRepository.findOneByCode(issuedFor);
+        Optional<IssuerQuota> quotaResult = authority.getIssuerQuotas().stream()
                 .filter(x -> x.getPermitYear() == py && x.isActive() && x.getPermitType() == pt)
                 .findFirst();
         if (quotaResult.isPresent()) {
@@ -53,7 +53,7 @@ public class PermitUtil {
             if (quota.getCurrentNumber() == quota.getEndNumber()) {
                 quota.setActive(false);
             }
-            authorityRepository.save(authority.get());
+            authorityRepository.save(authority);
             return nextPid;
         }
         return null;
