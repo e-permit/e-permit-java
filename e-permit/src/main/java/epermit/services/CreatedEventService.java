@@ -8,9 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import epermit.entities.CreatedEvent;
-import epermit.models.results.JwsValidationResult;
 import epermit.repositories.CreatedEventRepository;
-import epermit.utils.JwsUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
@@ -18,23 +16,18 @@ import lombok.SneakyThrows;
 @RequiredArgsConstructor
 public class CreatedEventService {
     private final CreatedEventRepository createdEventRepository;
-    private final JwsUtil jwsUtil;
 
     @SneakyThrows
-    public List<String> getEvents(String requestJws) {
-        JwsValidationResult validationResult = jwsUtil.validateJws(requestJws);
-        if(!validationResult.isValid()){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "INVALID_JWS");
-        }
-        Map<String, Object> claims = validationResult.getPayload();
-        String issuer = (String)claims.get("issuer");
-        String eventId = (String)claims.get("event_id");
+    public List<String> getEvents(Map<String, Object> claims) {
+        String issuer = (String) claims.get("issuer");
+        String eventId = (String) claims.get("event_id");
         Optional<CreatedEvent> eventR =
                 createdEventRepository.findOneByEventIdAndIssuedFor(eventId, issuer);
         if (eventR.isPresent()) {
+            List<CreatedEvent> createdEvents =
+                    createdEventRepository.findByIdGreaterThanOrderByIdAsc(eventR.get().getId());
             List<String> events =
-                    createdEventRepository.findByIdGreaterThanOrderByIdAsc(eventR.get().getId())
-                            .stream().map(x -> x.getJws()).collect(Collectors.toList());
+                    createdEvents.stream().map(x -> x.getJws()).collect(Collectors.toList());
             return events;
         }
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "INVALID_EVENT_ID");

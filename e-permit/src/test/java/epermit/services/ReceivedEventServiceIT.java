@@ -29,6 +29,7 @@ import epermit.events.quotacreated.QuotaCreatedEvent;
 import epermit.models.enums.PermitType;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.PermitRepository;
+import epermit.utils.GsonUtil;
 import epermit.utils.JwsUtil;
 import epermit.utils.KeyUtil;
 import lombok.SneakyThrows;
@@ -47,9 +48,6 @@ public class ReceivedEventServiceIT {
 
     @Autowired
     private KeyUtil keyUtil;
-
-    @Autowired
-    private JwsUtil jwsUtil;
 
     @Autowired
     private AuthorityRepository authorityRepository;
@@ -105,8 +103,7 @@ public class ReceivedEventServiceIT {
         e.setIssuer("UZ");
         e.setIssuedFor("TR");
         e.setEventId(UUID.randomUUID().toString());
-        String jws = jwsUtil.createJws(getKey(), e);
-        EventValidationResult r = receivedEventService.handle(jws);
+        EventValidationResult r = receivedEventService.handle(GsonUtil.toMap(e));
         assertTrue(r.isOk());
     }
 
@@ -128,8 +125,7 @@ public class ReceivedEventServiceIT {
         e.setIssuer("UZ");
         e.setIssuedFor("TR");
         e.setEventId(UUID.randomUUID().toString());
-        String jws = jwsUtil.createJws(getKey(), e);
-        EventValidationResult r = receivedEventService.handle(jws);
+        EventValidationResult r = receivedEventService.handle(GsonUtil.toMap(e));
         assertTrue(r.isOk());
         Optional<Permit> p = permitRepository.findOneByIssuerAndPermitId("UZ", "UZ-TR-2021-1-5");
         assertTrue(p.isPresent());

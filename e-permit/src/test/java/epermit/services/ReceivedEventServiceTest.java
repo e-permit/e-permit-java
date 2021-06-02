@@ -5,7 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -19,10 +21,15 @@ import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
+import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import epermit.entities.Authority;
 import epermit.entities.ReceivedEvent;
@@ -80,7 +87,6 @@ public class ReceivedEventServiceTest {
                                 "event_type", EventType.KEY_CREATED, "event_id", "1",
                                 "previous_event_id", "0", "key_id", "1");
 
-                when(jwsUtil.validateJws("jws")).thenReturn(JwsValidationResult.success(claims));
                 when(receivedEventRepository.existsByIssuerAndEventId("TR", "1")).thenReturn(false);
                 when(receivedEventRepository.existsByIssuerAndEventId("TR", "0")).thenReturn(true);
                 when(keyCreatedEventValidator.validate(claims)).thenReturn(EventValidationResult
@@ -90,20 +96,10 @@ public class ReceivedEventServiceTest {
                 ReceivedEventService receivedEventService = new ReceivedEventService(jwsUtil,
                                 receivedEventRepository, eventHandlers, eventValidators,
                                 restTemplate, authorityRepository, properties);
-                EventValidationResult r = receivedEventService.handle("jws");
+                EventValidationResult r = receivedEventService.handle(claims);
                 assertTrue(r.isOk());
                 verify(keyCreatedEventHandler, times(1))
                                 .handle(GsonUtil.fromMap(claims, KeyCreatedEvent.class));
-        }
-
-        @Test
-        void handleJwsFailTest() {
-                when(jwsUtil.validateJws("jws"))
-                                .thenReturn(JwsValidationResult.fail("INVALID_JWS"));
-                EventValidationResult r = eventService.handle("jws");
-                assertFalse(r.isOk());
-                assertEquals("INVALID_JWS", r.getErrorCode());
-                verify(keyCreatedEventHandler, never()).handle(any());
         }
 
         @Test
@@ -112,10 +108,9 @@ public class ReceivedEventServiceTest {
                                 "event_type", EventType.KEY_CREATED, "event_id", "1",
                                 "previous_event_id", "0", "key_id", "1");
 
-                when(jwsUtil.validateJws("jws")).thenReturn(JwsValidationResult.success(claims));
                 when(receivedEventRepository.existsByIssuerAndEventId("TR", "1")).thenReturn(true);
 
-                EventValidationResult r = eventService.handle("jws");
+                EventValidationResult r = eventService.handle(claims);
                 assertFalse(r.isOk());
                 assertEquals("EVENT_EXIST", r.getErrorCode());
                 verify(keyCreatedEventHandler, never()).handle(any());
@@ -127,11 +122,10 @@ public class ReceivedEventServiceTest {
                                 "event_type", EventType.KEY_CREATED, "event_id", "1",
                                 "previous_event_id", "0", "key_id", "1");
 
-                when(jwsUtil.validateJws("jws")).thenReturn(JwsValidationResult.success(claims));
                 when(receivedEventRepository.existsByIssuer("TR")).thenReturn(true);
                 when(receivedEventRepository.existsByIssuerAndEventId("TR", "1")).thenReturn(false);
                 when(receivedEventRepository.existsByIssuerAndEventId("TR", "0")).thenReturn(false);
-                EventValidationResult r = eventService.handle("jws");
+                EventValidationResult r = eventService.handle(claims);
                 assertFalse(r.isOk());
                 assertEquals("NOTEXIST_PREVIOUSEVENT", r.getErrorCode());
                 verify(keyCreatedEventHandler, never()).handle(any());
@@ -143,11 +137,10 @@ public class ReceivedEventServiceTest {
                                 "event_type", EventType.KEY_CREATED, "event_id", "1",
                                 "previous_event_id", "0", "key_id", "1");
 
-                when(jwsUtil.validateJws("jws")).thenReturn(JwsValidationResult.success(claims));
                 when(receivedEventRepository.existsByIssuerAndEventId("TR", "1")).thenReturn(false);
                 when(receivedEventRepository.existsByIssuerAndEventId("TR", "0")).thenReturn(true);
                 assertThrows(Exception.class, () -> {
-                        eventService.handle("jws");
+                        eventService.handle(claims);
                 });
                 verify(keyCreatedEventHandler, never()).handle(any());
         }
@@ -158,7 +151,6 @@ public class ReceivedEventServiceTest {
                                 "event_type", EventType.KEY_CREATED, "event_id", "1",
                                 "previous_event_id", "0", "key_id", "1");
 
-                when(jwsUtil.validateJws("jws")).thenReturn(JwsValidationResult.success(claims));
                 when(receivedEventRepository.existsByIssuerAndEventId("TR", "1")).thenReturn(false);
                 when(receivedEventRepository.existsByIssuerAndEventId("TR", "0")).thenReturn(true);
                 when(keyCreatedEventValidator.validate(claims)).thenReturn(EventValidationResult
@@ -167,7 +159,7 @@ public class ReceivedEventServiceTest {
                 ReceivedEventService receivedEventService = new ReceivedEventService(jwsUtil,
                                 receivedEventRepository, eventHandlers, eventValidators,
                                 restTemplate, authorityRepository, properties);
-                EventValidationResult r = receivedEventService.handle("jws");
+                EventValidationResult r = receivedEventService.handle(claims);
                 assertFalse(r.isOk());
                 assertEquals("ERROR", r.getErrorCode());
                 verify(keyCreatedEventHandler, never()).handle(any());
@@ -179,7 +171,6 @@ public class ReceivedEventServiceTest {
                                 "event_type", EventType.KEY_CREATED, "event_id", "1",
                                 "previous_event_id", "0", "key_id", "1");
 
-                when(jwsUtil.validateJws("jws")).thenReturn(JwsValidationResult.success(claims));
                 when(receivedEventRepository.existsByIssuerAndEventId("TR", "1")).thenReturn(false);
                 when(receivedEventRepository.existsByIssuerAndEventId("TR", "0")).thenReturn(true);
                 when(keyCreatedEventValidator.validate(claims)).thenReturn(EventValidationResult
@@ -189,7 +180,7 @@ public class ReceivedEventServiceTest {
                                 receivedEventRepository, eventHandlers, eventValidators,
                                 restTemplate, authorityRepository, properties);
                 assertThrows(Exception.class, () -> {
-                        receivedEventService.handle("jws");
+                        receivedEventService.handle(claims);
                 });
                 verify(keyCreatedEventHandler, never()).handle(any());
         }
@@ -197,26 +188,26 @@ public class ReceivedEventServiceTest {
         @Test
         void handleReceivedEventOkTest() {
                 ReceivedEventService eventService2 = spy(eventService);
-                doReturn(EventValidationResult.success(null)).when(eventService2).handle("jws");
+                doReturn(EventValidationResult.success(null)).when(eventService2).handle(anyMap());
                 ReceivedAppEvent event = new ReceivedAppEvent();
-                event.setJws("jws");
+                event.setClaims(Map.of());
                 eventService2.handleReceivedEvent(event);
-                verify(eventService2, times(1)).handle(anyString());
+                verify(eventService2, times(1)).handle(anyMap());
         }
 
         @Test
         void handleReceivedEventErrorTest() {
                 ReceivedEventService eventService2 = spy(eventService);
                 doReturn(EventValidationResult.fail("NOTEXIST_PREVIOUSEVENT_", null))
-                                .when(eventService2).handle("jws");
+                                .when(eventService2).handle(anyMap());
                 ReceivedAppEvent event = new ReceivedAppEvent();
-                event.setJws("jws");
+                event.setClaims(Map.of());
                 eventService2.handleReceivedEvent(event);
-                verify(eventService2, times(1)).handle(anyString());
+                verify(eventService2, times(1)).handle(anyMap());
         }
 
         @Test
-        void handleReceivedEventPreviousEventNotExistTest() {// 03122700055
+        void handleReceivedEventPreviousEventNotExistTest() {
                 ReceivedEventService eventService2 = spy(eventService);
                 KeyCreatedEvent keyCreatedEvent = new KeyCreatedEvent();
                 keyCreatedEvent.setEventId("3");
@@ -226,9 +217,9 @@ public class ReceivedEventServiceTest {
                 keyCreatedEvent.setJwk(new PublicJwk());
                 keyCreatedEvent.setPreviousEventId("2");
                 doReturn(EventValidationResult.fail("NOTEXIST_PREVIOUSEVENT", keyCreatedEvent))
-                                .when(eventService2).handle("jws");
+                                .when(eventService2).handle(Map.of("previous_event_id", "2"));
                 doReturn(EventValidationResult.success(keyCreatedEvent)).when(eventService2)
-                                .handle("abc");
+                                .handle(Map.of());
 
                 ReceivedEvent receivedEvent = new ReceivedEvent();
                 receivedEvent.setEventId("1");
@@ -241,14 +232,16 @@ public class ReceivedEventServiceTest {
                 claims.put("last_event_id", "1");
                 claims.put("issuer", "UZ");
                 claims.put("issued_for", "TR");
-                when(jwsUtil.createJws(claims)).thenReturn("request_jws");
-                when(restTemplate.getForObject(authority.getApiUri() + "/request_jws",
-                                String[].class)).thenReturn(new String[] {"abc"});
+                when(restTemplate.exchange(ArgumentMatchers.anyString(),
+                                ArgumentMatchers.eq(HttpMethod.GET), ArgumentMatchers.any(),
+                                ArgumentMatchers.<Class<String[]>>any())).thenReturn(
+                                                ResponseEntity.ok(new String[] {"abc"}));
+                when(jwsUtil.validateJws(anyString())).thenReturn(JwsValidationResult.success(Map.of()));
                 when(properties.getIssuerCode()).thenReturn("UZ");
                 ReceivedAppEvent event = new ReceivedAppEvent();
-                event.setJws("jws");
+                event.setClaims(Map.of("previous_event_id", "2"));
                 eventService2.handleReceivedEvent(event);
-                verify(eventService2, times(2)).handle(anyString());
+                verify(eventService2, times(2)).handle(anyMap());
         }
 }
 

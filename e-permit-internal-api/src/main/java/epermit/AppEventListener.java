@@ -9,21 +9,20 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.web.client.RestTemplate;
 import epermit.events.CreatedAppEvent;
+import epermit.utils.JwsUtil;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 @EnableAsync(proxyTargetClass = true)
 @Component
 public class AppEventListener {
     private final RestTemplate restTemplate;
-
-    public AppEventListener(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
-    }
+    private final JwsUtil jwsUtil;
 
     @Async
     @TransactionalEventListener
     public void onAppEvent(CreatedAppEvent event) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpHeaders headers = jwsUtil.getJwsHeader(event.getJws());
         HttpEntity<String> request = new HttpEntity<String>(event.getJws(), headers);
         restTemplate.postForEntity(event.getUri(), request, Boolean.class);
     }

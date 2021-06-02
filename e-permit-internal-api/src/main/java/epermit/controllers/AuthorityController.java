@@ -27,7 +27,6 @@ public class AuthorityController {
     private final AuthorityService service;
     private final RestTemplate restTemplate;
 
-
     @GetMapping()
     public List<AuthorityDto> getAll() {
         return service.getAll();

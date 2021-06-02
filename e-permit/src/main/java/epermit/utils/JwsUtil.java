@@ -1,5 +1,6 @@
 package epermit.utils;
 
+import java.util.Map;
 import java.util.Optional;
 import com.google.gson.Gson;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -11,7 +12,12 @@ import com.nimbusds.jose.Payload;
 import com.nimbusds.jose.crypto.ECDSASigner;
 import com.nimbusds.jose.crypto.ECDSAVerifier;
 import com.nimbusds.jose.jwk.ECKey;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 import epermit.entities.AuthorityKey;
 import epermit.models.EPermitProperties;
 import epermit.models.results.JwsValidationResult;
@@ -55,7 +61,7 @@ public class JwsUtil {
         String issuer = getClaim(jws, "issuer");
         JWSObject jwsObject = JWSObject.parse(jws);
         String keyId = jwsObject.getHeader().getKeyID();
-       
+
         Optional<AuthorityKey> k = authorityKeyRepository.findOneByIssuerAndKeyId(issuer, keyId);
         if (!k.isPresent()) {
             log.info("The issuer is not known");
@@ -75,5 +81,27 @@ public class JwsUtil {
     public <T> T getClaim(String jws, String key) {
         JWSObject jwsObject = JWSObject.parse(jws);
         return (T) jwsObject.getPayload().toJSONObject().get(key);
+    }
+
+    @SneakyThrows
+    public Map<String, Object> resolveJws(HttpHeaders headers) {
+        String header = headers.getFirst(HttpHeaders.AUTHORIZATION);
+        if (header == null || !header.startsWith("Bearer ")) {
+            throw new Exception("No JWT token found in request headers");
+        }
+
+        String jws = header.substring(7);
+        JwsValidationResult r = validateJws(jws);
+        if (!r.isValid()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED");
+        }
+        return r.getPayload();
+    }
+
+    public HttpHeaders getJwsHeader(String jws) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.add("Authorization", "Bearer " + jws);
+        return headers;
     }
 }

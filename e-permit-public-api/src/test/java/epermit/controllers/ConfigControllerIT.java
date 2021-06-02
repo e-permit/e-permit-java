@@ -1,7 +1,5 @@
 package epermit.controllers;
 
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,7 +18,6 @@ import epermit.PermitPostgresContainer;
 import epermit.entities.Key;
 import epermit.models.dtos.AuthorityConfig;
 import epermit.repositories.KeyRepository;
-import epermit.services.KeyService;
 import epermit.utils.KeyUtil;
 
 @Testcontainers

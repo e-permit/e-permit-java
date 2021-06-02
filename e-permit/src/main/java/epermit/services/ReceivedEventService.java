@@ -1,8 +1,11 @@
 package epermit.services;
 
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
+import java.nio.file.AccessDeniedException;
 import java.util.HashMap;
 import java.util.Map;
 import epermit.events.EventBase;
@@ -34,13 +37,8 @@ public class ReceivedEventService {
 
     @SneakyThrows
     @Transactional
-    public EventValidationResult handle(String jws) {
-        log.info("The message is recived. The message content is: " + jws);
-        JwsValidationResult r = jwsUtil.validateJws(jws);
-        if (!r.isValid()) {
-            return EventValidationResult.jwsFail(r.getErrorCode());
-        }
-        EventBase e = GsonUtil.fromMap(r.getPayload(), EventBase.class);
+    public EventValidationResult handle(Map<String, Object> claims) {
+        EventBase e = GsonUtil.fromMap(claims, EventBase.class);
         if (receivedEventRepository.existsByIssuerAndEventId(e.getIssuer(), e.getEventId())) {
             return EventValidationResult.fail("EVENT_EXIST", e);
         }
@@ -55,7 +53,7 @@ public class ReceivedEventService {
         if (eventValidator == null) {
             throw new Exception("NOT_IMPLEMENTED_EVENT_VALIDATOR");
         }
-        EventValidationResult result = eventValidator.validate(r.getPayload());
+        EventValidationResult result = eventValidator.validate(claims);
         if (result.isOk()) {
             EventHandler eventHandler =
                     eventHandlers.get(e.getEventType().toString() + "_EVENT_HANDLER");
@@ -70,7 +68,7 @@ public class ReceivedEventService {
 
     @SneakyThrows
     public void handleReceivedEvent(ReceivedAppEvent event) {
-        EventValidationResult r = handle(event.getJws());
+        EventValidationResult r = handle(event.getClaims());
         if (!r.isOk() && r.getErrorCode().equals("NOTEXIST_PREVIOUSEVENT")) {
             EventBase eBase = (EventBase) r.getEvent();
             String url = authorityRepository.findOneByCode(eBase.getIssuer()).getApiUri();
@@ -81,16 +79,16 @@ public class ReceivedEventService {
             claims.put("issuer", properties.getIssuerCode());
             claims.put("issued_for", eBase.getIssuer());
             String requestJws = jwsUtil.createJws(claims);
-            String[] jwsList = restTemplate.getForObject(url + "/" + requestJws, String[].class);
+            HttpEntity<?> entity = new HttpEntity<>(jwsUtil.getJwsHeader(requestJws));
+            String[] jwsList =
+                    restTemplate.exchange(url, HttpMethod.GET, entity, String[].class).getBody();
             for (String jws : jwsList) {
-                handle(jws);
+                JwsValidationResult jwsValidationResult = jwsUtil.validateJws(jws);
+                if (!jwsValidationResult.isValid()) {
+                    throw new AccessDeniedException("Jws validation error");
+                }
+                handle(jwsValidationResult.getPayload());
             }
         }
     }
-
-    /*
-     * private ObjectMapper jacksonObjectMapper() { return new
-     * ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
-     * .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false); }
-     */
 }

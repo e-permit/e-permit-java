@@ -2,7 +2,9 @@ package epermit.services;
 
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.when;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -37,28 +39,23 @@ public class CreatedEventServiceTest {
                 .thenReturn(Optional.of(createdEvent));
         when(createdEventRepository.findByIdGreaterThanOrderByIdAsc(Long.valueOf(1)))
                 .thenReturn(List.of(createdEvent));
-        when(jwsUtil.validateJws("requestJws"))
-                .thenReturn(JwsValidationResult.success(Map.of("event_id", "1", "issuer", "TR")));
-        List<String> r = createdEventService.getEvents("requestJws");
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("issuer", "TR");
+        claims.put("event_id", "1");
+        List<String> r = createdEventService.getEvents(claims);
         assertEquals(List.of("jws"), r);
     }
 
-    @Test
-    void getEventsInvalidJwsTest() {
-        when(jwsUtil.validateJws("requestJws")).thenReturn(JwsValidationResult.fail("INVALI_JWS"));
-        assertThrows(ResponseStatusException.class, () -> {
-            createdEventService.getEvents("requestJws");
-        });
-    }
 
     @Test
     void getEventsInvalidEventIdTest() {
         when(createdEventRepository.findOneByEventIdAndIssuedFor("1", "TR"))
                 .thenReturn(Optional.empty());
-        when(jwsUtil.validateJws("requestJws"))
-                .thenReturn(JwsValidationResult.success(Map.of("event_id", "1", "issuer", "TR")));
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("issuer", "TR");
+        claims.put("event_id", "1");
         assertThrows(ResponseStatusException.class, () -> {
-            createdEventService.getEvents("requestJws");
+            createdEventService.getEvents(claims);
         });
     }
 }

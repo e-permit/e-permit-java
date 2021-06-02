@@ -1,39 +1,37 @@
 package epermit.controllers;
 
 import java.util.List;
-import java.util.Map;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import epermit.events.ReceivedAppEvent;
 import epermit.services.CreatedEventService;
+import epermit.utils.JwsUtil;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/events")
-@Slf4j
 public class EventController {
 
     private final ApplicationEventPublisher applicationEventPublisher;
     private final CreatedEventService createdEventService;
+    private final JwsUtil jwsUtil;
 
     @PostMapping()
-    public Boolean receiveEvent(@RequestBody Map<String, String> input) {
-        log.info("Event is received jws: " + input.get("jws"));
+    public Boolean receiveEvent(@RequestHeader HttpHeaders headers) {
         ReceivedAppEvent appEvent = new ReceivedAppEvent();
-        appEvent.setJws(input.get("jws"));
+        appEvent.setClaims(jwsUtil.resolveJws(headers));
         applicationEventPublisher.publishEvent(appEvent);
         return true;
     }
 
     @GetMapping()
-    public List<String> getEvents(String jws) {
-        return createdEventService.getEvents(jws);
+    public List<String> getEvents(@RequestHeader HttpHeaders headers) {
+        return createdEventService.getEvents(jwsUtil.resolveJws(headers));
     }
-
 }
