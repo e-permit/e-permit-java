@@ -47,7 +47,7 @@ public class PermitControllerTest {
     @Test
     void usedTest() {
         PermitUsedInput input = new PermitUsedInput();
-        controller.setUsed(input);
-        verify(permitService, times(1)).usePermit(input);
+        controller.setUsed("TR", input);
+        verify(permitService, times(1)).usePermit("TR", input);
     }
 }

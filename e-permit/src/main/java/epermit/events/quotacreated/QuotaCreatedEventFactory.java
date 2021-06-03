@@ -18,7 +18,8 @@ public class QuotaCreatedEventFactory {
         e.setPermitYear(quota.getPermitYear());
         e.setStartNumber(quota.getStartNumber());
         e.setEventType(EventType.QUOTA_CREATED);
-        util.saveAndPublish(e, quota.getAuthority().getCode());
+        String issuedFor = quota.getAuthority().getCode();
+        util.saveAndPublish(e, issuedFor);
         return e;
     }
 }

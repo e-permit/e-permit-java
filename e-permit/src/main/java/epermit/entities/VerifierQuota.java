@@ -1,12 +1,12 @@
 package epermit.entities;
 
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -58,7 +58,7 @@ public class VerifierQuota {
     @Column(name ="deleted", nullable = false)
     private boolean deleted;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "authority_id") 
     @EqualsAndHashCode.Exclude
     @ToString.Exclude

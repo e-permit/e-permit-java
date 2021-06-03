@@ -20,9 +20,9 @@ public class CreatedEventService {
     @SneakyThrows
     public List<String> getEvents(Map<String, Object> claims) {
         String issuer = (String) claims.get("issuer");
-        String eventId = (String) claims.get("event_id");
+        String lastEventId = (String) claims.get("last_event_id");
         Optional<CreatedEvent> eventR =
-                createdEventRepository.findOneByEventIdAndIssuedFor(eventId, issuer);
+                createdEventRepository.findOneByEventIdAndIssuedFor(lastEventId, issuer);
         if (eventR.isPresent()) {
             List<CreatedEvent> createdEvents =
                     createdEventRepository.findByIdGreaterThanOrderByIdAsc(eventR.get().getId());

@@ -3,6 +3,7 @@ package epermit.events;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
@@ -23,9 +24,10 @@ public class EventFactoryUtil {
     private final AuthorityRepository authorityRepository;
 
     public <T extends EventBase> void saveAndPublish(T event, String issuedFor) {
-        CreatedEvent lastEvent =
-                createdEventRepository.findTopByIssuedForOrderByIdDesc(issuedFor).get();
-        event.setPreviousEventId(lastEvent.getEventId());
+        Optional<CreatedEvent> lastEventR =
+                createdEventRepository.findTopByIssuedForOrderByIdDesc(issuedFor);
+
+        event.setPreviousEventId(lastEventR.isPresent() ? lastEventR.get().getEventId() : "0");
         event.setCreatedAt(Instant.now().getEpochSecond());
         event.setIssuer(properties.getIssuerCode());
         event.setIssuedFor(issuedFor);
@@ -35,7 +37,7 @@ public class EventFactoryUtil {
         createdEvent.setCreatedAt(LocalDateTime.now(ZoneOffset.UTC));
         createdEvent.setIssuedFor(issuedFor);
         createdEvent.setEventId(event.getEventId());
-        createdEvent.setPreviousEventId(lastEvent.getEventId());
+        createdEvent.setPreviousEventId(event.getPreviousEventId());
         createdEvent.setEventType(event.getEventType());
         createdEvent.setJws(jws);
         createdEventRepository.save(createdEvent);

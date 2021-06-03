@@ -34,6 +34,9 @@ public class IssuedPermitActivity {
     @Enumerated(EnumType.STRING)
     private PermitActivityType activityType;
 
+    @Column(name = "activity_timestamp", nullable = false)
+    private Long activityTimestamp;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -67,23 +68,23 @@ public class PermitServiceTest {
     @Test
     void usePermitNotFoundTest() {
         assertThrows(ResponseStatusException.class, () -> {
-            permitService.usePermit(new PermitUsedInput());
+            permitService.usePermit("", new PermitUsedInput());
         });
     }
     @Test
     void usePermitTest() {
         PermitUsedInput input =  new PermitUsedInput();
         input.setActivityType(PermitActivityType.ENTERANCE);
-        input.setPermitId("TR-UZ-2021-1-1");
         Permit permit = new Permit();
         permit.setPermitId("TR-UZ-2021-1-1");
         PermitActivity activity = new PermitActivity();
         activity.setActivityType(PermitActivityType.ENTERANCE);
+        activity.setActivityTimestamp(Instant.now().getEpochSecond());
         permit.addActivity(activity);
         when( permitRepository.findOneByPermitId("TR-UZ-2021-1-1")).thenReturn(Optional.of(permit));
-        permitService.usePermit(input);
+        permitService.usePermit("TR-UZ-2021-1-1", input);
         verify(permitRepository, times(1)).save(permit);
-        verify(permitUsedEventFactory, times(1)).create(permit, PermitActivityType.ENTERANCE);
+        verify(permitUsedEventFactory, times(1)).create(activity);
     }
     
 }

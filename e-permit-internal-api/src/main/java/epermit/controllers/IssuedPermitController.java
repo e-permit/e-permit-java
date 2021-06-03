@@ -30,8 +30,8 @@ public class IssuedPermitController {
         return service.getAll(issuedFor, pageable);
     }
 
-    @GetMapping("{id}")
-    public IssuedPermitDto getById(Long id) {
+    @GetMapping("/{id}")
+    public IssuedPermitDto getById(@PathVariable("id") Long id) {
         return service.getById(id);
     }
 
@@ -41,8 +41,8 @@ public class IssuedPermitController {
         return Map.of("permitId", permitId);
     }
 
-    @PatchMapping("{id}/revoke")
-    public void revoke(@PathVariable Long id) {
+    @PatchMapping("/{id}/revoke")
+    public void revoke(@PathVariable("id") Long id) {
         service.revokePermit(id, "comment");
     }
 }

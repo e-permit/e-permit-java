@@ -1,5 +1,6 @@
 package epermit.services;
 
+import java.time.Instant;
 import java.util.Optional;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import epermit.entities.Permit;
+import epermit.entities.PermitActivity;
 import epermit.events.permitused.PermitUsedEventFactory;
 import epermit.models.dtos.PermitDto;
 import epermit.models.inputs.PermitUsedInput;
@@ -33,14 +35,18 @@ public class PermitService {
     }
 
     @Transactional
-    public void usePermit(PermitUsedInput input) {
-        Optional<Permit> permitOptional = permitRepository.findOneByPermitId(input.getPermitId());
+    public void usePermit(String permitId, PermitUsedInput input) {
+        Optional<Permit> permitOptional = permitRepository.findOneByPermitId(permitId);
         if (!permitOptional.isPresent()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "PERMIT_NOTFOUND");
         }
         Permit permit = permitOptional.get();
+        PermitActivity activity = new PermitActivity();
+        activity.setActivityType(input.getActivityType());
+        activity.setActivityTimestamp(Instant.now().getEpochSecond());
+        permit.addActivity(activity);
         permitRepository.save(permit);
-        permitUsedEventFactory.create(permit, input.getActivityType());
+        permitUsedEventFactory.create(activity);
     }
 
 }

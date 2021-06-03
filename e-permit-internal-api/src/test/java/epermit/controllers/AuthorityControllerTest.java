@@ -17,7 +17,6 @@ import org.springframework.web.client.RestTemplate;
 import epermit.models.dtos.AuthorityConfig;
 import epermit.models.dtos.AuthorityDto;
 import epermit.models.inputs.CreateAuthorityInput;
-import epermit.models.inputs.CreateQuotaInput;
 import epermit.services.AuthorityService;
 
 @ExtendWith(MockitoExtension.class)
@@ -63,18 +62,5 @@ public class AuthorityControllerTest {
                 "{\"code\":\"UZ\",\"verify_uri\":\"https://e-permit.github.io/verify\"}");
         controller.create(input);
         verify(authorityService, times(1)).create(eq(input), any());
-    }
-
-    @Test
-    void createQuotaTest() {
-        CreateQuotaInput input = new CreateQuotaInput();
-        controller.createQuota(input);
-        verify(authorityService, times(1)).createQuota(input);
-    }
-
-    @Test
-    void enableQuotaTest() {
-        controller.enableQuota(1);
-        verify(authorityService, times(1)).enableQuota(1);
     }
 }

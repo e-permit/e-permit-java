@@ -1,7 +1,5 @@
 package epermit.events.permitused;
 
-import java.time.Instant;
-import java.time.ZoneOffset;
 import org.springframework.stereotype.Service;
 import epermit.entities.IssuedPermit;
 import epermit.entities.IssuedPermitActivity;
@@ -23,6 +21,7 @@ public class PermitUsedEventHandler implements EventHandler {
         permit.setUsed(true);
         IssuedPermitActivity activity = new IssuedPermitActivity();
         activity.setActivityType(event.getActivityType());
+        activity.setActivityTimestamp(event.getActivityTimestamp());
         permit.addActivity(activity);
         issuedPermitRepository.save(permit);
     }
