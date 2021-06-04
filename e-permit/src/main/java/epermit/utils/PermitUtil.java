@@ -22,16 +22,17 @@ public class PermitUtil {
 
     public String getPermitId(String iss, String aud, PermitType pt, Integer py, int serialNumber) {
         StringJoiner joiner = new StringJoiner("-");
-        String permitId = joiner.add(iss).add(aud).add(Integer.toString(py))
-                .add(pt.getCode()).add(Long.toString(serialNumber)).toString();
+        String permitId = joiner.add(iss).add(aud).add(Integer.toString(py)).add(pt.getCode())
+                .add(Long.toString(serialNumber)).toString();
         return permitId;
     }
 
     public boolean isQuotaSufficient(String issuer, int permitYear, int serialNumber,
             PermitType permitType) {
         Authority authority = authorityRepository.findOneByCode(issuer);
-        return authority.getVerifierQuotas().stream().anyMatch(x -> x.getPermitType() == permitType
-                && serialNumber >= x.getStartNumber() && serialNumber <= x.getEndNumber());
+        return authority.getVerifierQuotas().stream()
+                .anyMatch(x -> x.isActive() && x.getPermitType() == permitType
+                        && serialNumber >= x.getStartNumber() && serialNumber <= x.getEndNumber());
     }
 
     public Integer generateSerialNumber(String issuedFor, int py, PermitType pt) {

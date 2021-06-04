@@ -62,14 +62,14 @@ public class IssuedPermitControllerTest {
     void createTest() {
         CreatePermitInput input = new CreatePermitInput();
         when(issuedPermitService.createPermit(input)).thenReturn("ABC");
-        Map<String, String> r = controller.createPermit(input);
-        assertEquals("ABC", r.get("permitId"));
+        String permitId = controller.createPermit(input);
+        assertEquals("ABC", permitId);
         verify(issuedPermitService, times(1)).createPermit(input);
     }
 
     @Test
     void revokeTest() {
         controller.revoke(Long.valueOf(1));
-        verify(issuedPermitService, times(1)).revokePermit(eq(Long.valueOf(1)), anyString());
+        verify(issuedPermitService, times(1)).revokePermit(eq(Long.valueOf(1)));
     }
 }

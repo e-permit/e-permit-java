@@ -23,6 +23,11 @@ public class GsonUtil {
         Type mapType = new TypeToken<Map<String, Object>>() {}.getType();
         return getGson().fromJson(getGson().toJson(obj), mapType);
     }
+
+    public static Map<String, Object> toMap(String json) {
+        Type mapType = new TypeToken<Map<String, Object>>() {}.getType();
+        return getGson().fromJson(json, mapType);
+    }
 }
 
 

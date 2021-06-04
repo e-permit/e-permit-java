@@ -26,7 +26,12 @@ public class PermitController {
         return permitService.getAll(pageable);
     }
 
-    @PostMapping("/{id}/usages")
+    @GetMapping("/{id}")
+    public PermitDto getById(@PathVariable("id") Long id) {
+        return permitService.getById(id);
+    }
+
+    @PostMapping("/{id}/activities")
     public void setUsed(@PathVariable("id") String id, @RequestBody @Valid PermitUsedInput input) {
         permitService.usePermit(id, input);
     }

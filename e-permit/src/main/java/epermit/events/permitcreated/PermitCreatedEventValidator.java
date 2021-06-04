@@ -1,7 +1,6 @@
 package epermit.events.permitcreated;
 
 import java.util.Map;
-import com.google.gson.Gson;
 import org.springframework.stereotype.Service;
 import epermit.events.EventValidationResult;
 import epermit.events.EventValidator;

@@ -30,7 +30,6 @@ import epermit.models.enums.PermitType;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.PermitRepository;
 import epermit.utils.GsonUtil;
-import epermit.utils.JwsUtil;
 import epermit.utils.KeyUtil;
 import lombok.SneakyThrows;
 

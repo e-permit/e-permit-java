@@ -3,6 +3,7 @@ package epermit.services;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 import java.util.Optional;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -75,7 +76,7 @@ public class IssuedPermitService {
     }
 
     @Transactional
-    public void revokePermit(Long id, String comment) {
+    public void revokePermit(Long id) {
         Optional<IssuedPermit> permitOptional = issuedPermitRepository.findById(id);
         if (!permitOptional.isPresent()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "PERMIT_NOTFOUND");

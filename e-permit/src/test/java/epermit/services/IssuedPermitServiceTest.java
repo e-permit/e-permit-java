@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -94,8 +95,8 @@ public class IssuedPermitServiceTest {
                 input.getPermitYear(), 5)).thenReturn("TR-UA-2021-1-5");
         when(properties.getIssuerCode()).thenReturn("TR");
         when(permitUtil.generateQrCode(any())).thenReturn("QRCODE");
-        String permitId = issuedPermitService.createPermit(input);
-        assertEquals("TR-UA-2021-1-5", permitId);
+        String r = issuedPermitService.createPermit(input);
+        assertEquals("TR-UA-2021-1-5", r);
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         IssuedPermit permit = new IssuedPermit();
         permit.setCompanyName("companyName");
@@ -132,7 +133,7 @@ public class IssuedPermitServiceTest {
         permit.setIssuedFor("issuedFor");
         permit.setPermitId("permitId");
         when(issuedPermitRepository.findById(id)).thenReturn(Optional.of(permit));
-        issuedPermitService.revokePermit(id, "comment");
+        issuedPermitService.revokePermit(id);
         assertTrue(permit.isRevoked());
         assertNotNull(permit.getRevokedAt());
         verify(issuedPermitRepository, times(1)).save(permit);
@@ -144,7 +145,7 @@ public class IssuedPermitServiceTest {
         Long id = Long.valueOf(1);
         when(issuedPermitRepository.findById(id)).thenReturn(Optional.empty());
         assertThrows(ResponseStatusException.class, () -> {
-            issuedPermitService.revokePermit(id, "comment");
+            issuedPermitService.revokePermit(id);
         });
     }
 }

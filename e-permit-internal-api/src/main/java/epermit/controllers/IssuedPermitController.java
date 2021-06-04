@@ -4,6 +4,7 @@ import java.util.Map;
 import javax.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,7 +28,8 @@ public class IssuedPermitController {
     @GetMapping()
     public Page<IssuedPermitDto> getAll(@RequestParam(required = false) String issuedFor,
             Pageable pageable) {
-        return service.getAll(issuedFor, pageable);
+        Page<IssuedPermitDto> r = service.getAll(issuedFor, pageable);
+        return r;
     }
 
     @GetMapping("/{id}")
@@ -36,13 +38,12 @@ public class IssuedPermitController {
     }
 
     @PostMapping()
-    public Map<String, String> createPermit(@RequestBody @Valid CreatePermitInput input) {
-        String permitId = service.createPermit(input);
-        return Map.of("permitId", permitId);
+    public String createPermit(@RequestBody @Valid CreatePermitInput input) {
+        return service.createPermit(input);
     }
 
-    @PatchMapping("/{id}/revoke")
+    @DeleteMapping("/{id}")
     public void revoke(@PathVariable("id") Long id) {
-        service.revokePermit(id, "comment");
+        service.revokePermit(id);
     }
 }

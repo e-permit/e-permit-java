@@ -1,7 +1,5 @@
 package epermit.events.permitcreated;
 
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import com.google.gson.Gson;
 import org.springframework.stereotype.Service;
 import epermit.entities.Permit;

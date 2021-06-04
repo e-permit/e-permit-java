@@ -16,7 +16,9 @@ public class PermitDto {
 
     private int permitYear;
 
-    private long issuedAt;
+    private String issuedAt;
+
+    private String expireAt;
 
     private String plateNumber;
 
