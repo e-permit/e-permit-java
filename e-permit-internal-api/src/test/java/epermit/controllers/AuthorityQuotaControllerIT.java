@@ -52,9 +52,8 @@ public class AuthorityQuotaControllerIT {
     @Autowired
     KeyUtil keyUtil;
 
-    @BeforeEach
     @Transactional
-    void setUp() {
+    void setUpAuthority() {
         Authority authority = new Authority();
         authority.setApiUri("apiUri");
         authority.setCode("UZ");
@@ -70,7 +69,12 @@ public class AuthorityQuotaControllerIT {
         Key key = keyUtil.create("1");
         key.setEnabled(true);
         keyRepository.save(key);
-        quotaId = authorityRepository.findOneByCode("UZ").getVerifierQuotas().get(0).getId();
+        quotaId = quota.getId();
+    }
+
+    @BeforeEach
+    void setUp(){
+        setUpAuthority();
     }
 
     @Container

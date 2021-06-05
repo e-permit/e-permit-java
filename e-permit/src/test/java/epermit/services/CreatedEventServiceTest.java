@@ -2,7 +2,6 @@ package epermit.services;
 
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.List;
@@ -15,7 +14,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.server.ResponseStatusException;
 import epermit.entities.CreatedEvent;
-import epermit.models.results.JwsValidationResult;
 import epermit.repositories.CreatedEventRepository;
 import epermit.utils.JwsUtil;
 
@@ -41,7 +39,7 @@ public class CreatedEventServiceTest {
                 .thenReturn(List.of(createdEvent));
         Map<String, Object> claims = new HashMap<>();
         claims.put("issuer", "TR");
-        claims.put("event_id", "1");
+        claims.put("last_event_id", "1");
         List<String> r = createdEventService.getEvents(claims);
         assertEquals(List.of("jws"), r);
     }
@@ -49,8 +47,6 @@ public class CreatedEventServiceTest {
 
     @Test
     void getEventsInvalidEventIdTest() {
-        when(createdEventRepository.findOneByEventIdAndIssuedFor("1", "TR"))
-                .thenReturn(Optional.empty());
         Map<String, Object> claims = new HashMap<>();
         claims.put("issuer", "TR");
         claims.put("event_id", "1");

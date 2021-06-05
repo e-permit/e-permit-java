@@ -26,6 +26,7 @@ public class PermitUsedEventFactoryTest {
         Permit permit = new Permit();
         permit.setPermitId("TR-UA");
         PermitActivity activity = new PermitActivity();
+        activity.setActivityType(PermitActivityType.ENTERANCE);
         activity.setPermit(permit);
         activity.setActivityTimestamp(Instant.now().getEpochSecond());
         PermitUsedEvent event = factory.create(activity);

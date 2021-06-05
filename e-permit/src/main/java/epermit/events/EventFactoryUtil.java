@@ -44,7 +44,7 @@ public class EventFactoryUtil {
         String apiUri = authorityRepository.findOneByCode(issuedFor).getApiUri();
         CreatedAppEvent appEvent = new CreatedAppEvent();
         appEvent.setJws(jws);
-        appEvent.setUri(apiUri);
+        appEvent.setUri(apiUri + "/events");
         eventPublisher.publishEvent(appEvent);
     }
 

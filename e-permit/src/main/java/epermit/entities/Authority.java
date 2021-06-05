@@ -60,7 +60,7 @@ public class Authority {
     key.setAuthority(this);
   }
 
-  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  @OneToMany(cascade = CascadeType.ALL)
   @EqualsAndHashCode.Exclude
   @ToString.Exclude
   private List<VerifierQuota> verifierQuotas = new ArrayList<>();
@@ -71,7 +71,7 @@ public class Authority {
     verifierQuota.setAuthority(this);
   }
 
-  @OneToMany(cascade = CascadeType.ALL)
+  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   @EqualsAndHashCode.Exclude
   @ToString.Exclude
   private List<IssuerQuota> issuerQuotas = new ArrayList<>();

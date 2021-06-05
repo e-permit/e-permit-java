@@ -1,10 +1,9 @@
 version: '3.6'
 services:
   tr-internal-api:
+    container_name: trinternalapi
     depends_on:
       - trdb
-    environment:
-      - SPRING_PROFILES_ACTIVE=dev
     env_file: 
       - tr.env
     build: 
@@ -12,10 +11,9 @@ services:
     ports:
       - "3020:8080"
   tr-public-api:
+    container_name: trpublicapi
     depends_on:
       - trdb
-    environment:
-      - SPRING_PROFILES_ACTIVE=dev
     env_file: 
       - tr.env
     build: 
@@ -23,10 +21,9 @@ services:
     ports:
       - "3021:8080"
   uz-internal-api:
+    container_name: uzinternalapi
     depends_on:
       - uzdb
-    environment:
-      - SPRING_PROFILES_ACTIVE=dev
     env_file: 
       - uz.env
     build: 
@@ -34,10 +31,9 @@ services:
     ports:
       - "3030:8080"
   uz-public-api:
+    container_name: uzpublicapi
     depends_on:
       - uzdb
-    environment:
-      - SPRING_PROFILES_ACTIVE=dev
     env_file: 
       - uz.env
     build: 

@@ -12,6 +12,7 @@ import lombok.SneakyThrows;
 @RequiredArgsConstructor
 public class QuotaCreatedEventHandler implements EventHandler {
     private final AuthorityRepository authorityRepository;
+    
     @SneakyThrows
     public void handle(Object e) {
         QuotaCreatedEvent event = (QuotaCreatedEvent)e;

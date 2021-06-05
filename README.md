@@ -1,1 +1,13 @@
 # e-permit-java
+
+tr.env
+```
+SPRING_PROFILES_ACTIVE=dev
+SPRING_DATASOURCE_URL=jdbc:postgresql://trdb:5432/devdb
+SPRING_DATASOURCE_USERNAME=compose-postgres
+SPRING_DATASOURCE_PASSWORD=compose-postgres
+EPERMIT_ISSUER_CODE=TR
+EPERMIT_KEY_PASSWORD=123456
+EPERMIT_VERIFY_URI=https://e-permit.github.io/verify
+EPERMIT_ADMIN_PASSWORD=123456
+```

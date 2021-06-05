@@ -1,13 +1,16 @@
 package epermit.services;
 
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 import java.nio.file.AccessDeniedException;
 import java.util.HashMap;
 import java.util.Map;
+import javax.transaction.Transactional;
 import epermit.events.EventBase;
 import epermit.events.EventValidationResult;
 import epermit.events.EventValidator;
@@ -34,6 +37,11 @@ public class ReceivedEventService {
     private final RestTemplate restTemplate;
     private final AuthorityRepository authorityRepository;
     private final EPermitProperties properties;
+    
+    @Transactional
+    public Map<String, Object> resolveJws(HttpHeaders headers) {
+        return jwsUtil.resolveJws(headers);
+    }
 
     @SneakyThrows
     @Transactional
@@ -71,7 +79,7 @@ public class ReceivedEventService {
         EventValidationResult r = handle(event.getClaims());
         if (!r.isOk() && r.getErrorCode().equals("NOTEXIST_PREVIOUSEVENT")) {
             EventBase eBase = (EventBase) r.getEvent();
-            String url = authorityRepository.findOneByCode(eBase.getIssuer()).getApiUri();
+            String url = authorityRepository.findOneByCode(eBase.getIssuer()).getApiUri() + "/events";
             String lastEventId = receivedEventRepository
                     .findTopByIssuerOrderByIdDesc(eBase.getIssuer()).get().getEventId();
             Map<String, String> claims = new HashMap<>();

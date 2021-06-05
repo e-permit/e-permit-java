@@ -2,6 +2,9 @@ package epermit.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -14,12 +17,11 @@ import org.modelmapper.ModelMapper;
 import epermit.entities.Authority;
 import epermit.entities.AuthorityKey;
 import epermit.entities.Key;
-import epermit.events.quotacreated.QuotaCreatedEventFactory;
 import epermit.models.EPermitProperties;
 import epermit.models.dtos.AuthorityConfig;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.KeyRepository;
-import epermit.repositories.VerifierQuotaRepository;
+import epermit.utils.KeyUtil;
 
 @ExtendWith(MockitoExtension.class)
 public class ConfigServiceTest {
@@ -39,8 +41,28 @@ public class ConfigServiceTest {
     @Mock
     AuthorityRepository authorityRepository;
 
+    @Mock
+    private KeyUtil keyUtil;
+
     @InjectMocks
     ConfigService configService;
+
+    @Test
+    void seedTest() {
+        when(keyRepository.count()).thenReturn(Long.valueOf(0));
+        Key key = new Key();
+        when(keyUtil.create("1")).thenReturn(key);
+        configService.seed();
+        verify(keyRepository).save(key);
+    }
+
+    @Test
+    void seedKeyExistTest() {
+        when(keyRepository.count()).thenReturn(Long.valueOf(1));
+        configService.seed();
+        verify(keyRepository, never()).save(any());
+    }
+
     @Test
     void getConfigTest() {
         when(properties.getIssuerCode()).thenReturn("TR");

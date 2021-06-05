@@ -21,16 +21,6 @@ public class KeyService {
     private final KeyCreatedEventFactory factory;
 
     @Transactional
-    public void seed() {
-        Long keyCount = keyRepository.count();
-        if (keyCount == 0) {
-            Key key = keyUtil.create("1");
-            key.setEnabled(true);
-            keyRepository.save(key);
-        }
-    }
-
-    @Transactional
     public void create(String keyId) {
         Optional<Key> keyR = keyRepository.findOneByKeyId(keyId);
         if (keyR.isPresent()) {

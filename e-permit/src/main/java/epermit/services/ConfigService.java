@@ -1,11 +1,16 @@
 package epermit.services;
 
-
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
 import com.google.gson.Gson;
+import com.nimbusds.jose.jwk.ECKey;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import epermit.entities.Authority;
+import epermit.entities.Key;
 import epermit.models.EPermitProperties;
 import epermit.models.dtos.AuthorityConfig;
 import epermit.models.dtos.PublicJwk;
@@ -13,15 +18,40 @@ import epermit.models.dtos.TrustedAuthority;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.KeyRepository;
 import epermit.utils.GsonUtil;
+import epermit.utils.KeyUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ConfigService {
     private final AuthorityRepository authorityRepository;
     private final KeyRepository keyRepository;
     private final EPermitProperties properties;
+    private final KeyUtil keyUtil;
+
+    @Value("${epermit.private-key:#{null}}")
+    private String privateKey;
+
+    @Transactional
+    @SneakyThrows
+    public void seed() {
+        Long keyCount = keyRepository.count();
+        if (keyCount == 0) {
+            Key key;
+            if (privateKey != null) {
+                String jwkStr = new String(Base64.getUrlDecoder().decode(privateKey));
+                log.info("Private key exist");
+                key = keyUtil.create(ECKey.parse(jwkStr));
+            } else {
+                key = keyUtil.create("1");
+            }
+            key.setEnabled(true);
+            keyRepository.save(key);
+        }
+    }
 
     @SneakyThrows
     public AuthorityConfig getConfig() {

@@ -40,22 +40,6 @@ public class KeyServiceTest {
     private KeyService keyService;
 
     @Test
-    void seedTest() {
-        when(keyRepository.count()).thenReturn(Long.valueOf(0));
-        Key key = new Key();
-        when(keyUtil.create("1")).thenReturn(key);
-        keyService.seed();
-        verify(keyRepository).save(key);
-    }
-
-    @Test
-    void seedKeyExistTest() {
-        when(keyRepository.count()).thenReturn(Long.valueOf(1));
-        keyService.seed();
-        verify(keyRepository, never()).save(any());
-    }
-
-    @Test
     void createTest() {
         when(keyRepository.findOneByKeyId("1")).thenReturn(Optional.empty());
         Key key = new Key();

@@ -15,7 +15,6 @@ import com.nimbusds.jose.jwk.ECKey;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 import epermit.entities.AuthorityKey;
