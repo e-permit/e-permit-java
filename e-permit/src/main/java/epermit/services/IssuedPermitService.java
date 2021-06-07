@@ -3,11 +3,14 @@ package epermit.services;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import javax.persistence.criteria.Predicate;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +21,8 @@ import epermit.events.permitrevoked.PermitRevokedEventFactory;
 import epermit.models.EPermitProperties;
 import epermit.models.dtos.IssuedPermitDto;
 import epermit.models.inputs.CreatePermitInput;
+import epermit.models.inputs.IssuedPermitListInput;
+import epermit.models.results.CreatePermitResult;
 import epermit.repositories.IssuedPermitRepository;
 import epermit.utils.PermitUtil;
 import lombok.RequiredArgsConstructor;
@@ -40,24 +45,24 @@ public class IssuedPermitService {
         return dto;
     }
 
-    public Page<IssuedPermitDto> getAll(String issuedFor, Pageable pageable) {
-        Page<epermit.entities.IssuedPermit> entities = issuedPermitRepository.findAll(pageable);
+    public Page<IssuedPermitDto> getAll(IssuedPermitListInput input) {
+        Page<epermit.entities.IssuedPermit> entities = issuedPermitRepository
+                .findAll(filterPermits(input), PageRequest.of(input.getPage(), 10));
         return entities.map(x -> modelMapper.map(x, IssuedPermitDto.class));
     }
 
     @Transactional
-    public String createPermit(CreatePermitInput input) {
+    public CreatePermitResult createPermit(CreatePermitInput input) {
         log.info("Permit create started");
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         String issuer = properties.getIssuerCode();
-        Integer serialNumber = permitUtil.generateSerialNumber(input.getIssuedFor(),
-                input.getPermitYear(), input.getPermitType());
-        if (serialNumber == null) {
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
-                    "INSUFFICIENT_SERIALNUMBER");
+        Optional<Integer> serialNumberResult = permitUtil.generateSerialNumber(
+                input.getIssuedFor(), input.getPermitYear(), input.getPermitType());
+        if (!serialNumberResult.isPresent()) {
+            return CreatePermitResult.fail("INSUFFICIENT_QUOTA");
         }
         String permitId = permitUtil.getPermitId(issuer, input.getIssuedFor(),
-                input.getPermitType(), input.getPermitYear(), serialNumber);
+                input.getPermitType(), input.getPermitYear(), serialNumberResult.get());
         IssuedPermit permit = new IssuedPermit();
         permit.setCompanyName(input.getCompanyName());
         permit.setIssuedFor(input.getIssuedFor());
@@ -65,14 +70,14 @@ public class IssuedPermitService {
         permit.setPermitType(input.getPermitType());
         permit.setPermitYear(input.getPermitYear());
         permit.setPlateNumber(input.getPlateNumber());
-        permit.setSerialNumber(serialNumber);
+        permit.setSerialNumber(serialNumberResult.get());
         permit.setIssuedAt(LocalDateTime.now(ZoneOffset.UTC).format(dtf));
         permit.setExpireAt("30/01/" + Integer.toString(input.getPermitYear() + 1));
         permit.setQrCode(permitUtil.generateQrCode(permit));
         issuedPermitRepository.save(permit);
         permitCreatedEventFactory.create(permit);
-        log.info("Permit create finished");
-        return permit.getPermitId();
+        log.info("Permit create finished permit id is {}", permit.getPermitId());
+        return CreatePermitResult.success(permit.getPermitId());
     }
 
     @Transactional
@@ -86,6 +91,26 @@ public class IssuedPermitService {
         permit.setRevokedAt(LocalDateTime.now());
         issuedPermitRepository.save(permit);
         permitRevokedEventFactory.create(permit.getIssuedFor(), permit.getPermitId());
+    }
+
+    static Specification<IssuedPermit> filterPermits(IssuedPermitListInput input) {
+        Specification<IssuedPermit> spec = (permit, cq, cb) -> {
+            List<Predicate> predicates = new ArrayList<Predicate>();
+            if (input.getIssuedFor() != null) {
+                predicates.add(cb.equal(permit.get("issuedFor"), input.getIssuedFor()));
+            }
+            if (input.getPermitType() != null) {
+                predicates.add(cb.equal(permit.get("permitType"), input.getPermitType()));
+            }
+            if (input.getPermitYear() != null) {
+                predicates.add(cb.equal(permit.get("permitYear"), input.getPermitYear()));
+            }
+            if (input.getCompanyId() != null) {
+                predicates.add(cb.equal(permit.get("companyId"), input.getCompanyId()));
+            }
+            return cb.and(predicates.toArray(new Predicate[predicates.size()]));
+        };
+        return spec;
     }
 
 }

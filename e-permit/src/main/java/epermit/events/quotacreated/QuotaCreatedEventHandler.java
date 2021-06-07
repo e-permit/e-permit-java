@@ -20,7 +20,7 @@ public class QuotaCreatedEventHandler implements EventHandler {
         IssuerQuota quota = new IssuerQuota();
         quota.setActive(true);
         quota.setAuthority(authority);
-        quota.setCurrentNumber(event.getStartNumber());
+        quota.setNextNumber(event.getStartNumber());
         quota.setEndNumber(event.getEndNumber());
         quota.setPermitType(event.getPermitType());
         quota.setStartNumber(event.getStartNumber());

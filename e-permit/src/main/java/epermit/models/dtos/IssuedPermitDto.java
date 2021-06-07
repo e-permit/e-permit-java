@@ -26,6 +26,8 @@ public class IssuedPermitDto {
 
     private String companyName;
 
+    private String companyId;
+
     private String claims;
 
     private boolean used;

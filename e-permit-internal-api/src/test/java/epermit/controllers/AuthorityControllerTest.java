@@ -54,8 +54,6 @@ public class AuthorityControllerTest {
     void createTest() {
         CreateAuthorityInput input = new CreateAuthorityInput();
         input.setApiUri("apiUri");
-        input.setCode("code");
-        input.setName("Name");
         AuthorityConfig config = new AuthorityConfig();
         config.setVerifyUri("verifyUri");
         when(restTemplate.getForObject("apiUri/epermit-configuration", String.class)).thenReturn(

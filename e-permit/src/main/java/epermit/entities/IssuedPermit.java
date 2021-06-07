@@ -67,6 +67,9 @@ public class IssuedPermit {
     @Column(name = "company_name", nullable = false)
     private String companyName;
 
+    @Column(name = "company_id", nullable = false)
+    private String companyId;
+
     @Column(name = "claims", nullable = true, length=1000)
     private String claims;
 

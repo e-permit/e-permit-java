@@ -10,5 +10,6 @@ public class PublicJwk {
     private String kid;
     private String x;
     private String y;
+    private String alg;
 }
 

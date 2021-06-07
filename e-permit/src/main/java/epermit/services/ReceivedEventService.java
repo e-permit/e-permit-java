@@ -1,16 +1,14 @@
 package epermit.services;
 
+import org.springframework.data.util.Pair;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.server.ResponseStatusException;
 import java.nio.file.AccessDeniedException;
 import java.util.HashMap;
 import java.util.Map;
-import javax.transaction.Transactional;
 import epermit.events.EventBase;
 import epermit.events.EventValidationResult;
 import epermit.events.EventValidator;
@@ -37,23 +35,20 @@ public class ReceivedEventService {
     private final RestTemplate restTemplate;
     private final AuthorityRepository authorityRepository;
     private final EPermitProperties properties;
-    
-    @Transactional
-    public Map<String, Object> resolveJws(HttpHeaders headers) {
-        return jwsUtil.resolveJws(headers);
-    }
 
     @SneakyThrows
-    @Transactional
     public EventValidationResult handle(Map<String, Object> claims) {
         EventBase e = GsonUtil.fromMap(claims, EventBase.class);
         if (receivedEventRepository.existsByIssuerAndEventId(e.getIssuer(), e.getEventId())) {
+            log.info("Event exists. EventId: {}", e.getEventId());
             return EventValidationResult.fail("EVENT_EXIST", e);
         }
         if (!receivedEventRepository.existsByIssuerAndEventId(e.getIssuer(),
                 e.getPreviousEventId())) {
             if (receivedEventRepository.existsByIssuer(e.getIssuer())) {
                 return EventValidationResult.fail("NOTEXIST_PREVIOUSEVENT", e);
+            }else{
+                log.info("First event received");
             }
         }
         EventValidator eventValidator =
@@ -76,27 +71,51 @@ public class ReceivedEventService {
 
     @SneakyThrows
     public void handleReceivedEvent(ReceivedAppEvent event) {
-        EventValidationResult r = handle(event.getClaims());
+        log.info("Event handle started. Claims is {}", event.getClaims());
+        EventValidationResult r = handleOne(event.getClaims());
         if (!r.isOk() && r.getErrorCode().equals("NOTEXIST_PREVIOUSEVENT")) {
             EventBase eBase = (EventBase) r.getEvent();
-            String url = authorityRepository.findOneByCode(eBase.getIssuer()).getApiUri() + "/events";
-            String lastEventId = receivedEventRepository
-                    .findTopByIssuerOrderByIdDesc(eBase.getIssuer()).get().getEventId();
-            Map<String, String> claims = new HashMap<>();
-            claims.put("last_event_id", lastEventId);
-            claims.put("issuer", properties.getIssuerCode());
-            claims.put("issued_for", eBase.getIssuer());
-            String requestJws = jwsUtil.createJws(claims);
-            HttpEntity<?> entity = new HttpEntity<>(jwsUtil.getJwsHeader(requestJws));
-            String[] jwsList =
-                    restTemplate.exchange(url, HttpMethod.GET, entity, String[].class).getBody();
-            for (String jws : jwsList) {
-                JwsValidationResult jwsValidationResult = jwsUtil.validateJws(jws);
-                if (!jwsValidationResult.isValid()) {
-                    throw new AccessDeniedException("Jws validation error");
-                }
-                handle(jwsValidationResult.getPayload());
-            }
+            log.info("Previous event does not exist. Previous event id: {}", eBase.getPreviousEventId());
+            Pair<String, String> pair = getData(eBase.getIssuer());
+            String[] jwsList = getEvents(pair.getFirst(), pair.getSecond(), eBase.getIssuer());
+            handleAll(jwsList);
         }
+    }
+
+    @Transactional
+    @SneakyThrows
+    private void handleAll(String[] jwsList) {
+        for (String jws : jwsList) {
+            JwsValidationResult jwsValidationResult = jwsUtil.validateJws(jws);
+            if (!jwsValidationResult.isValid()) {
+                throw new AccessDeniedException("Jws validation error");
+            }
+            handle(jwsValidationResult.getPayload());
+        }
+    }
+
+    @Transactional
+    private EventValidationResult handleOne(Map<String, Object> claims) {
+        return handle(claims);
+    }
+
+    @Transactional
+    private Pair<String, String> getData(String issuer) {
+        String url = authorityRepository.findOneByCode(issuer).getApiUri() + "/events";
+        String lastEventId =
+                receivedEventRepository.findTopByIssuerOrderByIdDesc(issuer).get().getEventId();
+        return Pair.of(url, lastEventId);
+    }
+
+    private String[] getEvents(String url, String lastEventId, String issuer) {
+        Map<String, String> claims = new HashMap<>();
+        claims.put("last_event_id", lastEventId);
+        claims.put("issuer", properties.getIssuerCode());
+        claims.put("issued_for", issuer);
+        String requestJws = jwsUtil.createJws(claims);
+        HttpEntity<?> entity = new HttpEntity<>(jwsUtil.getJwsHeader(requestJws));
+        String[] jwsList =
+                restTemplate.exchange(url, HttpMethod.GET, entity, String[].class).getBody();
+        return jwsList;
     }
 }

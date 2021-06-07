@@ -19,7 +19,7 @@ public class ReceivedAppEventListener {
     @Async
     @EventListener
     public void onAppEvent(ReceivedAppEvent event) {
-        log.info("Event is received");
+        log.info("Event received. {}", event);
         eventService.handleReceivedEvent(event);
     }
 }

@@ -17,5 +17,7 @@ public class CreatePermitInput {
 
     private String companyName;
 
+    private String companyId;
+
     private Map<String, Object> claims = new HashMap<>();
 }

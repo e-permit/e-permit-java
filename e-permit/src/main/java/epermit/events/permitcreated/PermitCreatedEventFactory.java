@@ -15,10 +15,8 @@ public class PermitCreatedEventFactory {
     public PermitCreatedEvent create(IssuedPermit permit) {
         PermitCreatedEvent event = new PermitCreatedEvent();
         event.setEventType(EventType.PERMIT_CREATED);
-        if (permit.getClaims() != null && !permit.getClaims().isEmpty()) {
-            event.setClaims(GsonUtil.toMap(permit.getClaims()));
-        }
         event.setCompanyName(permit.getCompanyName());
+        event.setCompanyId(permit.getCompanyId());
         event.setExpireAt(permit.getExpireAt());
         event.setIssuedAt(permit.getIssuedAt());
         event.setPermitId(permit.getPermitId());
@@ -27,6 +25,9 @@ public class PermitCreatedEventFactory {
         event.setPlateNumber(permit.getPlateNumber());
         event.setSerialNumber(permit.getSerialNumber());
         util.saveAndPublish(event, permit.getIssuedFor());
+        if (permit.getClaims() != null && !permit.getClaims().isEmpty()) {
+            event.setClaims(GsonUtil.toMap(permit.getClaims()));
+        }
         return event;
     }
 }

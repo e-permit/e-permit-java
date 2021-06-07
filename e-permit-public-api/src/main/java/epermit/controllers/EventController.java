@@ -1,6 +1,7 @@
 package epermit.controllers;
 
 import java.util.List;
+import java.util.Map;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,13 +26,15 @@ public class EventController {
     @PostMapping()
     public Boolean receiveEvent(@RequestHeader HttpHeaders headers) {
         ReceivedAppEvent appEvent = new ReceivedAppEvent();
-        appEvent.setClaims(jwsUtil.resolveJws(headers));
+        Map<String, Object> claims = jwsUtil.resolveJws(headers);
+        appEvent.setClaims(claims);
         applicationEventPublisher.publishEvent(appEvent);
         return true;
     }
 
     @GetMapping()
     public List<String> getEvents(@RequestHeader HttpHeaders headers) {
-        return createdEventService.getEvents(jwsUtil.resolveJws(headers));
+        Map<String, Object> claims = jwsUtil.resolveJws(headers);
+        return createdEventService.getEvents(claims);
     }
 }

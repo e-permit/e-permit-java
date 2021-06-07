@@ -118,8 +118,6 @@ public class AuthorityControllerIT {
 
         CreateAuthorityInput input = new CreateAuthorityInput();
         input.setApiUri("http://localhost");
-        input.setCode("UZ");
-        input.setName("Uzbekistan");
         ResponseEntity<Void> r =
                 getTestRestTemplate().postForEntity(getBaseUrl(), input, Void.class);
         assertEquals(HttpStatus.OK, r.getStatusCode());

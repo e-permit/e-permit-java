@@ -8,17 +8,21 @@ import org.springframework.stereotype.Component;
 import epermit.entities.Authority;
 import epermit.entities.IssuedPermit;
 import epermit.entities.IssuerQuota;
+import epermit.models.EPermitProperties;
 import epermit.models.enums.PermitType;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.IssuedPermitRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class PermitUtil {
     private final JwsUtil jwsUtil;
     private final IssuedPermitRepository issuedPermitRepository;
     private final AuthorityRepository authorityRepository;
+    private final EPermitProperties properties;
 
     public String getPermitId(String iss, String aud, PermitType pt, Integer py, int serialNumber) {
         StringJoiner joiner = new StringJoiner("-");
@@ -35,13 +39,15 @@ public class PermitUtil {
                         && serialNumber >= x.getStartNumber() && serialNumber <= x.getEndNumber());
     }
 
-    public Integer generateSerialNumber(String issuedFor, int py, PermitType pt) {
-        Optional<IssuedPermit> revokedCred =
+    public Optional<Integer> generateSerialNumber(String issuedFor, int py, PermitType pt) {
+        Optional<IssuedPermit> revokedPermitR =
                 issuedPermitRepository.findFirstByIssuedForAndRevokedTrue(issuedFor);
-        if (revokedCred.isPresent()) {
-            int nextPid = revokedCred.get().getSerialNumber();
-            issuedPermitRepository.delete(revokedCred.get());
-            return nextPid;
+        if (revokedPermitR.isPresent()) {
+            IssuedPermit revokedPermit = revokedPermitR.get();
+            log.info("Revoked permit found. The permit id is {}", revokedPermit.getPermitId());
+            int nextSerialNumber = revokedPermit.getSerialNumber();
+            issuedPermitRepository.delete(revokedPermit);
+            return Optional.of(nextSerialNumber);
         }
         Authority authority = authorityRepository.findOneByCode(issuedFor);
         Optional<IssuerQuota> quotaResult = authority.getIssuerQuotas().stream()
@@ -49,25 +55,36 @@ public class PermitUtil {
                 .findFirst();
         if (quotaResult.isPresent()) {
             IssuerQuota quota = quotaResult.get();
-            int nextPid = quota.getCurrentNumber() + 1;
-            quota.setCurrentNumber(nextPid);
-            if (quota.getCurrentNumber() == quota.getEndNumber()) {
+            log.info("Quota found. The quota id is {}", quota.getId());
+            int nextSerialNumber = quota.getNextNumber();
+            if (nextSerialNumber + 1 > quota.getEndNumber()) {
+                log.info("Quota ended");
                 quota.setActive(false);
+            } else {
+                log.info("Next serial number is valid", nextSerialNumber);
+                quota.setNextNumber(nextSerialNumber + 1);
             }
             authorityRepository.save(authority);
-            return nextPid;
+            return Optional.of(nextSerialNumber);
         }
-        return null;
+        log.info(
+                "There is no sufficient quota for the authority {}, permit year {} and permit type {}",
+                issuedFor, py, pt);
+        return Optional.empty();
     }
 
     public String generateQrCode(IssuedPermit permit) {
+        String verifyUri = authorityRepository.findOneByCode(permit.getIssuedFor()).getVerifyUri();
         Map<String, String> claims = new HashMap<>();
         claims.put("id", permit.getPermitId());
         claims.put("iat", permit.getIssuedAt());
         claims.put("exp", permit.getExpireAt());
         claims.put("pn", permit.getPlateNumber());
         claims.put("cn", permit.getCompanyName());
-        return jwsUtil.createJws(claims);
+        String jws = jwsUtil.createJws(claims);
+        String qrCode = verifyUri + "#" + properties.getQrcodeVersion() + "." + jws;
+        log.info("Qr Code generated jws is {}", jws);
+        return qrCode;
     }
 
 }

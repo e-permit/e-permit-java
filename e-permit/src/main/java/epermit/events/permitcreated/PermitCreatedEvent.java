@@ -16,6 +16,7 @@ public class PermitCreatedEvent extends EventBase {
     private String IssuedAt;
     private String ExpireAt;
     private String companyName;
+    private String companyId;
     private String plateNumber;
     private Map<String, Object> claims;
 }

@@ -15,7 +15,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import epermit.models.dtos.IssuedPermitDto;
 import epermit.models.inputs.CreatePermitInput;
+import epermit.models.inputs.IssuedPermitListInput;
+import epermit.models.results.CreatePermitResult;
 import epermit.services.IssuedPermitService;
+import epermit.utils.GsonUtil;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -26,9 +29,9 @@ public class IssuedPermitController {
     private final IssuedPermitService service;
 
     @GetMapping()
-    public Page<IssuedPermitDto> getAll(@RequestParam(required = false) String issuedFor,
-            Pageable pageable) {
-        Page<IssuedPermitDto> r = service.getAll(issuedFor, pageable);
+    public Page<IssuedPermitDto> getAll(@RequestParam Map<String,Object> params) {
+        IssuedPermitListInput input = GsonUtil.fromMap(params, IssuedPermitListInput.class);
+        Page<IssuedPermitDto> r = service.getAll(input);
         return r;
     }
 
@@ -38,7 +41,7 @@ public class IssuedPermitController {
     }
 
     @PostMapping()
-    public String createPermit(@RequestBody @Valid CreatePermitInput input) {
+    public CreatePermitResult createPermit(@RequestBody @Valid CreatePermitInput input) {
         return service.createPermit(input);
     }
 

@@ -11,11 +11,14 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -28,6 +31,8 @@ import epermit.entities.Key;
 import epermit.models.dtos.IssuedPermitDto;
 import epermit.models.enums.PermitType;
 import epermit.models.inputs.CreatePermitInput;
+import epermit.models.inputs.IssuedPermitListInput;
+import epermit.models.results.CreatePermitResult;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.IssuedPermitRepository;
 import epermit.repositories.KeyRepository;
@@ -95,6 +100,7 @@ public class IssuedPermitControllerIT {
         for (int i = 0; i < 25; i++) {
             IssuedPermit permit = new IssuedPermit();
             permit.setCompanyName("ABC");
+            permit.setCompanyId("1");
             permit.setIssuedFor("UZ");
             permit.setPermitType(PermitType.BILITERAL);
             permit.setPermitYear(2021);
@@ -106,15 +112,21 @@ public class IssuedPermitControllerIT {
             permit.setSerialNumber(1);
             issuedPermitRepository.save(permit);
         }
-        /*
-         * final String response = getTestRestTemplate().getForObject(getBaseUrl(), String.class);
-         */
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
+
+        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(getBaseUrl())
+                .queryParam("issued_for", "UZ").queryParam("page", 2);
+
+        HttpEntity<?> entity = new HttpEntity<>(headers);
+
         ParameterizedTypeReference<RestResponsePage<IssuedPermitDto>> responseType =
                 new ParameterizedTypeReference<RestResponsePage<IssuedPermitDto>>() {};
-        ResponseEntity<RestResponsePage<IssuedPermitDto>> result =
-                getTestRestTemplate().exchange(getBaseUrl(), HttpMethod.GET, null, responseType);
+        ResponseEntity<RestResponsePage<IssuedPermitDto>> result = getTestRestTemplate()
+                .exchange(builder.toUriString(), HttpMethod.GET, entity, responseType);
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertEquals(25, result.getBody().getTotalElements());
+        assertEquals(5, result.getBody().getContent().size());
 
     }
 
@@ -122,6 +134,7 @@ public class IssuedPermitControllerIT {
     void getByIdTest() {
         IssuedPermit permit = new IssuedPermit();
         permit.setCompanyName("ABC");
+        permit.setCompanyId("1");
         permit.setIssuedFor("UZ");
         permit.setPermitType(PermitType.BILITERAL);
         permit.setPermitYear(2021);
@@ -145,8 +158,8 @@ public class IssuedPermitControllerIT {
         input.setPermitType(PermitType.BILITERAL);
         input.setPermitYear(2021);
         input.setPlateNumber("06AA1234");
-        ResponseEntity<String> r =
-                getTestRestTemplate().postForEntity(getBaseUrl(), input, String.class);
+        ResponseEntity<CreatePermitResult> r =
+                getTestRestTemplate().postForEntity(getBaseUrl(), input, CreatePermitResult.class);
         assertEquals(HttpStatus.OK, r.getStatusCode());
 
     }
@@ -171,3 +184,8 @@ public class IssuedPermitControllerIT {
         assertEquals(HttpStatus.OK, r.getStatusCode());
     }
 }
+
+
+/*
+ * final String response = getTestRestTemplate().getForObject(getBaseUrl(), String.class);
+ */

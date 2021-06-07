@@ -3,10 +3,8 @@ package epermit.services;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-import java.util.Optional;
 import com.google.gson.Gson;
 import com.nimbusds.jose.jwk.ECKey;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import epermit.entities.Authority;
@@ -32,15 +30,13 @@ public class ConfigService {
     private final EPermitProperties properties;
     private final KeyUtil keyUtil;
 
-    @Value("${epermit.private-key:#{null}}")
-    private String privateKey;
-
     @Transactional
     @SneakyThrows
     public void seed() {
         Long keyCount = keyRepository.count();
         if (keyCount == 0) {
             Key key;
+            String privateKey = properties.getIssuerPrivateKey();
             if (privateKey != null) {
                 String jwkStr = new String(Base64.getUrlDecoder().decode(privateKey));
                 log.info("Private key exist");

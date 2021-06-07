@@ -17,9 +17,7 @@ public class PermitCreatedEventHandler implements EventHandler {
         PermitCreatedEvent event = (PermitCreatedEvent)e;
         Gson gson = GsonUtil.getGson();
         Permit permit = new Permit();
-        if (event.getClaims() != null && !event.getClaims().isEmpty()) {
-            permit.setClaims(gson.toJson(event.getClaims()));
-        }
+        permit.setCompanyId(event.getCompanyId());
         permit.setCompanyName(event.getCompanyName());
         permit.setExpireAt(event.getExpireAt());
         permit.setIssuedAt(event.getIssuedAt());
@@ -29,6 +27,9 @@ public class PermitCreatedEventHandler implements EventHandler {
         permit.setPermitYear(event.getPermitYear());
         permit.setPlateNumber(event.getPlateNumber());
         permit.setSerialNumber(event.getSerialNumber());
+        if (event.getClaims() != null && !event.getClaims().isEmpty()) {
+            permit.setClaims(gson.toJson(event.getClaims()));
+        }
         permitRepository.save(permit);
     }
 }

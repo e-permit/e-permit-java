@@ -59,8 +59,8 @@ public class AuthorityService {
         log.info("Authority create command: " + input.getApiUri());
         Authority authority = new Authority();
         authority.setApiUri(input.getApiUri());
-        authority.setCode(input.getCode());
-        authority.setName(input.getName());
+        authority.setCode(config.getCode());
+        authority.setName(config.getName());
         authority.setVerifyUri(config.getVerifyUri());
         config.getKeys().forEach(k -> {
             AuthorityKey authorityKey = new AuthorityKey();

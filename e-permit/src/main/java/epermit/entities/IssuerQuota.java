@@ -44,8 +44,8 @@ public class IssuerQuota {
     @Column(name = "end_number", nullable = false)
     private int endNumber;
 
-    @Column(name = "current_number", nullable = false)
-    private int currentNumber;
+    @Column(name = "next_number", nullable = false)
+    private int nextNumber;
     
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)

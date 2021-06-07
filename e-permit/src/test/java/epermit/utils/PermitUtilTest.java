@@ -30,7 +30,6 @@ public class PermitUtilTest {
 
     @Mock
     EPermitProperties properties;
-
     @Mock
     IssuedPermitRepository issuedPermitRepository;
     
@@ -48,51 +47,32 @@ public class PermitUtilTest {
 
     @Test
     @SneakyThrows
-    void gneratePermitIdTest() {
+    void gnerateSerialNumberTest() {
         IssuedPermit permit = new IssuedPermit();
         permit.setId((long) 1);
         permit.setSerialNumber(1);
         when(issuedPermitRepository.findFirstByIssuedForAndRevokedTrue("UA")).thenReturn(Optional.of(permit));
-        Integer nextPid = util.generateSerialNumber("UA", 2021, PermitType.BILITERAL);
+        Optional<Integer> result= util.generateSerialNumber("UA", 2021, PermitType.BILITERAL);
         verify(issuedPermitRepository, times(1)).delete(permit);
-        Assertions.assertEquals(1, nextPid);
+        Assertions.assertEquals(1, result.get());
     }
 
     @SneakyThrows
     @ParameterizedTest
     @ValueSource(ints = {2, 3})
-    void gneratePermitIdParameterizedTest(int endNumber) {
+    void generateSerialNumberParameterizedTest(int endNumber) {
         Authority authority = new Authority();
         IssuerQuota quota = new IssuerQuota();
         quota.setPermitType(PermitType.BILITERAL);
         quota.setActive(true);
         quota.setPermitYear(2021);
-        quota.setCurrentNumber(1);
+        quota.setNextNumber(2);
         quota.setEndNumber(endNumber);
         authority.addIssuerQuota(quota);
         when(issuedPermitRepository.findFirstByIssuedForAndRevokedTrue("UA")).thenReturn(Optional.empty());
         when(authorityRepository.findOneByCode("UA")).thenReturn(authority);
-        Integer nextPid = util.generateSerialNumber("UA", 2021, PermitType.BILITERAL);
-        Assertions.assertEquals(2, nextPid);
+        Optional<Integer> result = util.generateSerialNumber("UA", 2021, PermitType.BILITERAL);
+        Assertions.assertEquals(2, result.get());
         Assertions.assertEquals(endNumber == 3, quota.isActive());
     }
-
-    /*@Test
-    void createPermitTest() {
-        when(properties.getIssuerCode()).thenReturn("UA");
-        when(util.generateSerialNumber("TR", 2021, PermitType.BILITERAL)).thenReturn(1);
-        CreatePermitInput input = new CreatePermitInput();
-        input.setCompanyName("companyName");
-        input.setIssuedFor("TR");
-        input.setPermitType(PermitType.BILITERAL);
-        input.setPermitYear(2021);
-        input.setPlateNumber("plateNumber");
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("key", "value");
-        input.setClaims(claims);
-        IssuedPermit permit = util.createPermit(input);
-        assertNotNull(permit);
-        assertEquals("companyName", permit.getCompanyName());
-        assertEquals("UA-TR-2021-1-1", permit.getPermitId());
-    }*/
 }

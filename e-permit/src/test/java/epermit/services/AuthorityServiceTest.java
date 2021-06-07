@@ -19,7 +19,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.web.server.ResponseStatusException;
 import epermit.entities.Authority;
 import epermit.entities.AuthorityKey;
-import epermit.entities.Key;
 import epermit.entities.VerifierQuota;
 import epermit.events.quotacreated.QuotaCreatedEventFactory;
 import epermit.models.EPermitProperties;
@@ -84,10 +83,9 @@ public class AuthorityServiceTest {
     void createTest() {
         CreateAuthorityInput input = new CreateAuthorityInput();
         input.setApiUri("apiUri");
-        input.setCode("UZ");
-        input.setName("Uzbekistan");
         AuthorityConfig config = new AuthorityConfig();
         config.setCode("UZ");
+        config.setName("Uzbekistan");
         config.setVerifyUri("VerifyUri");
         PublicJwk publicJwk = GsonUtil.getGson().fromJson(jwk, PublicJwk.class);
         config.setKeys(List.of(publicJwk));

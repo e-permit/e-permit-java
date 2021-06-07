@@ -24,6 +24,8 @@ public class PermitDto {
 
     private String companyName;
 
+    private String companyId;
+
     private String claims;
 
     private boolean used;
