@@ -13,7 +13,9 @@ import epermit.events.ReceivedAppEvent;
 import epermit.services.CreatedEventService;
 import epermit.utils.JwsUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/events")

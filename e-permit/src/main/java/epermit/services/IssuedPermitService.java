@@ -53,7 +53,7 @@ public class IssuedPermitService {
 
     @Transactional
     public CreatePermitResult createPermit(CreatePermitInput input) {
-        log.info("Permit create started");
+        log.info("Permit create command {}", input);
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         String issuer = properties.getIssuerCode();
         Optional<Integer> serialNumberResult = permitUtil.generateSerialNumber(
@@ -82,6 +82,7 @@ public class IssuedPermitService {
 
     @Transactional
     public void revokePermit(Long id) {
+        log.info("Revoke permit started {}", id);
         Optional<IssuedPermit> permitOptional = issuedPermitRepository.findById(id);
         if (!permitOptional.isPresent()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "PERMIT_NOTFOUND");

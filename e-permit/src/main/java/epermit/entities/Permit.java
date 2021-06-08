@@ -61,10 +61,10 @@ public class Permit {
     @Column(name = "plate_number", nullable = false)
     private String plateNumber;
 
-    @Column(name = "company_name", nullable = false)
+    @Column(name = "company_name", nullable = false, length = 200)
     private String companyName;
 
-    @Column(name = "company_id", nullable = false)
+    @Column(name = "company_id", nullable = false, length = 100)
     private String companyId;
 
     @Column(name = "claims", nullable = true, length=5000)

@@ -39,7 +39,7 @@ public class KeyUtil {
         k.setSalt(salt);
         k.setPrivateJwk(encryptedJwk);
         k.setPublicJwk(key.toPublicJWK().toJSONString());
-        log.info("Key created jwk: " + k.getPublicJwk());
+        log.info("Key created jwk: {}, salt: {}", k.getPublicJwk(), salt);
         return k;
     }
 

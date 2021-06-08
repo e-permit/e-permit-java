@@ -56,7 +56,7 @@ public class AuthorityService {
 
     @Transactional
     public void create(CreateAuthorityInput input, AuthorityConfig config) {
-        log.info("Authority create command: " + input.getApiUri());
+        log.info("Authority create command: {}", input);
         Authority authority = new Authority();
         authority.setApiUri(input.getApiUri());
         authority.setCode(config.getCode());
@@ -68,11 +68,13 @@ public class AuthorityService {
             authorityKey.setKeyId(k.getKid());
             authority.addKey(authorityKey);
         });
+        log.info("Authority created: {}", authority);
         authorityRepository.save(authority);
     }
 
     @Transactional
     public void createQuota(CreateQuotaInput input) {
+        log.info("Quota create command: {}", input);
         Authority authority =
                 authorityRepository.findOneByCode(input.getAuthorityCode());
         VerifierQuota quota = new VerifierQuota();
@@ -82,11 +84,13 @@ public class AuthorityService {
         quota.setPermitYear(input.getPermitYear());
         quota.setAuthority(authority);
         authority.addVerifierQuota(quota);
+        log.info("Quota created: {}", quota);
         authorityRepository.save(authority);
     }
 
     @Transactional
     public void enableQuota(Integer id) {
+        log.info("Enable Quota command: {}", id);
         Optional<VerifierQuota> quotaR = verifierQuotaRepository.findById(id);
         if (!quotaR.isPresent()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "VERIFIER_QUOTA_NOTFOUND");

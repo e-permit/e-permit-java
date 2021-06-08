@@ -7,7 +7,9 @@ import epermit.events.EventHandler;
 import epermit.repositories.AuthorityRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service("QUOTA_CREATED_EVENT_HANDLER")
 @RequiredArgsConstructor
 public class QuotaCreatedEventHandler implements EventHandler {
@@ -15,6 +17,7 @@ public class QuotaCreatedEventHandler implements EventHandler {
     
     @SneakyThrows
     public void handle(Object e) {
+        log.info("QuotaCreatedEventHandler started with {}", e);
         QuotaCreatedEvent event = (QuotaCreatedEvent)e;
         Authority authority = authorityRepository.findOneByCode(event.getIssuer());
         IssuerQuota quota = new IssuerQuota();
@@ -26,6 +29,7 @@ public class QuotaCreatedEventHandler implements EventHandler {
         quota.setStartNumber(event.getStartNumber());
         quota.setPermitYear(event.getPermitYear());
         authority.addIssuerQuota(quota);
+        log.info("QuotaCreatedEventHandler ended with {}", quota);
         authorityRepository.save(authority);
     }
 }

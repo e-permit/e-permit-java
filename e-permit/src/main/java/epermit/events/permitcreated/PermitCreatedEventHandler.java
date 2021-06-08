@@ -7,13 +7,16 @@ import epermit.events.EventHandler;
 import epermit.repositories.PermitRepository;
 import epermit.utils.GsonUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service("PERMIT_CREATED_EVENT_HANDLER")
 @RequiredArgsConstructor
 public class PermitCreatedEventHandler implements EventHandler {
     private final PermitRepository permitRepository;
 
     public void handle(Object e) {
+        log.info("PermitCreatedEventHandler started with {}", e);
         PermitCreatedEvent event = (PermitCreatedEvent)e;
         Gson gson = GsonUtil.getGson();
         Permit permit = new Permit();
@@ -30,6 +33,7 @@ public class PermitCreatedEventHandler implements EventHandler {
         if (event.getClaims() != null && !event.getClaims().isEmpty()) {
             permit.setClaims(gson.toJson(event.getClaims()));
         }
+        log.info("PermitCreatedEventFactory ended with {}", permit);
         permitRepository.save(permit);
     }
 }

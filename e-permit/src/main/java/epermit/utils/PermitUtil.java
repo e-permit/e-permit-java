@@ -34,9 +34,11 @@ public class PermitUtil {
     public boolean isQuotaSufficient(String issuer, int permitYear, int serialNumber,
             PermitType permitType) {
         Authority authority = authorityRepository.findOneByCode(issuer);
-        return authority.getVerifierQuotas().stream()
+        Boolean r = authority.getVerifierQuotas().stream()
                 .anyMatch(x -> x.isActive() && x.getPermitType() == permitType
                         && serialNumber >= x.getStartNumber() && serialNumber <= x.getEndNumber());
+        log.info("isQuotaSufficient ruslt is {}", r);
+        return r;
     }
 
     public Optional<Integer> generateSerialNumber(String issuedFor, int py, PermitType pt) {
@@ -74,6 +76,7 @@ public class PermitUtil {
     }
 
     public String generateQrCode(IssuedPermit permit) {
+        log.info("generateQrCode started with {}", permit);
         String verifyUri = authorityRepository.findOneByCode(permit.getIssuedFor()).getVerifyUri();
         Map<String, String> claims = new HashMap<>();
         claims.put("id", permit.getPermitId());
@@ -83,7 +86,7 @@ public class PermitUtil {
         claims.put("cn", permit.getCompanyName());
         String jws = jwsUtil.createJws(claims);
         String qrCode = verifyUri + "#" + properties.getQrcodeVersion() + "." + jws;
-        log.info("Qr Code generated jws is {}", jws);
+        log.info("generateQrCode ended jws is {}", jws);
         return qrCode;
     }
 

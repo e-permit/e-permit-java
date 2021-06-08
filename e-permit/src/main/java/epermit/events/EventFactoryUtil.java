@@ -13,7 +13,9 @@ import epermit.repositories.AuthorityRepository;
 import epermit.repositories.CreatedEventRepository;
 import epermit.utils.JwsUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class EventFactoryUtil {
@@ -26,12 +28,17 @@ public class EventFactoryUtil {
     public <T extends EventBase> void saveAndPublish(T event, String issuedFor) {
         Optional<CreatedEvent> lastEventR =
                 createdEventRepository.findTopByIssuedForOrderByIdDesc(issuedFor);
-
-        event.setPreviousEventId(lastEventR.isPresent() ? lastEventR.get().getEventId() : "0");
+        event.setEventId(UUID.randomUUID().toString());
+        if(lastEventR.isPresent()){
+            event.setPreviousEventId(lastEventR.get().getEventId());
+        }else{
+            event.setPreviousEventId("0");
+            log.info("First event created. Event id is {}", event.getEventId());
+        }
         event.setCreatedAt(Instant.now().getEpochSecond());
         event.setIssuer(properties.getIssuerCode());
         event.setIssuedFor(issuedFor);
-        event.setEventId(UUID.randomUUID().toString());
+        
         String jws = jwsUtil.createJws(event);
         CreatedEvent createdEvent = new CreatedEvent();
         createdEvent.setCreatedAt(LocalDateTime.now(ZoneOffset.UTC));
@@ -46,6 +53,7 @@ public class EventFactoryUtil {
         appEvent.setJws(jws);
         appEvent.setUri(apiUri + "/events");
         eventPublisher.publishEvent(appEvent);
+        log.info("Event published {}", appEvent);
     }
 
 }

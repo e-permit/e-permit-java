@@ -38,6 +38,7 @@ public class ReceivedEventService {
 
     @SneakyThrows
     public EventValidationResult handle(Map<String, Object> claims) {
+        log.info("Event handle started {}", claims);
         EventBase e = GsonUtil.fromMap(claims, EventBase.class);
         if (receivedEventRepository.existsByIssuerAndEventId(e.getIssuer(), e.getEventId())) {
             log.info("Event exists. EventId: {}", e.getEventId());

@@ -18,25 +18,27 @@ public class PermitCreatedEventValidator implements EventValidator {
     private final PermitUtil permitUtil;
 
     public EventValidationResult validate(Map<String, Object> payload) {
+        log.info("PermitCreatedEventValidator started with {}", payload);
         PermitCreatedEvent event = GsonUtil.fromMap(payload, PermitCreatedEvent.class);
         String expectedPermitId = permitUtil.getPermitId(event.getIssuer(), event.getIssuedFor(),
                 event.getPermitType(), event.getPermitYear(), event.getSerialNumber());
         if (!expectedPermitId.equals(event.getPermitId())) {
-            log.info("INVALID_PERMITID");
+            log.info("PermitCreatedEventValidator result is INVALID_PERMITID");
             return EventValidationResult.fail("INVALID_PERMITID", event);
         }
         boolean exist =
                 permitRepository.existsByIssuerAndPermitId(event.getIssuer(), event.getPermitId());
         if (exist) {
-            log.info("PERMIT_EXIST");
+            log.info("PermitCreatedEventValidator result is PERMIT_EXIST");
             return EventValidationResult.fail("PERMIT_EXIST", event);
         }
 
         if (!permitUtil.isQuotaSufficient(event.getIssuer(), event.getPermitYear(),
                 event.getSerialNumber(), event.getPermitType())) {
-            log.info("INSUFFICIENT_QUOTA");
+            log.info("PermitCreatedEventValidator result is INSUFFICIENT_QUOTA");
             return EventValidationResult.fail("INSUFFICIENT_QUOTA", event);
         }
+        log.info("PermitCreatedEventValidator is succeed");
         return EventValidationResult.success(event);
     }
 }

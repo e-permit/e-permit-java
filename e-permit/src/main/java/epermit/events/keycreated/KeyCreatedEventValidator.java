@@ -20,18 +20,21 @@ public class KeyCreatedEventValidator implements EventValidator {
 
     @Override
     public EventValidationResult validate(Map<String, Object> payload) {
+        log.info("KeyCreatedEventValidator started with {}", payload);
         KeyCreatedEvent e = GsonUtil.fromMap(payload, KeyCreatedEvent.class);
 
         try {
             ECKey.parse(GsonUtil.getGson().toJson(e.getJwk())).toPublicJWK();
         } catch (ParseException ex) {
             log.error(ex.getMessage(), ex);
+            log.info("KeyCreatedEventValidator result is  INVALID_KEY");
             return EventValidationResult.fail("INVALID_KEY", e);
         }
         if (authorityKeyRepository.isPublicKeyExist(e.getIssuer(), e.getJwk().getKid())) {
+            log.info("KeyCreatedEventValidator result is  KEYID_EXIST");
             return EventValidationResult.fail("KEYID_EXIST", e);
         }
-
+        log.info("KeyCreatedEventValidator result is  succeed");
         return EventValidationResult.success(e);
     }
 

@@ -8,7 +8,6 @@ import javax.persistence.criteria.Predicate;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -22,7 +21,9 @@ import epermit.models.inputs.PermitListInput;
 import epermit.models.inputs.PermitUsedInput;
 import epermit.repositories.PermitRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PermitService {
@@ -43,6 +44,7 @@ public class PermitService {
 
     @Transactional
     public void usePermit(String permitId, PermitUsedInput input) {
+        log.info("usePermit started {} {}", permitId, input);
         Optional<Permit> permitOptional = permitRepository.findOneByPermitId(permitId);
         if (!permitOptional.isPresent()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "PERMIT_NOTFOUND");

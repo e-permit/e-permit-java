@@ -41,20 +41,24 @@ public class JwsUtil {
 
     @SneakyThrows
     public <T> String createJws(ECKey key, T payloadObj) {
+        log.info("createJws started with {} and key_id {}", payloadObj, key.getKeyID());
         Gson gson = GsonUtil.getGson();
         JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.ES256).keyID(key.getKeyID()).build();
         Payload payload = new Payload(gson.toJson(payloadObj));
         JWSObject jwsObject = new JWSObject(header, payload);
         JWSSigner signer = new ECDSASigner(key);
         jwsObject.sign(signer);
-        return jwsObject.serialize();
+        String jws = jwsObject.serialize();
+        log.info("createJws ended with {}", jws);
+        return jws;
     }
 
     @SneakyThrows
     public JwsValidationResult validateJws(String jws) {
         String issuedFor = getClaim(jws, "issued_for");
+        log.info("Jws validation issued_for {}", issuedFor);
         if (!issuedFor.equals(properties.getIssuerCode())) {
-            log.info("The jws is not issued for the current authority");
+            log.info("The jws is not issued for the current authority {}", jws);
             return JwsValidationResult.fail("INVALID_ISSUED_FOR");
         }
         String issuer = getClaim(jws, "issuer");
@@ -70,8 +74,10 @@ public class JwsUtil {
         JWSVerifier verifier = new ECDSAVerifier(key);
         Boolean valid = jwsObject.verify(verifier);
         if (!valid) {
+            log.info("Invalid jws");
             return JwsValidationResult.fail("INVALID_JWS");
         }
+        log.info("Jws validation succeed {}", jwsObject.getPayload().toJSONObject());
         return JwsValidationResult.success(jwsObject.getPayload().toJSONObject());
     }
 
