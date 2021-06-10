@@ -18,7 +18,9 @@ import epermit.models.results.CreatePermitResult;
 import epermit.services.IssuedPermitService;
 import epermit.utils.GsonUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/issued_permits")
@@ -40,11 +42,13 @@ public class IssuedPermitController {
 
     @PostMapping()
     public CreatePermitResult createPermit(@RequestBody @Valid CreatePermitInput input) {
+        log.info("Permit create request. {}", input);
         return service.createPermit(input);
     }
 
     @DeleteMapping("/{id}")
     public void revoke(@PathVariable("id") Long id) {
+        log.info("Revoke permit request. {}", id);
         service.revokePermit(id);
     }
 }

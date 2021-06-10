@@ -17,7 +17,9 @@ import epermit.models.inputs.PermitUsedInput;
 import epermit.services.PermitService;
 import epermit.utils.GsonUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/permits")
@@ -26,7 +28,7 @@ public class PermitController {
     private final PermitService permitService;
 
     @GetMapping()
-    public Page<PermitDto> getAll(@RequestParam Map<String,Object> params) {
+    public Page<PermitDto> getAll(@RequestParam Map<String, Object> params) {
         PermitListInput input = GsonUtil.fromMap(params, PermitListInput.class);
         Page<PermitDto> r = permitService.getAll(input);
         return r;
@@ -40,6 +42,7 @@ public class PermitController {
 
     @PostMapping("/{id}/activities")
     public void setUsed(@PathVariable("id") String id, @RequestBody @Valid PermitUsedInput input) {
+        log.info("Permit used request. {}, {}", id, input);
         permitService.usePermit(id, input);
     }
 }

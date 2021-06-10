@@ -27,15 +27,18 @@ public class EventController {
 
     @PostMapping()
     public Boolean receiveEvent(@RequestHeader HttpHeaders headers) {
+        log.info("Event received. {}", headers.getFirst(HttpHeaders.AUTHORIZATION));
         ReceivedAppEvent appEvent = new ReceivedAppEvent();
         Map<String, Object> claims = jwsUtil.resolveJws(headers);
         appEvent.setClaims(claims);
         applicationEventPublisher.publishEvent(appEvent);
+        log.info("Receive event finished");
         return true;
     }
 
     @GetMapping()
     public List<String> getEvents(@RequestHeader HttpHeaders headers) {
+        log.info("getEvents called. {}", headers.getFirst(HttpHeaders.AUTHORIZATION));
         Map<String, Object> claims = jwsUtil.resolveJws(headers);
         return createdEventService.getEvents(claims);
     }

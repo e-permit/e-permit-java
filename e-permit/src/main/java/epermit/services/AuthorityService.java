@@ -75,8 +75,12 @@ public class AuthorityService {
     @Transactional
     public void createQuota(CreateQuotaInput input) {
         log.info("Quota create command: {}", input);
-        Authority authority =
-                authorityRepository.findOneByCode(input.getAuthorityCode());
+        Authority authority = authorityRepository.findOneByCode(input.getAuthorityCode());
+        if (authority.getVerifierQuotas().stream()
+                .anyMatch(x -> x.isActive() && x.getPermitType() == input.getPermitType()
+                        && x.getPermitYear() == input.getPermitYear())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "QUOTA_ALREADY_EXIST");
+        }
         VerifierQuota quota = new VerifierQuota();
         quota.setEndNumber(input.getEndId());
         quota.setStartNumber(input.getStartId());
