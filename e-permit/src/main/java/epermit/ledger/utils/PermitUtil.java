@@ -5,12 +5,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
 import org.springframework.stereotype.Component;
-import epermit.ledger.entities.Permit;
+import epermit.ledger.entities.LedgerPermit;
 import epermit.ledger.models.EPermitProperties;
 import epermit.ledger.models.enums.PermitType;
 import epermit.ledger.models.inputs.CreatePermitIdInput;
 import epermit.ledger.models.inputs.CreateQrCodeInput;
-import epermit.ledger.repositories.PermitRepository;
+import epermit.ledger.repositories.LedgerPermitRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,30 +19,31 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class PermitUtil {
     private final JwsUtil jwsUtil;
-    private final PermitRepository permitRepository;
+    private final LedgerPermitRepository permitRepository;
     private final EPermitProperties properties;
 
     public String getPermitId(CreatePermitIdInput input) {
         StringJoiner joiner = new StringJoiner("-");
-        String permitId = joiner.add(iss).add(aud).add(Integer.toString(py)).add(pt.getCode())
-                .add(Long.toString(serialNumber)).toString();
+        String permitId = joiner.add(input.getIssuer()).add(input.getIssuedFor()).add(input.getPermitYear()).add(input.getPermitType())
+                .add(input.getSerialNumber()).toString();
         return permitId;
     }
 
     public boolean isQuotaSufficient(String issuer, int permitYear, int serialNumber,
             PermitType permitType) {
-        Authority authority = authorityRepository.findOneByCode(issuer);
+        /*Authority authority = authorityRepository.findOneByCode(issuer);
         Boolean r = authority.getVerifierQuotas().stream()
                 .anyMatch(x -> x.isActive() && x.getPermitType() == permitType
                         && serialNumber >= x.getStartNumber() && serialNumber <= x.getEndNumber());
-        log.info("isQuotaSufficient ruslt is {}", r);
-        return r;
+        log.info("isQuotaSufficient rusult is {}", r);
+        return r;*/
+        return true;
     }
 
     public Optional<Integer> generateSerialNumber(String issuedFor, int py, PermitType pt) {
-        Optional<Permit> revokedPermitR =
+        Optional<LedgerPermit> revokedPermitR =
                 permitRepository.findFirstByIssuedForAndRevokedTrue(issuedFor);
-        if (revokedPermitR.isPresent()) {
+        /*if (revokedPermitR.isPresent()) {
             Permit revokedPermit = revokedPermitR.get();
             log.info("Revoked permit found. The permit id is {}", revokedPermit.getPermitId());
             int nextSerialNumber = revokedPermit.getSerialNumber();
@@ -67,13 +68,13 @@ public class PermitUtil {
         }
         log.info(
                 "There is no sufficient quota for the authority {}, permit year {} and permit type {}",
-                issuedFor, py, pt);
+                issuedFor, py, pt);*/
         return Optional.empty();
     }
 
     public String generateQrCode(CreateQrCodeInput input) {
         log.info("generateQrCode started with {}");
-        String verifyUri = authorityRepository.findOneByCode(input.getIssuedFor()).getVerifyUri();
+        /*String verifyUri = authorityRepository.findOneByCode(input.getIssuedFor()).getVerifyUri();
         Map<String, String> claims = new HashMap<>();
         claims.put("id", permitId);
         claims.put("iat", issuedAt);
@@ -82,8 +83,8 @@ public class PermitUtil {
         claims.put("cn", companyName);
         String jws = jwsUtil.createJws(claims);
         String qrCode = verifyUri + "#" + properties.getQrcodeVersion() + "." + jws;
-        log.info("generateQrCode ended jws is {}", jws);
-        return qrCode;
+        log.info("generateQrCode ended jws is {}", jws);*/
+        return "qrCode";
     }
 
 }

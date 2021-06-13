@@ -1,8 +1,5 @@
 package epermit.ledger.entities;
 
-
-import java.time.LocalDateTime;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -10,17 +7,15 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-import epermit.models.enums.PermitType;
+import epermit.ledger.models.enums.PermitType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name = "quotas")
-public class Quota {
+@Table(name = "ledger_quotas")
+public class LedgerQuota {
     @Id
     @GeneratedValue
     private int id;
@@ -46,21 +41,6 @@ public class Quota {
 
     @Column(name = "active", nullable = false)
     private boolean active;
-    
-    // For authority
-    @Column(name = "next_number", nullable = false)
-    private int nextNumber;
-
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
-  
-    @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
-
-    @Column(name = "deleted", nullable = false)
-    private boolean deleted;
 }
 
 

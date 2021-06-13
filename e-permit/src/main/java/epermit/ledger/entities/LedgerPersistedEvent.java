@@ -1,6 +1,5 @@
 package epermit.ledger.entities;
 
-import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -8,16 +7,15 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import org.hibernate.annotations.CreationTimestamp;
-import epermit.events.EventType;
+import epermit.ledger.ledgerevents.LedgerEventType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name = "ledger_events")
-public class LedgerEvent {
+@Table(name = "ledger_persisted_events")
+public class LedgerPersistedEvent {
     @Id
     @GeneratedValue
     private long id;
@@ -27,7 +25,7 @@ public class LedgerEvent {
 
     @Column(name = "issued_for", nullable = false)
     private String issuedFor;
-    
+
     @Column(name = "event_id", nullable = false)
     private String eventId;
 
@@ -36,17 +34,12 @@ public class LedgerEvent {
 
     @Column(name = "event_type", nullable = false)
     @Enumerated(EnumType.STRING)
-    private EventType eventType;
+    private LedgerEventType eventType;
 
     @Column(name = "event_time", nullable = false)
     private Long eventTime;
 
-    @Column(name = "jws", nullable = false, length=10000)
+    @Column(name = "jws", nullable = false, length = 10000)
     private String jws;
-
-    // For authority
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
 }
 

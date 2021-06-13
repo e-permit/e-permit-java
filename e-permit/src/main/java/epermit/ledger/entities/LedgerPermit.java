@@ -3,31 +3,31 @@ package epermit.ledger.entities;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-import epermit.models.enums.PermitType;
+import com.vladmihalcea.hibernate.type.json.JsonType;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.Where;
+import epermit.ledger.models.valueobjects.LedgerPermitActivity;
+import epermit.ledger.models.enums.PermitType;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 @Data
 @NoArgsConstructor // JPA
 @Entity
-@Table(name = "permits")
-public class Permit {
+@Table(name = "ledger_permits")
+@SQLDelete(sql = "UPDATE ledger_permits SET deleted = true WHERE id = ?")
+@Where(clause = "deleted = false")
+@TypeDef(name = "json", typeClass = JsonType.class)
+public class LedgerPermit {
     @Id
     @GeneratedValue
     private Long id;
@@ -78,33 +78,11 @@ public class Permit {
     @Column(name = "used_at", nullable = true)
     private LocalDateTime usedAt;
 
-    @Column(name = "revoked", nullable = false)
-    private boolean revoked;
-
-    @Column(name = "revoked_at", nullable = true)
-    private LocalDateTime revokedAt;
-
-    // For authority
     @Column(name = "deleted", nullable = false)
     private boolean deleted;
 
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
-  
-    @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
-
-    @OneToMany(cascade = CascadeType.ALL)
-    @EqualsAndHashCode.Exclude
-    @ToString.Exclude
-    private List<PermitActivity> activities = new ArrayList<>();
-  
-    @JsonIgnore
-    public void addActivity(PermitActivity activity) {
-        activities.add(activity);
-        activity.setPermit(this);
-    }
+    @Type(type = "json")
+    @Column(columnDefinition = "jsonb")
+    private List<LedgerPermitActivity> activities = new ArrayList<>();
 }
 

@@ -1,14 +1,18 @@
 package epermit.ledger.entities;
 
-
 import java.time.LocalDateTime;
+import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import com.vladmihalcea.hibernate.type.json.JsonType;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.UpdateTimestamp;
+import epermit.ledger.models.valueobjects.AuthorityQuota;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -16,6 +20,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor // JPA
 @Entity
 @Table(name = "authorities")
+@TypeDef(name = "json", typeClass = JsonType.class)
 public class Authority {
 
   @Id
@@ -33,6 +38,10 @@ public class Authority {
 
   @Column(name = "verify_uri", nullable = false)
   private String verifyUri;
+
+  @Type(type = "json")
+  @Column(name = "quotas", columnDefinition = "jsonb")
+  private List<AuthorityQuota> quotas;
 
   @CreationTimestamp
   @Column(name = "created_at", nullable = false)

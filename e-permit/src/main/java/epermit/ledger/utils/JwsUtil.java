@@ -17,10 +17,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
-import epermit.entities.AuthorityKey;
-import epermit.models.EPermitProperties;
-import epermit.models.results.JwsValidationResult;
-import epermit.repositories.AuthorityKeyRepository;
+import epermit.ledger.entities.LedgerPublicKey;
+import epermit.ledger.models.EPermitProperties;
+import epermit.ledger.models.results.JwsValidationResult;
+import epermit.ledger.repositories.LedgerPublicKeyRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -29,9 +29,9 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @RequiredArgsConstructor
 public class JwsUtil {
-    private final KeyUtil keyUtil;
+    private final PrivateKeyUtil keyUtil;
     private final EPermitProperties properties;
-    private final AuthorityKeyRepository authorityKeyRepository;
+    private final LedgerPublicKeyRepository publicKeyRepository;
 
     @SneakyThrows
     public <T> String createJws(T payloadObj) {
@@ -65,10 +65,14 @@ public class JwsUtil {
         JWSObject jwsObject = JWSObject.parse(jws);
         String keyId = jwsObject.getHeader().getKeyID();
 
-        Optional<AuthorityKey> k = authorityKeyRepository.findOneByIssuerAndKeyId(issuer, keyId);
+        Optional<LedgerPublicKey> k =
+                publicKeyRepository.findOneByAuthorityCodeAndKeyId(issuer, keyId);
         if (!k.isPresent()) {
-            log.info("The issuer is not known");
+            log.info("The issuer or key doesn't found");
             return JwsValidationResult.fail("INVALID_KEYID");
+        }else if(k.get().isRevoked()){
+            log.info("The key is revoked");
+            return JwsValidationResult.fail("REVOKED_KEY");
         }
         ECKey key = ECKey.parse(k.get().getJwk()).toPublicJWK();
         JWSVerifier verifier = new ECDSAVerifier(key);
