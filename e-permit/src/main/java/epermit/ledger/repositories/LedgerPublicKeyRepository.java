@@ -10,5 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface LedgerPublicKeyRepository extends JpaRepository<LedgerPublicKey, Integer> {
     Optional<LedgerPublicKey> findOneByAuthorityCodeAndKeyId(String code, String keyId);
 
+    boolean existsByAuthorityCodeAndKeyId(String code, String keyId);
+
     List<LedgerPublicKey> findAllByAuthorityCode(String code);
 }

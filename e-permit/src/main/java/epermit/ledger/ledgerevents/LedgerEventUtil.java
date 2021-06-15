@@ -28,7 +28,6 @@ public class LedgerEventUtil {
     private final LedgerPersistedEventRepository ledgerEventRepository;
     private final AuthorityRepository authorityRepository;
     private final Map<String, LedgerEventHandler> eventHandlers;
-    private final Map<String, LedgerEventValidator> eventValidators;
 
     @SneakyThrows
     public <T extends LedgerEventBase> void persistAndPublish(T event, String issuedFor) {
@@ -44,23 +43,14 @@ public class LedgerEventUtil {
         event.setEventTimestamp(Instant.now().getEpochSecond());
         event.setIssuer(properties.getIssuerCode());
         event.setIssuedFor(issuedFor);
-        LedgerEventValidator eventValidator =
-                eventValidators.get(event.getEventType().toString() + "_EVENT_VALIDATOR");
-        if (eventValidator == null) {
+
+        LedgerEventHandler eventHandler =
+                eventHandlers.get(event.getEventType().toString() + "_EVENT_HANDLER");
+        if (eventHandler == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "NOT_IMPLEMENTED_EVENT_VALIDATOR");
+                    "NOT_IMPLEMENTED_EVENT_HANDLER");
         }
-        Map<String, Object> claims = GsonUtil.toMap(event);
-        LedgerEventValidationResult result = eventValidator.validate(claims);
-        if (result.isOk()) {
-            LedgerEventHandler eventHandler =
-                    eventHandlers.get(event.getEventType().toString() + "_EVENT_HANDLER");
-            if (eventHandler == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "NOT_IMPLEMENTED_EVENT_HANDLER");
-            }
-            eventHandler.handle(result.getEvent());
-        }
+        eventHandler.handle(event);
         String jws = jwsUtil.createJws(event);
         LedgerPersistedEvent createdEvent = new LedgerPersistedEvent();
         createdEvent.setIssuedFor(issuedFor);
@@ -78,38 +68,29 @@ public class LedgerEventUtil {
     }
 
     @SneakyThrows
-    private LedgerEventValidationResult handle(Map<String, Object> claims) {
+    private LedgerEventHandleResult handle(Map<String, Object> claims) {
         log.info("Event handle started {}", claims);
         LedgerEventBase e = GsonUtil.fromMap(claims, LedgerEventBase.class);
         if (ledgerEventRepository.existsByIssuerAndIssuedForAndEventId(e.getIssuer(),
                 e.getIssuedFor(), e.getEventId())) {
             log.info("Event exists. EventId: {}", e.getEventId());
-            return LedgerEventValidationResult.fail("EVENT_EXIST", e);
+            return LedgerEventHandleResult.fail("EVENT_EXIST");
         }
         if (!ledgerEventRepository.existsByIssuerAndIssuedForAndEventId(e.getIssuer(),
                 e.getIssuedFor(), e.getPreviousEventId())) {
             if (ledgerEventRepository.existsByIssuerAndIssuedFor(e.getIssuer(), e.getIssuedFor())) {
-                return LedgerEventValidationResult.fail("NOTEXIST_PREVIOUSEVENT", e);
+                return LedgerEventHandleResult.fail("NOTEXIST_PREVIOUSEVENT");
             } else {
                 log.info("First event received");
             }
         }
-        LedgerEventValidator eventValidator =
-                eventValidators.get(e.getEventType().toString() + "_EVENT_VALIDATOR");
-        if (eventValidator == null) {
-            throw new Exception("NOT_IMPLEMENTED_EVENT_VALIDATOR");
+        LedgerEventHandler eventHandler =
+                eventHandlers.get(e.getEventType().toString() + "_EVENT_HANDLER");
+        if (eventHandler == null) {
+            throw new Exception("NOT_IMPLEMENTED_EVENT_HANDLER");
         }
-        LedgerEventValidationResult result = eventValidator.validate(claims);
-        if (result.isOk()) {
-            LedgerEventHandler eventHandler =
-                    eventHandlers.get(e.getEventType().toString() + "_EVENT_HANDLER");
-            if (eventHandler == null) {
-                throw new Exception("NOT_IMPLEMENTED_EVENT_HANDLER");
-            }
-            eventHandler.handle(result.getEvent());
-            return LedgerEventValidationResult.success(result.getEvent());
-        }
-        return result;
+        eventHandler.handle(e);
+        return LedgerEventHandleResult.success();
     }
 
 }

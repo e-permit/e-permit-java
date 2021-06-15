@@ -1,6 +1,6 @@
 package epermit.ledger.models.inputs;
 
-import epermit.models.enums.PermitType;
+import epermit.ledger.models.enums.PermitType;
 import lombok.Data;
 
 @Data

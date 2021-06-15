@@ -1,5 +1,5 @@
 package epermit.ledger.ledgerevents;
 
 public interface LedgerEventHandler {
-    void handle(Object event);
+    LedgerEventHandleResult handle(Object event);
 }
