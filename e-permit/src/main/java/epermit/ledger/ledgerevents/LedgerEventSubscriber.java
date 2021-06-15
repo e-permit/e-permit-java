@@ -37,40 +37,6 @@ public class LedgerEventSubscriber {
     private final EPermitProperties properties;
 
     @SneakyThrows
-    private EventValidationResult handle(Map<String, Object> claims) {
-        log.info("Event handle started {}", claims);
-        EventBase e = GsonUtil.fromMap(claims, EventBase.class);
-        if (receivedEventRepository.existsByIssuerAndEventId(e.getIssuer(), e.getEventId())) {
-            log.info("Event exists. EventId: {}", e.getEventId());
-            return EventValidationResult.fail("EVENT_EXIST", e);
-        }
-        if (!receivedEventRepository.existsByIssuerAndEventId(e.getIssuer(),
-                e.getPreviousEventId())) {
-            if (receivedEventRepository.existsByIssuer(e.getIssuer())) {
-                return EventValidationResult.fail("NOTEXIST_PREVIOUSEVENT", e);
-            }else{
-                log.info("First event received");
-            }
-        }
-        EventValidator eventValidator =
-                eventValidators.get(e.getEventType().toString() + "_EVENT_VALIDATOR");
-        if (eventValidator == null) {
-            throw new Exception("NOT_IMPLEMENTED_EVENT_VALIDATOR");
-        }
-        EventValidationResult result = eventValidator.validate(claims);
-        if (result.isOk()) {
-            EventHandler eventHandler =
-                    eventHandlers.get(e.getEventType().toString() + "_EVENT_HANDLER");
-            if (eventHandler == null) {
-                throw new Exception("NOT_IMPLEMENTED_EVENT_HANDLER");
-            }
-            eventHandler.handle(result.getEvent());
-            return EventValidationResult.success(result.getEvent());
-        }
-        return result;
-    }
-
-    @SneakyThrows
     public void handleReceivedEvent(ReceivedAppEvent event) {
         log.info("Event handle started. Claims is {}", event.getClaims());
         EventValidationResult r = handleOne(event.getClaims());

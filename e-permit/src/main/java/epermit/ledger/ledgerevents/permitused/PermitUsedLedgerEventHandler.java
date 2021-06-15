@@ -20,6 +20,7 @@ public class PermitUsedLedgerEventHandler implements LedgerEventHandler {
         log.info("PermitUsedEventHandler started with {}", e);
         PermitUsedLedgerEvent event = (PermitUsedLedgerEvent) e;
         LedgerPermit permit = permitRepository.findOneByPermitId(event.getPermitId()).get();
+        
         permit.setUsed(true);
         LedgerPermitActivity activity = new LedgerPermitActivity();
         activity.setActivityType(event.getActivityType());
