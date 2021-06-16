@@ -12,6 +12,4 @@ public interface LedgerPermitRepository
      Optional<LedgerPermit> findOneByPermitId(String permitId);
 
      boolean existsByPermitId(String permitId);
-
-     Optional<LedgerPermit> findFirstByIssuedForAndRevokedTrue(String issuedFor);
 }

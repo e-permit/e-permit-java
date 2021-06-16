@@ -39,7 +39,8 @@ public class PermitService {
         String expireAt = "";
         PermitCreatedLedgerEvent e = new PermitCreatedLedgerEvent();
         e.setCompanyId(input.getCompanyId());
-        ledgerEventUtil.persistAndPublish(e, input.getIssuedFor());
+        e.setIssuedFor(input.getIssuedFor());
+        ledgerEventUtil.persistAndPublishEvent(e);
         log.info("Permit create finished permit id is {}", permitId);
         return CreatePermitResult.success(permitId);
     }

@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import epermit.events.keycreated.KeyCreatedEvent;
 import epermit.ledger.entities.PrivateKey;
 import epermit.ledger.repositories.AuthorityRepository;
 import epermit.ledger.repositories.PrivateKeyRepository;
@@ -45,6 +46,9 @@ public class KeyService {
         keyRepository.save(key);
 
         authorityRepository.findAll().forEach(a -> {
+            KeyCreatedEvent event = new KeyCreatedEvent();
+            event.setIssuedFor(a.getCode());
+            //event.setJwk(key.get);
             // persist and publish
         });
     }

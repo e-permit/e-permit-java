@@ -30,9 +30,11 @@ public class LedgerEventUtil {
     private final Map<String, LedgerEventHandler> eventHandlers;
 
     @SneakyThrows
-    public <T extends LedgerEventBase> void persistAndPublish(T event, String issuedFor) {
+    public <T extends LedgerEventBase> void persistAndPublishEvent(T event) {
+        event.setEventTimestamp(Instant.now().getEpochSecond());
+        event.setIssuer(properties.getIssuerCode());
         Optional<LedgerPersistedEvent> lastEventR = ledgerEventRepository
-                .findTopByIssuerAndIssuedForOrderByIdDesc(event.getIssuer(), issuedFor);
+                .findTopByIssuerAndIssuedForOrderByIdDesc(event.getIssuer(), event.getIssuedFor());
         event.setEventId(UUID.randomUUID().toString());
         if (lastEventR.isPresent()) {
             event.setPreviousEventId(lastEventR.get().getEventId());
@@ -40,9 +42,6 @@ public class LedgerEventUtil {
             event.setPreviousEventId("0");
             log.info("First event created. Event id is {}", event.getEventId());
         }
-        event.setEventTimestamp(Instant.now().getEpochSecond());
-        event.setIssuer(properties.getIssuerCode());
-        event.setIssuedFor(issuedFor);
 
         LedgerEventHandler eventHandler =
                 eventHandlers.get(event.getEventType().toString() + "_EVENT_HANDLER");
@@ -50,17 +49,17 @@ public class LedgerEventUtil {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "NOT_IMPLEMENTED_EVENT_HANDLER");
         }
-        eventHandler.handle(event);
+        eventHandler.handle(GsonUtil.toMap(event));
         String jws = jwsUtil.createJws(event);
         LedgerPersistedEvent createdEvent = new LedgerPersistedEvent();
-        createdEvent.setIssuedFor(issuedFor);
+        createdEvent.setIssuedFor(event.getIssuedFor());
         createdEvent.setEventId(event.getEventId());
         createdEvent.setPreviousEventId(event.getPreviousEventId());
         createdEvent.setEventType(event.getEventType());
         createdEvent.setJws(jws);
         ledgerEventRepository.save(createdEvent);
-        String apiUri = authorityRepository.findOneByCode(issuedFor).getApiUri();
-        LedgerEventPublishInput appEvent = new LedgerEventPublishInput();
+        String apiUri = authorityRepository.findOneByCode(event.getIssuedFor()).getApiUri();
+        LedgerEventCreated appEvent = new LedgerEventCreated();
         appEvent.setJws(jws);
         appEvent.setUri(apiUri + "/events");
         eventPublisher.publishEvent(appEvent);
@@ -68,7 +67,7 @@ public class LedgerEventUtil {
     }
 
     @SneakyThrows
-    private LedgerEventHandleResult handle(Map<String, Object> claims) {
+    public LedgerEventHandleResult handleEvent(Map<String, Object> claims) {
         log.info("Event handle started {}", claims);
         LedgerEventBase e = GsonUtil.fromMap(claims, LedgerEventBase.class);
         if (ledgerEventRepository.existsByIssuerAndIssuedForAndEventId(e.getIssuer(),

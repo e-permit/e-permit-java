@@ -8,11 +8,16 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class AuthorityQuota {
-    private int nextNumber;
+
+    private Integer activeQuotaId;
 
     private PermitType permitType;
 
     private int permitYear;
 
-    private List<String> revokedPermits;
+    private int nextNumber;
+
+    private List<Integer> usedQuotaIds;
+
+    private List<Integer> serialNumbers;
 }
