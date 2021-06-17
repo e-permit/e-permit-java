@@ -1,23 +1,18 @@
 package epermit.ledger.models.valueobjects;
 
 import java.util.List;
-import epermit.ledger.models.enums.PermitType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class AuthorityQuota {
+public class AuthorityIssuerQuotaPayload {
 
     private Integer activeQuotaId;
 
-    private PermitType permitType;
-
-    private int permitYear;
-
-    private int nextNumber;
+    private Integer nextNumber;
 
     private List<Integer> usedQuotaIds;
 
-    private List<Integer> serialNumbers;
+    private List<Integer> availableSerialNumbers;
 }

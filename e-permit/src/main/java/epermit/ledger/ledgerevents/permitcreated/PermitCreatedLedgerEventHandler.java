@@ -52,9 +52,9 @@ public class PermitCreatedLedgerEventHandler implements LedgerEventHandler {
         CreatePermitIdInput input = new CreatePermitIdInput();
         input.setIssuedFor(event.getIssuedFor());
         input.setIssuer(event.getIssuer());
-        input.setPermitType(event.getPermitType().getCode());
-        input.setPermitYear(Integer.toString(event.getPermitYear()));
-        input.setSerialNumber(Integer.toString(event.getSerialNumber()));
+        input.setPermitType(event.getPermitType());
+        input.setPermitYear(event.getPermitYear());
+        input.setSerialNumber(event.getSerialNumber());
         String expectedPermitId = permitUtil.getPermitId(input);
         if (expectedPermitId.equals(event.getPermitId())) {
             log.info("PermitCreatedEventValidator result is INVALID_PERMITID");

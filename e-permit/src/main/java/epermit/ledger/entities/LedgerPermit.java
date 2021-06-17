@@ -3,22 +3,25 @@ package epermit.ledger.entities;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vladmihalcea.hibernate.type.json.JsonType;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.Where;
-import epermit.ledger.models.valueobjects.LedgerPermitActivity;
 import epermit.ledger.models.enums.PermitType;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Data
 @NoArgsConstructor // JPA
@@ -81,8 +84,16 @@ public class LedgerPermit {
     @Column(name = "deleted", nullable = false)
     private boolean deleted;
 
-    @Type(type = "json")
-    @Column(columnDefinition = "jsonb")
+    
+    @OneToMany(cascade = CascadeType.ALL)
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     private List<LedgerPermitActivity> activities = new ArrayList<>();
+  
+    @JsonIgnore
+    public void addActivity(LedgerPermitActivity activity) {
+        activities.add(activity);
+        activity.setLedgerPermit(this);
+    }
 }
 

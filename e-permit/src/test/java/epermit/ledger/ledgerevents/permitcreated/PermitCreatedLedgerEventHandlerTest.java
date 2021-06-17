@@ -1,33 +1,57 @@
 package epermit.ledger.ledgerevents.permitcreated;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.when;
-import java.util.Map;
+import static org.mockito.Mockito.verify;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import epermit.events.EventValidationResult;
-import epermit.models.enums.PermitType;
-import epermit.repositories.PermitRepository;
-import epermit.utils.GsonUtil;
-import epermit.utils.PermitUtil;
+import epermit.ledger.entities.LedgerPermit;
+import epermit.ledger.models.enums.PermitType;
+import epermit.ledger.repositories.LedgerPermitRepository;
 
 @ExtendWith(MockitoExtension.class)
-public class PermitCreatedEventValidatorTest {
+public class PermitCreatedLedgerEventHandlerTest {
     @Mock
-    PermitRepository permitRepository;
-
-    @Mock
-    PermitUtil permitUtil;
+    LedgerPermitRepository permitRepository;
 
     @InjectMocks
-    PermitCreatedEventValidator validator;
+    PermitCreatedLedgerEventHandler handler;
+
+    @Captor
+    ArgumentCaptor<LedgerPermit> captor;
 
     @Test
+    void handleTest() {
+        PermitCreatedLedgerEvent event = new PermitCreatedLedgerEvent();
+        event.setExpireAt("A");
+        event.setIssuedAt("A");
+        event.setCompanyName("A");
+        event.setPermitId("UA-TR-2021-1-1");
+        event.setPermitType(PermitType.BILITERAL);
+        event.setPermitYear(2021);
+        event.setPlateNumber("A");
+        event.setSerialNumber(1);
+        event.setIssuer("UA");
+        event.setIssuedFor("TR");
+        handler.handle(event);
+        verify(permitRepository).save(captor.capture());
+        LedgerPermit p = captor.getValue();
+        assertEquals("A", p.getExpireAt());
+        assertEquals("UA-TR-2021-1-1", p.getPermitId());
+        assertEquals(PermitType.BILITERAL, p.getPermitType());
+        assertEquals("A", p.getCompanyName());
+        assertEquals("A", p.getIssuedAt());
+        assertEquals("UA", p.getIssuer());
+        assertEquals(2021, p.getPermitYear());
+        assertEquals(1, p.getSerialNumber());
+    }
+
+    /*
+     @Test
     void okTest() {
         when(permitRepository.existsByIssuerAndPermitId("UA", "UA-TR-2021-1-1")).thenReturn(false);
         when(permitUtil.isQuotaSufficient("UA", 2021, 1, PermitType.BILITERAL)).thenReturn(true);
@@ -84,4 +108,5 @@ public class PermitCreatedEventValidatorTest {
         return GsonUtil.toMap(event);
     }
 
+    */
 }

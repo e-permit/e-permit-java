@@ -12,7 +12,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.UpdateTimestamp;
-import epermit.ledger.models.valueobjects.AuthorityQuota;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -38,10 +37,6 @@ public class Authority {
 
   @Column(name = "verify_uri", nullable = false)
   private String verifyUri;
-
-  @Type(type = "json")
-  @Column(name = "quotas", columnDefinition = "jsonb")
-  private List<AuthorityQuota> quotas;
 
   @CreationTimestamp
   @Column(name = "created_at", nullable = false)

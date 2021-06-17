@@ -1,4 +1,4 @@
-package epermit.services;
+package epermit.ledger.services;
 
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -15,26 +15,22 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.server.ResponseStatusException;
-import epermit.entities.Authority;
-import epermit.entities.Key;
-import epermit.events.keycreated.KeyCreatedEventFactory;
-import epermit.repositories.AuthorityRepository;
-import epermit.repositories.KeyRepository;
-import epermit.utils.KeyUtil;
+import epermit.ledger.entities.Authority;
+import epermit.ledger.entities.PrivateKey;
+import epermit.ledger.repositories.AuthorityRepository;
+import epermit.ledger.repositories.PrivateKeyRepository;
+import epermit.ledger.utils.PrivateKeyUtil;
 
 @ExtendWith(MockitoExtension.class)
-public class KeyServiceTest {
+public class PrivateKeyServiceTest {
     @Mock
-    private KeyRepository keyRepository;
+    private PrivateKeyRepository keyRepository;
 
     @Mock
     private AuthorityRepository authorityRepository;
 
     @Mock
-    private KeyUtil keyUtil;
-
-    @Mock
-    private KeyCreatedEventFactory factory;
+    private PrivateKeyUtil keyUtil;
 
     @InjectMocks
     private KeyService keyService;
@@ -42,7 +38,7 @@ public class KeyServiceTest {
     @Test
     void createTest() {
         when(keyRepository.findOneByKeyId("1")).thenReturn(Optional.empty());
-        Key key = new Key();
+        PrivateKey key = new PrivateKey();
         key.setKeyId("1");
         when(keyUtil.create("1")).thenReturn(key);
         keyService.create("1");
@@ -51,7 +47,7 @@ public class KeyServiceTest {
     
     @Test
     void createKeyExistTest() {
-        Key key = new Key();
+        PrivateKey key = new PrivateKey();
         key.setKeyId("1");
         when(keyRepository.findOneByKeyId("1")).thenReturn(Optional.of(key));
         assertThrows(ResponseStatusException.class, () -> {
@@ -62,8 +58,8 @@ public class KeyServiceTest {
 
     @Test
     void enableTest() {
-        Key key = new Key();
-        Key existKey = new Key();
+        PrivateKey key = new PrivateKey();
+        PrivateKey existKey = new PrivateKey();
         existKey.setEnabled(true);
         Authority authority = new Authority();
         authority.setCode("TR");
@@ -72,7 +68,6 @@ public class KeyServiceTest {
         keyService.enable(1);
         assertTrue(key.isEnabled());
         verify(keyRepository, times(1)).save(key);
-        verify(factory).create(key, "TR");
     }
     
     @Test

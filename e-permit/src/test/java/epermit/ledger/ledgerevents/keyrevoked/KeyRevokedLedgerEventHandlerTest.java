@@ -1,27 +1,35 @@
 package epermit.ledger.ledgerevents.keyrevoked;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import epermit.entities.Authority;
-import epermit.entities.AuthorityKey;
-import epermit.events.EventValidationResult;
-import epermit.repositories.AuthorityRepository;
-import epermit.utils.GsonUtil;
 
 @ExtendWith(MockitoExtension.class)
-public class KeyRevokedEventValidatorTest {
-    @Mock
-    AuthorityRepository authorityRepository;
+public class KeyRevokedLedgerEventHandlerTest {
 
     @InjectMocks
-    KeyRevokedEventValidator validator;
+    KeyRevokedLedgerEventHandler handler;
 
     @Test
+    void handleOkTest() {
+        KeyRevokedLedgerEvent event = new KeyRevokedLedgerEvent();
+        event.setKeyId("1");
+        event.setIssuer("UA");
+        event.setIssuedFor("TR");
+        /*when(authorityKeyRepository.findOneByIssuerAndKeyId("UA", "1"))
+                .thenReturn(Optional.of(new AuthorityKey()));
+        handler.handle(event);
+        verify(authorityKeyRepository, times(1)).save(any());*/
+    }
+
+    /*@Test
     void okTest() {
         KeyRevokedEvent event = new KeyRevokedEvent();
         event.setKeyId("1");
@@ -45,6 +53,7 @@ public class KeyRevokedEventValidatorTest {
         event.setIssuedFor("TR");
         EventValidationResult r = validator.validate(GsonUtil.toMap(event));
         assertFalse(r.isOk());
-        assertEquals("INVALID_PERMITID_OR_ISSUER", r.getErrorCode());*/
-    }
+        assertEquals("INVALID_PERMITID_OR_ISSUER", r.getErrorCode());
+    }*/
+
 }
