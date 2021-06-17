@@ -16,4 +16,8 @@ public class QuotaCreatedLedgerEvent extends LedgerEventBase {
     private int startNumber;
 
     private int endNumber;
+
+    public QuotaCreatedLedgerEvent() {
+        super();
+    }
 }

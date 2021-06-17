@@ -29,16 +29,14 @@ public class LedgerEventUtil {
     private final AuthorityRepository authorityRepository;
     private final Map<String, LedgerEventHandler> eventHandlers;
 
-    public LedgerEventBase createLedgerEvent(LedgerEventType eventType, String issuedFor) {
-        String iss = properties.getIssuerCode();
+    public String getPreviousEventId(String issuedFor) {
         String previousEventId = "0";
-        Optional<LedgerPersistedEvent> lastEventR =
-                ledgerEventRepository.findTopByIssuerAndIssuedForOrderByIdDesc(iss, issuedFor);
+        Optional<LedgerPersistedEvent> lastEventR = ledgerEventRepository
+                .findTopByIssuerAndIssuedForOrderByIdDesc(properties.getIssuerCode(), issuedFor);
         if (lastEventR.isPresent()) {
             previousEventId = lastEventR.get().getEventId();
         }
-        LedgerEventBase event = LedgerEventBase.create(iss, issuedFor, previousEventId, eventType);
-        return event;
+        return previousEventId;
     }
 
     @SneakyThrows

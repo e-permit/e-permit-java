@@ -18,14 +18,12 @@ public class LedgerEventBase {
 
     private String previousEventId;
 
-    public static LedgerEventBase create(String issuer, String issuedFor, String preEventId, LedgerEventType eventType) {
-        LedgerEventBase eventBase = new LedgerEventBase();
-        eventBase.eventId = UUID.randomUUID().toString();
-        eventBase.eventTimestamp = Instant.now().getEpochSecond();
-        eventBase.eventType = eventType;
-        eventBase.issuedFor = issuedFor;
-        eventBase.issuer = issuer;
-        eventBase.previousEventId = preEventId;
-        return eventBase;
+    public LedgerEventBase(String issuer, String issuedFor, String preEventId, LedgerEventType eventType) {
+        this.eventId = UUID.randomUUID().toString();
+        this.eventTimestamp = Instant.now().getEpochSecond();
+        this.eventType = eventType;
+        this.issuedFor = issuedFor;
+        this.issuer = issuer;
+        this.previousEventId = preEventId;
     }
 }
