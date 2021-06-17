@@ -7,7 +7,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.web.client.RestTemplate;
-import epermit.events.CreatedAppEvent;
+import epermit.ledgerevents.LedgerEventCreated;
 import epermit.utils.JwsUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +22,7 @@ public class AppEventListener {
 
     @Async
     @TransactionalEventListener
-    public void onAppEvent(CreatedAppEvent event) {
+    public void onAppEvent(LedgerEventCreated event) {
         log.info("onAppEvent is fired. {}", event);
         HttpHeaders headers = jwsUtil.getJwsHeader(event.getJws());
         HttpEntity<String> request = new HttpEntity<String>(event.getJws(), headers);

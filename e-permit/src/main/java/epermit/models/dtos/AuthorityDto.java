@@ -19,8 +19,6 @@ public class AuthorityDto {
 
   private List<PublicJwk> keys = new ArrayList<>();
 
-  private List<VerifierQuotaDto> verifierQuotas = new ArrayList<>();
-
-  private List<IssuerQuotaDto> issuerQuotas = new ArrayList<>();
+  private List<QuotaDto> quotas = new ArrayList<>();
 }
 

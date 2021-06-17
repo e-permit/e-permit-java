@@ -8,15 +8,16 @@ import com.nimbusds.jose.jwk.ECKey;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import epermit.entities.Authority;
-import epermit.entities.Key;
+import epermit.entities.PrivateKey;
 import epermit.models.EPermitProperties;
 import epermit.models.dtos.AuthorityConfig;
 import epermit.models.dtos.PublicJwk;
 import epermit.models.dtos.TrustedAuthority;
 import epermit.repositories.AuthorityRepository;
-import epermit.repositories.KeyRepository;
+import epermit.repositories.LedgerPublicKeyRepository;
+import epermit.repositories.PrivateKeyRepository;
 import epermit.utils.GsonUtil;
-import epermit.utils.KeyUtil;
+import epermit.utils.PrivateKeyUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -26,16 +27,17 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class ConfigService {
     private final AuthorityRepository authorityRepository;
-    private final KeyRepository keyRepository;
+    private final PrivateKeyRepository keyRepository;
     private final EPermitProperties properties;
-    private final KeyUtil keyUtil;
+    private final PrivateKeyUtil keyUtil;
+    private final LedgerPublicKeyRepository ledgerPublicKeyRepository;
 
     @Transactional
     @SneakyThrows
     public void seed() {
         Long keyCount = keyRepository.count();
         if (keyCount == 0) {
-            Key key;
+            PrivateKey key;
             String privateKey = properties.getIssuerPrivateKey();
             if (privateKey != null) {
                 String jwkStr = new String(Base64.getUrlDecoder().decode(privateKey));
@@ -56,9 +58,10 @@ public class ConfigService {
         dto.setVerifyUri(properties.getIssuerVerifyUri());
         Gson gson = GsonUtil.getGson();
         List<PublicJwk> keyDtoList = new ArrayList<>();
-        keyRepository.findAllByEnabledTrue().forEach(key -> {
-            keyDtoList.add(gson.fromJson(key.getPublicJwk(), PublicJwk.class));
-        });
+        ledgerPublicKeyRepository.findAllByAuthorityCodeAndRevokedFalse(properties.getIssuerCode())
+                .forEach(key -> {
+                    keyDtoList.add(gson.fromJson(key.getJwk(), PublicJwk.class));
+                });
         dto.setKeys(keyDtoList);
         List<TrustedAuthority> trustedAuthorities = new ArrayList<>();
         List<Authority> authorities = authorityRepository.findAll();
@@ -66,7 +69,7 @@ public class ConfigService {
             TrustedAuthority trustedAuthority = new TrustedAuthority();
             trustedAuthority.setCode(authority.getCode());
             List<PublicJwk> publicKeys = new ArrayList<>();
-            authority.getKeys().forEach(k -> {
+            ledgerPublicKeyRepository.findAllByAuthorityCodeAndRevokedFalse(authority.getCode()).forEach(k -> {
                 PublicJwk publicJwk = gson.fromJson(k.getJwk(), PublicJwk.class);
                 publicKeys.add(publicJwk);
             });

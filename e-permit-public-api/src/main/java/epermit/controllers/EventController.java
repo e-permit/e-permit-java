@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import epermit.events.ReceivedAppEvent;
-import epermit.services.CreatedEventService;
+import epermit.ledgerevents.LedgerEventReceived;
+import epermit.services.PersistedEventService;
 import epermit.utils.JwsUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,16 +22,16 @@ import lombok.extern.slf4j.Slf4j;
 public class EventController {
 
     private final ApplicationEventPublisher applicationEventPublisher;
-    private final CreatedEventService createdEventService;
+    private final PersistedEventService eventService;
     private final JwsUtil jwsUtil;
 
     @PostMapping()
     public Boolean receiveEvent(@RequestHeader HttpHeaders headers) {
         log.info("Event received. {}", headers.getFirst(HttpHeaders.AUTHORIZATION));
-        ReceivedAppEvent appEvent = new ReceivedAppEvent();
+        LedgerEventReceived eventReceived = new LedgerEventReceived();
         Map<String, Object> claims = jwsUtil.resolveJws(headers);
-        appEvent.setClaims(claims);
-        applicationEventPublisher.publishEvent(appEvent);
+        eventReceived.setClaims(claims);
+        applicationEventPublisher.publishEvent(eventReceived);
         log.info("Receive event finished");
         return true;
     }
@@ -40,6 +40,6 @@ public class EventController {
     public List<String> getEvents(@RequestHeader HttpHeaders headers) {
         log.info("getEvents called. {}", headers.getFirst(HttpHeaders.AUTHORIZATION));
         Map<String, Object> claims = jwsUtil.resolveJws(headers);
-        return createdEventService.getEvents(claims);
+        return eventService.getPersistedLedgerEvents(claims);
     }
 }

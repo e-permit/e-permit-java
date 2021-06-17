@@ -9,6 +9,9 @@ public class PermitListInput {
     @JsonProperty("issuer")
     private String issuer;
 
+    @JsonProperty("issued_for")
+    private String issuedFor;
+
     @JsonProperty("permit_year")
     private Integer permitYear;
 

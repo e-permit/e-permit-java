@@ -17,7 +17,7 @@ public class AuthorityQuotaControllerTest {
     AuthorityService authorityService;
 
     @InjectMocks
-    AuthorityQuotaController controller;
+    QuotaController controller;
 
     @Test
     void createQuotaTest() {

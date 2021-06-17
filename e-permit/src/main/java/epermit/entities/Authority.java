@@ -1,28 +1,24 @@
 package epermit.entities;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.vladmihalcea.hibernate.type.json.JsonType;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.UpdateTimestamp;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 @Data
 @NoArgsConstructor // JPA
 @Entity
 @Table(name = "authorities")
+@TypeDef(name = "json", typeClass = JsonType.class)
 public class Authority {
 
   @Id
@@ -48,38 +44,4 @@ public class Authority {
   @UpdateTimestamp
   @Column(name = "updated_at", nullable = false)
   private LocalDateTime updatedAt;
-  
-  @OneToMany(cascade = CascadeType.ALL)
-  @EqualsAndHashCode.Exclude
-  @ToString.Exclude
-  private List<AuthorityKey> keys = new ArrayList<>();
-
-  @JsonIgnore
-  public void addKey(AuthorityKey key) {
-    keys.add(key);
-    key.setAuthority(this);
-  }
-
-  @OneToMany(cascade = CascadeType.ALL)
-  @EqualsAndHashCode.Exclude
-  @ToString.Exclude
-  private List<VerifierQuota> verifierQuotas = new ArrayList<>();
-
-  @JsonIgnore
-  public void addVerifierQuota(VerifierQuota verifierQuota) {
-    verifierQuotas.add(verifierQuota);
-    verifierQuota.setAuthority(this);
-  }
-
-  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-  @EqualsAndHashCode.Exclude
-  @ToString.Exclude
-  private List<IssuerQuota> issuerQuotas = new ArrayList<>();
-
-  @JsonIgnore
-  public void addIssuerQuota(IssuerQuota quota) {
-    issuerQuotas.add(quota);
-    quota.setAuthority(this);
-  }
- 
 }

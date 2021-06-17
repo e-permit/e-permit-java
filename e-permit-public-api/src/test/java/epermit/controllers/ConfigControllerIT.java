@@ -15,10 +15,10 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import epermit.PermitPostgresContainer;
-import epermit.entities.Key;
+import epermit.entities.PrivateKey;
 import epermit.models.dtos.AuthorityConfig;
-import epermit.repositories.KeyRepository;
-import epermit.utils.KeyUtil;
+import epermit.repositories.PrivateKeyRepository;
+import epermit.utils.PrivateKeyUtil;
 
 @Testcontainers
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -28,10 +28,10 @@ public class ConfigControllerIT {
     private int port;
 
     @Autowired
-    private KeyUtil keyUtil;
+    private PrivateKeyUtil keyUtil;
 
     @Autowired
-    private KeyRepository keyRepository;
+    private PrivateKeyRepository keyRepository;
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -44,7 +44,7 @@ public class ConfigControllerIT {
     @BeforeEach
     @Transactional
     void setUp() {
-        Key key = keyUtil.create("1");
+        PrivateKey key = keyUtil.create("1");
         key.setEnabled(true);
         keyRepository.save(key);
     }

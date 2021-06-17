@@ -7,8 +7,10 @@ import lombok.Data;
 @Data
 public class PermitDto {
     private Long id;
-    
+
     private String permitId;
+
+    private String qrCode;
 
     private int serialNumber;
 
@@ -36,4 +38,3 @@ public class PermitDto {
 
     private Date revokedAt;
 }
-

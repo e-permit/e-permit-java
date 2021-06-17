@@ -22,15 +22,11 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import epermit.PermitPostgresContainer;
 import epermit.entities.Authority;
-import epermit.entities.AuthorityKey;
-import epermit.entities.CreatedEvent;
-import epermit.entities.Key;
-import epermit.events.EventType;
+import epermit.models.dtos.PrivateKey;
 import epermit.repositories.AuthorityRepository;
-import epermit.repositories.CreatedEventRepository;
-import epermit.repositories.KeyRepository;
+import epermit.repositories.PrivateKeyRepository;
 import epermit.utils.JwsUtil;
-import epermit.utils.KeyUtil;
+import epermit.utils.PrivateKeyUtil;
 
 @Testcontainers
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -43,13 +39,11 @@ public class EventControllerIT {
         private AuthorityRepository authorityRepository;
 
         @Autowired
-        private KeyRepository keyRepository;
+        private PrivateKeyRepository keyRepository;
+
 
         @Autowired
-        CreatedEventRepository createdEventRepository;
-
-        @Autowired
-        private KeyUtil keyUtil;
+        private PrivateKeyUtil keyUtil;
 
         @Autowired
         private TestRestTemplate restTemplate;
@@ -69,7 +63,7 @@ public class EventControllerIT {
         @BeforeEach
         @Transactional
         void setUp() {
-                Key key = keyUtil.create("1");
+                /*PrivateKey key = keyUtil.create("1");
                 key.setEnabled(true);
                 keyRepository.save(key);
                 Authority authority = new Authority();
@@ -95,7 +89,7 @@ public class EventControllerIT {
                 event2.setJws("jws");
                 event2.setPreviousEventId("1");
                 createdEventRepository.save(event);
-                createdEventRepository.save(event2);
+                createdEventRepository.save(event2);*/
         }
 
         @Test
@@ -108,21 +102,21 @@ public class EventControllerIT {
                                 this.restTemplate.postForEntity(baseUrl, request, Boolean.class);
                 Assert.assertEquals(200, result.getStatusCodeValue());
                 Assert.assertEquals(true, result.getBody());
-                //verify(applicationEventPublisher).publishEvent(any());
+                // verify(applicationEventPublisher).publishEvent(any());
         }
 
         @Test
         void getEventsTest() {
                 final String baseUrl = "http://localhost:" + port + "/events";
-                String jws = jwsUtil.createJws(Map.of("issuer", "UA", "issued_for", "TR", "event_id", "1"));
+                String jws = jwsUtil.createJws(
+                                Map.of("issuer", "UA", "issued_for", "TR", "event_id", "1"));
                 HttpHeaders headers = jwsUtil.getJwsHeader(jws);
                 HttpEntity<?> entity = new HttpEntity<>(headers);
-                ResponseEntity<String[]> result =
-                                this.restTemplate.exchange(baseUrl, HttpMethod.GET, entity, String[].class);
+                ResponseEntity<String[]> result = this.restTemplate.exchange(baseUrl,
+                                HttpMethod.GET, entity, String[].class);
                 Assert.assertEquals(200, result.getStatusCodeValue());
                 Assert.assertEquals(1, result.getBody().length);
         }
 }
-
 
 
