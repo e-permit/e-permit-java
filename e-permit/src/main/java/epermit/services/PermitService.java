@@ -43,8 +43,8 @@ public class PermitService {
     }
 
     public Page<PermitDto> getAll(PermitListInput input) {
-        Page<epermit.entities.LedgerPermit> entities =
-                permitRepository.findAll(filterPermits(input), PageRequest.of(input.getPage(), 10));
+        Page<epermit.entities.LedgerPermit> entities = permitRepository.findAll(filterPermits(input),
+                PageRequest.of(input.getPage(), 10));
         return entities.map(x -> modelMapper.map(x, PermitDto.class));
     }
 
@@ -62,8 +62,8 @@ public class PermitService {
         String issuer = properties.getIssuerCode();
         String issuedAt = "";
         String expireAt = "";
-        PermitCreatedLedgerEvent e = (PermitCreatedLedgerEvent) ledgerEventUtil
-                .createLedgerEvent(LedgerEventType.PERMIT_CREATED, input.getIssuedFor());
+        String prevEventId = ledgerEventUtil.getPreviousEventId(input.getIssuedFor());
+        PermitCreatedLedgerEvent e = new PermitCreatedLedgerEvent(issuer, input.getIssuedFor(), prevEventId);
         e.setCompanyId(input.getCompanyId());
         ledgerEventUtil.persistAndPublishEvent(e);
         log.info("Permit create finished permit id is {}", permitId);
@@ -100,5 +100,3 @@ public class PermitService {
     }
 
 }
-
-

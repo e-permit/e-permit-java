@@ -1,9 +1,10 @@
 package epermit.ledgerevents;
 
-import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
+
+import javax.validation.Validator;
+
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -28,6 +29,7 @@ public class LedgerEventUtil {
     private final LedgerPersistedEventRepository ledgerEventRepository;
     private final AuthorityRepository authorityRepository;
     private final Map<String, LedgerEventHandler> eventHandlers;
+    private final Validator validator;
 
     public String getPreviousEventId(String issuedFor) {
         String previousEventId = "0";
@@ -41,11 +43,9 @@ public class LedgerEventUtil {
 
     @SneakyThrows
     public <T extends LedgerEventBase> void persistAndPublishEvent(T event) {
-        LedgerEventHandler eventHandler =
-                eventHandlers.get(event.getEventType().toString() + "_EVENT_HANDLER");
+        LedgerEventHandler eventHandler = eventHandlers.get(event.getEventType().toString() + "_EVENT_HANDLER");
         if (eventHandler == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "NOT_IMPLEMENTED_EVENT_HANDLER");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "NOT_IMPLEMENTED_EVENT_HANDLER");
         }
         eventHandler.handle(GsonUtil.toMap(event));
         String jws = jwsUtil.createJws(event);
@@ -91,4 +91,3 @@ public class LedgerEventUtil {
     }
 
 }
-

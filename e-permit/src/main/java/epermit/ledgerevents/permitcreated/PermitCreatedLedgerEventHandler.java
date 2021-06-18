@@ -23,7 +23,6 @@ public class PermitCreatedLedgerEventHandler implements LedgerEventHandler {
     public LedgerEventHandleResult handle(Object e) {
         log.info("PermitCreatedEventHandler started with {}", e);
         PermitCreatedLedgerEvent event = (PermitCreatedLedgerEvent) e;
-        Gson gson = GsonUtil.getGson();
         LedgerEventHandleResult r = validate(event);
         if(!r.isOk()){
             return r;

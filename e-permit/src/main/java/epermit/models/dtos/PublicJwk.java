@@ -3,7 +3,7 @@ package epermit.models.dtos;
 import lombok.Data;
 
 @Data
-public class PublicJwk {
+public class PublicJwk { 
     private String kty;
     private String use;
     private String crv;

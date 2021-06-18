@@ -18,12 +18,12 @@ public class LedgerEventBase {
 
     private String previousEventId;
 
-    public LedgerEventBase(String issuer, String issuedFor, String preEventId, LedgerEventType eventType) {
+    public LedgerEventBase(String issuer, String issuedFor, String prevEventId, LedgerEventType eventType) {
         this.eventId = UUID.randomUUID().toString();
         this.eventTimestamp = Instant.now().getEpochSecond();
         this.eventType = eventType;
         this.issuedFor = issuedFor;
         this.issuer = issuer;
-        this.previousEventId = preEventId;
+        this.previousEventId = prevEventId;
     }
 }

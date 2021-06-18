@@ -6,7 +6,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+
+import epermit.ledgerevents.LedgerEventUtil;
 import epermit.ledgerevents.keycreated.KeyCreatedLedgerEvent;
+import epermit.models.EPermitProperties;
 import epermit.entities.PrivateKey;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.PrivateKeyRepository;
@@ -21,6 +24,8 @@ public class KeyService {
     private final PrivateKeyRepository keyRepository;
     private final PrivateKeyUtil keyUtil;
     private final AuthorityRepository authorityRepository;
+    private final EPermitProperties properties;
+    private final LedgerEventUtil eventUtil;
 
     @Transactional
     public void create(String keyId) {
@@ -46,8 +51,10 @@ public class KeyService {
         keyRepository.save(key);
 
         authorityRepository.findAll().forEach(a -> {
-            KeyCreatedLedgerEvent event = null;
-            //event.setJwk(key.get);
+            String prevEventId = eventUtil.getPreviousEventId(a.getCode());
+            KeyCreatedLedgerEvent event = new KeyCreatedLedgerEvent(properties.getIssuerCode(), a.getCode(),
+                    prevEventId);
+            // event.setJwk(key.get);
             // persist and publish
         });
     }
@@ -60,14 +67,14 @@ public class KeyService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "KEY_NOTFOUND");
         }
         List<PrivateKey> keys = keyRepository.findAllByEnabledTrue();
-        if(keys.size() == 1){
+        if (keys.size() == 1) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "THERE_IS_ONLY_ONE_KEY");
         }
         PrivateKey key = keyR.get();
         keyRepository.delete(key);
 
         authorityRepository.findAll().forEach(a -> {
-           // persist and publish
+            // persist and publish
         });
     }
 }
