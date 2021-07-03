@@ -26,7 +26,7 @@ public class EventController {
     private final JwsUtil jwsUtil;
 
     @PostMapping()
-    public Boolean receiveEvent(@RequestHeader HttpHeaders headers) {
+    public Boolean createEvent(@RequestHeader HttpHeaders headers) {
         log.info("Event received. {}", headers.getFirst(HttpHeaders.AUTHORIZATION));
         LedgerEventReceived eventReceived = new LedgerEventReceived();
         Map<String, Object> claims = jwsUtil.resolveJws(headers);

@@ -112,7 +112,7 @@ public class AuthorityControllerIT {
         jwk.setX("x");
         jwk.setY("y");
         config.setKeys(List.of(jwk));
-        config.setTrustedAuthorities(List.of());
+        //config.setTrustedAuthorities(List.of());
         mockServer.expect(once(), requestTo("http://localhost/epermit-configuration")).andRespond(
                 withSuccess(GsonUtil.getGson().toJson(config), MediaType.APPLICATION_JSON));
 

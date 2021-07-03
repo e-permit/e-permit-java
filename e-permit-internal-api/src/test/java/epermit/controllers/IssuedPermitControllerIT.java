@@ -25,18 +25,17 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import epermit.PermitPostgresContainer;
 import epermit.RestResponsePage;
 import epermit.entities.Authority;
-import epermit.entities.IssuedPermit;
-import epermit.entities.IssuerQuota;
-import epermit.entities.Key;
-import epermit.models.dtos.IssuedPermitDto;
+import epermit.entities.LedgerPermit;
+import epermit.entities.LedgerQuota;
+import epermit.entities.PrivateKey;
+import epermit.models.dtos.PermitDto;
 import epermit.models.enums.PermitType;
 import epermit.models.inputs.CreatePermitInput;
-import epermit.models.inputs.IssuedPermitListInput;
 import epermit.models.results.CreatePermitResult;
 import epermit.repositories.AuthorityRepository;
-import epermit.repositories.IssuedPermitRepository;
-import epermit.repositories.KeyRepository;
-import epermit.utils.KeyUtil;
+import epermit.repositories.LedgerPermitRepository;
+import epermit.repositories.PrivateKeyRepository;
+import epermit.utils.PrivateKeyUtil;
 
 
 @Testcontainers
@@ -54,13 +53,13 @@ public class IssuedPermitControllerIT {
     AuthorityRepository authorityRepository;
 
     @Autowired
-    KeyRepository keyRepository;
+    PrivateKeyRepository keyRepository;
 
     @Autowired
-    IssuedPermitRepository issuedPermitRepository;
+    LedgerPermitRepository permitRepository;
 
     @Autowired
-    KeyUtil keyUtil;
+    PrivateKeyUtil keyUtil;
 
     @BeforeEach
     @Transactional
@@ -70,15 +69,13 @@ public class IssuedPermitControllerIT {
         authority.setCode("UZ");
         authority.setName("name");
         authority.setVerifyUri("verifyUri");
-        IssuerQuota quota = new IssuerQuota();
+        LedgerQuota quota = new LedgerQuota();
         quota.setActive(true);
         quota.setEndNumber(30);
         quota.setStartNumber(1);
         quota.setPermitType(PermitType.BILITERAL);
         quota.setPermitYear(2021);
-        authority.addIssuerQuota(quota);
-        authorityRepository.save(authority);
-        Key key = keyUtil.create("1");
+        PrivateKey key = keyUtil.create("1");
         key.setEnabled(true);
         keyRepository.save(key);
     }
@@ -98,7 +95,7 @@ public class IssuedPermitControllerIT {
     @Test
     void getAllTest() {
         for (int i = 0; i < 25; i++) {
-            IssuedPermit permit = new IssuedPermit();
+            LedgerPermit permit = new LedgerPermit();
             permit.setCompanyName("ABC");
             permit.setCompanyId("1");
             permit.setIssuedFor("UZ");
@@ -110,7 +107,7 @@ public class IssuedPermitControllerIT {
             permit.setPermitId("ABC");
             permit.setQrCode("qrCode");
             permit.setSerialNumber(1);
-            issuedPermitRepository.save(permit);
+            permitRepository.save(permit);
         }
         HttpHeaders headers = new HttpHeaders();
         headers.set(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
@@ -120,9 +117,9 @@ public class IssuedPermitControllerIT {
 
         HttpEntity<?> entity = new HttpEntity<>(headers);
 
-        ParameterizedTypeReference<RestResponsePage<IssuedPermitDto>> responseType =
-                new ParameterizedTypeReference<RestResponsePage<IssuedPermitDto>>() {};
-        ResponseEntity<RestResponsePage<IssuedPermitDto>> result = getTestRestTemplate()
+        ParameterizedTypeReference<RestResponsePage<PermitDto>> responseType =
+                new ParameterizedTypeReference<RestResponsePage<PermitDto>>() {};
+        ResponseEntity<RestResponsePage<PermitDto>> result = getTestRestTemplate()
                 .exchange(builder.toUriString(), HttpMethod.GET, entity, responseType);
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertEquals(25, result.getBody().getTotalElements());
@@ -132,7 +129,7 @@ public class IssuedPermitControllerIT {
 
     @Test
     void getByIdTest() {
-        IssuedPermit permit = new IssuedPermit();
+        LedgerPermit permit = new LedgerPermit();
         permit.setCompanyName("ABC");
         permit.setCompanyId("1");
         permit.setIssuedFor("UZ");
@@ -144,9 +141,9 @@ public class IssuedPermitControllerIT {
         permit.setPermitId("ABC");
         permit.setQrCode("qrCode");
         permit.setSerialNumber(1);
-        issuedPermitRepository.save(permit);
-        IssuedPermitDto dto = getTestRestTemplate()
-                .getForObject(getBaseUrl() + "/" + permit.getId(), IssuedPermitDto.class);
+        permitRepository.save(permit);
+        PermitDto dto = getTestRestTemplate()
+                .getForObject(getBaseUrl() + "/" + permit.getId(), PermitDto.class);
         assertEquals("ABC", dto.getPermitId());
     }
 
@@ -166,7 +163,7 @@ public class IssuedPermitControllerIT {
 
     @Test
     void revokeTest() {
-        IssuedPermit permit = new IssuedPermit();
+        LedgerPermit permit = new LedgerPermit();
         permit.setCompanyName("ABC");
         permit.setIssuedFor("UZ");
         permit.setPermitType(PermitType.BILITERAL);
@@ -177,7 +174,7 @@ public class IssuedPermitControllerIT {
         permit.setPermitId("ABC");
         permit.setQrCode("qrCode");
         permit.setSerialNumber(1);
-        issuedPermitRepository.save(permit);
+        permitRepository.save(permit);
         HttpEntity<String> entity = new HttpEntity<String>("{}");
         ResponseEntity<Void> r = getTestRestTemplate().exchange(getBaseUrl() + "/" + permit.getId(),
                 HttpMethod.DELETE, entity, Void.class);

@@ -1,19 +1,15 @@
 package epermit.services;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 import epermit.entities.Authority;
 import epermit.entities.LedgerPublicKey;
 import epermit.entities.LedgerQuota;
 import epermit.models.dtos.AuthorityConfig;
 import epermit.models.dtos.AuthorityDto;
-import epermit.models.dtos.PublicJwk;
 import epermit.models.inputs.CreateAuthorityInput;
 import epermit.models.inputs.CreateQuotaInput;
 import epermit.repositories.AuthorityRepository;

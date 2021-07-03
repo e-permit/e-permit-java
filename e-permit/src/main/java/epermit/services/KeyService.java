@@ -1,7 +1,9 @@
 package epermit.services;
 
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
+import com.nimbusds.jose.jwk.ECKey;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +17,7 @@ import epermit.repositories.AuthorityRepository;
 import epermit.repositories.PrivateKeyRepository;
 import epermit.utils.PrivateKeyUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -26,6 +29,25 @@ public class KeyService {
     private final AuthorityRepository authorityRepository;
     private final EPermitProperties properties;
     private final LedgerEventUtil eventUtil;
+
+    @Transactional
+    @SneakyThrows
+    public void seed() {
+        Long keyCount = keyRepository.count();
+        if (keyCount == 0) {
+            PrivateKey key;
+            String privateKey = properties.getIssuerPrivateKey();
+            if (privateKey != null) {
+                String jwkStr = new String(Base64.getUrlDecoder().decode(privateKey));
+                log.info("Private key exist");
+                key = keyUtil.create(ECKey.parse(jwkStr));
+            } else {
+                key = keyUtil.create("1");
+            }
+            key.setEnabled(true);
+            keyRepository.save(key);
+        }
+    }
 
     @Transactional
     public void create(String keyId) {
@@ -52,8 +74,8 @@ public class KeyService {
 
         authorityRepository.findAll().forEach(a -> {
             String prevEventId = eventUtil.getPreviousEventId(a.getCode());
-            KeyCreatedLedgerEvent event = new KeyCreatedLedgerEvent(properties.getIssuerCode(), a.getCode(),
-                    prevEventId);
+            KeyCreatedLedgerEvent event =
+                    new KeyCreatedLedgerEvent(properties.getIssuerCode(), a.getCode(), prevEventId);
             // event.setJwk(key.get);
             // persist and publish
         });

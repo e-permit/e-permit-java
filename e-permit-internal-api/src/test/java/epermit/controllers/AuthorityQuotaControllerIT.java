@@ -21,13 +21,13 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import epermit.PermitPostgresContainer;
 import epermit.entities.Authority;
-import epermit.entities.Key;
-import epermit.entities.VerifierQuota;
+import epermit.entities.LedgerQuota;
+import epermit.entities.PrivateKey;
 import epermit.models.enums.PermitType;
 import epermit.models.inputs.CreateQuotaInput;
 import epermit.repositories.AuthorityRepository;
-import epermit.repositories.KeyRepository;
-import epermit.utils.KeyUtil;
+import epermit.repositories.PrivateKeyRepository;
+import epermit.utils.PrivateKeyUtil;
 
 
 @Testcontainers
@@ -47,10 +47,10 @@ public class AuthorityQuotaControllerIT {
     AuthorityRepository authorityRepository;
 
     @Autowired
-    KeyRepository keyRepository;
+    PrivateKeyRepository keyRepository;
 
     @Autowired
-    KeyUtil keyUtil;
+    PrivateKeyUtil keyUtil;
 
     @Transactional
     void setUpAuthority() {
@@ -59,14 +59,13 @@ public class AuthorityQuotaControllerIT {
         authority.setCode("UZ");
         authority.setName("name");
         authority.setVerifyUri("verifyUri");
-        VerifierQuota quota = new VerifierQuota();
+        LedgerQuota quota = new LedgerQuota();
         quota.setEndNumber(30);
         quota.setStartNumber(1);
         quota.setPermitType(PermitType.BILITERAL);
         quota.setPermitYear(2021);
-        authority.addVerifierQuota(quota);
         authorityRepository.save(authority);
-        Key key = keyUtil.create("1");
+        PrivateKey key = keyUtil.create("1");
         key.setEnabled(true);
         keyRepository.save(key);
         quotaId = quota.getId();

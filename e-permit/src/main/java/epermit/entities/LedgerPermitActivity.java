@@ -33,6 +33,9 @@ public class LedgerPermitActivity {
     @Column(name = "activity_timestamp", nullable = false)
     private Long activityTimestamp;
 
+    @Column(name = "activity_details", nullable = false)
+    private String activityDetails;
+
     @ManyToOne
     @JoinColumn(name = "ledger_permit_id") 
     @EqualsAndHashCode.Exclude

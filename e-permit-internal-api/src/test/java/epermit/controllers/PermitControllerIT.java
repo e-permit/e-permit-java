@@ -23,16 +23,16 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import epermit.PermitPostgresContainer;
 import epermit.RestResponsePage;
 import epermit.entities.Authority;
-import epermit.entities.Permit;
-import epermit.entities.Key;
+import epermit.entities.LedgerPermit;
+import epermit.entities.PrivateKey;
 import epermit.models.dtos.PermitDto;
 import epermit.models.enums.PermitActivityType;
 import epermit.models.enums.PermitType;
 import epermit.models.inputs.PermitUsedInput;
 import epermit.repositories.AuthorityRepository;
-import epermit.repositories.PermitRepository;
-import epermit.repositories.KeyRepository;
-import epermit.utils.KeyUtil;
+import epermit.repositories.LedgerPermitRepository;
+import epermit.repositories.PrivateKeyRepository;
+import epermit.utils.PrivateKeyUtil;
 
 
 @Testcontainers
@@ -50,13 +50,13 @@ public class PermitControllerIT {
     AuthorityRepository authorityRepository;
 
     @Autowired
-    KeyRepository keyRepository;
+    PrivateKeyRepository keyRepository;
 
     @Autowired
-    PermitRepository permitRepository;
+    LedgerPermitRepository permitRepository;
 
     @Autowired
-    KeyUtil keyUtil;
+    PrivateKeyUtil keyUtil;
 
     @BeforeEach
     @Transactional
@@ -67,7 +67,7 @@ public class PermitControllerIT {
         authority.setName("name");
         authority.setVerifyUri("verifyUri");
         authorityRepository.save(authority);
-        Key key = keyUtil.create("1");
+        PrivateKey key = keyUtil.create("1");
         key.setEnabled(true);
         keyRepository.save(key);
     }
@@ -87,7 +87,7 @@ public class PermitControllerIT {
     @Test
     void getAllTest() {
         for (int i = 0; i < 25; i++) {
-            Permit permit = new Permit();
+            LedgerPermit permit = new LedgerPermit();
             permit.setCompanyName("ABC");
             permit.setIssuer("UZ");
             permit.setPermitType(PermitType.BILITERAL);
@@ -110,7 +110,7 @@ public class PermitControllerIT {
 
     @Test
     void getByIdTest() {
-        Permit permit = new Permit();
+        LedgerPermit permit = new LedgerPermit();
         permit.setCompanyName("ABC");
         permit.setIssuer("UZ");
         permit.setPermitType(PermitType.BILITERAL);
@@ -128,7 +128,7 @@ public class PermitControllerIT {
 
     @Test
     void usePermitTest() {
-        Permit permit = new Permit();
+        LedgerPermit permit = new LedgerPermit();
         permit.setCompanyName("ABC");
         permit.setIssuer("UZ");
         permit.setPermitType(PermitType.BILITERAL);

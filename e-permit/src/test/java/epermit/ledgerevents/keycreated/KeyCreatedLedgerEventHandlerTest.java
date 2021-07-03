@@ -51,7 +51,8 @@ public class KeyCreatedLedgerEventHandlerTest {
         event.setUse("sig");
         event.setX("b-twdhMdnpLQJ_pQx8meWsvevCyD0sufkdgF9nIsX-U");
         event.setY("U339OypYc4efK_xKJqnGSgWbLQ--47sCfpu-pJU2620");
-        handler.handle(event);
+        LedgerEventHandleResult r =handler.handle(event);
+        assertFalse(r.isOk());
         verify(keyRepository, times(1)).save(captor.capture());
         assertEquals("1", captor.getValue().getKeyId());
         assertEquals("TR", captor.getValue().getAuthorityCode());

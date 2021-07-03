@@ -23,10 +23,10 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import epermit.PermitPostgresContainer;
 import epermit.entities.Authority;
-import epermit.entities.Key;
+import epermit.entities.PrivateKey;
 import epermit.repositories.AuthorityRepository;
-import epermit.repositories.KeyRepository;
-import epermit.utils.KeyUtil;
+import epermit.repositories.PrivateKeyRepository;
+import epermit.utils.PrivateKeyUtil;
 
 
 @Testcontainers
@@ -44,10 +44,10 @@ public class KeyControllerIT {
     AuthorityRepository authorityRepository;
 
     @Autowired
-    KeyRepository keyRepository;
+    PrivateKeyRepository keyRepository;
 
     @Autowired
-    KeyUtil keyUtil;
+    PrivateKeyUtil keyUtil;
 
     @BeforeEach
     @Transactional
@@ -58,7 +58,7 @@ public class KeyControllerIT {
         authority.setName("name");
         authority.setVerifyUri("verifyUri");
         authorityRepository.save(authority);
-        Key key = keyUtil.create("1");
+        PrivateKey key = keyUtil.create("1");
         key.setEnabled(true);
         keyRepository.save(key);
     }
@@ -86,7 +86,7 @@ public class KeyControllerIT {
 
     @Test
     void enableTest() {
-        Key key = keyUtil.create("2");
+        PrivateKey key = keyUtil.create("2");
         keyRepository.save(key);
         RestTemplate restTemplate = getTestRestTemplate().getRestTemplate();
         HttpComponentsClientHttpRequestFactory requestFactory =
@@ -102,7 +102,7 @@ public class KeyControllerIT {
 
     @Test
     void revokeTest() {
-        Key key = keyUtil.create("2");
+        PrivateKey key = keyUtil.create("2");
         key.setEnabled(true);
         keyRepository.save(key);
         HttpEntity<String> entity = new HttpEntity<String>("{}");

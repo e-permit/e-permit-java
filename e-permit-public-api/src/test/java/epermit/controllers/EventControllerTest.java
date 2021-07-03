@@ -34,7 +34,7 @@ public class EventControllerTest {
    @Test
    void receiveEventTest() {
       when(jwsUtil.resolveJws(any())).thenReturn(Map.of());
-      Boolean r = controller.receiveEvent(new HttpHeaders());
+      Boolean r = controller.createEvent(new HttpHeaders());
       assertTrue(r);
       /*ReceivedAppEvent appEvent = new ReceivedAppEvent();
       appEvent.setClaims(Map.of());

@@ -23,4 +23,6 @@ public class PermitUsedLedgerEvent extends LedgerEventBase {
 
     @NotNull
     private Long activityTimestamp;
+
+    private String activityDetails;
 }

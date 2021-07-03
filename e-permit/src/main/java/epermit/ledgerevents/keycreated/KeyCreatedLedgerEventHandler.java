@@ -3,7 +3,6 @@ package epermit.ledgerevents.keycreated;
 import java.util.Set;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import epermit.entities.LedgerPublicKey;

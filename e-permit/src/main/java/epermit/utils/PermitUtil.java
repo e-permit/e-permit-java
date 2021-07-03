@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
-import epermit.entities.Authority;
 import epermit.entities.AuthorityIssuerQuota;
 import epermit.entities.LedgerQuota;
 import epermit.models.EPermitProperties;

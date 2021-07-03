@@ -25,12 +25,6 @@ public class AuthorityQuotaControllerTest {
         controller.createQuota(input);
         verify(authorityService, times(1)).createQuota(input);
     }
-
-    @Test
-    void enableQuotaTest() {
-        controller.enableQuota(1);
-        verify(authorityService, times(1)).enableQuota(1);
-    }
 }
 
 

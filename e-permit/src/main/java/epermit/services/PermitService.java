@@ -1,5 +1,7 @@
 package epermit.services;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import epermit.utils.PermitUtil;
 import epermit.entities.LedgerPermit;
-import epermit.ledgerevents.LedgerEventType;
 import epermit.ledgerevents.LedgerEventUtil;
 import epermit.ledgerevents.permitcreated.PermitCreatedLedgerEvent;
 import epermit.models.EPermitProperties;
@@ -43,8 +44,8 @@ public class PermitService {
     }
 
     public Page<PermitDto> getAll(PermitListInput input) {
-        Page<epermit.entities.LedgerPermit> entities = permitRepository.findAll(filterPermits(input),
-                PageRequest.of(input.getPage(), 10));
+        Page<epermit.entities.LedgerPermit> entities =
+                permitRepository.findAll(filterPermits(input), PageRequest.of(input.getPage(), 10));
         return entities.map(x -> modelMapper.map(x, PermitDto.class));
     }
 
@@ -58,13 +59,31 @@ public class PermitService {
         if (!serialNumberResult.isPresent()) {
             return CreatePermitResult.fail("INSUFFICIENT_QUOTA");
         }
-        String permitId = permitUtil.getPermitId(new CreatePermitIdInput());
+        CreatePermitIdInput idInput = new CreatePermitIdInput();
+        idInput.setIssuedFor(input.getIssuedFor());
+        idInput.setIssuer(properties.getIssuerCode());
+        idInput.setPermitType(input.getPermitType());
+        idInput.setPermitYear(input.getPermitYear());
+        idInput.setSerialNumber(serialNumberResult.get());
+        String permitId = permitUtil.getPermitId(idInput);
         String issuer = properties.getIssuerCode();
-        String issuedAt = "";
-        String expireAt = "";
+        String issuedAt = LocalDateTime.now(ZoneOffset.UTC).format(dtf);
+        String expireAt = "30/01/" + Integer.toString(input.getPermitYear() + 1);
         String prevEventId = ledgerEventUtil.getPreviousEventId(input.getIssuedFor());
-        PermitCreatedLedgerEvent e = new PermitCreatedLedgerEvent(issuer, input.getIssuedFor(), prevEventId);
+        PermitCreatedLedgerEvent e =
+                new PermitCreatedLedgerEvent(issuer, input.getIssuedFor(), prevEventId);
+        e.setPermitId(permitId);
+        e.setExpireAt(expireAt);
+        e.setIssuedAt(issuedAt);
         e.setCompanyId(input.getCompanyId());
+        e.setCompanyName(input.getCompanyName());
+        e.setPermitType(input.getPermitType());
+        e.setPermitYear(input.getPermitYear());
+        e.setPlateNumber(input.getPlateNumber());
+        e.setSerialNumber(serialNumberResult.get());
+        if(!input.getClaims().isEmpty()){
+            e.setClaims(input.getClaims());
+        }
         ledgerEventUtil.persistAndPublishEvent(e);
         log.info("Permit create finished permit id is {}", permitId);
         return CreatePermitResult.success(permitId);

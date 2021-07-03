@@ -19,17 +19,19 @@ public class KeyRevokedLedgerEventHandler implements LedgerEventHandler {
     public LedgerEventHandleResult handle(Object obj) {
         log.info("KeyRevokedEventHandler started with {}", obj);
         KeyRevokedLedgerEvent e = (KeyRevokedLedgerEvent) obj;
-        List<LedgerPublicKey> keys = publicKeyRepository.findAllByAuthorityCodeAndRevokedFalse(e.getIssuer());
+        List<LedgerPublicKey> keys =
+                publicKeyRepository.findAllByAuthorityCodeAndRevokedFalse(e.getIssuer());
         if (keys.size() < 2) {
             log.info("KeyRevokedEventValidator result is THERE_IS_ONLY_ONE_KEY");
             return LedgerEventHandleResult.fail("THERE_IS_ONLY_ONE_KEY");
         }
-        if (!keys.stream().anyMatch(x -> x.getKeyId().equals(e.getKeyId()))) {
+        Optional<LedgerPublicKey> publicKeyR =
+                keys.stream().filter(x -> x.getKeyId().equals(e.getKeyId())).findFirst();
+        if (!publicKeyR.isPresent()) {
             log.info("KeyRevokedEventValidator result is KEY_NOTFOUND");
             return LedgerEventHandleResult.fail("KEY_NOTFOUND");
         }
-        LedgerPublicKey publicKey =
-                keys.stream().filter(x -> x.getKeyId().equals(e.getKeyId())).findFirst().get();
+        LedgerPublicKey publicKey = publicKeyR.get();
         publicKey.setRevoked(true);
         publicKey.setRevokedAt(e.getRevokedAt());
         log.info("KeyRevokedEventHandler ended with {}", publicKey);

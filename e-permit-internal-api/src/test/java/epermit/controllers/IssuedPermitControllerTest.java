@@ -21,56 +21,55 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import epermit.models.dtos.IssuedPermitDto;
+import epermit.models.dtos.PermitDto;
 import epermit.models.inputs.CreatePermitInput;
-import epermit.models.inputs.IssuedPermitListInput;
 import epermit.models.results.CreatePermitResult;
-import epermit.services.IssuedPermitService;
+import epermit.services.PermitService;
 
 @ExtendWith(MockitoExtension.class)
 public class IssuedPermitControllerTest {
     @Mock
-    IssuedPermitService issuedPermitService;
+    PermitService permitService;
 
     @InjectMocks
-    IssuedPermitController controller;
+    PermitController controller;
 
     @Test
     void getAllTest() {
-        List<IssuedPermitDto> permits = new ArrayList<>();
+        List<PermitDto> permits = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
-            IssuedPermitDto dto = new IssuedPermitDto();
+            PermitDto dto = new PermitDto();
             permits.add(dto);
         }
-        Page<IssuedPermitDto> pagedList = new PageImpl<>(permits);
-        when(issuedPermitService.getAll(any())).thenReturn(pagedList);
-        Page<IssuedPermitDto> result = controller.getAll(Map.of());
+        Page<PermitDto> pagedList = new PageImpl<>(permits);
+        when(permitService.getAll(any())).thenReturn(pagedList);
+        Page<PermitDto> result = controller.getAll(Map.of());
         assertEquals(10, result.getTotalElements());
         //verify(issuedPermitService, times(1)).getAll(any());
     }
 
     @Test
     void getByIdTest() {
-        IssuedPermitDto permit = new IssuedPermitDto();
-        when(issuedPermitService.getById(Long.valueOf(1))).thenReturn(permit);
-        IssuedPermitDto dto = controller.getById(Long.valueOf(1));
+        PermitDto permit = new PermitDto();
+        when(permitService.getById(Long.valueOf(1))).thenReturn(permit);
+        PermitDto dto = controller.getById(Long.valueOf(1));
         assertNotNull(dto);
-        verify(issuedPermitService, times(1)).getById(Long.valueOf(1));
+        verify(permitService, times(1)).getById(Long.valueOf(1));
     }
 
 
     @Test
     void createTest() {
         CreatePermitInput input = new CreatePermitInput();
-        when(issuedPermitService.createPermit(input)).thenReturn(CreatePermitResult.success("ABC"));
+        when(permitService.createPermit(input)).thenReturn(CreatePermitResult.success("ABC"));
         CreatePermitResult r = controller.createPermit(input);
         assertEquals("ABC", r.getPermitId());
-        verify(issuedPermitService, times(1)).createPermit(input);
+        verify(permitService, times(1)).createPermit(input);
     }
 
     @Test
     void revokeTest() {
         controller.revoke(Long.valueOf(1));
-        verify(issuedPermitService, times(1)).revokePermit(eq(Long.valueOf(1)));
+        verify(permitService, times(1)).revokePermit(eq(Long.valueOf(1)));
     }
 }
