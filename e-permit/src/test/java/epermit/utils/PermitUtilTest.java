@@ -14,11 +14,12 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import epermit.entities.LedgerQuota;
 import epermit.models.EPermitProperties;
 import epermit.models.enums.PermitType;
 import epermit.models.inputs.CreatePermitIdInput;
+import epermit.repositories.AuthorityIssuerQuotaRepository;
 import epermit.repositories.AuthorityRepository;
+import epermit.repositories.LedgerQuotaRepository;
 import lombok.SneakyThrows;
 
 @ExtendWith(MockitoExtension.class)
@@ -28,9 +29,15 @@ public class PermitUtilTest {
 
     @Mock
     EPermitProperties properties;
-    
+
     @Mock
     AuthorityRepository authorityRepository;
+
+    @Mock
+    LedgerQuotaRepository quotaRepository;
+
+    @Mock
+    AuthorityIssuerQuotaRepository authorityIssuerQuotaRepository;
 
     @InjectMocks
     PermitUtil util;
@@ -48,27 +55,32 @@ public class PermitUtilTest {
     }
 
     @Test
+    void getIssuerQuotaTest(){
+       
+    }
+
+    /*@Test
     @SneakyThrows
     void gnerateSerialNumberTest() {
-        Optional<Integer> result= util.generateSerialNumber("UA", 2021, PermitType.BILITERAL);
+        //when(quotaRepository.fi)
+        Optional<Integer> result = util.generateSerialNumber("UA", 2021, PermitType.BILITERAL);
         Assertions.assertEquals(1, result.get());
-    }
+    }*/
 
     @SneakyThrows
     @ParameterizedTest
     @ValueSource(ints = {2, 3})
     void generateSerialNumberParameterizedTest(int endNumber) {
-        /*Authority authority = new Authority();
-        LedgerQuota quota = new LedgerQuota();
-        quota.setPermitType(PermitType.BILITERAL);
-        quota.setActive(true);
-        quota.setPermitYear(2021);
-        quota.setEndNumber(endNumber);
-        authority.addIssuerQuota(quota);
-        when(issuedPermitRepository.findFirstByIssuedForAndRevokedTrue("UA")).thenReturn(Optional.empty());
-        when(authorityRepository.findOneByCode("UA")).thenReturn(authority);
-        Optional<Integer> result = util.generateSerialNumber("UA", 2021, PermitType.BILITERAL);
-        Assertions.assertEquals(2, result.get());
-        Assertions.assertEquals(endNumber == 3, quota.isActive());*/
+        /*
+         * Authority authority = new Authority(); LedgerQuota quota = new LedgerQuota();
+         * quota.setPermitType(PermitType.BILITERAL); quota.setActive(true);
+         * quota.setPermitYear(2021); quota.setEndNumber(endNumber);
+         * authority.addIssuerQuota(quota);
+         * when(issuedPermitRepository.findFirstByIssuedForAndRevokedTrue("UA")).thenReturn(Optional
+         * .empty()); when(authorityRepository.findOneByCode("UA")).thenReturn(authority);
+         * Optional<Integer> result = util.generateSerialNumber("UA", 2021, PermitType.BILITERAL);
+         * Assertions.assertEquals(2, result.get()); Assertions.assertEquals(endNumber == 3,
+         * quota.isActive());
+         */
     }
 }

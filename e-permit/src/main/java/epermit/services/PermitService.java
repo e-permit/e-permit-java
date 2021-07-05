@@ -14,6 +14,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import epermit.utils.PermitUtil;
+import epermit.utils.SerialNumberUtil;
 import epermit.entities.LedgerPermit;
 import epermit.ledgerevents.LedgerEventUtil;
 import epermit.ledgerevents.permitcreated.PermitCreatedLedgerEvent;
@@ -33,6 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class PermitService {
     private final PermitUtil permitUtil;
+    private final SerialNumberUtil serialNumberUtil;
     private final EPermitProperties properties;
     private final LedgerEventUtil ledgerEventUtil;
     private final ModelMapper modelMapper;
@@ -54,7 +56,7 @@ public class PermitService {
         log.info("Permit create command {}", input);
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-        Optional<Integer> serialNumberResult = permitUtil.generateSerialNumber(input.getIssuedFor(),
+        Optional<Integer> serialNumberResult = serialNumberUtil.generate(input.getIssuedFor(),
                 input.getPermitYear(), input.getPermitType());
         if (!serialNumberResult.isPresent()) {
             return CreatePermitResult.fail("INSUFFICIENT_QUOTA");
@@ -81,7 +83,7 @@ public class PermitService {
         e.setPermitYear(input.getPermitYear());
         e.setPlateNumber(input.getPlateNumber());
         e.setSerialNumber(serialNumberResult.get());
-        if(!input.getClaims().isEmpty()){
+        if (!input.getClaims().isEmpty()) {
             e.setClaims(input.getClaims());
         }
         ledgerEventUtil.persistAndPublishEvent(e);
