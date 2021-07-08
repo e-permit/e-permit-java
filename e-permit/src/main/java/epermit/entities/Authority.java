@@ -1,24 +1,28 @@
 package epermit.entities;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import com.vladmihalcea.hibernate.type.json.JsonType;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.UpdateTimestamp;
+import epermit.models.enums.PermitType;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Data
 @NoArgsConstructor // JPA
 @Entity
 @Table(name = "authorities")
-@TypeDef(name = "json", typeClass = JsonType.class)
 public class Authority {
 
   @Id
@@ -34,8 +38,13 @@ public class Authority {
   @Column(name = "api_uri", nullable = false)
   private String apiUri;
 
-  @Column(name = "verify_uri", nullable = false)
-  private String verifyUri;
+  @Column(name = "last_sended_event_id", nullable = false)
+  private String lastSendedEventId;
+
+  @OneToMany(cascade = CascadeType.ALL)
+  @EqualsAndHashCode.Exclude
+  @ToString.Exclude
+  private List<AuthorityIssuerQuota> issuerQuotas = new ArrayList<>();
 
   @CreationTimestamp
   @Column(name = "created_at", nullable = false)
@@ -44,4 +53,9 @@ public class Authority {
   @UpdateTimestamp
   @Column(name = "updated_at", nullable = false)
   private LocalDateTime updatedAt;
+
+  public Optional<AuthorityIssuerQuota> getIssuerQuota(PermitType type, int year) {
+    return issuerQuotas.stream().filter(x -> x.getPermitType() == type && x.getPermitYear() == year)
+        .findFirst();
+  }
 }

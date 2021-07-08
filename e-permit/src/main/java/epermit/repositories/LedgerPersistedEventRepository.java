@@ -20,4 +20,6 @@ public interface LedgerPersistedEventRepository extends JpaRepository<LedgerPers
     boolean existsByIssuerAndIssuedForAndEventId(String issuer, String issuedFor, String eventId);
 
     boolean existsByIssuerAndIssuedFor(String issuer, String issuedFor);
+
+    boolean existsByIssuerAndIssuedForAndPreviousEventId(String issuer, String issuedFor, String previousEventId);
 }

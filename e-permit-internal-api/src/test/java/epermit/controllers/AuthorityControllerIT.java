@@ -74,7 +74,6 @@ public class AuthorityControllerIT {
         authority.setApiUri("apiUri");
         authority.setCode("UZ");
         authority.setName("name");
-        authority.setVerifyUri("verifyUri");
         authorityRepository.save(authority);
         ResponseEntity<AuthorityDto[]> r =
                 getTestRestTemplate().getForEntity(getBaseUrl(), AuthorityDto[].class);
@@ -88,7 +87,6 @@ public class AuthorityControllerIT {
         authority.setApiUri("apiUri");
         authority.setCode("UZ");
         authority.setName("name");
-        authority.setVerifyUri("verifyUri");
         authorityRepository.save(authority);
         ResponseEntity<AuthorityDto> r =
                 getTestRestTemplate().getForEntity(getBaseUrl() + "/UZ", AuthorityDto.class);

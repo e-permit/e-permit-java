@@ -17,7 +17,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import epermit.models.EPermitProperties;
 import epermit.models.enums.PermitType;
 import epermit.models.inputs.CreatePermitIdInput;
-import epermit.repositories.AuthorityIssuerQuotaRepository;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.LedgerQuotaRepository;
 import lombok.SneakyThrows;
@@ -35,9 +34,6 @@ public class PermitUtilTest {
 
     @Mock
     LedgerQuotaRepository quotaRepository;
-
-    @Mock
-    AuthorityIssuerQuotaRepository authorityIssuerQuotaRepository;
 
     @InjectMocks
     PermitUtil util;

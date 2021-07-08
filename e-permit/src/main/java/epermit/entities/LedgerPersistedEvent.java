@@ -39,6 +39,9 @@ public class LedgerPersistedEvent {
     @Column(name = "event_time", nullable = false)
     private Long eventTime;
 
+    @Column(name = "event_content", nullable = false)
+    private String eventContent;
+
     @Column(name = "jws", nullable = false, length = 10000)
     private String jws;
 }

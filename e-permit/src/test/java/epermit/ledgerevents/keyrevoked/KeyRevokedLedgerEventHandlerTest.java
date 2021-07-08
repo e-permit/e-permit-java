@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import epermit.entities.LedgerPublicKey;
 import epermit.ledgerevents.LedgerEventHandleResult;
 import epermit.repositories.LedgerPublicKeyRepository;
+import epermit.utils.GsonUtil;
 
 @ExtendWith(MockitoExtension.class)
 public class KeyRevokedLedgerEventHandlerTest {
@@ -39,7 +40,7 @@ public class KeyRevokedLedgerEventHandlerTest {
         pubKey2.setKeyId("2");
         when(publicKeyRepository.findAllByAuthorityCodeAndRevokedFalse("TR"))
                 .thenReturn(List.of(pubKey1, pubKey2));
-        LedgerEventHandleResult r = handler.handle(event);
+        LedgerEventHandleResult r = handler.handle(GsonUtil.toMap(event));
         assertTrue(r.isOk());
     }
 
@@ -52,7 +53,7 @@ public class KeyRevokedLedgerEventHandlerTest {
         pubKey1.setKeyId("1");
         when(publicKeyRepository.findAllByAuthorityCodeAndRevokedFalse("TR"))
                 .thenReturn(List.of(pubKey1));
-        LedgerEventHandleResult r = handler.handle(event);
+        LedgerEventHandleResult r = handler.handle(GsonUtil.toMap(event));
         assertFalse(r.isOk());
         assertEquals("THERE_IS_ONLY_ONE_KEY", r.getErrorCode());
     }
@@ -69,7 +70,7 @@ public class KeyRevokedLedgerEventHandlerTest {
         pubKey2.setKeyId("3");
         when(publicKeyRepository.findAllByAuthorityCodeAndRevokedFalse("TR"))
                 .thenReturn(List.of(pubKey1, pubKey2));
-        LedgerEventHandleResult r = handler.handle(event);
+        LedgerEventHandleResult r = handler.handle(GsonUtil.toMap(event));
         assertFalse(r.isOk());
         assertEquals("KEY_NOTFOUND", r.getErrorCode());
     }

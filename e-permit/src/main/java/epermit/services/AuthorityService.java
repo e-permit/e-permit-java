@@ -50,7 +50,6 @@ public class AuthorityService {
         authority.setApiUri(input.getApiUri());
         authority.setCode(config.getCode());
         authority.setName(config.getName());
-        authority.setVerifyUri(config.getVerifyUri());
         config.getKeys().forEach(k -> {
             LedgerPublicKey publicKey = new LedgerPublicKey();
             publicKey.setJwk(GsonUtil.getGson().toJson(k));

@@ -31,7 +31,6 @@ import lombok.ToString;
 @Table(name = "ledger_permits")
 @SQLDelete(sql = "UPDATE ledger_permits SET deleted = true WHERE id = ?")
 @Where(clause = "deleted = false")
-@TypeDef(name = "json", typeClass = JsonType.class)
 public class LedgerPermit {
     @Id
     @GeneratedValue
@@ -72,17 +71,13 @@ public class LedgerPermit {
     private String companyId;
 
     @Type(type = "json")
-    @Column(name = "claims", columnDefinition = "jsonb")
-    private Map<String, Object> claims;
+    private String claims;
 
     @Column(name = "qr_code", nullable = false, length=1000)
     private String qrCode;
 
     @Column(name = "used", nullable = false)
     private boolean used;
-
-    @Column(name = "used_at", nullable = true)
-    private LocalDateTime usedAt;
 
     @Column(name = "deleted", nullable = false)
     private boolean deleted;

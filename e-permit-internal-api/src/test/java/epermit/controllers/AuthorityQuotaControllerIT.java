@@ -58,7 +58,6 @@ public class AuthorityQuotaControllerIT {
         authority.setApiUri("apiUri");
         authority.setCode("UZ");
         authority.setName("name");
-        authority.setVerifyUri("verifyUri");
         LedgerQuota quota = new LedgerQuota();
         quota.setEndNumber(30);
         quota.setStartNumber(1);

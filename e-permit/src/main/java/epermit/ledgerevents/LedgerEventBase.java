@@ -2,28 +2,42 @@ package epermit.ledgerevents;
 
 import java.time.Instant;
 import java.util.UUID;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import lombok.Getter;
 
 @Getter
 public class LedgerEventBase {
-    private String issuer;
+    @NotNull
+    @Size(min = 2, max = 2)
+    private String eventIssuer;
 
-    private String issuedFor;
+    @NotNull
+    @Size(min = 2, max = 2)
+    private String eventIssuedFor;
 
+    @NotNull
+    @Min(1609459200)
     private Long eventTimestamp;
 
+    @NotNull
     private LedgerEventType eventType;
 
+    @NotNull
+    @Size(min = 16, max = 100)
     private String eventId;
 
+    @NotNull
+    @Size(min = 1, max = 100)
     private String previousEventId;
 
-    public LedgerEventBase(String issuer, String issuedFor, String prevEventId, LedgerEventType eventType) {
+    public LedgerEventBase(String eventIssuer, String eventIssuedFor, String prevEventId, LedgerEventType eventType) {
         this.eventId = UUID.randomUUID().toString();
         this.eventTimestamp = Instant.now().getEpochSecond();
         this.eventType = eventType;
-        this.issuedFor = issuedFor;
-        this.issuer = issuer;
+        this.eventIssuedFor = eventIssuedFor;
+        this.eventIssuer = eventIssuer;
         this.previousEventId = prevEventId;
     }
 }

@@ -9,8 +9,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class KeyRevokedLedgerEvent extends LedgerEventBase {
-    public KeyRevokedLedgerEvent(String issuer, String issuedFor, String prevEventId) {
-        super(issuer, issuedFor, prevEventId, LedgerEventType.KEY_REVOKED);
+    public KeyRevokedLedgerEvent(String eventIssuer, String eventIssuedFor, String prevEventId) {
+        super(eventIssuer, eventIssuedFor, prevEventId, LedgerEventType.KEY_REVOKED);
     }
 
     @NotNull

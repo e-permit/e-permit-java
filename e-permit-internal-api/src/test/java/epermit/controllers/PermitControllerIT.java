@@ -65,7 +65,6 @@ public class PermitControllerIT {
         authority.setApiUri("apiUri");
         authority.setCode("UZ");
         authority.setName("name");
-        authority.setVerifyUri("verifyUri");
         authorityRepository.save(authority);
         PrivateKey key = keyUtil.create("1");
         key.setEnabled(true);

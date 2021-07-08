@@ -56,17 +56,14 @@ public class PermitService {
         log.info("Permit create command {}", input);
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-        Optional<Integer> serialNumberResult = serialNumberUtil.generate(input.getIssuedFor(),
+        Integer serialNumber = serialNumberUtil.generate(input.getIssuedFor(),
                 input.getPermitYear(), input.getPermitType());
-        if (!serialNumberResult.isPresent()) {
-            return CreatePermitResult.fail("INSUFFICIENT_QUOTA");
-        }
         CreatePermitIdInput idInput = new CreatePermitIdInput();
         idInput.setIssuedFor(input.getIssuedFor());
         idInput.setIssuer(properties.getIssuerCode());
         idInput.setPermitType(input.getPermitType());
         idInput.setPermitYear(input.getPermitYear());
-        idInput.setSerialNumber(serialNumberResult.get());
+        idInput.setSerialNumber(serialNumber);
         String permitId = permitUtil.getPermitId(idInput);
         String issuer = properties.getIssuerCode();
         String issuedAt = LocalDateTime.now(ZoneOffset.UTC).format(dtf);
@@ -82,7 +79,7 @@ public class PermitService {
         e.setPermitType(input.getPermitType());
         e.setPermitYear(input.getPermitYear());
         e.setPlateNumber(input.getPlateNumber());
-        e.setSerialNumber(serialNumberResult.get());
+        e.setSerialNumber(serialNumber);
         if (!input.getClaims().isEmpty()) {
             e.setClaims(input.getClaims());
         }

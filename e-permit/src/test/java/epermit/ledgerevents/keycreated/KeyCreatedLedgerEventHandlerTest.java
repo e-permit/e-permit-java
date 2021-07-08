@@ -21,6 +21,7 @@ import org.modelmapper.ModelMapper;
 import epermit.entities.LedgerPublicKey;
 import epermit.ledgerevents.LedgerEventHandleResult;
 import epermit.repositories.LedgerPublicKeyRepository;
+import epermit.utils.GsonUtil;
 
 @ExtendWith(MockitoExtension.class)
 
@@ -51,7 +52,7 @@ public class KeyCreatedLedgerEventHandlerTest {
         event.setUse("sig");
         event.setX("b-twdhMdnpLQJ_pQx8meWsvevCyD0sufkdgF9nIsX-U");
         event.setY("U339OypYc4efK_xKJqnGSgWbLQ--47sCfpu-pJU2620");
-        LedgerEventHandleResult r =handler.handle(event);
+        LedgerEventHandleResult r =handler.handle(GsonUtil.toMap(event));
         assertFalse(r.isOk());
         verify(keyRepository, times(1)).save(captor.capture());
         assertEquals("1", captor.getValue().getKeyId());
@@ -63,7 +64,7 @@ public class KeyCreatedLedgerEventHandlerTest {
         KeyCreatedLedgerEvent event = new KeyCreatedLedgerEvent("TR", "UZ", "0");
         event.setKid("1");
         when(keyRepository.existsByAuthorityCodeAndKeyId("TR", "1")).thenReturn(true);
-        LedgerEventHandleResult r = handler.handle(event);
+        LedgerEventHandleResult r = handler.handle(GsonUtil.toMap(event));
         assertFalse(r.isOk());
         assertEquals("KEYID_EXIST", r.getErrorCode());
         verify(keyRepository, never()).save(any());

@@ -68,7 +68,6 @@ public class IssuedPermitControllerIT {
         authority.setApiUri("apiUri");
         authority.setCode("UZ");
         authority.setName("name");
-        authority.setVerifyUri("verifyUri");
         LedgerQuota quota = new LedgerQuota();
         quota.setActive(true);
         quota.setEndNumber(30);

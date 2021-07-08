@@ -16,6 +16,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpHeaders;
+import epermit.ledgerevents.LedgerEventHandleResult;
+import epermit.ledgerevents.permitcreated.PermitCreatedLedgerEvent;
 import epermit.utils.JwsUtil;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,8 +36,8 @@ public class EventControllerTest {
    @Test
    void receiveEventTest() {
       when(jwsUtil.resolveJws(any())).thenReturn(Map.of());
-      Boolean r = controller.createEvent(new HttpHeaders());
-      assertTrue(r);
+      LedgerEventHandleResult r = controller.permitCreated(new HttpHeaders(), new PermitCreatedLedgerEvent("issuer", "issuedFor", "prevEventId"));
+      assertTrue(r.isOk());
       /*ReceivedAppEvent appEvent = new ReceivedAppEvent();
       appEvent.setClaims(Map.of());
       verify(applicationEventPublisher, times(1)).publishEvent(appEvent);*/

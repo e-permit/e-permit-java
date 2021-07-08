@@ -17,6 +17,7 @@ import epermit.entities.LedgerPermit;
 import epermit.ledgerevents.LedgerEventHandleResult;
 import epermit.models.enums.PermitType;
 import epermit.repositories.LedgerPermitRepository;
+import epermit.utils.GsonUtil;
 import epermit.utils.PermitUtil;
 
 @ExtendWith(MockitoExtension.class)
@@ -46,7 +47,7 @@ public class PermitCreatedLedgerEventHandlerTest {
         event.setSerialNumber(1);
         when(permitUtil.getPermitId(any())).thenReturn("UZ-TR-2021-1-1");
         when(permitRepository.existsByPermitId("UZ-TR-2021-1-1")).thenReturn(false);
-        LedgerEventHandleResult r = handler.handle(event);
+        LedgerEventHandleResult r = handler.handle(GsonUtil.toMap(event));
         assertTrue(r.isOk());
         assertNull(r.getErrorCode());
         verify(permitRepository).save(captor.capture());

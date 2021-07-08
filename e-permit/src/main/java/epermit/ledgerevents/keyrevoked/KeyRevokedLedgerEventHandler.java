@@ -1,13 +1,16 @@
 package epermit.ledgerevents.keyrevoked;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import epermit.entities.LedgerPublicKey;
 import epermit.ledgerevents.LedgerEventHandleResult;
 import epermit.ledgerevents.LedgerEventHandler;
 import epermit.repositories.LedgerPublicKeyRepository;
+import epermit.utils.GsonUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -16,11 +19,12 @@ import lombok.extern.slf4j.Slf4j;
 public class KeyRevokedLedgerEventHandler implements LedgerEventHandler {
     private final LedgerPublicKeyRepository publicKeyRepository;
 
-    public LedgerEventHandleResult handle(Object obj) {
-        log.info("KeyRevokedEventHandler started with {}", obj);
-        KeyRevokedLedgerEvent e = (KeyRevokedLedgerEvent) obj;
+    @SneakyThrows
+    public LedgerEventHandleResult handle(Map<String, Object> claims) {
+        log.info("KeyRevokedLedgerEvent started with {}", claims);
+        KeyRevokedLedgerEvent e = GsonUtil.fromMap(claims, KeyRevokedLedgerEvent.class);
         List<LedgerPublicKey> keys =
-                publicKeyRepository.findAllByAuthorityCodeAndRevokedFalse(e.getIssuer());
+                publicKeyRepository.findAllByAuthorityCodeAndRevokedFalse(e.getEventIssuer());
         if (keys.size() < 2) {
             log.info("KeyRevokedEventValidator result is THERE_IS_ONLY_ONE_KEY");
             return LedgerEventHandleResult.fail("THERE_IS_ONLY_ONE_KEY");

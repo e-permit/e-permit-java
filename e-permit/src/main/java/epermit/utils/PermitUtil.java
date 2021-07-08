@@ -9,16 +9,12 @@ import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
-import epermit.entities.AuthorityIssuerQuota;
 import epermit.entities.LedgerQuota;
 import epermit.models.EPermitProperties;
 import epermit.models.enums.PermitType;
 import epermit.models.inputs.CreatePermitIdInput;
 import epermit.models.inputs.CreateQrCodeInput;
 import epermit.models.inputs.QuotaSufficientInput;
-import epermit.models.valueobjects.AuthorityIssuerQuotaPayload;
-import epermit.repositories.AuthorityIssuerQuotaRepository;
-import epermit.repositories.AuthorityRepository;
 import epermit.repositories.LedgerQuotaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,8 +25,6 @@ import lombok.extern.slf4j.Slf4j;
 public class PermitUtil {
     private final JwsUtil jwsUtil;
     private final LedgerQuotaRepository quotaRepository;
-    private final AuthorityIssuerQuotaRepository authorityIssuerQuotaRepository;
-    private final AuthorityRepository authorityRepository;
     private final EPermitProperties properties;
 
     public String getPermitId(CreatePermitIdInput input) {
@@ -55,7 +49,7 @@ public class PermitUtil {
     public String generateQrCode(CreateQrCodeInput input) {
         log.info("generateQrCode started with {}", input);
 
-        String verifyUri = authorityRepository.findOneByCode(input.getIssuedFor()).getVerifyUri();
+        String verifyUri = "https://e-permit.github.io/verify";
         Map<String, String> claims = new HashMap<>();
         claims.put("id", input.getId());
         claims.put("iat", input.getIssuedAt());
@@ -69,46 +63,33 @@ public class PermitUtil {
         return qrCode;
     }
 
-    public LedgerQuota getActiveLedgerQuota(AuthorityIssuerQuotaPayload issuerQuotaPayload,
-            String issuedFor, PermitType pt, int py) {
-        List<LedgerQuota> ledgerQuotas = quotaRepository.findAll().stream()
+    public LedgerQuota getLedgerQuota(String issuedFor,
+            PermitType pt, int py, List<Integer> usedIds) {
+        Optional<LedgerQuota> ledgerQuota = quotaRepository.findAll().stream()
                 .filter(x -> x.getIssuer().equals(properties.getIssuerCode())
                         && x.getIssuedFor().equals(issuedFor) && x.getPermitType() == pt
-                        && x.getPermitYear() == py)
-                .collect(Collectors.toList());
-        LedgerQuota ledgerQuota;
-        if (issuerQuotaPayload.getActiveQuotaId() == null) {
+                        && x.getPermitYear() == py && !usedIds.contains(x.getId()))
+                .findFirst();
+        if(ledgerQuota.isPresent()){
+            return ledgerQuota.get();
+        }else{
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quota is not available");
+        }
+        /*if (issuerQuota.getActiveLedgerQuotaId() == null) {
             Optional<LedgerQuota> ledgerQuotaResult = ledgerQuotas.stream()
-                    .filter(x -> issuerQuotaPayload.getUsedQuotaIds().contains(x.getId()))
+                    .filter(x -> issuerQuota.getUsedLedgerQuotaIds().contains(x.getId()))
                     .findFirst();
             if (!ledgerQuotaResult.isPresent()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quota is not availabe");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quota is not available");
             }
             ledgerQuota = ledgerQuotaResult.get();
-            issuerQuotaPayload.setActiveQuotaId(ledgerQuota.getId());
-            issuerQuotaPayload.setNextNumber(ledgerQuota.getStartNumber());
-            issuerQuotaPayload.getUsedQuotaIds().add(ledgerQuota.getId());
+            issuerQuota.setActiveLedgerQuotaId(ledgerQuota.getId());
+            issuerQuota.setNextNumber(ledgerQuota.getStartNumber());
+            issuerQuota.getUsedLedgerQuotaIds().add(ledgerQuota.getId());
         } else {
-            ledgerQuota = quotaRepository.findById(issuerQuotaPayload.getActiveQuotaId()).get();
-        }
-        return ledgerQuota;
+            ledgerQuota = quotaRepository.findById(issuerQuota.getActiveLedgerQuotaId()).get();
+        }*/
     }
 
-    public AuthorityIssuerQuota getIssuerQuota(String aud, PermitType pt, int py) {
-        List<AuthorityIssuerQuota> issuerQuotas = authorityIssuerQuotaRepository
-                .findAll().stream().filter(x -> x.getAuthority().getCode().equals(aud)
-                        && x.getPermitType() == pt && x.getPermitYear() == py)
-                .collect(Collectors.toList());
-        AuthorityIssuerQuota quota;
-        if (issuerQuotas.isEmpty()) {
-            quota = new AuthorityIssuerQuota();
-            quota.setPermitType(pt);
-            quota.setPermitYear(py);
-            quota.setPayload(new AuthorityIssuerQuotaPayload());
-
-        } else {
-            quota = issuerQuotas.get(0);
-        }
-        return quota;
-    }
+    
 }

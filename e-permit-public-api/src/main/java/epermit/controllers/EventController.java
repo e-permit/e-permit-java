@@ -1,17 +1,21 @@
 package epermit.controllers;
 
-import java.util.List;
 import java.util.Map;
-import org.springframework.context.ApplicationEventPublisher;
+import javax.validation.Valid;
 import org.springframework.http.HttpHeaders;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import epermit.ledgerevents.LedgerEventReceived;
+import epermit.ledgerevents.LedgerEventHandleResult;
+import epermit.ledgerevents.keycreated.KeyCreatedLedgerEvent;
+import epermit.ledgerevents.keyrevoked.KeyRevokedLedgerEvent;
+import epermit.ledgerevents.permitcreated.PermitCreatedLedgerEvent;
+import epermit.ledgerevents.permitrevoked.PermitRevokedLedgerEvent;
+import epermit.ledgerevents.permitused.PermitUsedLedgerEvent;
+import epermit.ledgerevents.quotacreated.QuotaCreatedLedgerEvent;
 import epermit.services.PersistedEventService;
-import epermit.utils.JwsUtil;
+import epermit.utils.GsonUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,26 +24,50 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @RequestMapping("/events")
 public class EventController {
-
-    private final ApplicationEventPublisher applicationEventPublisher;
     private final PersistedEventService eventService;
-    private final JwsUtil jwsUtil;
 
-    @PostMapping()
-    public Boolean createEvent(@RequestHeader HttpHeaders headers) {
-        log.info("Event received. {}", headers.getFirst(HttpHeaders.AUTHORIZATION));
-        LedgerEventReceived eventReceived = new LedgerEventReceived();
-        Map<String, Object> claims = jwsUtil.resolveJws(headers);
-        eventReceived.setClaims(claims);
-        applicationEventPublisher.publishEvent(eventReceived);
-        log.info("Receive event finished");
-        return true;
+    @PostMapping("permit-created")
+    public LedgerEventHandleResult permitCreated(@RequestHeader HttpHeaders headers,
+            @Valid PermitCreatedLedgerEvent event) {
+        return getResult(headers, GsonUtil.toMap(event));
     }
 
-    @GetMapping()
-    public List<String> getEvents(@RequestHeader HttpHeaders headers) {
-        log.info("getEvents called. {}", headers.getFirst(HttpHeaders.AUTHORIZATION));
-        Map<String, Object> claims = jwsUtil.resolveJws(headers);
-        return eventService.getPersistedLedgerEvents(claims);
+    @PostMapping("permit-used")
+    public LedgerEventHandleResult permitUsed(@RequestHeader HttpHeaders headers,
+            @Valid PermitUsedLedgerEvent event) {
+        return getResult(headers, GsonUtil.toMap(event));
+    }
+
+    @PostMapping("permit-created")
+    public LedgerEventHandleResult permitRevokedc(@RequestHeader HttpHeaders headers,
+            @Valid PermitRevokedLedgerEvent event) {
+        return getResult(headers, GsonUtil.toMap(event));
+    }
+
+    @PostMapping("permit-created")
+    public LedgerEventHandleResult quotaCreated(@RequestHeader HttpHeaders headers,
+            @Valid QuotaCreatedLedgerEvent event) {
+        return getResult(headers, GsonUtil.toMap(event));
+    }
+
+    @PostMapping("permit-created")
+    public LedgerEventHandleResult keyCreated(@RequestHeader HttpHeaders headers,
+            @Valid KeyCreatedLedgerEvent event) {
+        return getResult(headers, GsonUtil.toMap(event));
+    }
+
+    @PostMapping("permit-created")
+    public LedgerEventHandleResult keyRevoked(@RequestHeader HttpHeaders headers,
+            @Valid KeyRevokedLedgerEvent event) {
+        return getResult(headers, GsonUtil.toMap(event));
+    }
+
+    private LedgerEventHandleResult getResult(HttpHeaders headers, Map<String, Object> claims) {
+        log.info("Event claims. {}", claims);
+        String jws = headers.getFirst(HttpHeaders.AUTHORIZATION);
+        log.info("Event jws. {}", jws);
+        LedgerEventHandleResult r = eventService.handleEvent(claims, jws);
+        log.info("Receive event finished {}", r);
+        return r;
     }
 }

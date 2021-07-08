@@ -1,10 +1,12 @@
 package epermit.ledgerevents.quotacreated;
 
+import java.util.Map;
 import org.springframework.stereotype.Service;
 import epermit.entities.LedgerQuota;
 import epermit.ledgerevents.LedgerEventHandleResult;
 import epermit.ledgerevents.LedgerEventHandler;
 import epermit.repositories.LedgerQuotaRepository;
+import epermit.utils.GsonUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -14,11 +16,12 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class QuotaCreatedLedgerEventHandler implements LedgerEventHandler {
     private final LedgerQuotaRepository quotaRepository;
-
+    
+    @Override
     @SneakyThrows
-    public LedgerEventHandleResult handle(Object e) {
-        log.info("QuotaCreatedEventHandler started with {}", e);
-        QuotaCreatedLedgerEvent event = (QuotaCreatedLedgerEvent) e;
+    public LedgerEventHandleResult handle(Map<String, Object> claims) {
+        log.info("QuotaCreatedEventHandler started with {}", claims);
+        QuotaCreatedLedgerEvent event  = GsonUtil.fromMap(claims, QuotaCreatedLedgerEvent.class);
         /*if (authority.getVerifierQuotas().stream()
                 .anyMatch(x -> x.isActive() && x.getPermitType() == e.getPermitType()
                         && x.getPermitYear() == e.getPermitYear())) {
@@ -30,6 +33,8 @@ public class QuotaCreatedLedgerEventHandler implements LedgerEventHandler {
         quota.setPermitType(event.getPermitType());
         quota.setStartNumber(event.getStartNumber());
         quota.setPermitYear(event.getPermitYear());
+        //quota.setIssuer(event.getEventIssuedFor());
+        //quota.setIssuedFor(event.getEventIssuer());
         log.info("QuotaCreatedEventHandler ended with {}", quota);
         quotaRepository.save(quota);
         return LedgerEventHandleResult.success();

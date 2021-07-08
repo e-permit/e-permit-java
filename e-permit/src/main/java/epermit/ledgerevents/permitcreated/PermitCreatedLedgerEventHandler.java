@@ -5,9 +5,12 @@ import epermit.ledgerevents.LedgerEventHandleResult;
 import epermit.ledgerevents.LedgerEventHandler;
 import epermit.models.inputs.CreatePermitIdInput;
 import epermit.repositories.LedgerPermitRepository;
+import epermit.utils.GsonUtil;
 import epermit.utils.PermitUtil;
+import java.util.Map;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -18,9 +21,10 @@ public class PermitCreatedLedgerEventHandler implements LedgerEventHandler {
     private final LedgerPermitRepository permitRepository;
     private final PermitUtil permitUtil;
 
-    public LedgerEventHandleResult handle(Object e) {
-        log.info("PermitCreatedEventHandler started with {}", e);
-        PermitCreatedLedgerEvent event = (PermitCreatedLedgerEvent) e;
+    @SneakyThrows
+    public LedgerEventHandleResult handle(Map<String, Object> claims) {
+        log.info("PermitCreatedEventHandler started with {}", claims);
+        PermitCreatedLedgerEvent event = GsonUtil.fromMap(claims, PermitCreatedLedgerEvent.class);
         LedgerEventHandleResult r = validate(event);
         if(!r.isOk()){
             return r;
@@ -30,15 +34,15 @@ public class PermitCreatedLedgerEventHandler implements LedgerEventHandler {
         permit.setCompanyName(event.getCompanyName());
         permit.setExpireAt(event.getExpireAt());
         permit.setIssuedAt(event.getIssuedAt());
-        permit.setIssuer(event.getIssuer());
-        permit.setIssuedFor(event.getIssuedFor());
+        permit.setIssuer(event.getEventIssuer());
+        permit.setIssuedFor(event.getEventIssuedFor());
         permit.setPermitId(event.getPermitId());
         permit.setPermitType(event.getPermitType());
         permit.setPermitYear(event.getPermitYear());
         permit.setPlateNumber(event.getPlateNumber());
         permit.setSerialNumber(event.getSerialNumber());
         if (event.getClaims() != null && !event.getClaims().isEmpty()) {
-            permit.setClaims(event.getClaims());
+            permit.setClaims(GsonUtil.getGson().toJson(event.getClaims()));
         }
         log.info("PermitCreatedEventFactory ended with {}", permit);
         permitRepository.save(permit);
@@ -47,8 +51,8 @@ public class PermitCreatedLedgerEventHandler implements LedgerEventHandler {
 
     public LedgerEventHandleResult validate(PermitCreatedLedgerEvent event) {
         CreatePermitIdInput input = new CreatePermitIdInput();
-        input.setIssuedFor(event.getIssuedFor());
-        input.setIssuer(event.getIssuer());
+        input.setIssuedFor(event.getEventIssuedFor());
+        input.setIssuer(event.getEventIssuer());
         input.setPermitType(event.getPermitType());
         input.setPermitYear(event.getPermitYear());
         input.setSerialNumber(event.getSerialNumber());
