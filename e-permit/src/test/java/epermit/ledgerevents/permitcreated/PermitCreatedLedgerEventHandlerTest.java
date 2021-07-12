@@ -6,6 +6,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import java.util.Set;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -22,6 +28,9 @@ import epermit.utils.PermitUtil;
 
 @ExtendWith(MockitoExtension.class)
 public class PermitCreatedLedgerEventHandlerTest {
+
+    private static Validator validator;
+    
     @Mock
     PermitUtil permitUtil;
 
@@ -33,6 +42,33 @@ public class PermitCreatedLedgerEventHandlerTest {
 
     @Captor
     ArgumentCaptor<LedgerPermit> captor;
+
+    @BeforeAll
+    public static void setUp() {
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        validator = factory.getValidator();
+    }
+
+    @Test
+    void handleValidationTest(){
+
+
+        PermitCreatedLedgerEvent event = new PermitCreatedLedgerEvent("UZ", "TR", "0");
+        event.setExpireAt("03/01/2021");
+        event.setIssuedAt("03/01/2021");
+        event.setCompanyName("A");
+        event.setCompanyId("companyId");
+        event.setPermitId("UZ-TR-2021-1-1");
+        event.setPermitIssuedFor("TR");
+        event.setPermitIssuer("UZ");
+        event.setPermitType(PermitType.BILITERAL);
+        event.setPermitYear(2021);
+        event.setPlateNumber("A");
+        event.setSerialNumber(1);
+        
+        Set<ConstraintViolation<PermitCreatedLedgerEvent>> constraintViolations = validator.validate(event);
+        assertEquals(constraintViolations.size(), 0);
+    }
 
     @Test
     void handleOkTest() {

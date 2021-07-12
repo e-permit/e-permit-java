@@ -5,7 +5,6 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import javax.persistence.criteria.Predicate;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -55,7 +54,7 @@ public class PermitService {
     public CreatePermitResult createPermit(CreatePermitInput input) {
         log.info("Permit create command {}", input);
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
+        //ValidationUtils.checkIfNull(input.getPlateNumber(), "");
         Integer serialNumber = serialNumberUtil.generate(input.getIssuedFor(),
                 input.getPermitYear(), input.getPermitType());
         CreatePermitIdInput idInput = new CreatePermitIdInput();

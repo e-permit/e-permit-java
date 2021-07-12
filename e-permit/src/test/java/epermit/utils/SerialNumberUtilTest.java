@@ -1,10 +1,8 @@
 package epermit.utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -12,10 +10,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import epermit.entities.Authority;
 import epermit.entities.AuthorityIssuerQuota;
-import epermit.entities.LedgerPermit;
-import epermit.entities.LedgerPermitActivity;
 import epermit.entities.LedgerQuota;
 import epermit.models.enums.PermitType;
+import epermit.repositories.AuthorityIssuerQuotaRepository;
 import epermit.repositories.AuthorityRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -26,6 +23,9 @@ public class SerialNumberUtilTest {
 
     @Mock
     AuthorityRepository authorityRepository;
+
+    @Mock
+    AuthorityIssuerQuotaRepository authorityIssuerQuotaRepository;
 
     @InjectMocks
     SerialNumberUtil util;
@@ -39,6 +39,9 @@ public class SerialNumberUtilTest {
         AuthorityIssuerQuota quota = new AuthorityIssuerQuota();
         quota.setAvailableSerialNumbers(GsonUtil.getGson().toJson(List.of(10)));
         when(authorityRepository.findOneByCode("UZ")).thenReturn(authority);
+        LedgerQuota ledgerQuota = new LedgerQuota();
+        ledgerQuota.setId(1);
+        //when(permitUtil.getLedgerQuota("UZ", PermitType.BILITERAL, 2021, List.of())).thenReturn(ledgerQuota);
         Integer serialNumber = util.generate("UZ", 2021, PermitType.BILITERAL);
         assertEquals(10, serialNumber);
     }

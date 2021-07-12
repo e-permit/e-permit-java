@@ -1,5 +1,6 @@
 package epermit.ledgerevents.permitcreated;
 
+import epermit.commons.Check;
 import epermit.entities.LedgerPermit;
 import epermit.ledgerevents.LedgerEventHandleResult;
 import epermit.ledgerevents.LedgerEventHandler;
@@ -25,10 +26,11 @@ public class PermitCreatedLedgerEventHandler implements LedgerEventHandler {
     public LedgerEventHandleResult handle(Map<String, Object> claims) {
         log.info("PermitCreatedEventHandler started with {}", claims);
         PermitCreatedLedgerEvent event = GsonUtil.fromMap(claims, PermitCreatedLedgerEvent.class);
-        LedgerEventHandleResult r = validate(event);
-        if(!r.isOk()){
-            return r;
-        }
+        Check.assertEquals(event.getPermitIssuer(), event.getEventIssuer(), "");
+        Check.assertEquals(event.getPermitIssuer(), event.getEventIssuer(), "");
+        validatePermitId(event);
+        boolean exist = permitRepository.existsByPermitId(event.getPermitId());
+        Check.assertTrue(exist, "PERMIT_EXIST");
         LedgerPermit permit = new LedgerPermit();
         permit.setCompanyId(event.getCompanyId());
         permit.setCompanyName(event.getCompanyName());
@@ -49,7 +51,7 @@ public class PermitCreatedLedgerEventHandler implements LedgerEventHandler {
         return LedgerEventHandleResult.success();
     }
 
-    public LedgerEventHandleResult validate(PermitCreatedLedgerEvent event) {
+    public void validatePermitId(PermitCreatedLedgerEvent event) {
         CreatePermitIdInput input = new CreatePermitIdInput();
         input.setIssuedFor(event.getEventIssuedFor());
         input.setIssuer(event.getEventIssuer());
@@ -57,21 +59,16 @@ public class PermitCreatedLedgerEventHandler implements LedgerEventHandler {
         input.setPermitYear(event.getPermitYear());
         input.setSerialNumber(event.getSerialNumber());
         String expectedPermitId = permitUtil.getPermitId(input);
-        if (expectedPermitId.equals(event.getPermitId())) {
-            log.info("PermitCreatedEventValidator result is INVALID_PERMITID");
-            return LedgerEventHandleResult.fail("INVALID_PERMITID");
-        }
-        boolean exist = permitRepository.existsByPermitId(event.getPermitId());
-        if (exist) {
-            log.info("PermitCreatedEventValidator result is PERMIT_EXIST");
-            return LedgerEventHandleResult.fail("PERMIT_EXIST");
-        }
-        /*
-         * Authority authority = authorityRepository.findOneByCode(issuer); Boolean r =
-         * authority.getVerifierQuotas().stream() .anyMatch(x -> x.isActive() && x.getPermitType()
-         * == permitType && serialNumber >= x.getStartNumber() && serialNumber <= x.getEndNumber());
-         * log.info("isQuotaSufficient ruslt is {}", r); return r;
-         */
-        return LedgerEventHandleResult.success();
+        log.info("Expected permit id is {}", expectedPermitId);
+        Check.assertEquals(expectedPermitId, event.getPermitId(), "INVALID_PERMITID");
     }
 }
+
+
+
+/*
+ * Authority authority = authorityRepository.findOneByCode(issuer); Boolean r =
+ * authority.getVerifierQuotas().stream() .anyMatch(x -> x.isActive() && x.getPermitType() ==
+ * permitType && serialNumber >= x.getStartNumber() && serialNumber <= x.getEndNumber());
+ * log.info("isQuotaSufficient ruslt is {}", r); return r;
+ */

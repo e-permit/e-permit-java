@@ -62,34 +62,4 @@ public class PermitUtil {
 
         return qrCode;
     }
-
-    public LedgerQuota getLedgerQuota(String issuedFor,
-            PermitType pt, int py, List<Integer> usedIds) {
-        Optional<LedgerQuota> ledgerQuota = quotaRepository.findAll().stream()
-                .filter(x -> x.getIssuer().equals(properties.getIssuerCode())
-                        && x.getIssuedFor().equals(issuedFor) && x.getPermitType() == pt
-                        && x.getPermitYear() == py && !usedIds.contains(x.getId()))
-                .findFirst();
-        if(ledgerQuota.isPresent()){
-            return ledgerQuota.get();
-        }else{
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quota is not available");
-        }
-        /*if (issuerQuota.getActiveLedgerQuotaId() == null) {
-            Optional<LedgerQuota> ledgerQuotaResult = ledgerQuotas.stream()
-                    .filter(x -> issuerQuota.getUsedLedgerQuotaIds().contains(x.getId()))
-                    .findFirst();
-            if (!ledgerQuotaResult.isPresent()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quota is not available");
-            }
-            ledgerQuota = ledgerQuotaResult.get();
-            issuerQuota.setActiveLedgerQuotaId(ledgerQuota.getId());
-            issuerQuota.setNextNumber(ledgerQuota.getStartNumber());
-            issuerQuota.getUsedLedgerQuotaIds().add(ledgerQuota.getId());
-        } else {
-            ledgerQuota = quotaRepository.findById(issuerQuota.getActiveLedgerQuotaId()).get();
-        }*/
-    }
-
-    
 }

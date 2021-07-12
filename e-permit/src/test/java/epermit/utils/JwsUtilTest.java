@@ -3,9 +3,11 @@ package epermit.utils;
 import static org.mockito.Mockito.when;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import com.nimbusds.jose.JWSObject;
@@ -51,6 +53,14 @@ public class JwsUtilTest {
         Boolean valid = jwsObject.verify(verifier);
         Assertions.assertTrue(valid);
     }
+
+    
+    @Test
+    void dateTest() {
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        LocalDate  date = LocalDate.parse("03/02/2021", dtf);
+    }
+
 
     /*@Test
     @SneakyThrows

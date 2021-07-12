@@ -7,6 +7,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
+import epermit.commons.Check;
 import epermit.entities.LedgerPersistedEvent;
 import epermit.models.EPermitProperties;
 import epermit.repositories.AuthorityRepository;
