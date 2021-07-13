@@ -1,22 +1,19 @@
 package epermit.commons;
 
 public class EpermitValidationException extends RuntimeException{
-    private final String errorCode;
+    private final ErrorCodes errorCode;
 
-    private final String errorId = "";
-
-
-	public EpermitValidationException(String message, Throwable cause, String errorCode) {
+	public EpermitValidationException(String message, Throwable cause, ErrorCodes errorCode) {
 		super(message, cause);
 		this.errorCode = errorCode;
 	}
 
-	public EpermitValidationException(String message, String errorCode) {
+	public EpermitValidationException(String message, ErrorCodes errorCode) {
 		super(message);
 		this.errorCode = errorCode;
 	}
 
 	public String getErrorCode() {
-		return this.errorCode;
+		return this.errorCode.name();
 	}
 }

@@ -24,14 +24,12 @@ public class PermitRevokedLedgerEventHandler implements LedgerEventHandler {
     public LedgerEventHandleResult handle(Map<String, Object> claims) {
         log.info("PermitRevokedEventHandler started with {}", claims);
         PermitRevokedLedgerEvent event = GsonUtil.fromMap(claims, PermitRevokedLedgerEvent.class);
-        Check.assertEquals(event.getEventType(), LedgerEventType.PERMIT_REVOKED,
-                "INVALID_EVENTTYPE");
+        Check.equals(event.getEventType(), LedgerEventType.PERMIT_REVOKED, "INVALID_EVENTTYPE");
         Optional<LedgerPermit> permitR = permitRepository.findOneByPermitId(event.getPermitId());
-        Check.assertTrue(!permitR.isPresent(), "INVALID_PERMITID");
+        Check.isTrue(!permitR.isPresent(), "INVALID_PERMITID");
         LedgerPermit permit = permitR.get();
-        Check.assertEquals(permit.getIssuedFor(), event.getEventIssuedFor(),
-                "PERMIT_EVENT_MISMATCH");
-        Check.assertEquals(permit.getIssuer(), event.getEventIssuer(), "PERMIT_EVENT_MISMATCH");
+        Check.equals(permit.getIssuedFor(), event.getEventIssuedFor(), "PERMIT_EVENT_MISMATCH");
+        Check.equals(permit.getIssuer(), event.getEventIssuer(), "PERMIT_EVENT_MISMATCH");
         permitRepository.delete(permit);
         return LedgerEventHandleResult.success();
     }

@@ -1,6 +1,7 @@
 package epermit.ledgerevents.permitcreated;
 
 import epermit.commons.Check;
+import epermit.commons.ErrorCodes;
 import epermit.entities.LedgerPermit;
 import epermit.ledgerevents.LedgerEventHandleResult;
 import epermit.ledgerevents.LedgerEventHandler;
@@ -26,11 +27,13 @@ public class PermitCreatedLedgerEventHandler implements LedgerEventHandler {
     public LedgerEventHandleResult handle(Map<String, Object> claims) {
         log.info("PermitCreatedEventHandler started with {}", claims);
         PermitCreatedLedgerEvent event = GsonUtil.fromMap(claims, PermitCreatedLedgerEvent.class);
-        Check.assertEquals(event.getPermitIssuer(), event.getEventIssuer(), "");
-        Check.assertEquals(event.getPermitIssuer(), event.getEventIssuer(), "");
+        Check.equals(event.getPermitIssuer(), event.getEventIssuer(),
+                "PERMIT_ISSUER_EVENT_ISSUER_MISMATCH");
+        Check.equals(event.getPermitIssuer(), event.getEventIssuer(),
+                "PERMIT_ISSUEDFOR_EVENT_ISSUEDFOR_MISMATCH");
         validatePermitId(event);
         boolean exist = permitRepository.existsByPermitId(event.getPermitId());
-        Check.assertTrue(exist, "PERMIT_EXIST");
+        Check.isTrue(exist, ErrorCodes.PERMITID_ALREADY_EXISTS);
         LedgerPermit permit = new LedgerPermit();
         permit.setCompanyId(event.getCompanyId());
         permit.setCompanyName(event.getCompanyName());
@@ -60,7 +63,7 @@ public class PermitCreatedLedgerEventHandler implements LedgerEventHandler {
         input.setSerialNumber(event.getSerialNumber());
         String expectedPermitId = permitUtil.getPermitId(input);
         log.info("Expected permit id is {}", expectedPermitId);
-        Check.assertEquals(expectedPermitId, event.getPermitId(), "INVALID_PERMITID");
+        Check.equals(expectedPermitId, event.getPermitId(), ErrorCodes.INVALID_PERMITID);
     }
 }
 

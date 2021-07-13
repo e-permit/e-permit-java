@@ -15,9 +15,10 @@ import lombok.Setter;
 @Getter
 @Setter
 @FieldMatch.List({
-        @FieldMatch(first = "permitIssuer", second = "eventIssuer", message = ""),
-        @FieldMatch(first = "permitIssuedFor", second = "eventIssuedFor", message = "")
-})
+        @FieldMatch(first = "permitIssuer", second = "eventIssuer",
+                message = "Permit issuer should be equal to event issuer"),
+        @FieldMatch(first = "permitIssuedFor", second = "eventIssuedFor",
+                message = "Permit issued for should be equal to event issued for")})
 public class PermitCreatedLedgerEvent extends LedgerEventBase {
     public PermitCreatedLedgerEvent(String eventIssuer, String eventIssuedFor, String prevEventId) {
         super(eventIssuer, eventIssuedFor, prevEventId, LedgerEventType.PERMIT_CREATED);
