@@ -21,6 +21,7 @@ import epermit.models.EPermitProperties;
 import epermit.models.dtos.PermitDto;
 import epermit.models.inputs.CreatePermitIdInput;
 import epermit.models.inputs.CreatePermitInput;
+import epermit.models.inputs.CreateQrCodeInput;
 import epermit.models.inputs.PermitListInput;
 import epermit.models.inputs.PermitUsedInput;
 import epermit.models.results.CreatePermitResult;
@@ -68,6 +69,13 @@ public class PermitService {
         String issuedAt = LocalDateTime.now(ZoneOffset.UTC).format(dtf);
         String expireAt = "30/01/" + Integer.toString(input.getPermitYear() + 1);
         String prevEventId = ledgerEventUtil.getPreviousEventId(input.getIssuedFor());
+        CreateQrCodeInput qrCodeInput = new CreateQrCodeInput();
+        qrCodeInput.setCompanyName(input.getCompanyName());
+        qrCodeInput.setExpireAt(expireAt);
+        qrCodeInput.setId(permitId);
+        qrCodeInput.setIssuedAt(issuedAt);
+        qrCodeInput.setPlateNumber(input.getPlateNumber());
+        String qrCode = permitUtil.generateQrCode(qrCodeInput);
         PermitCreatedLedgerEvent e =
                 new PermitCreatedLedgerEvent(issuer, input.getIssuedFor(), prevEventId);
         e.setPermitId(permitId);
@@ -79,12 +87,12 @@ public class PermitService {
         e.setPermitYear(input.getPermitYear());
         e.setPlateNumber(input.getPlateNumber());
         e.setSerialNumber(serialNumber);
-        if (!input.getClaims().isEmpty()) {
-            e.setClaims(input.getClaims());
+        if (!input.getOtherClaims().isEmpty()) {
+            e.setOtherClaims(input.getOtherClaims());
         }
         ledgerEventUtil.persistAndPublishEvent(e);
         log.info("Permit create finished permit id is {}", permitId);
-        return CreatePermitResult.success(permitId);
+        return CreatePermitResult.success(permitId, qrCode);
     }
 
     @Transactional

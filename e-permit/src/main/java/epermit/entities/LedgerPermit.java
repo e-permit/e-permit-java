@@ -71,10 +71,8 @@ public class LedgerPermit {
     private String companyId;
 
     @Type(type = "json")
-    private String claims;
-
-    @Column(name = "qr_code", nullable = false, length=1000)
-    private String qrCode;
+    @Column(name = "other_claims", nullable = true)
+    private String otherClaims;
 
     @Column(name = "used", nullable = false)
     private boolean used;

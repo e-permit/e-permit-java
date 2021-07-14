@@ -14,12 +14,14 @@ public class CreatePermitResult {
 
     private String permitId;
 
+    private String qrCode;
     
-    public static CreatePermitResult success(String permitId){
+    public static CreatePermitResult success(String permitId, String qrCode){
         CreatePermitResult r = new CreatePermitResult();
         r.ok = true;
         r.permitId = permitId;
         r.timestamp = LocalDateTime.now(ZoneOffset.UTC);
+        r.qrCode = qrCode;
         return r;
     }
 

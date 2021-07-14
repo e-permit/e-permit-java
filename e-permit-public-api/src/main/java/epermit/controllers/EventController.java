@@ -64,9 +64,9 @@ public class EventController {
 
     private LedgerEventHandleResult getResult(HttpHeaders headers, Map<String, Object> claims) {
         log.info("Event claims. {}", claims);
-        String jws = headers.getFirst(HttpHeaders.AUTHORIZATION);
-        log.info("Event jws. {}", jws);
-        LedgerEventHandleResult r = eventService.handleEvent(claims, jws);
+        String proof = headers.getFirst(HttpHeaders.AUTHORIZATION);
+        log.info("Event jws. {}", proof);
+        LedgerEventHandleResult r = eventService.handleEvent(claims, proof);
         log.info("Receive event finished {}", r);
         return r;
     }

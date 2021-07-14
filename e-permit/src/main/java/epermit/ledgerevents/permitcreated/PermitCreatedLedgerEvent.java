@@ -63,5 +63,5 @@ public class PermitCreatedLedgerEvent extends LedgerEventBase {
     @NotNull
     private String plateNumber;
 
-    private Map<String, Object> claims;
+    private Map<String, Object> otherClaims;
 }

@@ -7,12 +7,15 @@ import java.util.Optional;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import epermit.models.enums.AuthenticationType;
 import epermit.models.enums.PermitType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -37,6 +40,10 @@ public class Authority {
 
   @Column(name = "api_uri", nullable = false)
   private String apiUri;
+
+  @Column(name = "authentication_type", nullable = false)
+  @Enumerated(EnumType.STRING)
+  private AuthenticationType authenticationType;
 
   @Column(name = "last_sended_event_id", nullable = false)
   private String lastSendedEventId;

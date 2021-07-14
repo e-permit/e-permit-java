@@ -28,9 +28,9 @@ public class PermitCreatedLedgerEventHandler implements LedgerEventHandler {
         log.info("PermitCreatedEventHandler started with {}", claims);
         PermitCreatedLedgerEvent event = GsonUtil.fromMap(claims, PermitCreatedLedgerEvent.class);
         Check.equals(event.getPermitIssuer(), event.getEventIssuer(),
-                "PERMIT_ISSUER_EVENT_ISSUER_MISMATCH");
+                ErrorCodes.PERMIT_ISSUER_EVENT_ISSUER_MISMATCH);
         Check.equals(event.getPermitIssuer(), event.getEventIssuer(),
-                "PERMIT_ISSUEDFOR_EVENT_ISSUEDFOR_MISMATCH");
+                ErrorCodes.PERMIT_ISSUEDFOR_EVENT_ISSUEDFOR_MISMATCH);
         validatePermitId(event);
         boolean exist = permitRepository.existsByPermitId(event.getPermitId());
         Check.isTrue(exist, ErrorCodes.PERMITID_ALREADY_EXISTS);
@@ -46,8 +46,8 @@ public class PermitCreatedLedgerEventHandler implements LedgerEventHandler {
         permit.setPermitYear(event.getPermitYear());
         permit.setPlateNumber(event.getPlateNumber());
         permit.setSerialNumber(event.getSerialNumber());
-        if (event.getClaims() != null && !event.getClaims().isEmpty()) {
-            permit.setClaims(GsonUtil.getGson().toJson(event.getClaims()));
+        if (event.getOtherClaims() != null && !event.getOtherClaims().isEmpty()) {
+            permit.setOtherClaims(GsonUtil.getGson().toJson(event.getOtherClaims()));
         }
         log.info("PermitCreatedEventFactory ended with {}", permit);
         permitRepository.save(permit);
