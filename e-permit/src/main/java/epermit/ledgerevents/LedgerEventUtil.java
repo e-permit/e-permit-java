@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 import epermit.commons.Check;
+import epermit.commons.ErrorCodes;
 import epermit.entities.LedgerPersistedEvent;
 import epermit.models.EPermitProperties;
 import epermit.repositories.AuthorityRepository;
@@ -71,17 +72,17 @@ public class LedgerEventUtil {
         if (ledgerEventRepository.existsByIssuerAndIssuedForAndEventId(e.getEventIssuer(),
                 e.getEventIssuedFor(), e.getEventId())) {
             log.info("Event exists. EventId: {}", e.getEventId());
-            return LedgerEventHandleResult.fail("EVENT_EXIST");
+            return LedgerEventHandleResult.fail(ErrorCodes.EVENT_ALREADY_EXISTS.name());
         }
         if (e.getPreviousEventId().equals("0")) {
             if (ledgerEventRepository.existsByIssuerAndIssuedFor(e.getEventIssuer(), e.getEventIssuedFor())) {
-                return LedgerEventHandleResult.fail("NOTEXIST_PREVIOUSEVENT");
+                return LedgerEventHandleResult.fail(ErrorCodes.GENESIS_EVENT_ALREADY_EXISTS.name());
             } else {
                 log.info("First event received");
             }
         } else if (!ledgerEventRepository.existsByIssuerAndIssuedForAndEventId(e.getEventIssuer(),
                 e.getEventIssuedFor(), e.getPreviousEventId())) {
-            return LedgerEventHandleResult.fail("NOTEXIST_PREVIOUSEVENT");
+            return LedgerEventHandleResult.fail(ErrorCodes.PREVIOUS_EVENT_NOTFOUND.name());
         }
 
         LedgerEventHandler eventHandler =
