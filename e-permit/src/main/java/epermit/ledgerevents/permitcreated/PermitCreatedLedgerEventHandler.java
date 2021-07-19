@@ -2,12 +2,13 @@ package epermit.ledgerevents.permitcreated;
 
 import epermit.commons.Check;
 import epermit.commons.ErrorCodes;
+import epermit.commons.GsonUtil;
 import epermit.entities.LedgerPermit;
 import epermit.ledgerevents.LedgerEventHandleResult;
 import epermit.ledgerevents.LedgerEventHandler;
 import epermit.models.inputs.CreatePermitIdInput;
+import epermit.models.inputs.QuotaSufficientInput;
 import epermit.repositories.LedgerPermitRepository;
-import epermit.utils.GsonUtil;
 import epermit.utils.PermitUtil;
 import java.util.Map;
 import org.springframework.stereotype.Service;
@@ -21,19 +22,19 @@ import lombok.extern.slf4j.Slf4j;
 public class PermitCreatedLedgerEventHandler implements LedgerEventHandler {
 
     private final LedgerPermitRepository permitRepository;
+
     private final PermitUtil permitUtil;
 
     @SneakyThrows
     public LedgerEventHandleResult handle(Map<String, Object> claims) {
         log.info("PermitCreatedEventHandler started with {}", claims);
         PermitCreatedLedgerEvent event = GsonUtil.fromMap(claims, PermitCreatedLedgerEvent.class);
-        Check.equals(event.getPermitIssuer(), event.getEventIssuer(),
-                ErrorCodes.PERMIT_ISSUER_EVENT_ISSUER_MISMATCH);
-        Check.equals(event.getPermitIssuer(), event.getEventIssuer(),
-                ErrorCodes.PERMIT_ISSUEDFOR_EVENT_ISSUEDFOR_MISMATCH);
-        validatePermitId(event);
+        String expectedPermitId = permitUtil.getPermitId(getCreatePermitIdInput(event));
+        Check.equals(expectedPermitId, event.getPermitId(), ErrorCodes.INVALID_PERMITID);
         boolean exist = permitRepository.existsByPermitId(event.getPermitId());
         Check.isTrue(exist, ErrorCodes.PERMITID_ALREADY_EXISTS);
+        Boolean isQuotaSufficient = permitUtil.isQuotaSufficient(getQuotaSufficientInput(event));
+        Check.isTrue(!isQuotaSufficient, ErrorCodes.INSUFFICIENT_PERMIT_QUOTA);
         LedgerPermit permit = new LedgerPermit();
         permit.setCompanyId(event.getCompanyId());
         permit.setCompanyName(event.getCompanyName());
@@ -54,24 +55,23 @@ public class PermitCreatedLedgerEventHandler implements LedgerEventHandler {
         return LedgerEventHandleResult.success();
     }
 
-    public void validatePermitId(PermitCreatedLedgerEvent event) {
+    private CreatePermitIdInput getCreatePermitIdInput(PermitCreatedLedgerEvent event) {
         CreatePermitIdInput input = new CreatePermitIdInput();
         input.setIssuedFor(event.getEventIssuedFor());
         input.setIssuer(event.getEventIssuer());
         input.setPermitType(event.getPermitType());
         input.setPermitYear(event.getPermitYear());
         input.setSerialNumber(event.getSerialNumber());
-        String expectedPermitId = permitUtil.getPermitId(input);
-        log.info("Expected permit id is {}", expectedPermitId);
-        Check.equals(expectedPermitId, event.getPermitId(), ErrorCodes.INVALID_PERMITID);
+        return input;
+    }
+
+    private QuotaSufficientInput getQuotaSufficientInput(PermitCreatedLedgerEvent event) {
+        QuotaSufficientInput input = new QuotaSufficientInput();
+        input.setIssuedFor(event.getEventIssuedFor());
+        input.setIssuer(event.getEventIssuer());
+        input.setPermitType(event.getPermitType());
+        input.setPermitYear(event.getPermitYear());
+        input.setSerialNumber(event.getSerialNumber());
+        return input;
     }
 }
-
-
-
-/*
- * Authority authority = authorityRepository.findOneByCode(issuer); Boolean r =
- * authority.getVerifierQuotas().stream() .anyMatch(x -> x.isActive() && x.getPermitType() ==
- * permitType && serialNumber >= x.getStartNumber() && serialNumber <= x.getEndNumber());
- * log.info("isQuotaSufficient ruslt is {}", r); return r;
- */

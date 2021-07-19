@@ -4,11 +4,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
+import epermit.commons.Check;
+import epermit.commons.ErrorCodes;
+import epermit.commons.GsonUtil;
 import epermit.entities.LedgerPublicKey;
 import epermit.ledgerevents.LedgerEventHandleResult;
 import epermit.ledgerevents.LedgerEventHandler;
 import epermit.repositories.LedgerPublicKeyRepository;
-import epermit.utils.GsonUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -25,16 +27,10 @@ public class KeyRevokedLedgerEventHandler implements LedgerEventHandler {
         KeyRevokedLedgerEvent e = GsonUtil.fromMap(claims, KeyRevokedLedgerEvent.class);
         List<LedgerPublicKey> keys =
                 publicKeyRepository.findAllByAuthorityCodeAndRevokedFalse(e.getEventIssuer());
-        if (keys.size() < 2) {
-            log.info("KeyRevokedEventValidator result is THERE_IS_ONLY_ONE_KEY");
-            return LedgerEventHandleResult.fail("THERE_IS_ONLY_ONE_KEY");
-        }
+        Check.isTrue(keys.size() < 2, ErrorCodes.INSUFFICIENT_KEY);
         Optional<LedgerPublicKey> publicKeyR =
                 keys.stream().filter(x -> x.getKeyId().equals(e.getKeyId())).findFirst();
-        if (!publicKeyR.isPresent()) {
-            log.info("KeyRevokedEventValidator result is KEY_NOTFOUND");
-            return LedgerEventHandleResult.fail("KEY_NOTFOUND");
-        }
+        Check.isTrue(!publicKeyR.isPresent(), ErrorCodes.KEY_NOTFOUND);
         LedgerPublicKey publicKey = publicKeyR.get();
         publicKey.setRevoked(true);
         publicKey.setRevokedAt(e.getRevokedAt());

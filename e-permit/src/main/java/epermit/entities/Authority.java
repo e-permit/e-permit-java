@@ -13,6 +13,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import epermit.models.enums.AuthenticationType;
@@ -52,6 +53,12 @@ public class Authority {
   @EqualsAndHashCode.Exclude
   @ToString.Exclude
   private List<AuthorityIssuerQuota> issuerQuotas = new ArrayList<>();
+
+  @JsonIgnore
+  public void addIssuerQuota(AuthorityIssuerQuota quota) {
+      issuerQuotas.add(quota);
+      quota.setAuthority(this);
+  }
 
   @CreationTimestamp
   @Column(name = "created_at", nullable = false)

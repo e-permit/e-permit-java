@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.google.gson.Gson;
 import org.springframework.stereotype.Service;
+import epermit.commons.GsonUtil;
 import epermit.entities.Authority;
 import epermit.models.EPermitProperties;
 import epermit.models.dtos.AuthorityConfig;
@@ -11,7 +12,6 @@ import epermit.models.dtos.PublicJwk;
 import epermit.models.dtos.TrustedAuthority;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.LedgerPublicKeyRepository;
-import epermit.utils.GsonUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 

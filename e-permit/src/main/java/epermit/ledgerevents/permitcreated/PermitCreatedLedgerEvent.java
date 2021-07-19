@@ -1,11 +1,14 @@
 package epermit.ledgerevents.permitcreated;
 
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
+import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
-import epermit.commons.FieldMatch;
 import epermit.ledgerevents.LedgerEventBase;
 import epermit.ledgerevents.LedgerEventType;
 import epermit.models.enums.PermitType;
@@ -14,11 +17,6 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@FieldMatch.List({
-        @FieldMatch(first = "permitIssuer", second = "eventIssuer",
-                message = "Permit issuer should be equal to event issuer"),
-        @FieldMatch(first = "permitIssuedFor", second = "eventIssuedFor",
-                message = "Permit issued for should be equal to event issued for")})
 public class PermitCreatedLedgerEvent extends LedgerEventBase {
     public PermitCreatedLedgerEvent(String eventIssuer, String eventIssuedFor, String prevEventId) {
         super(eventIssuer, eventIssuedFor, prevEventId, LedgerEventType.PERMIT_CREATED);
@@ -64,4 +62,30 @@ public class PermitCreatedLedgerEvent extends LedgerEventBase {
     private String plateNumber;
 
     private Map<String, Object> otherClaims;
+
+    @AssertTrue(message = "Invalid issued_at")
+    private boolean isValidIssuedAt() {
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        LocalDate iat = LocalDate.parse(this.issuedAt, dtf);
+        return iat.isBefore(LocalDate.now(ZoneOffset.UTC));
+    }
+
+    @AssertTrue(message = "Invalid expire_at")
+    private boolean isValidExpireAt() {
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        LocalDate iat = LocalDate.parse(this.issuedAt, dtf);
+        LocalDate exp = LocalDate.parse(this.expireAt, dtf);
+        return iat.isBefore(exp);
+    }
+
+    @AssertTrue(message = "Invalid permit issuer or issued_for")
+    private boolean isValid() {
+        if (!this.getEventIssuer().equals(this.permitIssuer)) {
+            return false;
+        }
+        if (!this.getEventIssuedFor().equals(this.permitIssuedFor)) {
+            return false;
+        }
+        return true;
+    }
 }

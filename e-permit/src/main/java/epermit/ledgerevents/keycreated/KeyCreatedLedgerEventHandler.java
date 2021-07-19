@@ -1,17 +1,16 @@
 package epermit.ledgerevents.keycreated;
 
 import java.util.Map;
-import java.util.Set;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validator;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import epermit.commons.Check;
+import epermit.commons.ErrorCodes;
+import epermit.commons.GsonUtil;
 import epermit.entities.LedgerPublicKey;
 import epermit.ledgerevents.LedgerEventHandleResult;
 import epermit.ledgerevents.LedgerEventHandler;
 import epermit.models.dtos.PublicJwk;
 import epermit.repositories.LedgerPublicKeyRepository;
-import epermit.utils.GsonUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -28,11 +27,7 @@ public class KeyCreatedLedgerEventHandler implements LedgerEventHandler {
         log.info("KeyCreatedEventHandler started with {}", claims);
         KeyCreatedLedgerEvent e = GsonUtil.fromMap(claims, KeyCreatedLedgerEvent.class);
         boolean keyExist = keyRepository.existsByAuthorityCodeAndKeyId(e.getEventIssuer(), e.getKid());
-        if (keyExist) {
-            log.info("KeyCreatedEventValidator result is  KEYID_EXIST");
-            return LedgerEventHandleResult.fail("KEYID_EXIST");
-        }
-
+        Check.isTrue(keyExist, ErrorCodes.KEYID_ALREADY_EXISTS);
         LedgerPublicKey key = new LedgerPublicKey();
         key.setKeyId(e.getKid());
         key.setAuthorityCode(e.getEventIssuer());

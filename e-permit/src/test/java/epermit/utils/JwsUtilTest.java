@@ -1,15 +1,9 @@
 package epermit.utils;
 
 import static org.mockito.Mockito.when;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.ECDSAVerifier;
@@ -23,8 +17,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import epermit.entities.LedgerPublicKey;
 import epermit.models.EPermitProperties;
 import epermit.models.results.JwsValidationResult;
+import epermit.repositories.LedgerPublicKeyRepository;
 import lombok.SneakyThrows;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,6 +30,9 @@ public class JwsUtilTest {
 
     @Mock
     PrivateKeyUtil keyUtil;
+
+    @Mock
+    LedgerPublicKeyRepository publicKeyRepository;
 
     @InjectMocks
     JwsUtil util;
@@ -54,15 +53,7 @@ public class JwsUtilTest {
         Assertions.assertTrue(valid);
     }
 
-    
     @Test
-    void dateTest() {
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        LocalDate  date = LocalDate.parse("03/02/2021", dtf);
-    }
-
-
-    /*@Test
     @SneakyThrows
     void validateJwsOkTest() {
         ECKey key = new ECKeyGenerator(Curve.P_256).keyUse(KeyUse.SIGNATURE).keyID("1").generate();
@@ -70,14 +61,14 @@ public class JwsUtilTest {
         claims.put("issuer", "TR");
         claims.put("issued_for", "UA");
         String jws = util.createJws(key, claims);
-        AuthorityKey authorityKey = new AuthorityKey();
+        LedgerPublicKey authorityKey = new LedgerPublicKey();
         authorityKey.setJwk(key.toPublicJWK().toJSONString());
-        when(authorityKeyRepository.findOneByIssuerAndKeyId("TR", "1"))
+        when(publicKeyRepository.findOneByAuthorityCodeAndKeyId("TR", "1"))
                 .thenReturn(Optional.of(authorityKey));
         when(properties.getIssuerCode()).thenReturn("UA");
         JwsValidationResult r = util.validateJws(jws);
         Assertions.assertTrue(r.isValid());
-    }*/
+    }
 
     @Test
     @SneakyThrows
@@ -107,7 +98,19 @@ public class JwsUtilTest {
         Assertions.assertEquals("INVALID_KEYID", r.getErrorCode());
     }
 
-    @Test
+}
+
+
+
+
+
+
+
+
+
+
+
+    /*@Test
     void timeTest(){
         Long t =  OffsetDateTime.now(ZoneOffset.UTC).toEpochSecond();
         Long l = Instant.now().toEpochMilli();
@@ -121,4 +124,9 @@ public class JwsUtilTest {
         System.out.println(LocalDateTime.now(ZoneOffset.UTC));
         System.out.println(LocalDateTime.now(ZoneOffset.UTC).toInstant(ZoneOffset.UTC).toEpochMilli());
     }
-}
+
+    @Test
+    void dateTest() {
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        LocalDate  date = LocalDate.parse("03/02/2021", dtf);
+    }*/

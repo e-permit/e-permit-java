@@ -45,7 +45,6 @@ public class IssuedPermitControllerTest {
         when(permitService.getAll(any())).thenReturn(pagedList);
         Page<PermitDto> result = controller.getAll(Map.of());
         assertEquals(10, result.getTotalElements());
-        //verify(issuedPermitService, times(1)).getAll(any());
     }
 
     @Test
@@ -61,7 +60,7 @@ public class IssuedPermitControllerTest {
     @Test
     void createTest() {
         CreatePermitInput input = new CreatePermitInput();
-        when(permitService.createPermit(input)).thenReturn(CreatePermitResult.success("ABC"));
+        when(permitService.createPermit(input)).thenReturn(CreatePermitResult.success("ABC", "ABC"));
         CreatePermitResult r = controller.createPermit(input);
         assertEquals("ABC", r.getPermitId());
         verify(permitService, times(1)).createPermit(input);

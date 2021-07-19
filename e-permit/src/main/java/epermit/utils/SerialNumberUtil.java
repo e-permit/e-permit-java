@@ -30,7 +30,6 @@ public class SerialNumberUtil {
     private final EPermitProperties properties;
 
     public Integer generate(String issuedFor, int py, PermitType pt) {
-        Gson gson = GsonUtil.getGson();
         Authority authority = authorityRepository.findOneByCode(issuedFor);
         Integer nextSerialNumber;
         AuthorityIssuerQuota quota;
@@ -39,17 +38,11 @@ public class SerialNumberUtil {
             quota = new AuthorityIssuerQuota();
             quota.setPermitType(pt);
             quota.setPermitYear(py);
-            quota.setAvailableSerialNumbers(gson.toJson(List.of()));
-            quota.setUsedLedgerQuotaIds(gson.toJson(List.of()));
         } else {
             quota = quotaR.get();
         }
-        List<Integer> availableSerialNumbers = new ArrayList<>(
-                Arrays.asList(gson.fromJson(quota.getAvailableSerialNumbers(), Integer[].class)));
-        List<Integer> usedLedgerQuotaIds = new ArrayList<>(
-                Arrays.asList(gson.fromJson(quota.getUsedLedgerQuotaIds(), Integer[].class)));
-        if (!availableSerialNumbers.isEmpty()) {
-            nextSerialNumber = availableSerialNumbers.remove(0);
+        if (!quota.getAvailableSerialNumbers().isEmpty()) {
+            nextSerialNumber = quota.getAvailableSerialNumbers().remove(0);
         } else if (quota.getNextNumber() != null) {
             nextSerialNumber = quota.getNextNumber();
             if (nextSerialNumber == quota.getNextNumber()) {
@@ -58,15 +51,13 @@ public class SerialNumberUtil {
                 quota.setNextNumber(null);
             }
         } else {
-            LedgerQuota ledgerQuota = getLedgerQuota(issuedFor, pt, py, usedLedgerQuotaIds);
-            usedLedgerQuotaIds.add(ledgerQuota.getId());
+            LedgerQuota ledgerQuota = getLedgerQuota(issuedFor, pt, py, quota.getUsedLedgerQuotaIds());
+            quota.getUsedLedgerQuotaIds().add(ledgerQuota.getId());
             quota.setStartNumber(ledgerQuota.getStartNumber());
             quota.setEndNumber(ledgerQuota.getEndNumber());
             quota.setNextNumber(ledgerQuota.getStartNumber());
             nextSerialNumber = quota.getNextNumber();
         }
-        quota.setAvailableSerialNumbers(gson.toJson(availableSerialNumbers));
-        quota.setUsedLedgerQuotaIds(gson.toJson(usedLedgerQuotaIds));
         authorityIssuerQuotaRepository.save(quota);
         return nextSerialNumber;
     }

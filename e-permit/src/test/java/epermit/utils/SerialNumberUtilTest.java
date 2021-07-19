@@ -34,14 +34,18 @@ public class SerialNumberUtilTest {
     void generateAvailableSerialNumberTest() {
         Authority authority = new Authority();
         authority.setApiUri("apiUri");
-        authority.setCode("TR");
+        authority.setCode("UZ");
         authority.setName("name");
         AuthorityIssuerQuota quota = new AuthorityIssuerQuota();
-        quota.setAvailableSerialNumbers(GsonUtil.getGson().toJson(List.of(10)));
+        quota.setPermitType(PermitType.BILITERAL);
+        quota.setPermitYear(2021);
+        quota.addSerialNumber(10);
+        //quota.setAvailableSerialNumbers(GsonUtil.getGson().toJson(List.of(10)));
+        authority.addIssuerQuota(quota);
         when(authorityRepository.findOneByCode("UZ")).thenReturn(authority);
         LedgerQuota ledgerQuota = new LedgerQuota();
         ledgerQuota.setId(1);
-        //when(permitUtil.getLedgerQuota("UZ", PermitType.BILITERAL, 2021, List.of())).thenReturn(ledgerQuota);
+        //when(util.getLedgerQuota("UZ", PermitType.BILITERAL, 2021, List.of())).thenReturn(ledgerQuota);
         Integer serialNumber = util.generate("UZ", 2021, PermitType.BILITERAL);
         assertEquals(10, serialNumber);
     }

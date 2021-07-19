@@ -1,4 +1,4 @@
-package epermit.utils;
+package epermit.commons;
 
 import java.lang.reflect.Type;
 import java.util.Map;

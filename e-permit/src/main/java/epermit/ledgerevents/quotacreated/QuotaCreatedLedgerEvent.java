@@ -1,5 +1,6 @@
 package epermit.ledgerevents.quotacreated;
 
+import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -38,5 +39,16 @@ public class QuotaCreatedLedgerEvent extends LedgerEventBase {
     @NotNull
     @Min(1)
     private int endNumber;
+
+    @AssertTrue(message = "Invalid permit issuer or issued_for")
+    private boolean isValid() {
+        if (!this.getEventIssuer().equals(this.permitIssuedFor)) {
+            return false;
+        }
+        if (!this.getEventIssuedFor().equals(this.permitIssuer)) {
+            return false;
+        }
+        return true;
+    }
 
 }

@@ -22,13 +22,13 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import epermit.PermitPostgresContainer;
+import epermit.commons.GsonUtil;
 import epermit.entities.Authority;
 import epermit.models.dtos.AuthorityConfig;
 import epermit.models.dtos.AuthorityDto;
 import epermit.models.dtos.PublicJwk;
 import epermit.models.inputs.CreateAuthorityInput;
 import epermit.repositories.AuthorityRepository;
-import epermit.utils.GsonUtil;
 
 
 @Testcontainers

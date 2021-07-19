@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import epermit.commons.GsonUtil;
 import epermit.entities.Authority;
 import epermit.entities.LedgerPublicKey;
 import epermit.entities.LedgerQuota;
@@ -15,7 +16,6 @@ import epermit.models.inputs.CreateQuotaInput;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.LedgerPublicKeyRepository;
 import epermit.repositories.LedgerQuotaRepository;
-import epermit.utils.GsonUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

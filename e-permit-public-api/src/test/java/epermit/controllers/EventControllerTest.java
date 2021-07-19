@@ -1,57 +1,63 @@
 package epermit.controllers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
-import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpHeaders;
+import epermit.LedgerEventResult;
+import epermit.commons.ErrorCodes;
 import epermit.ledgerevents.LedgerEventHandleResult;
 import epermit.ledgerevents.permitcreated.PermitCreatedLedgerEvent;
-import epermit.utils.JwsUtil;
+import epermit.services.PersistedEventService;
 
 @ExtendWith(MockitoExtension.class)
 
 public class EventControllerTest {
 
    @Mock
-   JwsUtil jwsUtil;
-
-   @Mock
-   ApplicationEventPublisher applicationEventPublisher;
+   PersistedEventService eventService;
 
    @InjectMocks
    EventController controller;
 
    @Test
-   void receiveEventTest() {
-      when(jwsUtil.resolveJws(any())).thenReturn(Map.of());
-      LedgerEventHandleResult r = controller.permitCreated(new HttpHeaders(), new PermitCreatedLedgerEvent("issuer", "issuedFor", "prevEventId"));
+   void receiveEventOkTest() {
+      PermitCreatedLedgerEvent e = new PermitCreatedLedgerEvent("TR", "UZ", "0");
+      when(eventService.handleReceivedEvent(anyMap(), anyString()))
+            .thenReturn(LedgerEventHandleResult.success());
+      HttpHeaders headers = new HttpHeaders();
+      headers.add("authorization", "1234");
+      LedgerEventResult r = controller.permitCreated(headers, e);
       assertTrue(r.isOk());
-      /*ReceivedAppEvent appEvent = new ReceivedAppEvent();
-      appEvent.setClaims(Map.of());
-      verify(applicationEventPublisher, times(1)).publishEvent(appEvent);*/
    }
 
    @Test
-   void getEventsTest() {
-      when(jwsUtil.resolveJws(any())).thenReturn(Map.of());
-      /*when(createdEventService.getEvents(anyMap())).thenReturn(List.of("abc"));
-      List<String> r = controller.getEvents(new HttpHeaders());
-      assertEquals(1, r.size());*/
+   void receiveEventErrorTest() {
+      PermitCreatedLedgerEvent e = new PermitCreatedLedgerEvent("TR", "UZ", "0");
+      when(eventService.handleReceivedEvent(anyMap(), anyString()))
+            .thenReturn(LedgerEventHandleResult.fail(ErrorCodes.EVENT_ALREADY_EXISTS.name()));
+      HttpHeaders headers = new HttpHeaders();
+      headers.add("authorization", "1234");
+      LedgerEventResult r = controller.permitCreated(headers, e);
+      assertFalse(r.isOk());
+      assertEquals(ErrorCodes.EVENT_ALREADY_EXISTS.name(), r.getErrorCode());
    }
 
 }
+
+
+
+
+
+
 
 
 

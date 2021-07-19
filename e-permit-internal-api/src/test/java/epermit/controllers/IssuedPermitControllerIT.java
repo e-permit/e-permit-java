@@ -104,7 +104,7 @@ public class IssuedPermitControllerIT {
             permit.setExpireAt("31/01/2022");
             permit.setIssuedAt("03/03/2021");
             permit.setPermitId("ABC");
-            permit.setQrCode("qrCode");
+            //permit.setQrCode("qrCode");
             permit.setSerialNumber(1);
             permitRepository.save(permit);
         }
@@ -138,7 +138,7 @@ public class IssuedPermitControllerIT {
         permit.setExpireAt("31/01/2022");
         permit.setIssuedAt("03/03/2021");
         permit.setPermitId("ABC");
-        permit.setQrCode("qrCode");
+        //permit.setQrCode("qrCode");
         permit.setSerialNumber(1);
         permitRepository.save(permit);
         PermitDto dto = getTestRestTemplate()
@@ -171,7 +171,7 @@ public class IssuedPermitControllerIT {
         permit.setExpireAt("31/01/2022");
         permit.setIssuedAt("03/03/2021");
         permit.setPermitId("ABC");
-        permit.setQrCode("qrCode");
+        //permit.setQrCode("qrCode");
         permit.setSerialNumber(1);
         permitRepository.save(permit);
         HttpEntity<String> entity = new HttpEntity<String>("{}");

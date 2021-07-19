@@ -9,11 +9,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
+import epermit.commons.GsonUtil;
 import epermit.models.dtos.AuthorityConfig;
 import epermit.models.dtos.AuthorityDto;
 import epermit.models.inputs.CreateAuthorityInput;
 import epermit.services.AuthorityService;
-import epermit.utils.GsonUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

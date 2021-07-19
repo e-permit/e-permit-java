@@ -7,7 +7,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import epermit.LedgerEventResult;
 import epermit.commons.EpermitValidationException;
+import epermit.commons.GsonUtil;
 import epermit.ledgerevents.LedgerEventHandleResult;
 import epermit.ledgerevents.keycreated.KeyCreatedLedgerEvent;
 import epermit.ledgerevents.keyrevoked.KeyRevokedLedgerEvent;
@@ -16,7 +18,6 @@ import epermit.ledgerevents.permitrevoked.PermitRevokedLedgerEvent;
 import epermit.ledgerevents.permitused.PermitUsedLedgerEvent;
 import epermit.ledgerevents.quotacreated.QuotaCreatedLedgerEvent;
 import epermit.services.PersistedEventService;
-import epermit.utils.GsonUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,51 +29,54 @@ public class EventController {
     private final PersistedEventService eventService;
 
     @PostMapping("permit-created")
-    public LedgerEventHandleResult permitCreated(@RequestHeader HttpHeaders headers,
+    public LedgerEventResult permitCreated(@RequestHeader HttpHeaders headers,
             @Valid PermitCreatedLedgerEvent event) {
         return getResult(headers, GsonUtil.toMap(event));
     }
 
     @PostMapping("permit-used")
-    public LedgerEventHandleResult permitUsed(@RequestHeader HttpHeaders headers,
+    public LedgerEventResult permitUsed(@RequestHeader HttpHeaders headers,
             @Valid PermitUsedLedgerEvent event) {
         return getResult(headers, GsonUtil.toMap(event));
     }
 
     @PostMapping("permit-created")
-    public LedgerEventHandleResult permitRevokedc(@RequestHeader HttpHeaders headers,
+    public LedgerEventResult permitRevokedc(@RequestHeader HttpHeaders headers,
             @Valid PermitRevokedLedgerEvent event) {
         return getResult(headers, GsonUtil.toMap(event));
     }
 
     @PostMapping("permit-created")
-    public LedgerEventHandleResult quotaCreated(@RequestHeader HttpHeaders headers,
+    public LedgerEventResult quotaCreated(@RequestHeader HttpHeaders headers,
             @Valid QuotaCreatedLedgerEvent event) {
         return getResult(headers, GsonUtil.toMap(event));
     }
 
     @PostMapping("permit-created")
-    public LedgerEventHandleResult keyCreated(@RequestHeader HttpHeaders headers,
+    public LedgerEventResult keyCreated(@RequestHeader HttpHeaders headers,
             @Valid KeyCreatedLedgerEvent event) {
         return getResult(headers, GsonUtil.toMap(event));
     }
 
     @PostMapping("permit-created")
-    public LedgerEventHandleResult keyRevoked(@RequestHeader HttpHeaders headers,
+    public LedgerEventResult keyRevoked(@RequestHeader HttpHeaders headers,
             @Valid KeyRevokedLedgerEvent event) {
         return getResult(headers, GsonUtil.toMap(event));
     }
 
-    private LedgerEventHandleResult getResult(HttpHeaders headers, Map<String, Object> claims) {
+    private LedgerEventResult getResult(HttpHeaders headers, Map<String, Object> claims) {
         log.info("Event claims. {}", claims);
         String proof = headers.getFirst(HttpHeaders.AUTHORIZATION);
         log.info("Event jws. {}", proof);
         try {
-            LedgerEventHandleResult r = eventService.handleEvent(claims, proof);
+            LedgerEventHandleResult r = eventService.handleReceivedEvent(claims, proof);
             log.info("Receive event finished {}", r);
-            return r;
+            if(r.isOk()){
+                return LedgerEventResult.success();
+            }
+            return LedgerEventResult.fail(r.getErrorCode(), r.getErrorCode());
         } catch (EpermitValidationException ex) {
-            return LedgerEventHandleResult.fail(ex.getErrorCode());
+            return LedgerEventResult.fail(ex.getErrorCode(), ex.getMessage());
         }
        
     }

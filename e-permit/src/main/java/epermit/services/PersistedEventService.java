@@ -22,7 +22,7 @@ public class PersistedEventService {
     private final AuthorityRepository authorityRepository;
 
     @Transactional
-    public LedgerEventHandleResult handleEvent(Map<String, Object> claims, String proof) {
+    public LedgerEventHandleResult handleReceivedEvent(Map<String, Object> claims, String proof) {
         Authority authority = authorityRepository.findOneByCode(claims.get("event_issuer").toString());
         if(authority.getAuthenticationType() == AuthenticationType.BASIC){
             
@@ -36,7 +36,7 @@ public class PersistedEventService {
     }
 
     @Transactional
-    public void sendEvent(){
+    public void handleCreatedEvent(){
         
     }
 }

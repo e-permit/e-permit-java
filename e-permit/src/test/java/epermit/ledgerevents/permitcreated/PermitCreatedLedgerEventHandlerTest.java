@@ -19,11 +19,11 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import epermit.commons.GsonUtil;
 import epermit.entities.LedgerPermit;
 import epermit.ledgerevents.LedgerEventHandleResult;
 import epermit.models.enums.PermitType;
 import epermit.repositories.LedgerPermitRepository;
-import epermit.utils.GsonUtil;
 import epermit.utils.PermitUtil;
 
 @ExtendWith(MockitoExtension.class)
@@ -51,8 +51,6 @@ public class PermitCreatedLedgerEventHandlerTest {
 
     @Test
     void handleValidationTest(){
-
-
         PermitCreatedLedgerEvent event = new PermitCreatedLedgerEvent("UZ", "TR", "0");
         event.setExpireAt("03/01/2021");
         event.setIssuedAt("03/01/2021");
@@ -65,7 +63,6 @@ public class PermitCreatedLedgerEventHandlerTest {
         event.setPermitYear(2021);
         event.setPlateNumber("A");
         event.setSerialNumber(1);
-        
         Set<ConstraintViolation<PermitCreatedLedgerEvent>> constraintViolations = validator.validate(event);
         assertEquals(constraintViolations.size(), 0);
     }

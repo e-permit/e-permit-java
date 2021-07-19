@@ -2,11 +2,11 @@ package epermit.ledgerevents.quotacreated;
 
 import java.util.Map;
 import org.springframework.stereotype.Service;
+import epermit.commons.GsonUtil;
 import epermit.entities.LedgerQuota;
 import epermit.ledgerevents.LedgerEventHandleResult;
 import epermit.ledgerevents.LedgerEventHandler;
 import epermit.repositories.LedgerQuotaRepository;
-import epermit.utils.GsonUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -33,8 +33,8 @@ public class QuotaCreatedLedgerEventHandler implements LedgerEventHandler {
         quota.setPermitType(event.getPermitType());
         quota.setStartNumber(event.getStartNumber());
         quota.setPermitYear(event.getPermitYear());
-        //quota.setIssuer(event.getEventIssuedFor());
-        //quota.setIssuedFor(event.getEventIssuer());
+        quota.setIssuer(event.getEventIssuedFor());
+        quota.setIssuedFor(event.getEventIssuer());
         log.info("QuotaCreatedEventHandler ended with {}", quota);
         quotaRepository.save(quota);
         return LedgerEventHandleResult.success();

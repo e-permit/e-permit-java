@@ -1,6 +1,9 @@
 package epermit.entities;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -10,6 +13,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import epermit.commons.IntegerListConverter;
 import epermit.models.enums.PermitType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -41,11 +45,21 @@ public class AuthorityIssuerQuota {
     @Column(name = "next_number", nullable = true)
     private Integer nextNumber;
 
-    @Column(name = "used_ledger_quota_ids", nullable = false)
-    private String usedLedgerQuotaIds;
+    @Column(name = "used_ledger_quota_ids", nullable = true)
+    @Convert(converter = IntegerListConverter.class)
+    private List<Integer> usedLedgerQuotaIds = new ArrayList<>();
 
-    @Column(name = "available_serial_numbers", nullable = false)
-    private String availableSerialNumbers;
+    public void addLedgerQuotaId(Integer id){
+        this.usedLedgerQuotaIds.add(id);
+    }
+
+    @Column(name = "available_serial_numbers", nullable = true)
+    @Convert(converter = IntegerListConverter.class)
+    private List<Integer> availableSerialNumbers = new ArrayList<>();
+
+    public void addSerialNumber(Integer sn){
+        this.availableSerialNumbers.add(sn);
+    }
 
     @ManyToOne
     @JoinColumn(name = "authority_id") 

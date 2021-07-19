@@ -1,9 +1,7 @@
 package epermit.entities;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -14,10 +12,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.vladmihalcea.hibernate.type.json.JsonType;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.Where;
 import epermit.models.enums.PermitType;
 import lombok.Data;
@@ -70,7 +65,6 @@ public class LedgerPermit {
     @Column(name = "company_id", nullable = false, length = 100)
     private String companyId;
 
-    @Type(type = "json")
     @Column(name = "other_claims", nullable = true)
     private String otherClaims;
 

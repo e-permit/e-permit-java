@@ -32,9 +32,6 @@ public class PermitUtilTest {
     @Mock
     AuthorityRepository authorityRepository;
 
-    @Mock
-    LedgerQuotaRepository quotaRepository;
-
     @InjectMocks
     PermitUtil util;
 
