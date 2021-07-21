@@ -1,17 +1,10 @@
 package epermit.utils;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.StringJoiner;
-import java.util.stream.Collectors;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.springframework.web.server.ResponseStatusException;
-import epermit.entities.LedgerQuota;
 import epermit.models.EPermitProperties;
-import epermit.models.enums.PermitType;
 import epermit.models.inputs.CreatePermitIdInput;
 import epermit.models.inputs.CreateQrCodeInput;
 import epermit.models.inputs.QuotaSufficientInput;
@@ -37,8 +30,8 @@ public class PermitUtil {
 
     public boolean isQuotaSufficient(QuotaSufficientInput input) {
         Boolean r = quotaRepository.findAll().stream()
-                .anyMatch(x -> x.getIssuer().equals(input.getIssuer())
-                        && x.getIssuedFor().equals(input.getIssuedFor()) && x.isActive()
+                .anyMatch(x -> x.getPermitIssuer().equals(input.getIssuer())
+                        && x.getPermitIssuedFor().equals(input.getIssuedFor()) && x.isActive()
                         && x.getPermitType() == input.getPermitType()
                         && input.getSerialNumber() >= x.getStartNumber()
                         && input.getSerialNumber() <= x.getEndNumber());

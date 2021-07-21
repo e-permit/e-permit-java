@@ -4,9 +4,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.springframework.web.server.ResponseStatusException;
 import epermit.commons.Check;
 import epermit.commons.ErrorCodes;
 import epermit.commons.GsonUtil;
@@ -44,54 +42,46 @@ public class LedgerEventUtil {
     public <T extends LedgerEventBase> void persistAndPublishEvent(T event) {
         LedgerEventHandler eventHandler =
                 eventHandlers.get(event.getEventType().toString() + "_EVENT_HANDLER");
-        if (eventHandler == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "NOT_IMPLEMENTED_EVENT_HANDLER");
-        }
+        Check.isTrue(eventHandler == null, ErrorCodes.INVALID_EVENT);
         eventHandler.handle(GsonUtil.toMap(event));
-        String jws = jwsUtil.createJws(event);
+        String proof = jwsUtil.createJws(event);
         LedgerPersistedEvent createdEvent = new LedgerPersistedEvent();
         createdEvent.setIssuedFor(event.getEventIssuedFor());
         createdEvent.setEventId(event.getEventId());
         createdEvent.setPreviousEventId(event.getPreviousEventId());
         createdEvent.setEventType(event.getEventType());
-        createdEvent.setJws(jws);
+        createdEvent.setProof(proof);
         ledgerEventRepository.save(createdEvent);
         String apiUri = authorityRepository.findOneByCode(event.getEventIssuedFor()).getApiUri();
         LedgerEventCreated appEvent = new LedgerEventCreated();
-        appEvent.setJws(jws);
+        appEvent.setContent(GsonUtil.getGson().toJson(event));
+        appEvent.setProof(proof);
         appEvent.setUri(apiUri + "/events");
         eventPublisher.publishEvent(appEvent);
         log.info("Event published {}", appEvent);
     }
 
     @SneakyThrows
-    public LedgerEventHandleResult handleEvent(Map<String, Object> claims) {
+    public void handleEvent(Map<String, Object> claims) {
         log.info("Event handle started {}", claims);
         LedgerEventBase e = GsonUtil.fromMap(claims, LedgerEventBase.class);
-        if (ledgerEventRepository.existsByIssuerAndIssuedForAndEventId(e.getEventIssuer(),
-                e.getEventIssuedFor(), e.getEventId())) {
-            log.info("Event exists. EventId: {}", e.getEventId());
-            return LedgerEventHandleResult.fail(ErrorCodes.EVENT_ALREADY_EXISTS.name());
-        }
+        Boolean eventExist = ledgerEventRepository.existsByIssuerAndIssuedForAndEventId(
+                e.getEventIssuer(), e.getEventIssuedFor(), e.getEventId());
+        Check.isTrue(eventExist, ErrorCodes.EVENT_ALREADY_EXISTS);
         if (e.getPreviousEventId().equals("0")) {
-            if (ledgerEventRepository.existsByIssuerAndIssuedFor(e.getEventIssuer(), e.getEventIssuedFor())) {
-                return LedgerEventHandleResult.fail(ErrorCodes.GENESIS_EVENT_ALREADY_EXISTS.name());
-            } else {
-                log.info("First event received");
-            }
-        } else if (!ledgerEventRepository.existsByIssuerAndIssuedForAndEventId(e.getEventIssuer(),
-                e.getEventIssuedFor(), e.getPreviousEventId())) {
-            return LedgerEventHandleResult.fail(ErrorCodes.PREVIOUS_EVENT_NOTFOUND.name());
+            Boolean genesisEventExist = ledgerEventRepository
+                    .existsByIssuerAndIssuedFor(e.getEventIssuer(), e.getEventIssuedFor());
+            Check.isTrue(!genesisEventExist, ErrorCodes.GENESIS_EVENT_ALREADY_EXISTS);
+            log.info("First event received");
         }
+        Boolean previousEventExist = ledgerEventRepository.existsByIssuerAndIssuedForAndEventId(
+                e.getEventIssuer(), e.getEventIssuedFor(), e.getPreviousEventId());
+        Check.isTrue(!previousEventExist, ErrorCodes.PREVIOUS_EVENT_NOTFOUND);
 
         LedgerEventHandler eventHandler =
                 eventHandlers.get(e.getEventType().toString() + "_EVENT_HANDLER");
-        if (eventHandler == null) {
-            throw new Exception("NOT_IMPLEMENTED_EVENT_HANDLER");
-        }
+        Check.isTrue(eventHandler == null, ErrorCodes.EVENT_ALREADY_EXISTS);
         eventHandler.handle(claims);
-        return LedgerEventHandleResult.success();
     }
 
 }

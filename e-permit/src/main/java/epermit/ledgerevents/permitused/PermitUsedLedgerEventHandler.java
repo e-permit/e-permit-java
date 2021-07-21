@@ -3,10 +3,11 @@ package epermit.ledgerevents.permitused;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
+import epermit.commons.Check;
+import epermit.commons.ErrorCodes;
 import epermit.commons.GsonUtil;
 import epermit.entities.LedgerPermit;
 import epermit.entities.LedgerPermitActivity;
-import epermit.ledgerevents.LedgerEventHandleResult;
 import epermit.ledgerevents.LedgerEventHandler;
 import epermit.repositories.LedgerPermitRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,20 +23,16 @@ public class PermitUsedLedgerEventHandler implements LedgerEventHandler {
 
     @SneakyThrows
     @Override
-    public LedgerEventHandleResult handle(Map<String, Object> claims) {
+    public void handle(Map<String, Object> claims) {
         log.info("PermitUsedEventHandler started with {}", claims);
         PermitUsedLedgerEvent event= GsonUtil.fromMap(claims, PermitUsedLedgerEvent.class);
         Optional<LedgerPermit> permitR = permitRepository.findOneByPermitId(event.getPermitId());
-        if (!permitR.isPresent()) {
-            log.info("PermitRevokedEventValidator result is INVALID_PERMITID");
-            return LedgerEventHandleResult.fail("INVALID_PERMITID");
-        }
+        Check.isTrue(!permitR.isPresent(), ErrorCodes.PERMIT_NOTFOUND);
         LedgerPermit permit = permitR.get();
-        if (!(permit.getIssuedFor().equals(event.getEventIssuedFor())
-                && permit.getIssuer().equals(event.getEventIssuer()))) {
-            log.info("PermitRevokedEventValidator result is PERMIT_EVENT_MISMATCH");
-            return LedgerEventHandleResult.fail("PERMIT_EVENT_MISMATCH");
-        }
+        Check.isTrue(!permit.getIssuer().equals(event.getEventIssuedFor()),
+                ErrorCodes.PERMIT_NOTFOUND);
+        Check.isTrue(!permit.getIssuedFor().equals(event.getEventIssuer()),
+                ErrorCodes.PERMIT_NOTFOUND);
         permit.setUsed(true);
         LedgerPermitActivity activity = new LedgerPermitActivity();
         activity.setActivityType(event.getActivityType());
@@ -43,6 +40,5 @@ public class PermitUsedLedgerEventHandler implements LedgerEventHandler {
         permit.addActivity(activity);
         log.info("PermitUsedEventHandler ended with {}", activity);
         permitRepository.save(permit);
-        return LedgerEventHandleResult.success();
     }
 }

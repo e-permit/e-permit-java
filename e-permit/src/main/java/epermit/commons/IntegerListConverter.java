@@ -2,7 +2,6 @@ package epermit.commons;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;

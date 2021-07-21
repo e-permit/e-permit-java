@@ -1,4 +1,4 @@
-package epermit;
+package epermit.ledgerevents;
 
 import lombok.Data;
 

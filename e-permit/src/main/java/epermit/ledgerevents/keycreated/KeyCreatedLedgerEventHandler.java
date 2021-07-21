@@ -7,7 +7,6 @@ import epermit.commons.Check;
 import epermit.commons.ErrorCodes;
 import epermit.commons.GsonUtil;
 import epermit.entities.LedgerPublicKey;
-import epermit.ledgerevents.LedgerEventHandleResult;
 import epermit.ledgerevents.LedgerEventHandler;
 import epermit.models.dtos.PublicJwk;
 import epermit.repositories.LedgerPublicKeyRepository;
@@ -23,7 +22,7 @@ public class KeyCreatedLedgerEventHandler implements LedgerEventHandler {
     private final ModelMapper modelMapper;
 
     @SneakyThrows
-    public LedgerEventHandleResult handle(Map<String, Object> claims) {
+    public void handle(Map<String, Object> claims) {
         log.info("KeyCreatedEventHandler started with {}", claims);
         KeyCreatedLedgerEvent e = GsonUtil.fromMap(claims, KeyCreatedLedgerEvent.class);
         boolean keyExist = keyRepository.existsByAuthorityCodeAndKeyId(e.getEventIssuer(), e.getKid());
@@ -34,6 +33,5 @@ public class KeyCreatedLedgerEventHandler implements LedgerEventHandler {
         key.setJwk(GsonUtil.getGson().toJson(modelMapper.map(e, PublicJwk.class)));
         log.info("KeyCreatedEventHandler ended with {}", key.getJwk());
         keyRepository.save(key);
-        return LedgerEventHandleResult.success();
     }
 }

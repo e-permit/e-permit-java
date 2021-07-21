@@ -20,11 +20,11 @@ public class LedgerQuota {
     @GeneratedValue
     private int id;
 
-    @Column(name = "issuer", nullable = false)
-    private String issuer;
+    @Column(name = "permit_issuer", nullable = false)
+    private String permitIssuer;
 
-    @Column(name = "issued_for", nullable = false)
-    private String issuedFor;
+    @Column(name = "permit_issued_for", nullable = false)
+    private String permitIssuedFor;
 
     @Column(name = "permit_year", nullable = false)
     private int permitYear;

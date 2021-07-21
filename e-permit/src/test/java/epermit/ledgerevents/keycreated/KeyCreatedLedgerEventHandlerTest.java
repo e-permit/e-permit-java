@@ -24,7 +24,6 @@ import epermit.commons.EpermitValidationException;
 import epermit.commons.ErrorCodes;
 import epermit.commons.GsonUtil;
 import epermit.entities.LedgerPublicKey;
-import epermit.ledgerevents.LedgerEventHandleResult;
 import epermit.repositories.LedgerPublicKeyRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -53,8 +52,7 @@ public class KeyCreatedLedgerEventHandlerTest {
         event.setUse("sig");
         event.setX("b-twdhMdnpLQJ_pQx8meWsvevCyD0sufkdgF9nIsX-U");
         event.setY("U339OypYc4efK_xKJqnGSgWbLQ--47sCfpu-pJU2620");
-        LedgerEventHandleResult r = handler.handle(GsonUtil.toMap(event));
-        assertTrue(r.isOk());
+        handler.handle(GsonUtil.toMap(event));
         verify(keyRepository, times(1)).save(captor.capture());
         assertEquals("1", captor.getValue().getKeyId());
         assertEquals("TR", captor.getValue().getAuthorityCode());
@@ -71,30 +69,4 @@ public class KeyCreatedLedgerEventHandlerTest {
         assertEquals(ErrorCodes.KEYID_ALREADY_EXISTS.name(), ex.getErrorCode());
         verify(keyRepository, never()).save(any());
     }
-
-
-
-    /*
-     * @Test void okTest() { String jwk =
-     * "{\"kty\":\"EC\",\"crv\":\"P-256\",\"x\":\"b-twdhMdnpLQJ_pQx8meWsvevCyD0sufkdgF9nIsX-U\",\"y\":\"U339OypYc4efK_xKJqnGSgWbLQ--47sCfpu-pJU2620\",\"use\":\"sig\",\"kid\":\"1\",\"alg\":\"ES256\"}";
-     * KeyCreatedEvent event = new KeyCreatedEvent(); event.setJwk(GsonUtil.getGson().fromJson(jwk,
-     * PublicJwk.class)); event.setIssuer("UA"); EventValidationResult r =
-     * validator.validate(GsonUtil.toMap(event)); assertTrue(r.isOk()); }
-     * 
-     * @Test void invalidJwkTest() { String jwk =
-     * "{\"kty\":\"EC\",\"crv\":\"P-256\",\"x\":\"\",\"y\":\"U339OypYc4efK_xKJqnGSgWbLQ--47sCfpu-pJU2620\",\"use\":\"sig\",\"kid\":\"1\",\"alg\":\"ES256\"}";
-     * KeyCreatedEvent event = new KeyCreatedEvent(); event.setJwk(GsonUtil.getGson().fromJson(jwk,
-     * PublicJwk.class)); event.setIssuer("UA"); EventValidationResult r =
-     * validator.validate(GsonUtil.toMap(event)); assertFalse(r.isOk()); assertEquals("INVALID_KEY",
-     * r.getErrorCode()); }
-     */
 }
-
-/*
- * verify(authorityRepository, times(1)) .save(Mockito.argThat(new ArgumentMatcher<Authority>() {
- * 
- * @Override public boolean matches(Authority argument) { AuthorityKey key =
- * argument.getKeys().get(0); if (!key.getKeyId().equals("1")) return false; if
- * (!key.getJwk().equals("jwk")) return false; if (key.getValidFrom() != utc) return false; return
- * true; } }));
- */

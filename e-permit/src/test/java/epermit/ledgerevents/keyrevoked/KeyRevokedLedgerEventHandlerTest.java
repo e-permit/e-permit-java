@@ -14,7 +14,6 @@ import epermit.commons.EpermitValidationException;
 import epermit.commons.ErrorCodes;
 import epermit.commons.GsonUtil;
 import epermit.entities.LedgerPublicKey;
-import epermit.ledgerevents.LedgerEventHandleResult;
 import epermit.repositories.LedgerPublicKeyRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,8 +37,7 @@ public class KeyRevokedLedgerEventHandlerTest {
         pubKey2.setKeyId("2");
         when(publicKeyRepository.findAllByAuthorityCodeAndRevokedFalse("TR"))
                 .thenReturn(List.of(pubKey1, pubKey2));
-        LedgerEventHandleResult r = handler.handle(GsonUtil.toMap(event));
-        assertTrue(r.isOk());
+        handler.handle(GsonUtil.toMap(event));
     }
 
     @Test
@@ -76,20 +74,4 @@ public class KeyRevokedLedgerEventHandlerTest {
                 });
         assertEquals(ErrorCodes.KEY_NOTFOUND.name(), ex.getErrorCode());
     }
-
-    /*
-     * @Test void okTest() { KeyRevokedEvent event = new KeyRevokedEvent(); event.setKeyId("1");
-     * event.setIssuer("UA"); event.setIssuedFor("TR"); Authority authority = new Authority();
-     * AuthorityKey key = new AuthorityKey(); key.setKeyId("1"); authority.addKey(key);
-     * authority.addKey(new AuthorityKey());
-     * when(authorityRepository.findOneByCode("UA")).thenReturn(authority); EventValidationResult r
-     * = validator.validate(GsonUtil.toMap(event)); assertTrue(r.isOk()); }
-     * 
-     * @Test void invalidPermitIdOrIssuerTest() { /*PermitRevokedEvent event = new
-     * PermitRevokedEvent(); event.setPermitId("UA-TR-2021-1-1"); event.setIssuer("UA");
-     * event.setIssuedFor("TR"); EventValidationResult r =
-     * validator.validate(GsonUtil.toMap(event)); assertFalse(r.isOk());
-     * assertEquals("INVALID_PERMITID_OR_ISSUER", r.getErrorCode()); }
-     */
-
 }

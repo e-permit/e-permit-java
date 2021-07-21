@@ -32,20 +32,12 @@ public class SerialNumberUtil {
     public Integer generate(String issuedFor, int py, PermitType pt) {
         Authority authority = authorityRepository.findOneByCode(issuedFor);
         Integer nextSerialNumber;
-        AuthorityIssuerQuota quota;
-        Optional<AuthorityIssuerQuota> quotaR = authority.getIssuerQuota(pt, py);
-        if (!quotaR.isPresent()) {
-            quota = new AuthorityIssuerQuota();
-            quota.setPermitType(pt);
-            quota.setPermitYear(py);
-        } else {
-            quota = quotaR.get();
-        }
-        if (!quota.getAvailableSerialNumbers().isEmpty()) {
-            nextSerialNumber = quota.getAvailableSerialNumbers().remove(0);
+        AuthorityIssuerQuota quota = authority.getIssuerQuota(pt, py);
+        if (!quota.getRevokedSerialNumbers().isEmpty()) {
+            nextSerialNumber = quota.getRevokedSerialNumbers().remove(0);
         } else if (quota.getNextNumber() != null) {
             nextSerialNumber = quota.getNextNumber();
-            if (nextSerialNumber == quota.getNextNumber()) {
+            if (nextSerialNumber == quota.getEndNumber()) {
                 quota.setStartNumber(null);
                 quota.setEndNumber(null);
                 quota.setNextNumber(null);
@@ -65,8 +57,8 @@ public class SerialNumberUtil {
     private LedgerQuota getLedgerQuota(String issuedFor, PermitType pt, int py,
             List<Integer> usedIds) {
         Optional<LedgerQuota> ledgerQuota = ledgerQuotaRepository.findAll().stream()
-                .filter(x -> x.getIssuer().equals(properties.getIssuerCode())
-                        && x.getIssuedFor().equals(issuedFor) && x.getPermitType() == pt
+                .filter(x -> x.getPermitIssuer().equals(properties.getIssuerCode())
+                        && x.getPermitIssuedFor().equals(issuedFor) && x.getPermitType() == pt
                         && x.getPermitYear() == py && !usedIds.contains(x.getId()))
                 .findFirst();
         if (ledgerQuota.isPresent()) {

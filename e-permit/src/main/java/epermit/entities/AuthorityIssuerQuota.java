@@ -53,12 +53,12 @@ public class AuthorityIssuerQuota {
         this.usedLedgerQuotaIds.add(id);
     }
 
-    @Column(name = "available_serial_numbers", nullable = true)
+    @Column(name = "revoked_serial_numbers", nullable = true)
     @Convert(converter = IntegerListConverter.class)
-    private List<Integer> availableSerialNumbers = new ArrayList<>();
+    private List<Integer> revokedSerialNumbers = new ArrayList<>();
 
-    public void addSerialNumber(Integer sn){
-        this.availableSerialNumbers.add(sn);
+    public void addRevokedSerialNumber(Integer sn){
+        this.revokedSerialNumbers.add(sn);
     }
 
     @ManyToOne

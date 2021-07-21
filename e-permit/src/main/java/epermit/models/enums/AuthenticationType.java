@@ -1,7 +1,7 @@
 package epermit.models.enums;
 
 public enum AuthenticationType {
-    BASIC("BASIC"), BEARER("BEARER");
+    BASIC("BASIC"), PUBLICKEY("PUBLICKEY");
     public final String authenticationType;
 
     private AuthenticationType(String authenticationType) {

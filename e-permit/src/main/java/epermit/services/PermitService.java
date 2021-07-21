@@ -55,7 +55,6 @@ public class PermitService {
     public CreatePermitResult createPermit(CreatePermitInput input) {
         log.info("Permit create command {}", input);
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        //ValidationUtils.checkIfNull(input.getPlateNumber(), "");
         Integer serialNumber = serialNumberUtil.generate(input.getIssuedFor(),
                 input.getPermitYear(), input.getPermitType());
         CreatePermitIdInput idInput = new CreatePermitIdInput();

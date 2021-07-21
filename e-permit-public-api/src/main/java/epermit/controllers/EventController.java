@@ -7,10 +7,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import epermit.LedgerEventResult;
 import epermit.commons.EpermitValidationException;
 import epermit.commons.GsonUtil;
-import epermit.ledgerevents.LedgerEventHandleResult;
+import epermit.ledgerevents.LedgerEventResult;
 import epermit.ledgerevents.keycreated.KeyCreatedLedgerEvent;
 import epermit.ledgerevents.keyrevoked.KeyRevokedLedgerEvent;
 import epermit.ledgerevents.permitcreated.PermitCreatedLedgerEvent;
@@ -69,15 +68,11 @@ public class EventController {
         String proof = headers.getFirst(HttpHeaders.AUTHORIZATION);
         log.info("Event jws. {}", proof);
         try {
-            LedgerEventHandleResult r = eventService.handleReceivedEvent(claims, proof);
-            log.info("Receive event finished {}", r);
-            if(r.isOk()){
-                return LedgerEventResult.success();
-            }
-            return LedgerEventResult.fail(r.getErrorCode(), r.getErrorCode());
+            eventService.handleReceivedEvent(claims, proof);
+            return LedgerEventResult.success();
         } catch (EpermitValidationException ex) {
             return LedgerEventResult.fail(ex.getErrorCode(), ex.getMessage());
         }
-       
+
     }
 }

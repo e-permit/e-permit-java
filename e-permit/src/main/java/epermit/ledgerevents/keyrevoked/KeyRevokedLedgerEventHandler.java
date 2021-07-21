@@ -8,7 +8,6 @@ import epermit.commons.Check;
 import epermit.commons.ErrorCodes;
 import epermit.commons.GsonUtil;
 import epermit.entities.LedgerPublicKey;
-import epermit.ledgerevents.LedgerEventHandleResult;
 import epermit.ledgerevents.LedgerEventHandler;
 import epermit.repositories.LedgerPublicKeyRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +21,7 @@ public class KeyRevokedLedgerEventHandler implements LedgerEventHandler {
     private final LedgerPublicKeyRepository publicKeyRepository;
 
     @SneakyThrows
-    public LedgerEventHandleResult handle(Map<String, Object> claims) {
+    public void handle(Map<String, Object> claims) {
         log.info("KeyRevokedLedgerEvent started with {}", claims);
         KeyRevokedLedgerEvent e = GsonUtil.fromMap(claims, KeyRevokedLedgerEvent.class);
         List<LedgerPublicKey> keys =
@@ -36,6 +35,5 @@ public class KeyRevokedLedgerEventHandler implements LedgerEventHandler {
         publicKey.setRevokedAt(e.getRevokedAt());
         log.info("KeyRevokedEventHandler ended with {}", publicKey);
         publicKeyRepository.save(publicKey);
-        return LedgerEventHandleResult.success();
     }
 }

@@ -3,5 +3,5 @@ package epermit.ledgerevents;
 import java.util.Map;
 
 public interface LedgerEventHandler {
-    LedgerEventHandleResult handle(Map<String, Object> event);
+    void handle(Map<String, Object> event);
 }

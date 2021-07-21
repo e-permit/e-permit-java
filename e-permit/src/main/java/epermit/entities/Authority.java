@@ -44,10 +44,10 @@ public class Authority {
 
   @Column(name = "authentication_type", nullable = false)
   @Enumerated(EnumType.STRING)
-  private AuthenticationType authenticationType;
+  private AuthenticationType authenticationType = AuthenticationType.PUBLICKEY;
 
   @Column(name = "last_sended_event_id", nullable = false)
-  private String lastSendedEventId;
+  private Long lastSendedEventId = Long.valueOf(0);
 
   @OneToMany(cascade = CascadeType.ALL)
   @EqualsAndHashCode.Exclude
@@ -56,8 +56,8 @@ public class Authority {
 
   @JsonIgnore
   public void addIssuerQuota(AuthorityIssuerQuota quota) {
-      issuerQuotas.add(quota);
-      quota.setAuthority(this);
+    issuerQuotas.add(quota);
+    quota.setAuthority(this);
   }
 
   @CreationTimestamp
@@ -68,8 +68,17 @@ public class Authority {
   @Column(name = "updated_at", nullable = false)
   private LocalDateTime updatedAt;
 
-  public Optional<AuthorityIssuerQuota> getIssuerQuota(PermitType type, int year) {
-    return issuerQuotas.stream().filter(x -> x.getPermitType() == type && x.getPermitYear() == year)
-        .findFirst();
+  public AuthorityIssuerQuota getIssuerQuota(PermitType type, int year) {
+    AuthorityIssuerQuota quota;
+    Optional<AuthorityIssuerQuota> quotaR = issuerQuotas.stream()
+        .filter(x -> x.getPermitType() == type && x.getPermitYear() == year).findFirst();
+    if (!quotaR.isPresent()) {
+      quota = new AuthorityIssuerQuota();
+      quota.setPermitType(type);
+      quota.setPermitYear(year);
+    } else {
+      quota = quotaR.get();
+    }
+    return quota;
   }
 }

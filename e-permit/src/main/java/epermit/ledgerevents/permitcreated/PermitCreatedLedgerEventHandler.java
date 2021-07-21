@@ -4,7 +4,6 @@ import epermit.commons.Check;
 import epermit.commons.ErrorCodes;
 import epermit.commons.GsonUtil;
 import epermit.entities.LedgerPermit;
-import epermit.ledgerevents.LedgerEventHandleResult;
 import epermit.ledgerevents.LedgerEventHandler;
 import epermit.models.inputs.CreatePermitIdInput;
 import epermit.models.inputs.QuotaSufficientInput;
@@ -26,7 +25,7 @@ public class PermitCreatedLedgerEventHandler implements LedgerEventHandler {
     private final PermitUtil permitUtil;
 
     @SneakyThrows
-    public LedgerEventHandleResult handle(Map<String, Object> claims) {
+    public void handle(Map<String, Object> claims) {
         log.info("PermitCreatedEventHandler started with {}", claims);
         PermitCreatedLedgerEvent event = GsonUtil.fromMap(claims, PermitCreatedLedgerEvent.class);
         String expectedPermitId = permitUtil.getPermitId(getCreatePermitIdInput(event));
@@ -52,7 +51,6 @@ public class PermitCreatedLedgerEventHandler implements LedgerEventHandler {
         }
         log.info("PermitCreatedEventFactory ended with {}", permit);
         permitRepository.save(permit);
-        return LedgerEventHandleResult.success();
     }
 
     private CreatePermitIdInput getCreatePermitIdInput(PermitCreatedLedgerEvent event) {

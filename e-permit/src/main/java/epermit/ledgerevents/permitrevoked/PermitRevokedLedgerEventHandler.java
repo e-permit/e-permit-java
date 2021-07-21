@@ -7,7 +7,6 @@ import epermit.commons.Check;
 import epermit.commons.ErrorCodes;
 import epermit.commons.GsonUtil;
 import epermit.entities.LedgerPermit;
-import epermit.ledgerevents.LedgerEventHandleResult;
 import epermit.ledgerevents.LedgerEventHandler;
 import epermit.repositories.LedgerPermitRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,16 +20,16 @@ public class PermitRevokedLedgerEventHandler implements LedgerEventHandler {
     private final LedgerPermitRepository permitRepository;
 
     @SneakyThrows
-    public LedgerEventHandleResult handle(Map<String, Object> claims) {
+    public void handle(Map<String, Object> claims) {
         log.info("PermitRevokedEventHandler started with {}", claims);
         PermitRevokedLedgerEvent event = GsonUtil.fromMap(claims, PermitRevokedLedgerEvent.class);
-        //Check.equals(event.getEventType(), LedgerEventType.PERMIT_REVOKED, "INVALID_EVENTTYPE");
         Optional<LedgerPermit> permitR = permitRepository.findOneByPermitId(event.getPermitId());
-        Check.isTrue(!permitR.isPresent(), ErrorCodes.INVALID_PERMITID);
+        Check.isTrue(!permitR.isPresent(), ErrorCodes.PERMIT_NOTFOUND);
         LedgerPermit permit = permitR.get();
-        //Check.equals(permit.getIssuedFor(), event.getEventIssuedFor(), "PERMIT_EVENT_MISMATCH");
-        //Check.equals(permit.getIssuer(), event.getEventIssuer(), "PERMIT_EVENT_MISMATCH");
+        Check.isTrue(!permit.getIssuer().equals(event.getEventIssuer()),
+                ErrorCodes.PERMIT_NOTFOUND);
+        Check.isTrue(!permit.getIssuedFor().equals(event.getEventIssuedFor()),
+                ErrorCodes.PERMIT_NOTFOUND);
         permitRepository.delete(permit);
-        return LedgerEventHandleResult.success();
     }
 }

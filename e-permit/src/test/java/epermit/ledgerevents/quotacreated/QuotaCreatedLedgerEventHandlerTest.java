@@ -2,10 +2,12 @@ package epermit.ledgerevents.quotacreated;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import java.util.Optional;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -13,33 +15,37 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.jpa.domain.Specification;
+import epermit.commons.EpermitValidationException;
+import epermit.commons.ErrorCodes;
+import epermit.commons.GsonUtil;
 import epermit.entities.Authority;
-import epermit.repositories.AuthorityRepository;
+import epermit.entities.LedgerQuota;
+import epermit.models.enums.PermitType;
+import epermit.repositories.LedgerQuotaRepository;
 
 @ExtendWith(MockitoExtension.class)
 public class QuotaCreatedLedgerEventHandlerTest {
     @Mock
-    AuthorityRepository authorityRepository;
+    LedgerQuotaRepository quotaRepository;;
 
     @InjectMocks
     QuotaCreatedLedgerEventHandler handler;
 
     @Captor
-    ArgumentCaptor<Authority> captor;
+    ArgumentCaptor<LedgerQuota> captor;
 
-    /*@Test
-    void handleTest() {
-        QuotaCreatedEvent event = new QuotaCreatedEvent();
-        event.setIssuer("TR");
-        event.setIssuedFor("UA");
+
+    @Test
+    void handleOkTest() {
+        QuotaCreatedLedgerEvent event = new QuotaCreatedLedgerEvent("TR", "UZ", "0");
         event.setStartNumber(4);
         event.setEndNumber(40);
         event.setPermitType(PermitType.BILITERAL);
         event.setPermitYear(2021);
-        when(authorityRepository.findOneByCode("TR")).thenReturn(new Authority());
-        handler.handle(event);
-        verify(authorityRepository, times(1)).save(captor.capture());
-        IssuerQuota quota = captor.getValue().getIssuerQuotas().get(0);
+        handler.handle(GsonUtil.toMap(event));
+        verify(quotaRepository, times(1)).save(captor.capture());
+        LedgerQuota quota = captor.getValue();
         assertEquals(4, quota.getStartNumber());
         assertEquals(40, quota.getEndNumber());
         assertEquals(2021, quota.getPermitYear());
@@ -47,15 +53,13 @@ public class QuotaCreatedLedgerEventHandlerTest {
     }
 
     @Test
-    void handleTest() {
-        QuotaCreatedEvent event = new QuotaCreatedEvent();
-        event.setIssuer("TR");
-        event.setIssuedFor("UA");
-        event.setStartNumber(4);
-        event.setEndNumber(40);
-        event.setPermitType(PermitType.BILITERAL);
-        event.setPermitYear(4);
-        EventValidationResult r = validator.validate(GsonUtil.toMap(event));
-        assertTrue(r.isOk());
-    }*/
+    void handleInvalidQuotaIntervalTest() {
+        QuotaCreatedLedgerEvent event = new QuotaCreatedLedgerEvent("TR", "UZ", "0");
+        when(quotaRepository.count(any(Specification.class))).thenReturn(Long.valueOf(1));
+        EpermitValidationException ex =
+                Assertions.assertThrows(EpermitValidationException.class, () -> {
+                    handler.handle(GsonUtil.toMap(event));
+                });
+        assertEquals(ErrorCodes.INVALID_QUOTA_INTERVAL.name(), ex.getErrorCode());
+    }
 }

@@ -1,6 +1,7 @@
 package epermit.utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -11,9 +12,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import epermit.entities.Authority;
 import epermit.entities.AuthorityIssuerQuota;
 import epermit.entities.LedgerQuota;
+import epermit.models.EPermitProperties;
 import epermit.models.enums.PermitType;
 import epermit.repositories.AuthorityIssuerQuotaRepository;
 import epermit.repositories.AuthorityRepository;
+import epermit.repositories.LedgerQuotaRepository;
 
 @ExtendWith(MockitoExtension.class)
 public class SerialNumberUtilTest {
@@ -26,12 +29,18 @@ public class SerialNumberUtilTest {
 
     @Mock
     AuthorityIssuerQuotaRepository authorityIssuerQuotaRepository;
+    
+    @Mock
+    LedgerQuotaRepository ledgerQuotaRepository;
+
+    @Mock
+    EPermitProperties properties;
 
     @InjectMocks
     SerialNumberUtil util;
 
     @Test
-    void generateAvailableSerialNumberTest() {
+    void generateRevokedSerialNumberTest() {
         Authority authority = new Authority();
         authority.setApiUri("apiUri");
         authority.setCode("UZ");
@@ -39,28 +48,71 @@ public class SerialNumberUtilTest {
         AuthorityIssuerQuota quota = new AuthorityIssuerQuota();
         quota.setPermitType(PermitType.BILITERAL);
         quota.setPermitYear(2021);
-        quota.addSerialNumber(10);
-        //quota.setAvailableSerialNumbers(GsonUtil.getGson().toJson(List.of(10)));
+        quota.addRevokedSerialNumber(10);
         authority.addIssuerQuota(quota);
         when(authorityRepository.findOneByCode("UZ")).thenReturn(authority);
-        LedgerQuota ledgerQuota = new LedgerQuota();
-        ledgerQuota.setId(1);
-        //when(util.getLedgerQuota("UZ", PermitType.BILITERAL, 2021, List.of())).thenReturn(ledgerQuota);
         Integer serialNumber = util.generate("UZ", 2021, PermitType.BILITERAL);
         assertEquals(10, serialNumber);
     }
 
     @Test
-    void generateTest() {
+    void generateNextNumberTest() {
+        Authority authority = new Authority();
+        authority.setApiUri("apiUri");
+        authority.setCode("UZ");
+        authority.setName("name");
         AuthorityIssuerQuota quota = new AuthorityIssuerQuota();
-        /*AuthorityIssuerQuotaPayload payload = new AuthorityIssuerQuotaPayload();
-        payload.setAvailableSerialNumbers(List.of());
-        quota.setPayload(payload);
-        LedgerQuota ledgerQuota = new LedgerQuota();
-        
-        when(permitUtil.getIssuerQuota("UZ", PermitType.BILITERAL, 2021)).thenReturn(quota);
-        when(permitUtil.getActiveLedgerQuota(payload, "UZ", PermitType.BILITERAL, 2021)).thenReturn(value)
+        quota.setPermitType(PermitType.BILITERAL);
+        quota.setPermitYear(2021);
+        quota.setNextNumber(5);
+        authority.addIssuerQuota(quota);
+        when(authorityRepository.findOneByCode("UZ")).thenReturn(authority);
         Integer serialNumber = util.generate("UZ", 2021, PermitType.BILITERAL);
-        assertEquals(10, serialNumber);*/
+        assertEquals(5, serialNumber);
+    }
+
+    @Test
+    void generateEndNumberTest() {
+        Authority authority = new Authority();
+        authority.setApiUri("apiUri");
+        authority.setCode("UZ");
+        authority.setName("name");
+        AuthorityIssuerQuota quota = new AuthorityIssuerQuota();
+        quota.setPermitType(PermitType.BILITERAL);
+        quota.setPermitYear(2021);
+        quota.setNextNumber(5);
+        quota.setEndNumber(5);
+        authority.addIssuerQuota(quota);
+        when(authorityRepository.findOneByCode("UZ")).thenReturn(authority);
+        Integer serialNumber = util.generate("UZ", 2021, PermitType.BILITERAL);
+        assertEquals(5, serialNumber);
+        assertNull(quota.getNextNumber());
+        assertNull(quota.getStartNumber());
+        assertNull(quota.getEndNumber());
+    }
+
+    @Test
+    void generateTest() {
+        Authority authority = new Authority();
+        authority.setApiUri("apiUri");
+        authority.setCode("UZ");
+        authority.setName("name");
+        AuthorityIssuerQuota quota = new AuthorityIssuerQuota();
+        quota.setPermitType(PermitType.BILITERAL);
+        quota.setPermitYear(2021);
+        authority.addIssuerQuota(quota);
+        when(authorityRepository.findOneByCode("UZ")).thenReturn(authority);
+        LedgerQuota ledgerQuota = new LedgerQuota();
+        ledgerQuota.setActive(true);
+        ledgerQuota.setEndNumber(5);
+        ledgerQuota.setPermitIssuedFor("UZ");
+        ledgerQuota.setPermitIssuer("TR");
+        ledgerQuota.setPermitType(PermitType.BILITERAL);
+        ledgerQuota.setPermitYear(2021);
+        ledgerQuota.setStartNumber(1);
+        when(properties.getIssuerCode()).thenReturn("TR");
+        when(ledgerQuotaRepository.findAll()).thenReturn(List.of(ledgerQuota));
+        Integer serialNumber = util.generate("UZ", 2021, PermitType.BILITERAL);
+        assertEquals(1, serialNumber);
     }
 }
