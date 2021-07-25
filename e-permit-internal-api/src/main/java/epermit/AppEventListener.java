@@ -22,7 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 public class AppEventListener {
     private final RestTemplate restTemplate;
     private final LedgerEventUtil ledgerEventUtil;
-    private final PersistedEventService persistedEventService;
 
     @Async
     @TransactionalEventListener
@@ -33,8 +32,6 @@ public class AppEventListener {
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(event.getContent(), headers);
         LedgerEventResult result =
                 restTemplate.postForObject(event.getUri(), request, LedgerEventResult.class);
-        if (result.isOk()) {
-            persistedEventService.handleSendedEvent(event.getContent().get("event_id").toString());
-        }
+        log.info("Sending event is finished with the result {}", result);
     }
 }
