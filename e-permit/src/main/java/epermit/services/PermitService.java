@@ -17,6 +17,8 @@ import epermit.utils.SerialNumberUtil;
 import epermit.entities.LedgerPermit;
 import epermit.ledgerevents.LedgerEventUtil;
 import epermit.ledgerevents.permitcreated.PermitCreatedLedgerEvent;
+import epermit.ledgerevents.permitrevoked.PermitRevokedLedgerEvent;
+import epermit.ledgerevents.permitused.PermitUsedLedgerEvent;
 import epermit.models.EPermitProperties;
 import epermit.models.dtos.PermitDto;
 import epermit.models.inputs.CreatePermitIdInput;
@@ -86,6 +88,8 @@ public class PermitService {
         e.setPermitYear(input.getPermitYear());
         e.setPlateNumber(input.getPlateNumber());
         e.setSerialNumber(serialNumber);
+        e.setPermitIssuer(properties.getIssuerCode());
+        e.setPermitIssuedFor(input.getIssuedFor());
         if (!input.getOtherClaims().isEmpty()) {
             e.setOtherClaims(input.getOtherClaims());
         }
@@ -97,12 +101,28 @@ public class PermitService {
     @Transactional
     public void revokePermit(Long id) {
         log.info("Revoke permit started {}", id);
-
+        LedgerPermit permit = permitRepository.findById(id).get();
+        String issuer = properties.getIssuerCode();
+        String prevEventId = ledgerEventUtil.getPreviousEventId(permit.getIssuedFor());
+        PermitRevokedLedgerEvent e =
+                new PermitRevokedLedgerEvent(issuer, permit.getIssuedFor(), prevEventId);
+        e.setPermitId(permit.getPermitId());
+        ledgerEventUtil.persistAndPublishEvent(e);
     }
 
     @Transactional
-    public void permitUsed(String id, PermitUsedInput input) {
-        log.info("Permit used started {}", id);
+    public void permitUsed(PermitUsedInput input) {
+        log.info("Permit used started {}", input);
+        LedgerPermit permit = permitRepository.findOneByPermitId(input.getPermitId()).get();
+        String prevEventId = ledgerEventUtil.getPreviousEventId(permit.getIssuer());
+        PermitUsedLedgerEvent e =
+                new PermitUsedLedgerEvent(properties.getIssuerCode(), permit.getIssuer(), prevEventId);
+        e.setPermitId(permit.getPermitId());
+        e.setActivityTimestamp(input.getActivityTimestamp());
+        e.setActivityDetails(input.getActivityDetails());
+        e.setPermitId(input.getPermitId());
+        e.setActivityType(input.getActivityType());
+        ledgerEventUtil.persistAndPublishEvent(e);
 
     }
 

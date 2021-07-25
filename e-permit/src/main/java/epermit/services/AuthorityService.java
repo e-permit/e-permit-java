@@ -8,14 +8,15 @@ import org.springframework.transaction.annotation.Transactional;
 import epermit.commons.GsonUtil;
 import epermit.entities.Authority;
 import epermit.entities.LedgerPublicKey;
-import epermit.entities.LedgerQuota;
+import epermit.ledgerevents.LedgerEventUtil;
+import epermit.ledgerevents.quotacreated.QuotaCreatedLedgerEvent;
+import epermit.models.EPermitProperties;
 import epermit.models.dtos.AuthorityConfig;
 import epermit.models.dtos.AuthorityDto;
 import epermit.models.inputs.CreateAuthorityInput;
 import epermit.models.inputs.CreateQuotaInput;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.LedgerPublicKeyRepository;
-import epermit.repositories.LedgerQuotaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,7 +25,8 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class AuthorityService {
     private final AuthorityRepository authorityRepository;
-    private final LedgerQuotaRepository ledgerQuotaRepository;
+    private final EPermitProperties properties;
+    private final LedgerEventUtil ledgerEventUtil;
     private final LedgerPublicKeyRepository ledgerPublicKeyRepository;
     private final ModelMapper modelMapper;
 
@@ -63,14 +65,18 @@ public class AuthorityService {
     @Transactional
     public void createQuota(CreateQuotaInput input) {
         log.info("Quota create command: {}", input);
-        LedgerQuota quota = new LedgerQuota();
-        quota.setEndNumber(input.getEndId());
-        quota.setStartNumber(input.getStartId());
-        quota.setPermitType(input.getPermitType());
-        quota.setPermitYear(input.getPermitYear());
-        quota.setActive(true);
-        log.info("Quota created: {}", quota);
-        ledgerQuotaRepository.save(quota);
+        String issuer = properties.getIssuerCode();
+        String prevEventId = ledgerEventUtil.getPreviousEventId(input.getAuthorityCode());
+        QuotaCreatedLedgerEvent event =
+                new QuotaCreatedLedgerEvent(issuer, input.getAuthorityCode(), prevEventId);
+        event.setEndNumber(input.getEndNumber());
+        event.setStartNumber(input.getStartNumber());
+        event.setPermitType(input.getPermitType());
+        event.setPermitYear(input.getPermitYear());
+        event.setPermitIssuer(input.getAuthorityCode());
+        event.setPermitIssuedFor(issuer);
+        log.info("Quota created: {}", event);
+        ledgerEventUtil.persistAndPublishEvent(event);
     }
 }
 

@@ -26,7 +26,6 @@ public class ConfigService {
     public AuthorityConfig getConfig() {
         AuthorityConfig dto = new AuthorityConfig();
         dto.setCode(properties.getIssuerCode());
-        dto.setVerifyUri(properties.getIssuerVerifyUri());
         Gson gson = GsonUtil.getGson();
         List<PublicJwk> keyDtoList = new ArrayList<>();
         ledgerPublicKeyRepository.findAllByAuthorityCodeAndRevokedFalse(properties.getIssuerCode())
@@ -37,7 +36,7 @@ public class ConfigService {
         return dto;
     }
 
-    public List<TrustedAuthority> getAuthorities(){
+    public List<TrustedAuthority> getTrustedAuthorities(){
         Gson gson = GsonUtil.getGson();
         List<TrustedAuthority> trustedAuthorities = new ArrayList<>();
         List<Authority> authorities = authorityRepository.findAll();

@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import epermit.services.KeyService;
+import epermit.services.PrivateKeyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,18 +17,12 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @RequestMapping("/keys")
 public class KeyController {
-    private final KeyService keyService;
+    private final PrivateKeyService keyService;
 
     @PostMapping()
     public void create(@RequestBody Map<String, String> input) {
         log.info("Key create request. {}", input);
         keyService.create(input.get("key_id"));
-    }
-
-    @PatchMapping("/{id}/enable")
-    public void enable(@PathVariable("id") Integer id) {
-        log.info("Key enable request. {}", id);
-        keyService.enable(id);
     }
 
     @DeleteMapping("/{id}")

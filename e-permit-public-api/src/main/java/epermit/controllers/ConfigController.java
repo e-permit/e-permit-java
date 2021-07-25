@@ -26,6 +26,6 @@ public class ConfigController {
 
     @GetMapping("/trusted_authorities")
     public List<TrustedAuthority> getAuthorities(){
-        return configService.getAuthorities();
+        return configService.getTrustedAuthorities();
     }
 }

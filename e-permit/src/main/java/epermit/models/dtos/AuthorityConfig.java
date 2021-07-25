@@ -10,7 +10,5 @@ public class AuthorityConfig {
 
     private String name;
   
-    private String verifyUri;
-  
     private List<PublicJwk> keys = new ArrayList<>();
 }

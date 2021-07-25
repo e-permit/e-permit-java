@@ -64,7 +64,7 @@ public class AuthorityQuotaControllerIT {
         quota.setPermitType(PermitType.BILITERAL);
         quota.setPermitYear(2021);
         authorityRepository.save(authority);
-        PrivateKey key = keyUtil.create("1");
+        PrivateKey key = keyUtil.create("1").getFirst();
         key.setEnabled(true);
         keyRepository.save(key);
         quotaId = quota.getId();
@@ -92,26 +92,12 @@ public class AuthorityQuotaControllerIT {
     void createQuotaTest() {
         CreateQuotaInput input = new CreateQuotaInput();
         input.setAuthorityCode("UZ");
-        input.setEndId(100);
+        input.setEndNumber(100);
         input.setPermitType(PermitType.BILITERAL);
         input.setPermitYear(2021);
-        input.setStartId(1);
+        input.setStartNumber(1);
         ResponseEntity<Void> r =
                 getTestRestTemplate().postForEntity(getBaseUrl(), input, Void.class);
-        assertEquals(HttpStatus.OK, r.getStatusCode());
-    }
-
-    @Test
-    void enableQuotaTest() {
-        RestTemplate restTemplate = getTestRestTemplate().getRestTemplate();
-        HttpComponentsClientHttpRequestFactory requestFactory =
-                new HttpComponentsClientHttpRequestFactory();
-        requestFactory.setConnectTimeout(0);
-        requestFactory.setReadTimeout(0);
-        restTemplate.setRequestFactory(requestFactory);
-        HttpEntity<String> entity = new HttpEntity<String>("{}");
-        ResponseEntity<Void> r = restTemplate.exchange(getBaseUrl() + "/" + quotaId + "/enable",
-                HttpMethod.PATCH, entity, Void.class);
         assertEquals(HttpStatus.OK, r.getStatusCode());
     }
 }

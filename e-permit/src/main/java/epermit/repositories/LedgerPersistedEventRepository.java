@@ -6,9 +6,11 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 @Repository
-public interface LedgerPersistedEventRepository extends JpaRepository<LedgerPersistedEvent, Long> {
+public interface LedgerPersistedEventRepository extends JpaRepository<LedgerPersistedEvent, Long>,
+                JpaSpecificationExecutor<LedgerPersistedEvent> {
 
         Optional<LedgerPersistedEvent> findOneByEventId(String eventId);
 
@@ -17,8 +19,6 @@ public interface LedgerPersistedEventRepository extends JpaRepository<LedgerPers
 
         Optional<LedgerPersistedEvent> findTopByIssuerAndIssuedForOrderByIdDesc(String issuer,
                         String issuedFor);
-
-        List<LedgerPersistedEvent> findByIdGreaterThanOrderByIdAsc(Long id);
 
         boolean existsByIssuerAndIssuedForAndEventId(String issuer, String issuedFor,
                         String eventId);

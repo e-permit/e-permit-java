@@ -101,7 +101,6 @@ public class AuthorityControllerIT {
     void createTest() {
         AuthorityConfig config = new AuthorityConfig();
         config.setCode("UZ");
-        config.setVerifyUri("verifyUri");
         PublicJwk jwk = new PublicJwk();
         jwk.setCrv("crv");
         jwk.setKid("1");

@@ -1,10 +1,13 @@
 package epermit.ledgerevents;
 
+import java.util.Map;
+import epermit.models.enums.AuthenticationType;
 import lombok.Data;
 
 @Data
 public class LedgerEventCreated {
     private String uri;
-    private String content;
+    private Map<String, Object> content;
+    private AuthenticationType proofType;
     private String proof;
 }

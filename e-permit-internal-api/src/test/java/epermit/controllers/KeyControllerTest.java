@@ -10,12 +10,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import epermit.services.KeyService;
+import epermit.services.PrivateKeyService;
 
 @ExtendWith(MockitoExtension.class)
 public class KeyControllerTest {
     @Mock
-    KeyService keyService;
+    PrivateKeyService keyService;
 
     @InjectMocks
     KeyController controller;
@@ -26,11 +26,5 @@ public class KeyControllerTest {
         input.put("key_id", "value");
         controller.create(input);
         verify(keyService, times(1)).create("value");
-    }
-
-    @Test
-    void enableTest() {
-        controller.enable(1);
-        verify(keyService, times(1)).enable(1);
     }
 }

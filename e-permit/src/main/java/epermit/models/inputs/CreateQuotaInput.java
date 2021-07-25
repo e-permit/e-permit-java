@@ -11,7 +11,7 @@ public class CreateQuotaInput {
 
     private PermitType permitType;
 
-    private int startId;
+    private int startNumber;
 
-    private int endId;
+    private int endNumber;
 }

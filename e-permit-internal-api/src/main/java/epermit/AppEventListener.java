@@ -1,5 +1,6 @@
 package epermit;
 
+import java.util.Map;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.scheduling.annotation.Async;
@@ -9,8 +10,8 @@ import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.web.client.RestTemplate;
 import epermit.ledgerevents.LedgerEventCreated;
 import epermit.ledgerevents.LedgerEventResult;
+import epermit.ledgerevents.LedgerEventUtil;
 import epermit.services.PersistedEventService;
-import epermit.utils.JwsUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,18 +21,20 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class AppEventListener {
     private final RestTemplate restTemplate;
-    private final JwsUtil jwsUtil;
+    private final LedgerEventUtil ledgerEventUtil;
     private final PersistedEventService persistedEventService;
 
     @Async
     @TransactionalEventListener
     public void onAppEvent(LedgerEventCreated event) {
         log.info("onAppEvent is fired. {}", event);
-        HttpHeaders headers = jwsUtil.getJwsHeader(event.getJws());
-        HttpEntity<String> request = new HttpEntity<String>(event.getJws(), headers);
-        LedgerEventResult result = restTemplate.postForObject(event.getUri(), request, LedgerEventResult.class);
-        if(result.isOk()){
-            persistedEventService.handleSendedEvent(event.);
+        HttpHeaders headers =
+                ledgerEventUtil.createEventRequestHeader(event.getProofType(), event.getProof());
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(event.getContent(), headers);
+        LedgerEventResult result =
+                restTemplate.postForObject(event.getUri(), request, LedgerEventResult.class);
+        if (result.isOk()) {
+            persistedEventService.handleSendedEvent(event.getContent().get("event_id").toString());
         }
     }
 }

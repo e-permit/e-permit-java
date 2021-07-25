@@ -7,16 +7,16 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.util.Pair;
 import org.springframework.web.server.ResponseStatusException;
-import epermit.entities.Authority;
 import epermit.entities.PrivateKey;
+import epermit.models.EPermitProperties;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.PrivateKeyRepository;
 import epermit.utils.PrivateKeyUtil;
@@ -24,16 +24,35 @@ import epermit.utils.PrivateKeyUtil;
 @ExtendWith(MockitoExtension.class)
 public class PrivateKeyServiceTest {
     @Mock
-    private PrivateKeyRepository keyRepository;
+    PrivateKeyRepository keyRepository;
 
     @Mock
-    private AuthorityRepository authorityRepository;
+    AuthorityRepository authorityRepository;
 
     @Mock
-    private PrivateKeyUtil keyUtil;
+    PrivateKeyUtil keyUtil;
+
+    @Mock
+    EPermitProperties properties;
 
     @InjectMocks
-    private KeyService keyService;
+    PrivateKeyService keyService;
+
+    @Test
+    void seedTest() {
+        when(keyRepository.count()).thenReturn(Long.valueOf(0));
+        PrivateKey key = new PrivateKey();
+        when(keyUtil.create("1")).thenReturn(key);
+        keyService.seed();
+        verify(keyRepository).save(key);
+    }
+
+    @Test
+    void seedKeyExistTest() {
+        when(keyRepository.count()).thenReturn(Long.valueOf(1));
+        keyService.seed();
+        verify(keyRepository, never()).save(any());
+    }
 
     @Test
     void createTest() {
@@ -54,27 +73,5 @@ public class PrivateKeyServiceTest {
             keyService.create("1");
         });
         
-    }
-
-    @Test
-    void enableTest() {
-        PrivateKey key = new PrivateKey();
-        PrivateKey existKey = new PrivateKey();
-        existKey.setEnabled(true);
-        Authority authority = new Authority();
-        authority.setCode("TR");
-        when(keyRepository.findById(1)).thenReturn(Optional.of(key));
-        when(authorityRepository.findAll()).thenReturn(List.of(authority));
-        keyService.enable(1);
-        assertTrue(key.isEnabled());
-        verify(keyRepository, times(1)).save(key);
-    }
-    
-    @Test
-    void enableKeyNotFoundTest() {
-        when(keyRepository.findById(1)).thenReturn(Optional.empty());
-        assertThrows(ResponseStatusException.class, () -> {
-            keyService.enable(1);
-        });
     }
 }

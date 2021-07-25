@@ -8,8 +8,8 @@ import org.springframework.security.crypto.encrypt.Encryptors;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.security.crypto.keygen.KeyGenerators;
 import org.springframework.stereotype.Component;
-import epermit.entities.PrivateKey;
 import epermit.models.EPermitProperties;
+import epermit.models.dtos.PrivateKey;
 import epermit.repositories.PrivateKeyRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -38,13 +38,15 @@ public class PrivateKeyUtil {
         k.setKeyId(key.getKeyID());
         k.setSalt(salt);
         k.setPrivateJwk(encryptedJwk);
+        k.setPublicJwk(key.toPublicJWK().toJSONString());
         log.info("Key created jwk: {}, salt: {}", key.toPublicJWK().toJSONString(), salt);
         return k;
     }
 
     @SneakyThrows
     public ECKey getKey() {
-        PrivateKey privateKey = keyRepository.findFirstByEnabledTrueOrderByIdDesc();
+        epermit.entities.PrivateKey privateKey =
+                keyRepository.findFirstByEnabledTrueOrderByIdDesc();
         TextEncryptor decryptor =
                 Encryptors.text(properties.getKeyPassword(), privateKey.getSalt());
         ECKey key = ECKey.parse(decryptor.decrypt(privateKey.getPrivateJwk()));

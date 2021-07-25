@@ -8,7 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import epermit.entities.PrivateKey;
+import epermit.models.dtos.PrivateKey;
 import epermit.models.EPermitProperties;
 import epermit.repositories.PrivateKeyRepository;
 import lombok.SneakyThrows;
@@ -37,8 +37,12 @@ public class PrivateKeyUtilTest {
     void keyShouldNotBeCreatedWhenPasswordIsIncorrect() {
         when(properties.getKeyPassword()).thenReturn("123456");
         PrivateKey key = util.create("1");
+        epermit.entities.PrivateKey keyEntity = new epermit.entities.PrivateKey();
+        keyEntity.setPrivateJwk(key.getPrivateJwk());
+        keyEntity.setKeyId(key.getKeyId());
+        keyEntity.setSalt(key.getSalt());
         Assertions.assertThrows(IllegalStateException.class, () -> {
-            when(keyRepository.findFirstByEnabledTrueOrderByIdDesc()).thenReturn(key);
+            when(keyRepository.findFirstByEnabledTrueOrderByIdDesc()).thenReturn(keyEntity);
             when(properties.getKeyPassword()).thenReturn("1234567");
             ECKey ecKey = util.getKey();
             Assertions.assertNotNull(ecKey);

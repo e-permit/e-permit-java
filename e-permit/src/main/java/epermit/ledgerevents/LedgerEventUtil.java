@@ -1,15 +1,20 @@
 package epermit.ledgerevents;
 
+import java.util.Base64;
 import java.util.Map;
 import java.util.Optional;
-
+import com.nimbusds.jose.JWSObject;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import epermit.commons.Check;
 import epermit.commons.ErrorCodes;
 import epermit.commons.GsonUtil;
+import epermit.entities.Authority;
 import epermit.entities.LedgerPersistedEvent;
 import epermit.models.EPermitProperties;
+import epermit.models.enums.AuthenticationType;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.LedgerPersistedEventRepository;
 import epermit.utils.JwsUtil;
@@ -44,19 +49,21 @@ public class LedgerEventUtil {
                 eventHandlers.get(event.getEventType().toString() + "_EVENT_HANDLER");
         Check.isTrue(eventHandler == null, ErrorCodes.INVALID_EVENT);
         eventHandler.handle(GsonUtil.toMap(event));
-        String proof = jwsUtil.createJws(event);
+        String proof = createProof(event);
+        String content = GsonUtil.getGson().toJson(event);
         LedgerPersistedEvent createdEvent = new LedgerPersistedEvent();
         createdEvent.setIssuedFor(event.getEventIssuedFor());
         createdEvent.setEventId(event.getEventId());
         createdEvent.setPreviousEventId(event.getPreviousEventId());
         createdEvent.setEventType(event.getEventType());
+        createdEvent.setEventContent(content);
         createdEvent.setProof(proof);
         ledgerEventRepository.save(createdEvent);
-        String apiUri = authorityRepository.findOneByCode(event.getEventIssuedFor()).getApiUri();
+        Authority authority = authorityRepository.findOneByCode(event.getEventIssuedFor());
         LedgerEventCreated appEvent = new LedgerEventCreated();
-        appEvent.setContent(GsonUtil.getGson().toJson(event));
+        appEvent.setContent(GsonUtil.toMap(event));
         appEvent.setProof(proof);
-        appEvent.setUri(apiUri + "/events");
+        appEvent.setUri(authority.getApiUri() + "/events");
         eventPublisher.publishEvent(appEvent);
         log.info("Event published {}", appEvent);
     }
@@ -82,6 +89,44 @@ public class LedgerEventUtil {
                 eventHandlers.get(e.getEventType().toString() + "_EVENT_HANDLER");
         Check.isTrue(eventHandler == null, ErrorCodes.EVENT_ALREADY_EXISTS);
         eventHandler.handle(claims);
+    }
+
+    @SneakyThrows
+    public <T extends LedgerEventBase> String createProof(T event) {
+        Authority authority = authorityRepository.findOneByCode(event.getEventIssuedFor());
+        if (authority.getAuthenticationType() == AuthenticationType.BASIC) {
+            return "";
+        } else {
+            String jws = jwsUtil.createJws(event);
+            JWSObject jwsObject = JWSObject.parse(jws);
+            return jwsObject.getParsedParts()[0].decodeToString() + "."
+                    + jwsObject.getParsedParts()[1].decodeToString();
+        }
+    }
+
+    @SneakyThrows
+    public Boolean verifyProof(Map<String, Object> claims, String authorization) {
+        Authority authority =
+                authorityRepository.findOneByCode(claims.get("event_issuer").toString());
+        if (authority.getAuthenticationType() == AuthenticationType.BASIC) {
+            String proof = authorization.substring(6);
+            return proof.isBlank();
+        } else {
+            String proof = authorization.substring(7);
+            String[] proofArr = proof.split(".");
+            String payloadJsonStr = GsonUtil.getGson().toJson(claims);
+            String payloadBase64 = Base64.getUrlEncoder().encodeToString(payloadJsonStr.getBytes());
+            String jws = proofArr[0] + payloadBase64 + proofArr[1];
+            return jwsUtil.validateJws(jws);
+        }
+    }
+
+    public HttpHeaders createEventRequestHeader(AuthenticationType proofType, String proof) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.add("Authoriation",
+                proofType == AuthenticationType.BASIC ? "Basic" : "Bearer " + proof);
+        return headers;
     }
 
 }

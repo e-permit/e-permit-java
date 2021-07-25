@@ -1,50 +1,60 @@
 package epermit.services;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import org.springframework.http.HttpStatus;
+import java.util.Optional;
+import javax.persistence.criteria.Predicate;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
-import epermit.entities.Authority;
+import epermit.commons.Check;
+import epermit.commons.ErrorCodes;
 import epermit.entities.LedgerPersistedEvent;
 import epermit.ledgerevents.LedgerEventUtil;
-import epermit.models.enums.AuthenticationType;
-import epermit.models.results.JwsValidationResult;
-import epermit.repositories.AuthorityRepository;
+import epermit.models.EPermitProperties;
 import epermit.repositories.LedgerPersistedEventRepository;
-import epermit.utils.JwsUtil;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class PersistedEventService {
-    private final JwsUtil jwsUtil;
     private final LedgerEventUtil ledgerEventUtil;
-    private final AuthorityRepository authorityRepository;
     private final LedgerPersistedEventRepository eventRepository;
+    private final EPermitProperties properties;
 
     @Transactional
-    public void handleReceivedEvent(Map<String, Object> claims, String proof) {
-        Authority authority = authorityRepository.findOneByCode(claims.get("event_issuer").toString());
-        if(authority.getAuthenticationType() == AuthenticationType.BASIC){
-            
-        }else{
-            JwsValidationResult jwsValidationResult = jwsUtil.validateJws(proof);
-            if (!jwsValidationResult.isValid()) {
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Jws validation error");
-            }
-        }
+    public void handleReceivedEvent(Map<String, Object> claims, String authorization) {
+        Boolean r = ledgerEventUtil.verifyProof(claims, authorization);
+        Check.isTrue(r, ErrorCodes.KEY_NOTFOUND);
         ledgerEventUtil.handleEvent(claims);
     }
 
     @Transactional
-    public void handleSendedEvent(String eventId){
+    public List<LedgerPersistedEvent> getUnsentEvents(String issuedFor, String eventId) {
         LedgerPersistedEvent event = eventRepository.findOneByEventId(eventId).get();
-        Authority authority = authorityRepository.findOneByCode(event.getIssuedFor());
-        if(event.getId() > authority.getLastSendedEventId()){
-            authority.setLastSendedEventId(event.getId());
-        }
-        eventRepository.save(event);
+        List<LedgerPersistedEvent> events = eventRepository
+                .findAll(filterEvents(event.getId(), properties.getIssuerCode(), issuedFor));
+        return events;
+    }
+
+    @Transactional
+    public String getLastReceivedEventId(String issuer) {
+        Optional<LedgerPersistedEvent> e = eventRepository
+                .findTopByIssuerAndIssuedForOrderByIdDesc(issuer, properties.getIssuerCode());
+        return e.get().getEventId();
+    }
+
+    static Specification<LedgerPersistedEvent> filterEvents(Long id, String issuer,
+            String issuedFor) {
+        Specification<LedgerPersistedEvent> spec = (event, cq, cb) -> {
+            List<Predicate> predicates = new ArrayList<Predicate>();
+            predicates.add(cb.equal(event.get("issuer"), issuer));
+            predicates.add(cb.equal(event.get("issued_for"), issuedFor));
+            predicates.add(cb.greaterThan(event.get("id"), id));
+            return cb.and(predicates.toArray(new Predicate[predicates.size()]));
+        };
+        return spec;
     }
 }
 

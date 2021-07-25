@@ -20,8 +20,6 @@ public class EPermitProperties {
 
     private String issuerApiUri;
 
-    private String issuerVerifyUri; 
-
     private String issuerPrivateKey;
 
     private String qrcodeVersion;

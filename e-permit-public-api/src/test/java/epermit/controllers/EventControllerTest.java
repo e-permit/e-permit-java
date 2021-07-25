@@ -13,7 +13,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpHeaders;
 import epermit.commons.ErrorCodes;
-import epermit.ledgerevents.LedgerEventHandleResult;
 import epermit.ledgerevents.LedgerEventResult;
 import epermit.ledgerevents.permitcreated.PermitCreatedLedgerEvent;
 import epermit.services.PersistedEventService;
@@ -31,8 +30,6 @@ public class EventControllerTest {
    @Test
    void receiveEventOkTest() {
       PermitCreatedLedgerEvent e = new PermitCreatedLedgerEvent("TR", "UZ", "0");
-      when(eventService.handleReceivedEvent(anyMap(), anyString()))
-            .thenReturn(LedgerEventHandleResult.success());
       HttpHeaders headers = new HttpHeaders();
       headers.add("authorization", "1234");
       LedgerEventResult r = controller.permitCreated(headers, e);
@@ -42,8 +39,6 @@ public class EventControllerTest {
    @Test
    void receiveEventErrorTest() {
       PermitCreatedLedgerEvent e = new PermitCreatedLedgerEvent("TR", "UZ", "0");
-      when(eventService.handleReceivedEvent(anyMap(), anyString()))
-            .thenReturn(LedgerEventHandleResult.fail(ErrorCodes.EVENT_ALREADY_EXISTS.name()));
       HttpHeaders headers = new HttpHeaders();
       headers.add("authorization", "1234");
       LedgerEventResult r = controller.permitCreated(headers, e);

@@ -66,8 +66,8 @@ public class JwsUtilTest {
         when(publicKeyRepository.findOneByAuthorityCodeAndKeyId("TR", "1"))
                 .thenReturn(Optional.of(authorityKey));
         when(properties.getIssuerCode()).thenReturn("UA");
-        JwsValidationResult r = util.validateJws(jws);
-        Assertions.assertTrue(r.isValid());
+        Boolean r = util.validateJws(jws);
+        Assertions.assertTrue(r);
     }
 
     @Test
@@ -79,9 +79,8 @@ public class JwsUtilTest {
         claims.put("issued_for", "UA2");
         String jws = util.createJws(key, claims);
         when(properties.getIssuerCode()).thenReturn("UA");
-        JwsValidationResult r = util.validateJws(jws);
-        Assertions.assertFalse(r.isValid());
-        Assertions.assertEquals("INVALID_ISSUED_FOR", r.getErrorCode());
+        Boolean r = util.validateJws(jws);
+        Assertions.assertFalse(r);
     }
 
     @Test
@@ -93,9 +92,8 @@ public class JwsUtilTest {
         claims.put("issued_for", "UA");
         String jws = util.createJws(key, claims);
         when(properties.getIssuerCode()).thenReturn("UA");
-        JwsValidationResult r = util.validateJws(jws);
-        Assertions.assertFalse(r.isValid());
-        Assertions.assertEquals("INVALID_KEYID", r.getErrorCode());
+        Boolean r = util.validateJws(jws);
+        Assertions.assertFalse(r);
     }
 
 }

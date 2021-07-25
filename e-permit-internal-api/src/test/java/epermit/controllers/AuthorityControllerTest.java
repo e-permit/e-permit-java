@@ -55,7 +55,6 @@ public class AuthorityControllerTest {
         CreateAuthorityInput input = new CreateAuthorityInput();
         input.setApiUri("apiUri");
         AuthorityConfig config = new AuthorityConfig();
-        config.setVerifyUri("verifyUri");
         when(restTemplate.getForObject("apiUri/epermit-configuration", String.class)).thenReturn(
                 "{\"code\":\"UZ\",\"verify_uri\":\"https://e-permit.github.io/verify\"}");
         controller.create(input);

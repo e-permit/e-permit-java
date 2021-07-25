@@ -11,6 +11,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import epermit.ledgerevents.LedgerEventUtil;
 import epermit.ledgerevents.keycreated.KeyCreatedLedgerEvent;
+import epermit.ledgerevents.keyrevoked.KeyRevokedLedgerEvent;
 import epermit.models.EPermitProperties;
 import epermit.entities.PrivateKey;
 import epermit.repositories.AuthorityRepository;
@@ -23,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class KeyService {
+public class PrivateKeyService {
     private final PrivateKeyRepository keyRepository;
     private final PrivateKeyUtil keyUtil;
     private final AuthorityRepository authorityRepository;
@@ -35,7 +36,7 @@ public class KeyService {
     public void seed() {
         Long keyCount = keyRepository.count();
         if (keyCount == 0) {
-            PrivateKey key;
+            epermit.models.dtos.PrivateKey key;
             String privateKey = properties.getIssuerPrivateKey();
             if (privateKey != null) {
                 String jwkStr = new String(Base64.getUrlDecoder().decode(privateKey));
@@ -44,41 +45,33 @@ public class KeyService {
             } else {
                 key = keyUtil.create("1");
             }
-            key.setEnabled(true);
-            keyRepository.save(key);
+            PrivateKey keyEntity = new epermit.entities.PrivateKey();
+            keyEntity.setKeyId(key.getKeyId());
+            keyEntity.setPrivateJwk(key.getPrivateJwk());
+            keyEntity.setSalt(key.getSalt());
+            keyEntity.setEnabled(true);
+            keyRepository.save(keyEntity);
         }
     }
 
     @Transactional
     public void create(String keyId) {
         log.info("KeyService create started {}", keyId);
-        Optional<PrivateKey> keyR = keyRepository.findOneByKeyId(keyId);
-        if (keyR.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "KEYID_EXIST");
-        }
-        PrivateKey key = keyUtil.create(keyId);
-        log.info("KeyService create finished {}", key.getKeyId());
-        keyRepository.save(key);
-    }
+        epermit.models.dtos.PrivateKey key = keyUtil.create(keyId);
+        PrivateKey keyEntity = new PrivateKey();
+        keyEntity.setKeyId(key.getKeyId());
+        keyEntity.setPrivateJwk(key.getPrivateJwk());
+        keyEntity.setSalt(key.getSalt());
+        keyRepository.save(keyEntity);
+        authorityRepository.findAll().forEach(authority -> {
+            String prevEventId = eventUtil.getPreviousEventId(authority.getCode());
+            KeyCreatedLedgerEvent event = new KeyCreatedLedgerEvent(properties.getIssuerCode(),
+                    authority.getCode(), prevEventId);
+            event.setKid(keyId);
 
-    @Transactional
-    public void enable(Integer id) {
-        log.info("KeyService enable started {}", id);
-        Optional<PrivateKey> keyR = keyRepository.findById(id);
-        if (!keyR.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "KEY_NOTFOUND");
-        }
-        PrivateKey key = keyR.get();
-        key.setEnabled(true);
-        keyRepository.save(key);
-
-        authorityRepository.findAll().forEach(a -> {
-            String prevEventId = eventUtil.getPreviousEventId(a.getCode());
-            KeyCreatedLedgerEvent event =
-                    new KeyCreatedLedgerEvent(properties.getIssuerCode(), a.getCode(), prevEventId);
-            // event.setJwk(key.get);
-            // persist and publish
         });
+        log.info("KeyService create finished {}", key.getKeyId());
+
     }
 
     @Transactional
@@ -88,15 +81,11 @@ public class KeyService {
         if (!keyR.isPresent()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "KEY_NOTFOUND");
         }
-        List<PrivateKey> keys = keyRepository.findAllByEnabledTrue();
-        if (keys.size() == 1) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "THERE_IS_ONLY_ONE_KEY");
-        }
         PrivateKey key = keyR.get();
         keyRepository.delete(key);
 
-        authorityRepository.findAll().forEach(a -> {
-            // persist and publish
+        authorityRepository.findAll().forEach(authority -> {
+            //KeyRevokedLedgerEvent event = 
         });
     }
 }

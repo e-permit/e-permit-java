@@ -57,6 +57,6 @@ public class PermitController {
     @PostMapping("/{id}/activities")
     public void setUsed(@PathVariable("id") String id, @RequestBody @Valid PermitUsedInput input) {
         log.info("Permit used request. {}, {}", id, input);
-        permitService.permitUsed(id, input);
+        permitService.permitUsed(input);
     }
 }

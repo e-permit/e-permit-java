@@ -22,7 +22,6 @@ public class ConfigControllerTest {
     void getConfigTest(){
         AuthorityConfig config = new AuthorityConfig();
         config.setCode("TR");
-        config.setVerifyUri("https://localhost:3001");
         when(configService.getConfig()).thenReturn(config);
         AuthorityConfig result = controller.getConfig();
         assertEquals(config, result);
