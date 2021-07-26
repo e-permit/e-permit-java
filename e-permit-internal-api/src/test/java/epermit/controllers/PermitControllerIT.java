@@ -66,9 +66,12 @@ public class PermitControllerIT {
         authority.setCode("UZ");
         authority.setName("name");
         authorityRepository.save(authority);
-        PrivateKey key = keyUtil.create("1");
-        key.setEnabled(true);
-        keyRepository.save(key);
+        epermit.models.dtos.PrivateKey key = keyUtil.create("1");
+        PrivateKey keyEntity = new PrivateKey();
+        keyEntity.setKeyId(key.getKeyId());
+        keyEntity.setPrivateJwk(key.getPrivateJwk());
+        keyEntity.setEnabled(true);
+        keyRepository.save(keyEntity);
     }
 
     @Container

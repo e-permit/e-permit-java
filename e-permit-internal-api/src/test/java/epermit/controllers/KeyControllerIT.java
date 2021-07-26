@@ -57,9 +57,12 @@ public class KeyControllerIT {
         authority.setCode("UZ");
         authority.setName("name");
         authorityRepository.save(authority);
-        PrivateKey key = keyUtil.create("1");
-        key.setEnabled(true);
-        keyRepository.save(key);
+        epermit.models.dtos.PrivateKey key = keyUtil.create("1");
+        PrivateKey keyEntity = new PrivateKey();
+        keyEntity.setKeyId(key.getKeyId());
+        keyEntity.setPrivateJwk(key.getPrivateJwk());
+        keyEntity.setEnabled(true);
+        keyRepository.save(keyEntity);
     }
 
     @Container
@@ -85,8 +88,11 @@ public class KeyControllerIT {
 
     @Test
     void enableTest() {
-        PrivateKey key = keyUtil.create("2");
-        keyRepository.save(key);
+        epermit.models.dtos.PrivateKey key = keyUtil.create("2");
+        PrivateKey keyEntity = new PrivateKey();
+        keyEntity.setKeyId(key.getKeyId());
+        keyEntity.setPrivateJwk(key.getPrivateJwk());
+        keyRepository.save(keyEntity);
         RestTemplate restTemplate = getTestRestTemplate().getRestTemplate();
         HttpComponentsClientHttpRequestFactory requestFactory =
                 new HttpComponentsClientHttpRequestFactory();
@@ -94,18 +100,21 @@ public class KeyControllerIT {
         requestFactory.setReadTimeout(0);
         restTemplate.setRequestFactory(requestFactory);
         HttpEntity<String> entity = new HttpEntity<String>("{}");
-        ResponseEntity<Void> r = restTemplate.exchange(getBaseUrl() + "/" + key.getId() + "/enable",
+        ResponseEntity<Void> r = restTemplate.exchange(getBaseUrl() + "/" + keyEntity.getId() + "/enable",
                 HttpMethod.PATCH, entity, Void.class);
         assertEquals(HttpStatus.OK, r.getStatusCode());
     }
 
     @Test
     void revokeTest() {
-        PrivateKey key = keyUtil.create("2");
-        key.setEnabled(true);
-        keyRepository.save(key);
+        epermit.models.dtos.PrivateKey key = keyUtil.create("2");
+        PrivateKey keyEntity = new PrivateKey();
+        keyEntity.setKeyId(key.getKeyId());
+        keyEntity.setPrivateJwk(key.getPrivateJwk());
+        keyEntity.setEnabled(true);
+        keyRepository.save(keyEntity);
         HttpEntity<String> entity = new HttpEntity<String>("{}");
-        ResponseEntity<Void> r = getTestRestTemplate().exchange(getBaseUrl() + "/" + key.getId(),
+        ResponseEntity<Void> r = getTestRestTemplate().exchange(getBaseUrl() + "/" + keyEntity.getId(),
                 HttpMethod.DELETE, entity, Void.class);
         assertEquals(HttpStatus.OK, r.getStatusCode());
     }

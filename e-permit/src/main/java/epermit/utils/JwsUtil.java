@@ -55,7 +55,6 @@ public class JwsUtil {
         if (!issuedFor.equals(properties.getIssuerCode())) {
             log.info("The jws is not issued for the current authority {}", jws);
             return false;
-            //return JwsValidationResult.fail("INVALID_ISSUED_FOR");
         }
         String issuer = getClaim(jws, "issuer");
         JWSObject jwsObject = JWSObject.parse(jws);
@@ -64,21 +63,21 @@ public class JwsUtil {
         Optional<LedgerPublicKey> k =
                 publicKeyRepository.findOneByAuthorityCodeAndKeyId(issuer, keyId);
         if (!k.isPresent()) {
-            log.info("The issuer or key doesn't found");
-            return false;//return JwsValidationResult.fail("INVALID_KEYID");
+            log.info("The key doesn't found");
+            return false;
         }else if(k.get().isRevoked()){
             log.info("The key is revoked");
-            return false;//return JwsValidationResult.fail("REVOKED_KEY");
+            return false;
         }
         ECKey key = ECKey.parse(k.get().getJwk()).toPublicJWK();
         JWSVerifier verifier = new ECDSAVerifier(key);
         Boolean valid = jwsObject.verify(verifier);
         if (!valid) {
             log.info("Invalid jws");
-            return false;//return JwsValidationResult.fail("INVALID_JWS");
+            return false;
         }
         log.info("Jws validation succeed {}", jwsObject.getPayload().toJSONObject());
-        return true;//return JwsValidationResult.success(jwsObject.getPayload().toJSONObject());
+        return true;
     }
 
     @SneakyThrows

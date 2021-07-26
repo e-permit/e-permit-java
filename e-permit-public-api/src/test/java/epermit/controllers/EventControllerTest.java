@@ -3,8 +3,10 @@ package epermit.controllers;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpHeaders;
+import epermit.commons.EpermitValidationException;
 import epermit.commons.ErrorCodes;
 import epermit.ledgerevents.LedgerEventResult;
 import epermit.ledgerevents.permitcreated.PermitCreatedLedgerEvent;
@@ -41,18 +44,14 @@ public class EventControllerTest {
       PermitCreatedLedgerEvent e = new PermitCreatedLedgerEvent("TR", "UZ", "0");
       HttpHeaders headers = new HttpHeaders();
       headers.add("authorization", "1234");
+      doThrow(new EpermitValidationException("message", ErrorCodes.EVENT_ALREADY_EXISTS))
+            .when(eventService).handleReceivedEvent(anyMap(), anyString());
       LedgerEventResult r = controller.permitCreated(headers, e);
       assertFalse(r.isOk());
       assertEquals(ErrorCodes.EVENT_ALREADY_EXISTS.name(), r.getErrorCode());
    }
 
 }
-
-
-
-
-
-
 
 
 

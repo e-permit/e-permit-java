@@ -18,9 +18,9 @@ public class EventScheduler {
     
     private final AuthorityRepository authorityRepository;
 
-    @Scheduled(fixedDelay = 5 * 60 * 1000)
+    @Scheduled(fixedDelay = 30 * 60 * 1000)
     public void unsentEventsTask() {
         log.info("Unsent events task started");
-        eventService.getUnsentEvents(issuedFor, eventId)
+        //eventService.getUnsentEvents(issuedFor, eventId)
     }
 }

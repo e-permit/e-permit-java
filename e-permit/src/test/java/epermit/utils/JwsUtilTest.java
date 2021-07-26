@@ -19,7 +19,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import epermit.entities.LedgerPublicKey;
 import epermit.models.EPermitProperties;
-import epermit.models.results.JwsValidationResult;
 import epermit.repositories.LedgerPublicKeyRepository;
 import lombok.SneakyThrows;
 

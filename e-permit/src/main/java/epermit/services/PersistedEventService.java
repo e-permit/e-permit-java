@@ -6,8 +6,10 @@ import java.util.Map;
 import java.util.Optional;
 import javax.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 import epermit.commons.Check;
 import epermit.commons.ErrorCodes;
 import epermit.entities.LedgerPersistedEvent;
@@ -26,7 +28,9 @@ public class PersistedEventService {
     @Transactional
     public void handleReceivedEvent(Map<String, Object> claims, String authorization) {
         Boolean r = ledgerEventUtil.verifyProof(claims, authorization);
-        Check.isTrue(r, ErrorCodes.KEY_NOTFOUND);
+        if(!r){
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "");
+        }
         ledgerEventUtil.handleEvent(claims);
     }
 

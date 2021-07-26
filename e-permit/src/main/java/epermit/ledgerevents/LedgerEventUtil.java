@@ -52,12 +52,14 @@ public class LedgerEventUtil {
         String proof = createProof(event);
         String content = GsonUtil.getGson().toJson(event);
         LedgerPersistedEvent createdEvent = new LedgerPersistedEvent();
+        createdEvent.setIssuer(event.getEventIssuer());
         createdEvent.setIssuedFor(event.getEventIssuedFor());
         createdEvent.setEventId(event.getEventId());
         createdEvent.setPreviousEventId(event.getPreviousEventId());
         createdEvent.setEventType(event.getEventType());
         createdEvent.setEventContent(content);
         createdEvent.setProof(proof);
+        createdEvent.setEventTime(event.getEventTimestamp());
         ledgerEventRepository.save(createdEvent);
         Authority authority = authorityRepository.findOneByCode(event.getEventIssuedFor());
         LedgerEventCreated appEvent = new LedgerEventCreated();
@@ -110,7 +112,7 @@ public class LedgerEventUtil {
                 authorityRepository.findOneByCode(claims.get("event_issuer").toString());
         if (authority.getAuthenticationType() == AuthenticationType.BASIC) {
             String proof = authorization.substring(6);
-            return proof.isBlank();
+            return !proof.isBlank();
         } else {
             String proof = authorization.substring(7);
             String[] proofArr = proof.split(".");

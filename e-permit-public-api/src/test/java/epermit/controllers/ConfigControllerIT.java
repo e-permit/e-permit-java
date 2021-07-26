@@ -15,8 +15,8 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import epermit.PermitPostgresContainer;
-import epermit.entities.PrivateKey;
 import epermit.models.dtos.AuthorityConfig;
+import epermit.models.dtos.PrivateKey;
 import epermit.repositories.PrivateKeyRepository;
 import epermit.utils.PrivateKeyUtil;
 
@@ -45,8 +45,9 @@ public class ConfigControllerIT {
     @Transactional
     void setUp() {
         PrivateKey key = keyUtil.create("1");
-        key.setEnabled(true);
-        keyRepository.save(key);
+        epermit.entities.PrivateKey keyEntity = new epermit.entities.PrivateKey();
+        keyEntity.setEnabled(true);
+        keyRepository.save(keyEntity);
     }
 
     @Test

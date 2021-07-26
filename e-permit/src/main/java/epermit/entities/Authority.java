@@ -46,9 +46,6 @@ public class Authority {
   @Enumerated(EnumType.STRING)
   private AuthenticationType authenticationType = AuthenticationType.PUBLICKEY;
 
-  /*@Column(name = "last_sended_event_id", nullable = false)
-  private Long lastSendedEventId = Long.valueOf(0);*/
-
   @OneToMany(cascade = CascadeType.ALL)
   @EqualsAndHashCode.Exclude
   @ToString.Exclude

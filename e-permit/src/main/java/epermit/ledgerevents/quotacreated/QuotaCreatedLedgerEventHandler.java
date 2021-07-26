@@ -45,7 +45,7 @@ public class QuotaCreatedLedgerEventHandler implements LedgerEventHandler {
         Specification<LedgerQuota> spec = (quota, cq, cb) -> {
             List<Predicate> predicates = new ArrayList<Predicate>();
             predicates.add(cb.equal(quota.get("permitIssuer"), event.getPermitIssuer()));
-            predicates.add(cb.equal(quota.get("permitIssuedFor"), event.getPermitIssuer()));
+            predicates.add(cb.equal(quota.get("permitIssuedFor"), event.getPermitIssuedFor()));
             predicates.add(cb.equal(quota.get("permitType"), event.getPermitType()));
             predicates.add(cb.equal(quota.get("permitYear"), event.getPermitYear()));
             Predicate startPredicate = cb.between(quota.get("startNumber"), event.getStartNumber(),
