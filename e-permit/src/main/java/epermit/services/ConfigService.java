@@ -6,6 +6,7 @@ import com.google.gson.Gson;
 import org.springframework.stereotype.Service;
 import epermit.commons.GsonUtil;
 import epermit.entities.Authority;
+import epermit.entities.LedgerPublicKey;
 import epermit.models.EPermitProperties;
 import epermit.models.dtos.AuthorityConfig;
 import epermit.models.dtos.PublicJwk;
@@ -28,15 +29,16 @@ public class ConfigService {
         dto.setCode(properties.getIssuerCode());
         Gson gson = GsonUtil.getGson();
         List<PublicJwk> keyDtoList = new ArrayList<>();
-        ledgerPublicKeyRepository.findAllByAuthorityCodeAndRevokedFalse(properties.getIssuerCode())
-                .forEach(key -> {
-                    keyDtoList.add(gson.fromJson(key.getJwk(), PublicJwk.class));
-                });
+        List<LedgerPublicKey> keys = ledgerPublicKeyRepository
+                .findAllByAuthorityCodeAndRevokedFalse(properties.getIssuerCode());
+        keys.forEach(key -> {
+            keyDtoList.add(gson.fromJson(key.getJwk(), PublicJwk.class));
+        });
         dto.setKeys(keyDtoList);
         return dto;
     }
 
-    public List<TrustedAuthority> getTrustedAuthorities(){
+    public List<TrustedAuthority> getTrustedAuthorities() {
         Gson gson = GsonUtil.getGson();
         List<TrustedAuthority> trustedAuthorities = new ArrayList<>();
         List<Authority> authorities = authorityRepository.findAll();
@@ -44,10 +46,11 @@ public class ConfigService {
             TrustedAuthority trustedAuthority = new TrustedAuthority();
             trustedAuthority.setCode(authority.getCode());
             List<PublicJwk> publicKeys = new ArrayList<>();
-            ledgerPublicKeyRepository.findAllByAuthorityCodeAndRevokedFalse(authority.getCode()).forEach(k -> {
-                PublicJwk publicJwk = gson.fromJson(k.getJwk(), PublicJwk.class);
-                publicKeys.add(publicJwk);
-            });
+            ledgerPublicKeyRepository.findAllByAuthorityCodeAndRevokedFalse(authority.getCode())
+                    .forEach(k -> {
+                        PublicJwk publicJwk = gson.fromJson(k.getJwk(), PublicJwk.class);
+                        publicKeys.add(publicJwk);
+                    });
             trustedAuthority.setKeys(publicKeys);
             trustedAuthorities.add(trustedAuthority);
         });

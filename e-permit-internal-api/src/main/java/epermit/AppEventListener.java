@@ -3,6 +3,7 @@ package epermit;
 import java.util.Map;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Component;
@@ -29,12 +30,21 @@ public class AppEventListener {
 
     public void onAppEvent(LedgerEventCreated event) {
         log.info("onAppEvent is fired. {}", event);
-        sendEvent(event);
+        sendEvent(event, 0);
         log.info("Sending event is finished");
     }
 
     @SneakyThrows
-    private void sendEvent(LedgerEventCreated event) {
+    private void sendEvent(LedgerEventCreated event, int counter) {
+        HttpComponentsClientHttpRequestFactory rf =
+                (HttpComponentsClientHttpRequestFactory) restTemplate.getRequestFactory();
+        rf.setReadTimeout(2 * 1000);
+        rf.setConnectTimeout(2 * 1000);
+        restTemplate.setRequestFactory(rf);
+        if (counter == 10) {
+            log.info("Send event exceed max size for {}", event);
+            return;
+        }
         HttpHeaders headers =
                 ledgerEventUtil.createEventRequestHeader(event.getProofType(), event.getProof());
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(event.getContent(), headers);
@@ -43,7 +53,7 @@ public class AppEventListener {
         if (!result.isOk()) {
             if (result.getErrorCode() == ErrorCodes.PREVIOUS_EVENT_NOTFOUND.name()) {
                 Thread.sleep(Long.valueOf(1 * 60 * 1000));
-                sendEvent(event);
+                sendEvent(event, counter++);
             }
         }
     }

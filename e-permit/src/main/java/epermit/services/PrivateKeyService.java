@@ -13,8 +13,11 @@ import epermit.ledgerevents.LedgerEventUtil;
 import epermit.ledgerevents.keycreated.KeyCreatedLedgerEvent;
 import epermit.ledgerevents.keyrevoked.KeyRevokedLedgerEvent;
 import epermit.models.EPermitProperties;
+import epermit.commons.GsonUtil;
+import epermit.entities.LedgerPublicKey;
 import epermit.entities.PrivateKey;
 import epermit.repositories.AuthorityRepository;
+import epermit.repositories.LedgerPublicKeyRepository;
 import epermit.repositories.PrivateKeyRepository;
 import epermit.utils.PrivateKeyUtil;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +33,7 @@ public class PrivateKeyService {
     private final AuthorityRepository authorityRepository;
     private final EPermitProperties properties;
     private final LedgerEventUtil eventUtil;
+    private final LedgerPublicKeyRepository ledgerPublicKeyRepository;
 
     @Transactional
     @SneakyThrows
@@ -51,6 +55,11 @@ public class PrivateKeyService {
             keyEntity.setSalt(key.getSalt());
             keyEntity.setEnabled(true);
             keyRepository.save(keyEntity);
+            LedgerPublicKey publicKey = new LedgerPublicKey();
+            publicKey.setJwk(key.getPublicJwk());
+            publicKey.setKeyId(key.getKeyId());
+            publicKey.setAuthorityCode(properties.getIssuerCode());
+            ledgerPublicKeyRepository.save(publicKey);
         }
     }
 
@@ -85,7 +94,7 @@ public class PrivateKeyService {
         keyRepository.delete(key);
 
         authorityRepository.findAll().forEach(authority -> {
-            //KeyRevokedLedgerEvent event = 
+            // KeyRevokedLedgerEvent event =
         });
     }
 }

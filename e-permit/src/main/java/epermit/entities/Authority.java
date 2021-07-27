@@ -42,6 +42,9 @@ public class Authority {
   @Column(name = "api_uri", nullable = false)
   private String apiUri;
 
+  @Column(name = "api_secret", nullable = false)
+  private String apiSecret;
+
   @Column(name = "authentication_type", nullable = false)
   @Enumerated(EnumType.STRING)
   private AuthenticationType authenticationType = AuthenticationType.PUBLICKEY;

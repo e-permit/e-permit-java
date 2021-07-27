@@ -56,6 +56,7 @@ public class AuthorityService {
             LedgerPublicKey publicKey = new LedgerPublicKey();
             publicKey.setJwk(GsonUtil.getGson().toJson(k));
             publicKey.setKeyId(k.getKid());
+            publicKey.setAuthorityCode(config.getCode());
             ledgerPublicKeyRepository.save(publicKey);
         });
         log.info("Authority created: {}", authority);

@@ -1,9 +1,8 @@
 package epermit.services;
 
-
+import static org.junit.Assert.assertEquals;
 import java.util.List;
-import java.util.Map;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
@@ -16,6 +15,8 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import epermit.PermitPostgresContainer;
+import epermit.commons.EpermitValidationException;
+import epermit.commons.ErrorCodes;
 import epermit.entities.Authority;
 import epermit.ledgerevents.LedgerEventUtil;
 import epermit.models.EPermitProperties;
@@ -102,7 +103,10 @@ public class AuthorityServiceIT {
         input.setPermitYear(2021);
         input.setStartNumber(1);
         authorityService.createQuota(input);
-        authorityService.createQuota(input);
+        EpermitValidationException ex = Assertions.assertThrows(EpermitValidationException.class, () -> {
+            authorityService.createQuota(input);
+        });
+        assertEquals(ErrorCodes.INVALID_QUOTA_INTERVAL.name(), ex.getErrorCode());
     }
 }
 
