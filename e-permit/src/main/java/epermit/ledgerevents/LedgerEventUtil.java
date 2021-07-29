@@ -13,6 +13,7 @@ import epermit.commons.Check;
 import epermit.commons.ErrorCodes;
 import epermit.commons.GsonUtil;
 import epermit.entities.Authority;
+import epermit.entities.AuthorityEvent;
 import epermit.entities.LedgerPersistedEvent;
 import epermit.models.EPermitProperties;
 import epermit.models.enums.AuthenticationType;
@@ -64,6 +65,9 @@ public class LedgerEventUtil {
         appEvent.setContent(GsonUtil.toMap(event));
         appEvent.setProof(proof);
         appEvent.setUri(authority.getApiUri() + "/events");
+        AuthorityEvent authorityEvent = new AuthorityEvent();
+        authorityEvent.setEventId(event.getEventId());
+        authority.addEvent(authorityEvent);
         eventPublisher.publishEvent(appEvent);
         log.info("Event published {}", appEvent);
     }

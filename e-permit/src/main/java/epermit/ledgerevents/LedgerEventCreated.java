@@ -10,4 +10,5 @@ public class LedgerEventCreated {
     private Map<String, Object> content;
     private AuthenticationType proofType;
     private String proof;
+    private String eventId;
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -16,6 +17,7 @@ import javax.persistence.Table;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import epermit.commons.StringListConverter;
 import epermit.models.enums.AuthenticationType;
 import epermit.models.enums.PermitType;
 import lombok.Data;
@@ -58,6 +60,17 @@ public class Authority {
   public void addIssuerQuota(AuthorityIssuerQuota quota) {
     issuerQuotas.add(quota);
     quota.setAuthority(this);
+  }
+
+  @OneToMany(cascade = CascadeType.ALL)
+  @EqualsAndHashCode.Exclude
+  @ToString.Exclude
+  private List<AuthorityEvent> events = new ArrayList<>();
+
+  @JsonIgnore
+  public void addEvent(AuthorityEvent event) {
+    events.add(event);
+    event.setAuthority(this);
   }
 
   @CreationTimestamp
