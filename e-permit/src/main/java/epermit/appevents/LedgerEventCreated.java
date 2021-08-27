@@ -1,4 +1,4 @@
-package epermit.ledgerevents;
+package epermit.appevents;
 
 import java.util.Map;
 import epermit.models.enums.AuthenticationType;

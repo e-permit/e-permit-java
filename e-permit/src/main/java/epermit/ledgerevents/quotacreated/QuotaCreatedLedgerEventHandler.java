@@ -9,8 +9,11 @@ import org.springframework.stereotype.Service;
 import epermit.commons.Check;
 import epermit.commons.ErrorCodes;
 import epermit.commons.GsonUtil;
+import epermit.entities.IssuerQuotaSerialNumber;
 import epermit.entities.LedgerQuota;
 import epermit.ledgerevents.LedgerEventHandler;
+import epermit.models.enums.IssuerQuotaSerialNumberState;
+import epermit.repositories.IssuerQuotaSerialNumberRepository;
 import epermit.repositories.LedgerQuotaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -21,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class QuotaCreatedLedgerEventHandler implements LedgerEventHandler {
     private final LedgerQuotaRepository quotaRepository;
+    private final IssuerQuotaSerialNumberRepository issuerQuotaSerialNumberRepository;
 
     @Override
     @SneakyThrows
@@ -37,6 +41,14 @@ public class QuotaCreatedLedgerEventHandler implements LedgerEventHandler {
         quota.setPermitYear(event.getPermitYear());
         quota.setPermitIssuer(event.getEventIssuedFor());
         quota.setPermitIssuedFor(event.getEventIssuer());
+        List<IssuerQuotaSerialNumber> serialNumbers = new ArrayList<>();
+        for(int i = quota.getStartNumber(); i< quota.getEndNumber(); i ++){
+            IssuerQuotaSerialNumber s = new IssuerQuotaSerialNumber();
+            s.setLedgerQuota(quota);
+            s.setSerialNumber(i);
+            s.setState(IssuerQuotaSerialNumberState.CREATED);      
+        }
+        issuerQuotaSerialNumberRepository.saveAll(serialNumbers);
         log.info("QuotaCreatedEventHandler ended with {}", quota);
         quotaRepository.save(quota);
     }

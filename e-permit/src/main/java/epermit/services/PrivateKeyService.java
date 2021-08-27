@@ -13,6 +13,7 @@ import epermit.ledgerevents.LedgerEventUtil;
 import epermit.ledgerevents.keycreated.KeyCreatedLedgerEvent;
 import epermit.ledgerevents.keyrevoked.KeyRevokedLedgerEvent;
 import epermit.models.EPermitProperties;
+import epermit.models.dtos.PublicJwk;
 import epermit.commons.GsonUtil;
 import epermit.entities.LedgerPublicKey;
 import epermit.entities.PrivateKey;
@@ -77,7 +78,16 @@ public class PrivateKeyService {
             KeyCreatedLedgerEvent event = new KeyCreatedLedgerEvent(properties.getIssuerCode(),
                     authority.getCode(), prevEventId);
             event.setKid(keyId);
-
+            PublicJwk jwk = GsonUtil.getGson().fromJson(key.getPublicJwk(), PublicJwk.class);
+            event.setAlg(jwk.getAlg());
+            event.setAlg(jwk.getAlg());
+            event.setAlg(jwk.getAlg());
+            event.setAlg(jwk.getAlg());
+            event.setAlg(jwk.getAlg());
+            event.setAlg(jwk.getAlg());
+            event.setAlg(jwk.getAlg());
+            event.setAlg(jwk.getAlg());
+            event.setAlg(jwk.getAlg());
         });
         log.info("KeyService create finished {}", key.getKeyId());
 

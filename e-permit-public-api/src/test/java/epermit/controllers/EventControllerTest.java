@@ -45,7 +45,7 @@ public class EventControllerTest {
       HttpHeaders headers = new HttpHeaders();
       headers.add("authorization", "1234");
       doThrow(new EpermitValidationException("message", ErrorCodes.EVENT_ALREADY_EXISTS))
-            .when(eventService).handleReceivedEvent(anyMap(), anyString());
+            .when(eventService).handleReceivedEvent(any(), anyMap());
       LedgerEventResult r = controller.permitCreated(headers, e);
       assertFalse(r.isOk());
       assertEquals(ErrorCodes.EVENT_ALREADY_EXISTS.name(), r.getErrorCode());

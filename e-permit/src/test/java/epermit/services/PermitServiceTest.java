@@ -24,6 +24,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import epermit.entities.IssuerQuotaSerialNumber;
 import epermit.entities.LedgerPermit;
 import epermit.ledgerevents.LedgerEventType;
 import epermit.ledgerevents.LedgerEventUtil;
@@ -38,9 +39,9 @@ import epermit.models.inputs.CreatePermitInput;
 import epermit.models.inputs.PermitListInput;
 import epermit.models.inputs.PermitUsedInput;
 import epermit.models.results.CreatePermitResult;
+import epermit.repositories.IssuerQuotaSerialNumberRepository;
 import epermit.repositories.LedgerPermitRepository;
 import epermit.utils.PermitUtil;
-import epermit.utils.SerialNumberUtil;
 
 @ExtendWith(MockitoExtension.class)
 public class PermitServiceTest {
@@ -51,7 +52,7 @@ public class PermitServiceTest {
     @Mock
     PermitUtil permitUtil;
     @Mock
-    SerialNumberUtil serialNumberUtil;
+    IssuerQuotaSerialNumberRepository issuerQuotaSerialNumberRepository;
     @Mock
     EPermitProperties properties;
     @Mock
@@ -108,7 +109,10 @@ public class PermitServiceTest {
         when(properties.getIssuerCode()).thenReturn("TR");
         when(ledgerEventUtil.getPreviousEventId("UZ")).thenReturn("123");
         when(permitUtil.generateQrCode(any())).thenReturn("QR");
-        when(serialNumberUtil.generate("UZ", 2021, PermitType.BILITERAL)).thenReturn(1);
+        IssuerQuotaSerialNumber issuerQuotaSerialNumber = new IssuerQuotaSerialNumber();
+        issuerQuotaSerialNumber.setSerialNumber(1);
+        when(issuerQuotaSerialNumberRepository.getSerialNumber("TR", "UZ", PermitType.BILITERAL,
+                2021)).thenReturn(issuerQuotaSerialNumber);
         when(permitUtil.getPermitId(any())).thenReturn("TR-UZ-2021-1-1");
         CreatePermitResult result = permitService.createPermit(input);
         assertEquals("TR-UZ-2021-1-1", result.getPermitId());

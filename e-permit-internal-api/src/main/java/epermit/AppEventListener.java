@@ -9,10 +9,10 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.web.client.RestTemplate;
-import epermit.ledgerevents.LedgerEventCreated;
+import epermit.appevents.LedgerEventCreated;
 import epermit.ledgerevents.LedgerEventResult;
 import epermit.ledgerevents.LedgerEventUtil;
-import epermit.services.AuthorityEventService;
+import epermit.services.PersistedEventService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -23,8 +23,8 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class AppEventListener {
     private final RestTemplate restTemplate;
-    private final AuthorityEventService authorityEventService;
     private final LedgerEventUtil ledgerEventUtil;
+    private final PersistedEventService persistedEventService;
 
     @Async
     @TransactionalEventListener
@@ -48,7 +48,7 @@ public class AppEventListener {
         LedgerEventResult result =
                 restTemplate.postForObject(event.getUri(), request, LedgerEventResult.class);
         if (result.isOk()) {
-            authorityEventService.handleSendedEvent(event.getEventId());
+            persistedEventService.handleSendedEvent(event.getEventId());
         }
     }
 }

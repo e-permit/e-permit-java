@@ -13,7 +13,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import epermit.utils.PermitUtil;
-import epermit.utils.SerialNumberUtil;
+import epermit.entities.IssuerQuotaSerialNumber;
 import epermit.entities.LedgerPermit;
 import epermit.ledgerevents.LedgerEventUtil;
 import epermit.ledgerevents.permitcreated.PermitCreatedLedgerEvent;
@@ -21,12 +21,14 @@ import epermit.ledgerevents.permitrevoked.PermitRevokedLedgerEvent;
 import epermit.ledgerevents.permitused.PermitUsedLedgerEvent;
 import epermit.models.EPermitProperties;
 import epermit.models.dtos.PermitDto;
+import epermit.models.enums.IssuerQuotaSerialNumberState;
 import epermit.models.inputs.CreatePermitIdInput;
 import epermit.models.inputs.CreatePermitInput;
 import epermit.models.inputs.CreateQrCodeInput;
 import epermit.models.inputs.PermitListInput;
 import epermit.models.inputs.PermitUsedInput;
 import epermit.models.results.CreatePermitResult;
+import epermit.repositories.IssuerQuotaSerialNumberRepository;
 import epermit.repositories.LedgerPermitRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,11 +38,11 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class PermitService {
     private final PermitUtil permitUtil;
-    private final SerialNumberUtil serialNumberUtil;
     private final EPermitProperties properties;
     private final LedgerEventUtil ledgerEventUtil;
     private final ModelMapper modelMapper;
     private final LedgerPermitRepository permitRepository;
+    private final IssuerQuotaSerialNumberRepository issuerQuotaSerialNumberRepository;
 
     public PermitDto getById(Long id) {
         PermitDto dto = modelMapper.map(permitRepository.findById(id).get(), PermitDto.class);
@@ -57,14 +59,15 @@ public class PermitService {
     public CreatePermitResult createPermit(CreatePermitInput input) {
         log.info("Permit create command {}", input);
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        Integer serialNumber = serialNumberUtil.generate(input.getIssuedFor(),
-                input.getPermitYear(), input.getPermitType());
+        IssuerQuotaSerialNumber serialNumber =
+                issuerQuotaSerialNumberRepository.getSerialNumber(properties.getIssuerCode(),
+                        input.getIssuedFor(), input.getPermitType(), input.getPermitYear());
         CreatePermitIdInput idInput = new CreatePermitIdInput();
         idInput.setIssuedFor(input.getIssuedFor());
         idInput.setIssuer(properties.getIssuerCode());
         idInput.setPermitType(input.getPermitType());
         idInput.setPermitYear(input.getPermitYear());
-        idInput.setSerialNumber(serialNumber);
+        idInput.setSerialNumber(serialNumber.getSerialNumber());
         String permitId = permitUtil.getPermitId(idInput);
         String issuer = properties.getIssuerCode();
         String issuedAt = LocalDateTime.now(ZoneOffset.UTC).format(dtf);
@@ -87,12 +90,14 @@ public class PermitService {
         e.setPermitType(input.getPermitType());
         e.setPermitYear(input.getPermitYear());
         e.setPlateNumber(input.getPlateNumber());
-        e.setSerialNumber(serialNumber);
+        e.setSerialNumber(serialNumber.getSerialNumber());
         e.setPermitIssuer(properties.getIssuerCode());
         e.setPermitIssuedFor(input.getIssuedFor());
         if (!input.getOtherClaims().isEmpty()) {
             e.setOtherClaims(input.getOtherClaims());
         }
+        serialNumber.setState(IssuerQuotaSerialNumberState.USED);
+        issuerQuotaSerialNumberRepository.save(serialNumber);
         ledgerEventUtil.persistAndPublishEvent(e);
         log.info("Permit create finished permit id is {}", permitId);
         return CreatePermitResult.success(permitId, qrCode);
@@ -107,6 +112,7 @@ public class PermitService {
         PermitRevokedLedgerEvent e =
                 new PermitRevokedLedgerEvent(issuer, permit.getIssuedFor(), prevEventId);
         e.setPermitId(permit.getPermitId());
+        // set revoked serial number
         ledgerEventUtil.persistAndPublishEvent(e);
     }
 
@@ -115,8 +121,8 @@ public class PermitService {
         log.info("Permit used started {}", input);
         LedgerPermit permit = permitRepository.findOneByPermitId(input.getPermitId()).get();
         String prevEventId = ledgerEventUtil.getPreviousEventId(permit.getIssuer());
-        PermitUsedLedgerEvent e =
-                new PermitUsedLedgerEvent(properties.getIssuerCode(), permit.getIssuer(), prevEventId);
+        PermitUsedLedgerEvent e = new PermitUsedLedgerEvent(properties.getIssuerCode(),
+                permit.getIssuer(), prevEventId);
         e.setPermitId(permit.getPermitId());
         e.setActivityTimestamp(input.getActivityTimestamp());
         e.setActivityDetails(input.getActivityDetails());

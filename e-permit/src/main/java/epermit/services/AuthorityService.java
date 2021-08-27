@@ -1,23 +1,34 @@
 package epermit.services;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import javax.persistence.criteria.Predicate;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import epermit.appevents.QuotaCreated;
 import epermit.commons.GsonUtil;
 import epermit.entities.Authority;
+import epermit.entities.IssuerQuotaSerialNumber;
 import epermit.entities.LedgerPublicKey;
+import epermit.entities.LedgerQuota;
 import epermit.ledgerevents.LedgerEventUtil;
 import epermit.ledgerevents.quotacreated.QuotaCreatedLedgerEvent;
 import epermit.models.EPermitProperties;
 import epermit.models.dtos.AuthorityConfig;
 import epermit.models.dtos.AuthorityDto;
+import epermit.models.enums.IssuerQuotaSerialNumberState;
 import epermit.models.inputs.CreateAuthorityInput;
 import epermit.models.inputs.CreateQuotaInput;
 import epermit.repositories.AuthorityRepository;
+import epermit.repositories.IssuerQuotaSerialNumberRepository;
 import epermit.repositories.LedgerPublicKeyRepository;
+import epermit.repositories.LedgerQuotaRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -28,6 +39,8 @@ public class AuthorityService {
     private final EPermitProperties properties;
     private final LedgerEventUtil ledgerEventUtil;
     private final LedgerPublicKeyRepository ledgerPublicKeyRepository;
+    private final LedgerQuotaRepository ledgerQuotaRepository;
+    private final IssuerQuotaSerialNumberRepository serialNumberRepository;
     private final ModelMapper modelMapper;
 
     private AuthorityDto entityToDto(Authority authority) {
@@ -78,6 +91,37 @@ public class AuthorityService {
         event.setPermitIssuedFor(issuer);
         log.info("Quota created: {}", event);
         ledgerEventUtil.persistAndPublishEvent(event);
+    }
+
+    @Transactional
+    @SneakyThrows
+    public void handleReceivedQuota(QuotaCreated e) {
+        Optional<LedgerQuota> r = ledgerQuotaRepository.findOne(filterEvents(e));
+        if (r.isPresent()) {
+            LedgerQuota lq = r.get();
+            for (int i = lq.getStartNumber(); i < lq.getEndNumber(); i++) {
+                IssuerQuotaSerialNumber sn = new IssuerQuotaSerialNumber();
+                sn.setSerialNumber(i);
+                sn.setState(IssuerQuotaSerialNumberState.CREATED);
+                sn.setLedgerQuota(lq);
+                serialNumberRepository.save(sn);
+            }
+        } else {
+            throw new Exception("Ledger quota not found");
+        }
+    }
+
+    static Specification<LedgerQuota> filterEvents(QuotaCreated e) {
+        Specification<LedgerQuota> spec = (q, cq, cb) -> {
+            List<Predicate> predicates = new ArrayList<Predicate>();
+            predicates.add(cb.equal(q.get("permit_issued_for"), e.getPermitIssuedFor()));
+            predicates.add(cb.equal(q.get("start_number"), e.getStartNumber()));
+            predicates.add(cb.equal(q.get("end_number"), e.getEndNumber()));
+            predicates.add(cb.equal(q.get("permit_year"), e.getPermitYear()));
+            predicates.add(cb.equal(q.get("permit_type"), e.getPermitType()));
+            return cb.and(predicates.toArray(new Predicate[predicates.size()]));
+        };
+        return spec;
     }
 }
 
