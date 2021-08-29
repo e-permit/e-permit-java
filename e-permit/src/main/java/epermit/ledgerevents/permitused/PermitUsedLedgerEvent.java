@@ -14,8 +14,8 @@ import lombok.Setter;
 @Setter
 public class PermitUsedLedgerEvent extends LedgerEventBase {
 
-    public PermitUsedLedgerEvent(String eventIssuer, String eventIssuedFor, String prevEventId) {
-        super(eventIssuer, eventIssuedFor, prevEventId, LedgerEventType.PERMIT_USED);
+    public PermitUsedLedgerEvent(String producer, String consumer, String prevEventId) {
+        super(producer, consumer, prevEventId, LedgerEventType.PERMIT_USED);
     }
 
     @NotNull

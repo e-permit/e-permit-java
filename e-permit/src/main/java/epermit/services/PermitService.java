@@ -5,6 +5,7 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import javax.persistence.criteria.Predicate;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -13,7 +14,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import epermit.utils.PermitUtil;
-import epermit.entities.IssuerQuotaSerialNumber;
+import epermit.commons.Check;
+import epermit.commons.ErrorCodes;
+import epermit.entities.SerialNumber;
 import epermit.entities.LedgerPermit;
 import epermit.ledgerevents.LedgerEventUtil;
 import epermit.ledgerevents.permitcreated.PermitCreatedLedgerEvent;
@@ -21,14 +24,15 @@ import epermit.ledgerevents.permitrevoked.PermitRevokedLedgerEvent;
 import epermit.ledgerevents.permitused.PermitUsedLedgerEvent;
 import epermit.models.EPermitProperties;
 import epermit.models.dtos.PermitDto;
-import epermit.models.enums.IssuerQuotaSerialNumberState;
+import epermit.models.enums.SerialNumberState;
+import epermit.models.enums.PermitType;
 import epermit.models.inputs.CreatePermitIdInput;
 import epermit.models.inputs.CreatePermitInput;
 import epermit.models.inputs.CreateQrCodeInput;
 import epermit.models.inputs.PermitListInput;
 import epermit.models.inputs.PermitUsedInput;
 import epermit.models.results.CreatePermitResult;
-import epermit.repositories.IssuerQuotaSerialNumberRepository;
+import epermit.repositories.SerialNumberRepository;
 import epermit.repositories.LedgerPermitRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +46,7 @@ public class PermitService {
     private final LedgerEventUtil ledgerEventUtil;
     private final ModelMapper modelMapper;
     private final LedgerPermitRepository permitRepository;
-    private final IssuerQuotaSerialNumberRepository issuerQuotaSerialNumberRepository;
+    private final SerialNumberRepository serialNumberRepository;
 
     public PermitDto getById(Long id) {
         PermitDto dto = modelMapper.map(permitRepository.findById(id).get(), PermitDto.class);
@@ -59,9 +63,11 @@ public class PermitService {
     public CreatePermitResult createPermit(CreatePermitInput input) {
         log.info("Permit create command {}", input);
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        IssuerQuotaSerialNumber serialNumber =
-                issuerQuotaSerialNumberRepository.getSerialNumber(properties.getIssuerCode(),
-                        input.getIssuedFor(), input.getPermitType(), input.getPermitYear());
+        Optional<SerialNumber> serialNumberR =
+                serialNumberRepository.findOne(filterSerialNumbers(properties.getIssuerCode(),
+                        input.getPermitYear(), input.getPermitType()));
+        Check.isTrue(serialNumberR.isPresent(), ErrorCodes.INSUFFICIENT_PERMIT_QUOTA);
+        SerialNumber serialNumber = serialNumberR.get();
         CreatePermitIdInput idInput = new CreatePermitIdInput();
         idInput.setIssuedFor(input.getIssuedFor());
         idInput.setIssuer(properties.getIssuerCode());
@@ -96,8 +102,8 @@ public class PermitService {
         if (!input.getOtherClaims().isEmpty()) {
             e.setOtherClaims(input.getOtherClaims());
         }
-        serialNumber.setState(IssuerQuotaSerialNumberState.USED);
-        issuerQuotaSerialNumberRepository.save(serialNumber);
+        serialNumber.setState(SerialNumberState.USED);
+        serialNumberRepository.save(serialNumber);
         ledgerEventUtil.persistAndPublishEvent(e);
         log.info("Permit create finished permit id is {}", permitId);
         return CreatePermitResult.success(permitId, qrCode);
@@ -145,6 +151,23 @@ public class PermitService {
                 predicates.add(cb.equal(permit.get("permitYear"), input.getPermitYear()));
             }
             return cb.and(predicates.toArray(new Predicate[predicates.size()]));
+        };
+        return spec;
+    }
+
+    static Specification<SerialNumber> filterSerialNumbers(String authority, int py,
+            PermitType pt) {
+        Specification<SerialNumber> spec = (sn, cq, cb) -> {
+            List<Predicate> predicates = new ArrayList<Predicate>();
+            predicates.add(cb.equal(sn.get("authorityCode"), authority));
+            predicates.add(cb.equal(sn.get("permitType"), pt));
+            predicates.add(cb.equal(sn.get("permitYear"), py));
+            Predicate p1 = cb.equal(sn.get("state"), SerialNumberState.CREATED);
+            Predicate p2 = cb.equal(sn.get("state"), SerialNumberState.REVOKED);
+            predicates.add(cb.or(p1, p2));
+            Predicate p = cb.and(predicates.toArray(new Predicate[predicates.size()]));
+            cq.orderBy(cb.desc(sn.get("serialNumber")));
+            return p;
         };
         return spec;
     }

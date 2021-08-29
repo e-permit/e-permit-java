@@ -6,36 +6,35 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import epermit.models.enums.IssuerQuotaSerialNumberState;
+import epermit.models.enums.SerialNumberState;
+import epermit.models.enums.PermitType;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 @Data
 @NoArgsConstructor // JPA
 @Entity
-@Table(name = "issuer_quota_serial_numbers")
-public class IssuerQuotaSerialNumber {
+@Table(name = "serial_numbers")
+public class SerialNumber {
     @Id
     @GeneratedValue
     private int id;
     
     @Enumerated(EnumType.STRING)
     @Column(name = "state", nullable = false)
-    private IssuerQuotaSerialNumberState state;
+    private SerialNumberState state;
+
+    @Column(name = "authority_code", nullable = false)
+    private String authorityCode;
 
     @Column(name = "serial_number", nullable = false)
     private int serialNumber;
 
-    @ManyToOne
-    @JoinColumn(name = "ledger_quota_id") 
-    @EqualsAndHashCode.Exclude
-    @ToString.Exclude
-    @JsonIgnore
-    private LedgerQuota ledgerQuota;
+    @Column(name = "permit_year", nullable = false)
+    private int permitYear;
+
+    @Column(name = "permit_type", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private PermitType permitType;
 }

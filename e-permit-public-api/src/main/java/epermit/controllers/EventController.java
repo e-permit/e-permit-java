@@ -14,14 +14,14 @@ import epermit.ledgerevents.permitcreated.PermitCreatedLedgerEvent;
 import epermit.ledgerevents.permitrevoked.PermitRevokedLedgerEvent;
 import epermit.ledgerevents.permitused.PermitUsedLedgerEvent;
 import epermit.ledgerevents.quotacreated.QuotaCreatedLedgerEvent;
-import epermit.services.PersistedEventService;
+import epermit.services.LedgerEventService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/events")
 public class EventController {
-    private final PersistedEventService eventService;
+    private final LedgerEventService eventService;
 
     @PostMapping("permit-created")
     public LedgerEventResult permitCreated(@RequestHeader HttpHeaders headers,

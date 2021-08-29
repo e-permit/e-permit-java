@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import epermit.appevents.QuotaCreated;
 import epermit.commons.GsonUtil;
 import epermit.entities.Authority;
-import epermit.entities.IssuerQuotaSerialNumber;
+import epermit.entities.SerialNumber;
 import epermit.entities.LedgerPublicKey;
 import epermit.entities.LedgerQuota;
 import epermit.ledgerevents.LedgerEventUtil;
@@ -20,11 +20,11 @@ import epermit.ledgerevents.quotacreated.QuotaCreatedLedgerEvent;
 import epermit.models.EPermitProperties;
 import epermit.models.dtos.AuthorityConfig;
 import epermit.models.dtos.AuthorityDto;
-import epermit.models.enums.IssuerQuotaSerialNumberState;
+import epermit.models.enums.SerialNumberState;
 import epermit.models.inputs.CreateAuthorityInput;
 import epermit.models.inputs.CreateQuotaInput;
 import epermit.repositories.AuthorityRepository;
-import epermit.repositories.IssuerQuotaSerialNumberRepository;
+import epermit.repositories.SerialNumberRepository;
 import epermit.repositories.LedgerPublicKeyRepository;
 import epermit.repositories.LedgerQuotaRepository;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +40,7 @@ public class AuthorityService {
     private final LedgerEventUtil ledgerEventUtil;
     private final LedgerPublicKeyRepository ledgerPublicKeyRepository;
     private final LedgerQuotaRepository ledgerQuotaRepository;
-    private final IssuerQuotaSerialNumberRepository serialNumberRepository;
+    private final SerialNumberRepository serialNumberRepository;
     private final ModelMapper modelMapper;
 
     private AuthorityDto entityToDto(Authority authority) {
@@ -99,13 +99,16 @@ public class AuthorityService {
         Optional<LedgerQuota> r = ledgerQuotaRepository.findOne(filterEvents(e));
         if (r.isPresent()) {
             LedgerQuota lq = r.get();
-            for (int i = lq.getStartNumber(); i < lq.getEndNumber(); i++) {
-                IssuerQuotaSerialNumber sn = new IssuerQuotaSerialNumber();
-                sn.setSerialNumber(i);
-                sn.setState(IssuerQuotaSerialNumberState.CREATED);
-                sn.setLedgerQuota(lq);
-                serialNumberRepository.save(sn);
+            List<SerialNumber> serialNumbers = new ArrayList<>();
+            for(int i = lq.getStartNumber(); i< lq.getEndNumber(); i ++){
+                SerialNumber s = new SerialNumber();
+                s.setAuthorityCode(lq.getPermitIssuedFor());
+                s.setPermitType(lq.getPermitType());
+                s.setPermitYear(lq.getPermitYear());
+                s.setSerialNumber(i);
+                s.setState(SerialNumberState.CREATED);      
             }
+            serialNumberRepository.saveAll(serialNumbers);
         } else {
             throw new Exception("Ledger quota not found");
         }

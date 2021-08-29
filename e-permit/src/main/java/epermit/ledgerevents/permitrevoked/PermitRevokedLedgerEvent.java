@@ -10,8 +10,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class PermitRevokedLedgerEvent extends LedgerEventBase {
-    public PermitRevokedLedgerEvent(String eventIssuer, String eventIssuedFor, String prevEventId) {
-        super(eventIssuer, eventIssuedFor, prevEventId, LedgerEventType.PERMIT_REVOKED);
+    public PermitRevokedLedgerEvent(String producer, String consumer, String prevEventId) {
+        super(producer, consumer, prevEventId, LedgerEventType.PERMIT_REVOKED);
     }
 
     @NotNull

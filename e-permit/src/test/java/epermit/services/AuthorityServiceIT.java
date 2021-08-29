@@ -75,7 +75,7 @@ public class AuthorityServiceIT {
     @Test
     void createTest() {
         AuthorityService authorityService = new AuthorityService(authorityRepository, properties,
-                ledgerEventUtil, ledgerPublicKeyRepository, new ModelMapper());
+                ledgerEventUtil, ledgerPublicKeyRepository, null, null, new ModelMapper());
         AuthorityConfig config = new AuthorityConfig();
         config.setCode("UZ");
         config.setName("Uzbekistan");
@@ -89,7 +89,7 @@ public class AuthorityServiceIT {
     @Test
     void createQuotaTest() {
         AuthorityService authorityService = new AuthorityService(authorityRepository, properties,
-                ledgerEventUtil, ledgerPublicKeyRepository, new ModelMapper());
+                ledgerEventUtil, ledgerPublicKeyRepository, null, null, new ModelMapper());
         Authority authority = new Authority();
         authority.setApiUri("apiUri");
         authority.setAuthenticationType(AuthenticationType.BASIC);

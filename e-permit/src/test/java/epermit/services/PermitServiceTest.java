@@ -24,7 +24,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import epermit.entities.IssuerQuotaSerialNumber;
+import epermit.entities.SerialNumber;
 import epermit.entities.LedgerPermit;
 import epermit.ledgerevents.LedgerEventType;
 import epermit.ledgerevents.LedgerEventUtil;
@@ -39,7 +39,7 @@ import epermit.models.inputs.CreatePermitInput;
 import epermit.models.inputs.PermitListInput;
 import epermit.models.inputs.PermitUsedInput;
 import epermit.models.results.CreatePermitResult;
-import epermit.repositories.IssuerQuotaSerialNumberRepository;
+import epermit.repositories.SerialNumberRepository;
 import epermit.repositories.LedgerPermitRepository;
 import epermit.utils.PermitUtil;
 
@@ -52,7 +52,7 @@ public class PermitServiceTest {
     @Mock
     PermitUtil permitUtil;
     @Mock
-    IssuerQuotaSerialNumberRepository issuerQuotaSerialNumberRepository;
+    SerialNumberRepository issuerQuotaSerialNumberRepository;
     @Mock
     EPermitProperties properties;
     @Mock
@@ -109,18 +109,16 @@ public class PermitServiceTest {
         when(properties.getIssuerCode()).thenReturn("TR");
         when(ledgerEventUtil.getPreviousEventId("UZ")).thenReturn("123");
         when(permitUtil.generateQrCode(any())).thenReturn("QR");
-        IssuerQuotaSerialNumber issuerQuotaSerialNumber = new IssuerQuotaSerialNumber();
-        issuerQuotaSerialNumber.setSerialNumber(1);
-        when(issuerQuotaSerialNumberRepository.getSerialNumber("TR", "UZ", PermitType.BILITERAL,
-                2021)).thenReturn(issuerQuotaSerialNumber);
+        SerialNumber serialNumber = new SerialNumber();
+        serialNumber.setSerialNumber(1);
         when(permitUtil.getPermitId(any())).thenReturn("TR-UZ-2021-1-1");
         CreatePermitResult result = permitService.createPermit(input);
         assertEquals("TR-UZ-2021-1-1", result.getPermitId());
         assertEquals("QR", result.getQrCode());
         verify(ledgerEventUtil, times(1)).persistAndPublishEvent(createdCaptor.capture());
         PermitCreatedLedgerEvent event = createdCaptor.getValue();
-        assertEquals("TR", event.getEventIssuer());
-        assertEquals("UZ", event.getEventIssuedFor());
+        assertEquals("TR", event.getProducer());
+        assertEquals("UZ", event.getConsumer());
         assertEquals(LedgerEventType.PERMIT_CREATED, event.getEventType());
         assertEquals("TR", event.getPermitIssuer());
         assertEquals("UZ", event.getPermitIssuedFor());
@@ -145,8 +143,8 @@ public class PermitServiceTest {
         permitService.permitUsed(input);
         verify(ledgerEventUtil, times(1)).persistAndPublishEvent(usedCaptor.capture());
         PermitUsedLedgerEvent event = usedCaptor.getValue();
-        assertEquals("TR", event.getEventIssuer());
-        assertEquals("UZ", event.getEventIssuedFor());
+        assertEquals("TR", event.getProducer());
+        assertEquals("UZ", event.getConsumer());
         assertEquals(LedgerEventType.PERMIT_USED, event.getEventType());
         assertEquals("Details", event.getActivityDetails());
         assertEquals(Long.valueOf(12344), event.getActivityTimestamp());
@@ -167,8 +165,8 @@ public class PermitServiceTest {
         permitService.revokePermit(Long.valueOf(1));
         verify(ledgerEventUtil, times(1)).persistAndPublishEvent(revokedCaptor.capture());
         PermitRevokedLedgerEvent event = revokedCaptor.getValue();
-        assertEquals("TR", event.getEventIssuer());
-        assertEquals("UZ", event.getEventIssuedFor());
+        assertEquals("TR", event.getProducer());
+        assertEquals("UZ", event.getConsumer());
         assertEquals(LedgerEventType.PERMIT_REVOKED, event.getEventType());
         assertEquals("TR-UZ-2021-1-1", event.getPermitId());
         assertEquals("123", event.getPreviousEventId());

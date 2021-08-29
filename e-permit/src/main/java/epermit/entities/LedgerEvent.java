@@ -14,17 +14,17 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name = "ledger_persisted_events")
-public class LedgerPersistedEvent {
+@Table(name = "ledger_events")
+public class LedgerEvent {
     @Id
     @GeneratedValue
     private long id;
 
-    @Column(name = "issuer", nullable = false)
-    private String issuer;
+    @Column(name = "producer", nullable = false)
+    private String producer;
 
-    @Column(name = "issued_for", nullable = false)
-    private String issuedFor;
+    @Column(name = "consumer", nullable = false)
+    private String consumer;
 
     @Column(name = "event_id", nullable = false)
     private String eventId;
@@ -36,8 +36,8 @@ public class LedgerPersistedEvent {
     @Enumerated(EnumType.STRING)
     private LedgerEventType eventType;
 
-    @Column(name = "event_time", nullable = false)
-    private Long eventTime;
+    @Column(name = "event_timestamp", nullable = false)
+    private Long eventTimestamp;
 
     @Column(name = "event_content", nullable = false, length = 10000)
     private String eventContent;

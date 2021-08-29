@@ -121,8 +121,8 @@ public class AuthorityServiceTest {
         QuotaCreatedLedgerEvent event = captor.getValue();
         assertEquals(1, event.getStartNumber());
         assertEquals(20, event.getEndNumber());
-        assertEquals("TR", event.getEventIssuedFor());
-        assertEquals("UZ", event.getEventIssuer());
+        assertEquals("TR", event.getConsumer());
+        assertEquals("UZ", event.getProducer());
         assertEquals(LedgerEventType.QUOTA_CREATED, event.getEventType());
         assertEquals("TR", event.getPermitIssuer());
         assertEquals("UZ", event.getPermitIssuedFor());

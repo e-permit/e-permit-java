@@ -12,7 +12,7 @@ import org.springframework.web.client.RestTemplate;
 import epermit.appevents.LedgerEventCreated;
 import epermit.ledgerevents.LedgerEventResult;
 import epermit.ledgerevents.LedgerEventUtil;
-import epermit.services.PersistedEventService;
+import epermit.services.LedgerEventService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AppEventListener {
     private final RestTemplate restTemplate;
     private final LedgerEventUtil ledgerEventUtil;
-    private final PersistedEventService persistedEventService;
+    private final LedgerEventService persistedEventService;
 
     @Async
     @TransactionalEventListener
@@ -37,6 +37,10 @@ public class AppEventListener {
 
     @SneakyThrows
     private void sendEvent(LedgerEventCreated event) {
+        //appEvent.setContent(GsonUtil.toMap(event));
+        //appEvent.setProof(proof);
+        //appEvent.setUri(authority.getApiUri() + "/events");
+        //appEvent.setProofType(authority.getAuthenticationType());
         HttpComponentsClientHttpRequestFactory rf =
                 (HttpComponentsClientHttpRequestFactory) restTemplate.getRequestFactory();
         rf.setReadTimeout(2 * 1000);

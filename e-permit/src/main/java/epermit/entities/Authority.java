@@ -47,17 +47,6 @@ public class Authority {
   @Enumerated(EnumType.STRING)
   private AuthenticationType authenticationType = AuthenticationType.PUBLICKEY;
 
-  @OneToMany(cascade = CascadeType.ALL)
-  @EqualsAndHashCode.Exclude
-  @ToString.Exclude
-  private List<AuthorityEvent> events = new ArrayList<>();
-
-  @JsonIgnore
-  public void addEvent(AuthorityEvent event) {
-    events.add(event);
-    event.setAuthority(this);
-  }
-
   @CreationTimestamp
   @Column(name = "created_at", nullable = false)
   private LocalDateTime createdAt;

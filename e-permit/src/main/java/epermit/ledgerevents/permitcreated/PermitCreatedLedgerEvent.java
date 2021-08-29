@@ -18,8 +18,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class PermitCreatedLedgerEvent extends LedgerEventBase {
-    public PermitCreatedLedgerEvent(String eventIssuer, String eventIssuedFor, String prevEventId) {
-        super(eventIssuer, eventIssuedFor, prevEventId, LedgerEventType.PERMIT_CREATED);
+    public PermitCreatedLedgerEvent(String producer, String consumer, String prevEventId) {
+        super(producer, consumer, prevEventId, LedgerEventType.PERMIT_CREATED);
     }
 
     @NotNull
@@ -80,10 +80,10 @@ public class PermitCreatedLedgerEvent extends LedgerEventBase {
 
     @AssertTrue(message = "Invalid permit issuer or issued_for")
     private boolean isValid() {
-        if (!this.getEventIssuer().equals(this.permitIssuer)) {
+        if (!this.getProducer().equals(this.permitIssuer)) {
             return false;
         }
-        if (!this.getEventIssuedFor().equals(this.permitIssuedFor)) {
+        if (!this.getConsumer().equals(this.permitIssuedFor)) {
             return false;
         }
         return true;

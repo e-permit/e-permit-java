@@ -1,5 +1,7 @@
 package epermit.services;
 
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
@@ -80,14 +82,12 @@ public class PrivateKeyService {
             event.setKid(keyId);
             PublicJwk jwk = GsonUtil.getGson().fromJson(key.getPublicJwk(), PublicJwk.class);
             event.setAlg(jwk.getAlg());
-            event.setAlg(jwk.getAlg());
-            event.setAlg(jwk.getAlg());
-            event.setAlg(jwk.getAlg());
-            event.setAlg(jwk.getAlg());
-            event.setAlg(jwk.getAlg());
-            event.setAlg(jwk.getAlg());
-            event.setAlg(jwk.getAlg());
-            event.setAlg(jwk.getAlg());
+            event.setCrv(jwk.getCrv());
+            event.setKty(jwk.getKty());
+            event.setUse(jwk.getUse());
+            event.setX(jwk.getX());
+            event.setY(jwk.getY());
+            eventUtil.persistAndPublishEvent(event);
         });
         log.info("KeyService create finished {}", key.getKeyId());
 
@@ -104,7 +104,12 @@ public class PrivateKeyService {
         keyRepository.delete(key);
 
         authorityRepository.findAll().forEach(authority -> {
-            // KeyRevokedLedgerEvent event =
+            String prevEventId = eventUtil.getPreviousEventId(authority.getCode());
+            KeyRevokedLedgerEvent event = new KeyRevokedLedgerEvent(properties.getIssuerCode(),
+                    authority.getCode(), prevEventId);
+            event.setKeyId(key.getKeyId());
+            event.setRevokedAt(Instant.now().getEpochSecond());
+            eventUtil.persistAndPublishEvent(event);
         });
     }
 }

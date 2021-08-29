@@ -13,7 +13,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
-import epermit.ledgerevents.LedgerEventCreated;
+import epermit.appevents.LedgerEventCreated;
 import epermit.ledgerevents.LedgerEventUtil;
 
 @ExtendWith(MockitoExtension.class)

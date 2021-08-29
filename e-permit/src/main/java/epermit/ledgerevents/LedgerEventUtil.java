@@ -14,12 +14,13 @@ import epermit.commons.Check;
 import epermit.commons.ErrorCodes;
 import epermit.commons.GsonUtil;
 import epermit.entities.Authority;
-import epermit.entities.AuthorityEvent;
-import epermit.entities.LedgerPersistedEvent;
+import epermit.entities.CreatedEvent;
+import epermit.entities.LedgerEvent;
 import epermit.models.EPermitProperties;
 import epermit.models.enums.AuthenticationType;
+import epermit.models.inputs.CreateAuthorityInput;
 import epermit.repositories.AuthorityRepository;
-import epermit.repositories.LedgerPersistedEventRepository;
+import epermit.repositories.LedgerEventRepository;
 import epermit.utils.JwsUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -32,14 +33,14 @@ public class LedgerEventUtil {
     private final EPermitProperties properties;
     private final ApplicationEventPublisher eventPublisher;
     private final JwsUtil jwsUtil;
-    private final LedgerPersistedEventRepository ledgerEventRepository;
+    private final LedgerEventRepository ledgerEventRepository;
     private final AuthorityRepository authorityRepository;
     private final Map<String, LedgerEventHandler> eventHandlers;
 
-    public String getPreviousEventId(String issuedFor) {
+    public String getPreviousEventId(String consumer) {
         String previousEventId = "0";
-        Optional<LedgerPersistedEvent> lastEventR = ledgerEventRepository
-                .findTopByIssuerAndIssuedForOrderByIdDesc(properties.getIssuerCode(), issuedFor);
+        Optional<LedgerEvent> lastEventR = ledgerEventRepository
+                .findTopByProducerAndConsumerOrderByIdDesc(properties.getIssuerCode(), consumer);
         if (lastEventR.isPresent()) {
             previousEventId = lastEventR.get().getEventId();
         }
@@ -48,58 +49,48 @@ public class LedgerEventUtil {
 
     @SneakyThrows
     public <T extends LedgerEventBase> void persistAndPublishEvent(T event) {
-        String proof = createProof(event);  
-        handleEvent(GsonUtil.toMap(event), proof);
-        Authority authority = authorityRepository.findOneByCode(event.getEventIssuedFor());
+        LedgerEventHandler eventHandler =
+                eventHandlers.get(event.getEventType().toString() + "_EVENT_HANDLER");
+        Check.isTrue(eventHandler == null, ErrorCodes.INTERNAL_SERVER_ERROR);
+        eventHandler.handle(GsonUtil.toMap(event));
         LedgerEventCreated appEvent = new LedgerEventCreated();
-        appEvent.setContent(GsonUtil.toMap(event));
-        appEvent.setProof(proof);
-        appEvent.setUri(authority.getApiUri() + "/events");
-        AuthorityEvent authorityEvent = new AuthorityEvent();
-        authorityEvent.setEventId(event.getEventId());
-        authority.addEvent(authorityEvent);
-        authorityRepository.save(authority);
+        appEvent.setEventId(event.getEventId());
+        CreatedEvent createdEvent = new CreatedEvent();
+        createdEvent.setEventId(event.getEventId());
+        createdEvent.setConsumer(event.getConsumer());
+        createdEvent.setEventTimestamp(event.getEventTimestamp());
+        createdEvent.setEventType(event.getEventType());
+        createdEvent.setPreviousEventId(event.getPreviousEventId());
+        createdEvent.setEventContent(GsonUtil.getGson().toJson(event));
+        createdEvent.setSended(false);
         eventPublisher.publishEvent(appEvent);
         log.info("Event published {}", appEvent);
     }
 
     @SneakyThrows
-    public void handleEvent(Map<String, Object> claims, String proof) {
+    public void handleEvent(Map<String, Object> claims) {
         log.info("Event handle started {}", claims);
         LedgerEventBase e = GsonUtil.fromMap(claims, LedgerEventBase.class);
-        Boolean eventExist = ledgerEventRepository.existsByIssuerAndIssuedForAndEventId(
-                e.getEventIssuer(), e.getEventIssuedFor(), e.getEventId());
+        Boolean eventExist = ledgerEventRepository.existsByProducerAndConsumerAndEventId(
+                e.getProducer(), e.getConsumer(), e.getEventId());
         Check.isTrue(eventExist, ErrorCodes.EVENT_ALREADY_EXISTS);
         if (e.getPreviousEventId().equals("0")) {
             Boolean genesisEventExist = ledgerEventRepository
-                    .existsByIssuerAndIssuedFor(e.getEventIssuer(), e.getEventIssuedFor());
+                    .existsByProducerAndConsumer(e.getProducer(), e.getConsumer());
             Check.isTrue(genesisEventExist, ErrorCodes.GENESIS_EVENT_ALREADY_EXISTS);
             log.info("First event received");
         } else {
-            Boolean previousEventExist = ledgerEventRepository.existsByIssuerAndIssuedForAndEventId(
-                    e.getEventIssuer(), e.getEventIssuedFor(), e.getPreviousEventId());
+            Boolean previousEventExist =
+                    ledgerEventRepository.existsByProducerAndConsumerAndEventId(e.getProducer(),
+                            e.getConsumer(), e.getPreviousEventId());
             Check.isTrue(!previousEventExist, ErrorCodes.PREVIOUS_EVENT_NOTFOUND);
         }
-        String content = GsonUtil.getGson().toJson(claims);
-        LedgerPersistedEvent createdEvent = new LedgerPersistedEvent();
-        createdEvent.setIssuer(e.getEventIssuer());
-        createdEvent.setIssuedFor(e.getEventIssuedFor());
-        createdEvent.setEventId(e.getEventId());
-        createdEvent.setPreviousEventId(e.getPreviousEventId());
-        createdEvent.setEventType(e.getEventType());
-        createdEvent.setEventContent(content);
-        createdEvent.setProof(proof);
-        createdEvent.setEventTime(e.getEventTimestamp());
-        ledgerEventRepository.save(createdEvent);
-        LedgerEventHandler eventHandler =
-                eventHandlers.get(e.getEventType().toString() + "_EVENT_HANDLER");
-        Check.isTrue(eventHandler == null, ErrorCodes.EVENT_ALREADY_EXISTS);
-        eventHandler.handle(claims);
+
     }
 
     @SneakyThrows
     public <T extends LedgerEventBase> String createProof(T event) {
-        Authority authority = authorityRepository.findOneByCode(event.getEventIssuedFor());
+        Authority authority = authorityRepository.findOneByCode(event.getConsumer());
         if (authority.getAuthenticationType() == AuthenticationType.BASIC) {
             String proofStr = authority.getCode() + ":" + authority.getApiSecret();
             String proof =
@@ -118,8 +109,7 @@ public class LedgerEventUtil {
         if (authorization == null) {
             return false;
         }
-        Authority authority =
-                authorityRepository.findOneByCode(claims.get("event_issuer").toString());
+        Authority authority = authorityRepository.findOneByCode(claims.get("producer").toString());
         if (authority.getAuthenticationType() == AuthenticationType.BASIC) {
             if (authorization.toLowerCase().startsWith("basic")) {
                 return false;

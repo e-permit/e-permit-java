@@ -11,11 +11,11 @@ import lombok.Getter;
 public class LedgerEventBase {
     @NotNull
     @Size(min = 2, max = 2)
-    private String eventIssuer;
+    private String producer;
 
     @NotNull
     @Size(min = 2, max = 2)
-    private String eventIssuedFor;
+    private String consumer;
 
     @NotNull
     @Min(1609459200)
@@ -32,12 +32,12 @@ public class LedgerEventBase {
     @Size(min = 1, max = 100)
     private String previousEventId;
 
-    public LedgerEventBase(String eventIssuer, String eventIssuedFor, String prevEventId, LedgerEventType eventType) {
+    public LedgerEventBase(String producer, String consumer, String prevEventId, LedgerEventType eventType) {
         this.eventId = UUID.randomUUID().toString();
         this.eventTimestamp = Instant.now().getEpochSecond();
         this.eventType = eventType;
-        this.eventIssuedFor = eventIssuedFor;
-        this.eventIssuer = eventIssuer;
+        this.producer = producer;
+        this.consumer = consumer;
         this.previousEventId = prevEventId;
     }
 }
