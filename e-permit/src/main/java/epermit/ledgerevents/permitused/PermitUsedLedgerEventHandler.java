@@ -25,14 +25,12 @@ public class PermitUsedLedgerEventHandler implements LedgerEventHandler {
     @Override
     public void handle(Map<String, Object> claims) {
         log.info("PermitUsedEventHandler started with {}", claims);
-        PermitUsedLedgerEvent event= GsonUtil.fromMap(claims, PermitUsedLedgerEvent.class);
+        PermitUsedLedgerEvent event = GsonUtil.fromMap(claims, PermitUsedLedgerEvent.class);
         Optional<LedgerPermit> permitR = permitRepository.findOneByPermitId(event.getPermitId());
-        Check.isTrue(!permitR.isPresent(), ErrorCodes.PERMIT_NOTFOUND);
+        Check.assertTrue(permitR.isPresent(), ErrorCodes.PERMIT_NOTFOUND);
         LedgerPermit permit = permitR.get();
-        Check.isTrue(!permit.getIssuer().equals(event.getConsumer()),
-                ErrorCodes.PERMIT_NOTFOUND);
-        Check.isTrue(!permit.getIssuedFor().equals(event.getProducer()),
-                ErrorCodes.PERMIT_NOTFOUND);
+        Check.assertEquals(permit.getIssuer(), event.getConsumer(), ErrorCodes.PERMIT_NOTFOUND);
+        Check.assertEquals(permit.getIssuedFor(), event.getProducer(), ErrorCodes.PERMIT_NOTFOUND);
         permit.setUsed(true);
         LedgerPermitActivity activity = new LedgerPermitActivity();
         activity.setActivityType(event.getActivityType());

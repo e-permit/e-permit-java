@@ -3,7 +3,8 @@ package epermit;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
-import epermit.services.LedgerEventService;
+import epermit.repositories.CreatedEventRepository;
+import epermit.services.EventService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -13,11 +14,11 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class EventScheduler {
 
-    private final LedgerEventService eventService;
+    private final EventService eventService;
 
     @Scheduled(fixedDelay = 30 * 60 * 1000)
     public void unsentEventsTask() {
         log.info("Unsent events task started");
-        //eventService.getUnsentEvents(issuedFor, eventId)
+        eventService.handleUnSendedEvents();
     }
 }

@@ -21,13 +21,17 @@ import epermit.commons.ErrorCodes;
 import epermit.commons.GsonUtil;
 import epermit.entities.Authority;
 import epermit.entities.LedgerQuota;
+import epermit.models.EPermitProperties;
 import epermit.models.enums.PermitType;
 import epermit.repositories.LedgerQuotaRepository;
 
 @ExtendWith(MockitoExtension.class)
 public class QuotaCreatedLedgerEventHandlerTest {
     @Mock
-    LedgerQuotaRepository quotaRepository;;
+    LedgerQuotaRepository quotaRepository;
+
+    @Mock
+    EPermitProperties properties;
 
     @InjectMocks
     QuotaCreatedLedgerEventHandler handler;
@@ -35,9 +39,9 @@ public class QuotaCreatedLedgerEventHandlerTest {
     @Captor
     ArgumentCaptor<LedgerQuota> captor;
 
-
     @Test
     void handleOkTest() {
+        when(properties.getIssuerCode()).thenReturn("TR");
         QuotaCreatedLedgerEvent event = new QuotaCreatedLedgerEvent("TR", "UZ", "0");
         event.setStartNumber(4);
         event.setEndNumber(40);

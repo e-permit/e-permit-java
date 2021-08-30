@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import epermit.models.EPermitProperties;
 import epermit.repositories.AuthorityRepository;
+import epermit.repositories.LedgerPublicKeyRepository;
 import epermit.repositories.PrivateKeyRepository;
 import epermit.utils.PrivateKeyUtil;
 
@@ -27,6 +28,9 @@ public class PrivateKeyServiceTest {
 
     @Mock
     EPermitProperties properties;
+
+    @Mock
+    LedgerPublicKeyRepository ledgerPublicKeyRepository;
 
     @InjectMocks
     PrivateKeyService keyService;

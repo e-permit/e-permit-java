@@ -18,14 +18,14 @@ import epermit.commons.EpermitValidationException;
 import epermit.commons.ErrorCodes;
 import epermit.ledgerevents.LedgerEventResult;
 import epermit.ledgerevents.permitcreated.PermitCreatedLedgerEvent;
-import epermit.services.LedgerEventService;
+import epermit.services.EventService;
 
 @ExtendWith(MockitoExtension.class)
 
 public class EventControllerTest {
 
    @Mock
-   LedgerEventService eventService;
+   EventService eventService;
 
    @InjectMocks
    EventController controller;

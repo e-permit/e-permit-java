@@ -18,8 +18,8 @@ import epermit.entities.CreatedEvent;
 import epermit.entities.LedgerEvent;
 import epermit.models.EPermitProperties;
 import epermit.models.enums.AuthenticationType;
-import epermit.models.inputs.CreateAuthorityInput;
 import epermit.repositories.AuthorityRepository;
+import epermit.repositories.CreatedEventRepository;
 import epermit.repositories.LedgerEventRepository;
 import epermit.utils.JwsUtil;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +35,7 @@ public class LedgerEventUtil {
     private final JwsUtil jwsUtil;
     private final LedgerEventRepository ledgerEventRepository;
     private final AuthorityRepository authorityRepository;
+    private final CreatedEventRepository createdEventRepository;
     private final Map<String, LedgerEventHandler> eventHandlers;
 
     public String getPreviousEventId(String consumer) {
@@ -49,43 +50,59 @@ public class LedgerEventUtil {
 
     @SneakyThrows
     public <T extends LedgerEventBase> void persistAndPublishEvent(T event) {
-        LedgerEventHandler eventHandler =
-                eventHandlers.get(event.getEventType().toString() + "_EVENT_HANDLER");
-        Check.isTrue(eventHandler == null, ErrorCodes.INTERNAL_SERVER_ERROR);
-        eventHandler.handle(GsonUtil.toMap(event));
-        LedgerEventCreated appEvent = new LedgerEventCreated();
-        appEvent.setEventId(event.getEventId());
         CreatedEvent createdEvent = new CreatedEvent();
         createdEvent.setEventId(event.getEventId());
-        createdEvent.setConsumer(event.getConsumer());
-        createdEvent.setEventTimestamp(event.getEventTimestamp());
-        createdEvent.setEventType(event.getEventType());
-        createdEvent.setPreviousEventId(event.getPreviousEventId());
-        createdEvent.setEventContent(GsonUtil.getGson().toJson(event));
         createdEvent.setSended(false);
+        createdEventRepository.save(createdEvent);
+        String proof = createProof(event);
+        handleEvent(GsonUtil.toMap(event), proof);
+        publishAppEvent(createdEvent);
+    }
+
+    public void publishAppEvent(CreatedEvent createdEvent) {
+        LedgerEvent ledgerEvent = ledgerEventRepository.findOneByEventId(createdEvent.getEventId()).get();
+        Authority authority = authorityRepository.findOneByCode(ledgerEvent.getConsumer());
+        LedgerEventCreated appEvent = new LedgerEventCreated();
+        appEvent.setEventId(createdEvent.getEventId());
+        appEvent.setProofType(authority.getAuthenticationType());
+        appEvent.setUri(authority.getApiUri());
+        appEvent.setContent(GsonUtil.toMap(ledgerEvent.getEventContent()));
+        appEvent.setProof(ledgerEvent.getProof());
         eventPublisher.publishEvent(appEvent);
         log.info("Event published {}", appEvent);
     }
 
     @SneakyThrows
-    public void handleEvent(Map<String, Object> claims) {
+    public void handleEvent(Map<String, Object> claims, String proof) {
         log.info("Event handle started {}", claims);
         LedgerEventBase e = GsonUtil.fromMap(claims, LedgerEventBase.class);
         Boolean eventExist = ledgerEventRepository.existsByProducerAndConsumerAndEventId(
                 e.getProducer(), e.getConsumer(), e.getEventId());
-        Check.isTrue(eventExist, ErrorCodes.EVENT_ALREADY_EXISTS);
+        Check.assertFalse(eventExist, ErrorCodes.EVENT_ALREADY_EXISTS);
         if (e.getPreviousEventId().equals("0")) {
             Boolean genesisEventExist = ledgerEventRepository
                     .existsByProducerAndConsumer(e.getProducer(), e.getConsumer());
-            Check.isTrue(genesisEventExist, ErrorCodes.GENESIS_EVENT_ALREADY_EXISTS);
+            Check.assertFalse(genesisEventExist, ErrorCodes.GENESIS_EVENT_ALREADY_EXISTS);
             log.info("First event received");
         } else {
             Boolean previousEventExist =
                     ledgerEventRepository.existsByProducerAndConsumerAndEventId(e.getProducer(),
                             e.getConsumer(), e.getPreviousEventId());
-            Check.isTrue(!previousEventExist, ErrorCodes.PREVIOUS_EVENT_NOTFOUND);
+            Check.assertTrue(previousEventExist, ErrorCodes.PREVIOUS_EVENT_NOTFOUND);
         }
-
+        LedgerEvent ledgerEvent = new LedgerEvent();
+        ledgerEvent.setEventId(e.getEventId());
+        ledgerEvent.setConsumer(e.getConsumer());
+        ledgerEvent.setProducer(e.getProducer());
+        ledgerEvent.setEventTimestamp(e.getEventTimestamp());
+        ledgerEvent.setEventType(e.getEventType());
+        ledgerEvent.setPreviousEventId(e.getPreviousEventId());
+        ledgerEvent.setEventContent(GsonUtil.getGson().toJson(claims));
+        ledgerEvent.setProof(proof);
+        ledgerEventRepository.save(ledgerEvent);
+        LedgerEventHandler eventHandler =
+                eventHandlers.get(e.getEventType().toString() + "_EVENT_HANDLER");
+        eventHandler.handle(GsonUtil.toMap(claims));
     }
 
     @SneakyThrows
@@ -134,14 +151,6 @@ public class LedgerEventUtil {
             String jws = proofArr[0] + payloadBase64 + proofArr[1];
             return jwsUtil.validateJws(jws);
         }
-    }
-
-    public HttpHeaders createEventRequestHeader(AuthenticationType proofType, String proof) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.add("Authoriation",
-                proofType == AuthenticationType.BASIC ? "Basic " : "Bearer " + proof);
-        return headers;
     }
 
 }

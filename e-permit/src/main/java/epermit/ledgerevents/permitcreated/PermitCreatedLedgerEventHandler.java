@@ -29,11 +29,11 @@ public class PermitCreatedLedgerEventHandler implements LedgerEventHandler {
         log.info("PermitCreatedEventHandler started with {}", claims);
         PermitCreatedLedgerEvent event = GsonUtil.fromMap(claims, PermitCreatedLedgerEvent.class);
         String expectedPermitId = permitUtil.getPermitId(getCreatePermitIdInput(event));
-        Check.equals(expectedPermitId, event.getPermitId(), ErrorCodes.INVALID_PERMITID);
+        Check.assertEquals(expectedPermitId, event.getPermitId(), ErrorCodes.INVALID_PERMITID);
         boolean exist = permitRepository.existsByPermitId(event.getPermitId());
-        Check.isTrue(exist, ErrorCodes.PERMITID_ALREADY_EXISTS);
+        Check.assertFalse(exist, ErrorCodes.PERMITID_ALREADY_EXISTS);
         Boolean isQuotaSufficient = permitUtil.isQuotaSufficient(getQuotaSufficientInput(event));
-        Check.isTrue(!isQuotaSufficient, ErrorCodes.INSUFFICIENT_PERMIT_QUOTA);
+        Check.assertTrue(isQuotaSufficient, ErrorCodes.INSUFFICIENT_PERMIT_QUOTA);
         LedgerPermit permit = new LedgerPermit();
         permit.setCompanyId(event.getCompanyId());
         permit.setCompanyName(event.getCompanyName());

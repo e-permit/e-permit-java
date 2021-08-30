@@ -66,7 +66,7 @@ public class PermitService {
         Optional<SerialNumber> serialNumberR =
                 serialNumberRepository.findOne(filterSerialNumbers(properties.getIssuerCode(),
                         input.getPermitYear(), input.getPermitType()));
-        Check.isTrue(serialNumberR.isPresent(), ErrorCodes.INSUFFICIENT_PERMIT_QUOTA);
+        Check.assertTrue(serialNumberR.isPresent(), ErrorCodes.INSUFFICIENT_PERMIT_QUOTA);
         SerialNumber serialNumber = serialNumberR.get();
         CreatePermitIdInput idInput = new CreatePermitIdInput();
         idInput.setIssuedFor(input.getIssuedFor());

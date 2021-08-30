@@ -47,14 +47,19 @@ import epermit.utils.PermitUtil;
 public class PermitServiceTest {
     @Spy
     private ModelMapper modelMapper;
+
     @Mock
     private LedgerPermitRepository permitRepository;
+
     @Mock
     PermitUtil permitUtil;
+
     @Mock
-    SerialNumberRepository issuerQuotaSerialNumberRepository;
+    SerialNumberRepository serialNumberRepository;
+
     @Mock
     EPermitProperties properties;
+
     @Mock
     LedgerEventUtil ledgerEventUtil;
 
@@ -106,11 +111,13 @@ public class PermitServiceTest {
         input.setCompanyId("companyId");
         input.setCompanyName("companyName");
         input.setPlateNumber("plateNumber");
+        SerialNumber serialNumber = new SerialNumber();
+        serialNumber.setSerialNumber(1);
+        when(serialNumberRepository.findOne(ArgumentMatchers.<Specification<SerialNumber>>any()))
+                .thenReturn(Optional.of(serialNumber));
         when(properties.getIssuerCode()).thenReturn("TR");
         when(ledgerEventUtil.getPreviousEventId("UZ")).thenReturn("123");
         when(permitUtil.generateQrCode(any())).thenReturn("QR");
-        SerialNumber serialNumber = new SerialNumber();
-        serialNumber.setSerialNumber(1);
         when(permitUtil.getPermitId(any())).thenReturn("TR-UZ-2021-1-1");
         CreatePermitResult result = permitService.createPermit(input);
         assertEquals("TR-UZ-2021-1-1", result.getPermitId());

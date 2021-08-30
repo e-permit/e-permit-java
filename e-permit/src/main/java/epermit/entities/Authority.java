@@ -40,7 +40,7 @@ public class Authority {
   @Column(name = "api_uri", nullable = false)
   private String apiUri;
 
-  @Column(name = "api_secret", nullable = false)
+  @Column(name = "api_secret", nullable = true)
   private String apiSecret;
 
   @Column(name = "authentication_type", nullable = false)
