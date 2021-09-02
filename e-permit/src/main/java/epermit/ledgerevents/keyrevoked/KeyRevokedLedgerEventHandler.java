@@ -25,7 +25,7 @@ public class KeyRevokedLedgerEventHandler implements LedgerEventHandler {
         log.info("KeyRevokedLedgerEvent started with {}", claims);
         KeyRevokedLedgerEvent e = GsonUtil.fromMap(claims, KeyRevokedLedgerEvent.class);
         List<LedgerPublicKey> keys =
-                publicKeyRepository.findAllByAuthorityCodeAndRevokedFalse(e.getProducer());
+                publicKeyRepository.findAllByAuthorityCodeAndRevokedFalse(e.getEventProducer());
         Check.assertTrue(keys.size() > 1, ErrorCodes.INSUFFICIENT_KEY);
         Optional<LedgerPublicKey> publicKeyR =
                 keys.stream().filter(x -> x.getKeyId().equals(e.getKeyId())).findFirst();

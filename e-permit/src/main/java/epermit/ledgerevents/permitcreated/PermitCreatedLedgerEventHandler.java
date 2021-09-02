@@ -39,8 +39,8 @@ public class PermitCreatedLedgerEventHandler implements LedgerEventHandler {
         permit.setCompanyName(event.getCompanyName());
         permit.setExpireAt(event.getExpireAt());
         permit.setIssuedAt(event.getIssuedAt());
-        permit.setIssuer(event.getProducer());
-        permit.setIssuedFor(event.getConsumer());
+        permit.setIssuer(event.getEventProducer());
+        permit.setIssuedFor(event.getEventConsumer());
         permit.setPermitId(event.getPermitId());
         permit.setPermitType(event.getPermitType());
         permit.setPermitYear(event.getPermitYear());
@@ -55,8 +55,8 @@ public class PermitCreatedLedgerEventHandler implements LedgerEventHandler {
 
     private CreatePermitIdInput getCreatePermitIdInput(PermitCreatedLedgerEvent event) {
         CreatePermitIdInput input = new CreatePermitIdInput();
-        input.setIssuedFor(event.getConsumer());
-        input.setIssuer(event.getProducer());
+        input.setIssuedFor(event.getEventConsumer());
+        input.setIssuer(event.getEventProducer());
         input.setPermitType(event.getPermitType());
         input.setPermitYear(event.getPermitYear());
         input.setSerialNumber(event.getSerialNumber());
@@ -65,8 +65,8 @@ public class PermitCreatedLedgerEventHandler implements LedgerEventHandler {
 
     private QuotaSufficientInput getQuotaSufficientInput(PermitCreatedLedgerEvent event) {
         QuotaSufficientInput input = new QuotaSufficientInput();
-        input.setIssuedFor(event.getConsumer());
-        input.setIssuer(event.getProducer());
+        input.setIssuedFor(event.getEventConsumer());
+        input.setIssuer(event.getEventProducer());
         input.setPermitType(event.getPermitType());
         input.setPermitYear(event.getPermitYear());
         input.setSerialNumber(event.getSerialNumber());

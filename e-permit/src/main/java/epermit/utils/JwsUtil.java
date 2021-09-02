@@ -50,18 +50,18 @@ public class JwsUtil {
 
     @SneakyThrows
     public Boolean validateJws(String jws) {
-        String issuedFor = getClaim(jws, "issued_for");
-        log.info("Jws validation issued_for {}", issuedFor);
-        if (!issuedFor.equals(properties.getIssuerCode())) {
-            log.info("The jws is not issued for the current authority {}", jws);
+        String consumer = getClaim(jws, "event_consumer");
+        log.info("Jws validation consumer {}", consumer);
+        if (!consumer.equals(properties.getIssuerCode())) {
+            log.info("The jws is not consumer the current authority {}", jws);
             return false;
         }
-        String issuer = getClaim(jws, "issuer");
+        String producer = getClaim(jws, "event_producer");
         JWSObject jwsObject = JWSObject.parse(jws);
         String keyId = jwsObject.getHeader().getKeyID();
 
         Optional<LedgerPublicKey> k =
-                publicKeyRepository.findOneByAuthorityCodeAndKeyId(issuer, keyId);
+                publicKeyRepository.findOneByAuthorityCodeAndKeyId(producer, keyId);
         if (!k.isPresent()) {
             log.info("The key doesn't found");
             return false;

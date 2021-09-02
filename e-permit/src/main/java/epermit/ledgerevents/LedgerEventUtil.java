@@ -60,7 +60,8 @@ public class LedgerEventUtil {
     }
 
     public void publishAppEvent(CreatedEvent createdEvent) {
-        LedgerEvent ledgerEvent = ledgerEventRepository.findOneByEventId(createdEvent.getEventId()).get();
+        LedgerEvent ledgerEvent =
+                ledgerEventRepository.findOneByEventId(createdEvent.getEventId()).get();
         Authority authority = authorityRepository.findOneByCode(ledgerEvent.getConsumer());
         LedgerEventCreated appEvent = new LedgerEventCreated();
         appEvent.setEventId(createdEvent.getEventId());
@@ -77,23 +78,23 @@ public class LedgerEventUtil {
         log.info("Event handle started {}", claims);
         LedgerEventBase e = GsonUtil.fromMap(claims, LedgerEventBase.class);
         Boolean eventExist = ledgerEventRepository.existsByProducerAndConsumerAndEventId(
-                e.getProducer(), e.getConsumer(), e.getEventId());
+                e.getEventProducer(), e.getEventConsumer(), e.getEventId());
         Check.assertFalse(eventExist, ErrorCodes.EVENT_ALREADY_EXISTS);
         if (e.getPreviousEventId().equals("0")) {
             Boolean genesisEventExist = ledgerEventRepository
-                    .existsByProducerAndConsumer(e.getProducer(), e.getConsumer());
+                    .existsByProducerAndConsumer(e.getEventProducer(), e.getEventConsumer());
             Check.assertFalse(genesisEventExist, ErrorCodes.GENESIS_EVENT_ALREADY_EXISTS);
             log.info("First event received");
         } else {
             Boolean previousEventExist =
-                    ledgerEventRepository.existsByProducerAndConsumerAndEventId(e.getProducer(),
-                            e.getConsumer(), e.getPreviousEventId());
+                    ledgerEventRepository.existsByProducerAndConsumerAndEventId(
+                            e.getEventProducer(), e.getEventConsumer(), e.getPreviousEventId());
             Check.assertTrue(previousEventExist, ErrorCodes.PREVIOUS_EVENT_NOTFOUND);
         }
         LedgerEvent ledgerEvent = new LedgerEvent();
         ledgerEvent.setEventId(e.getEventId());
-        ledgerEvent.setConsumer(e.getConsumer());
-        ledgerEvent.setProducer(e.getProducer());
+        ledgerEvent.setConsumer(e.getEventConsumer());
+        ledgerEvent.setProducer(e.getEventProducer());
         ledgerEvent.setEventTimestamp(e.getEventTimestamp());
         ledgerEvent.setEventType(e.getEventType());
         ledgerEvent.setPreviousEventId(e.getPreviousEventId());
@@ -107,7 +108,7 @@ public class LedgerEventUtil {
 
     @SneakyThrows
     public <T extends LedgerEventBase> String createProof(T event) {
-        Authority authority = authorityRepository.findOneByCode(event.getConsumer());
+        Authority authority = authorityRepository.findOneByCode(event.getEventConsumer());
         if (authority.getAuthenticationType() == AuthenticationType.BASIC) {
             String proofStr = authority.getCode() + ":" + authority.getApiSecret();
             String proof =
@@ -126,9 +127,13 @@ public class LedgerEventUtil {
         if (authorization == null) {
             return false;
         }
-        Authority authority = authorityRepository.findOneByCode(claims.get("producer").toString());
+        Authority authority =
+                authorityRepository.findOneByCode(claims.get("event_producer").toString());
+        if(authority == null){
+            return false;
+        }
         if (authority.getAuthenticationType() == AuthenticationType.BASIC) {
-            if (authorization.toLowerCase().startsWith("basic")) {
+            if (!authorization.toLowerCase().startsWith("basic")) {
                 return false;
             }
             String proofB64 = authorization.substring(6);
@@ -141,14 +146,16 @@ public class LedgerEventUtil {
             }
             return apiSecret.equals(authority.getApiSecret());
         } else {
-            if (authorization.toLowerCase().startsWith("bearer")) {
+            if (!authorization.toLowerCase().startsWith("bearer")) {
                 return false;
             }
             String proof = authorization.substring(7);
-            String[] proofArr = proof.split(".");
+            String[] proofArr = proof.split("\\.");
             String payloadJsonStr = GsonUtil.getGson().toJson(claims);
-            String payloadBase64 = Base64.getUrlEncoder().encodeToString(payloadJsonStr.getBytes());
-            String jws = proofArr[0] + payloadBase64 + proofArr[1];
+            String payloadBase64 = Base64.getUrlEncoder().withoutPadding()
+                    .encodeToString(payloadJsonStr.getBytes());
+            String jws = proofArr[0] + "." + payloadBase64 + "." + proofArr[1];
+            log.info("Constructed jws: {}", jws);
             return jwsUtil.validateJws(jws);
         }
     }

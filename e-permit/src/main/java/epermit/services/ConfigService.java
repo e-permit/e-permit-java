@@ -27,6 +27,7 @@ public class ConfigService {
     public AuthorityConfig getConfig() {
         AuthorityConfig dto = new AuthorityConfig();
         dto.setCode(properties.getIssuerCode());
+        dto.setName(properties.getIssuerName());
         Gson gson = GsonUtil.getGson();
         List<PublicJwk> keyDtoList = new ArrayList<>();
         List<LedgerPublicKey> keys = ledgerPublicKeyRepository

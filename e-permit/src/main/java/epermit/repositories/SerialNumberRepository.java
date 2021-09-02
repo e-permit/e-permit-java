@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 @Repository
 public interface SerialNumberRepository
-                extends JpaRepository<SerialNumber, Integer>,
-                JpaSpecificationExecutor<SerialNumber> {
+        extends JpaRepository<SerialNumber, Integer>, JpaSpecificationExecutor<SerialNumber> {
+
 }
 

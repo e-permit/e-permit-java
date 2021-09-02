@@ -67,7 +67,8 @@ public class PermitCreatedLedgerEvent extends LedgerEventBase {
     private boolean isValidIssuedAt() {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         LocalDate iat = LocalDate.parse(this.issuedAt, dtf);
-        return iat.isBefore(LocalDate.now(ZoneOffset.UTC));
+        return iat.isBefore(LocalDate.now(ZoneOffset.UTC))
+                || iat.equals(LocalDate.now(ZoneOffset.UTC));
     }
 
     @AssertTrue(message = "Invalid expire_at")
@@ -80,10 +81,10 @@ public class PermitCreatedLedgerEvent extends LedgerEventBase {
 
     @AssertTrue(message = "Invalid permit issuer or issued_for")
     private boolean isValid() {
-        if (!this.getProducer().equals(this.permitIssuer)) {
+        if (!this.getEventProducer().equals(this.permitIssuer)) {
             return false;
         }
-        if (!this.getConsumer().equals(this.permitIssuedFor)) {
+        if (!this.getEventConsumer().equals(this.permitIssuedFor)) {
             return false;
         }
         return true;

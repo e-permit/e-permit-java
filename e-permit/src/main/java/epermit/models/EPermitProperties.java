@@ -16,7 +16,7 @@ public class EPermitProperties {
 
     private String issuerCode;
 
-    private String issuerTitle;
+    private String issuerName;
 
     private String issuerApiUri;
 

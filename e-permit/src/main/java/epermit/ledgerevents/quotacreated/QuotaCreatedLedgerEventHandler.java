@@ -40,8 +40,8 @@ public class QuotaCreatedLedgerEventHandler implements LedgerEventHandler {
         quota.setPermitType(event.getPermitType());
         quota.setStartNumber(event.getStartNumber());
         quota.setPermitYear(event.getPermitYear());
-        quota.setPermitIssuer(event.getConsumer());
-        quota.setPermitIssuedFor(event.getProducer());
+        quota.setPermitIssuer(event.getEventConsumer());
+        quota.setPermitIssuedFor(event.getEventProducer());
         log.info("QuotaCreatedEventHandler ended with {}", quota);
         quotaRepository.save(quota);
         if (properties.getIssuerCode().equals(quota.getPermitIssuer())) {

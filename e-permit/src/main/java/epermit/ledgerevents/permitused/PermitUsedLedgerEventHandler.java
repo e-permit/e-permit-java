@@ -29,8 +29,8 @@ public class PermitUsedLedgerEventHandler implements LedgerEventHandler {
         Optional<LedgerPermit> permitR = permitRepository.findOneByPermitId(event.getPermitId());
         Check.assertTrue(permitR.isPresent(), ErrorCodes.PERMIT_NOTFOUND);
         LedgerPermit permit = permitR.get();
-        Check.assertEquals(permit.getIssuer(), event.getConsumer(), ErrorCodes.PERMIT_NOTFOUND);
-        Check.assertEquals(permit.getIssuedFor(), event.getProducer(), ErrorCodes.PERMIT_NOTFOUND);
+        Check.assertEquals(permit.getIssuer(), event.getEventConsumer(), ErrorCodes.PERMIT_NOTFOUND);
+        Check.assertEquals(permit.getIssuedFor(), event.getEventProducer(), ErrorCodes.PERMIT_NOTFOUND);
         permit.setUsed(true);
         LedgerPermitActivity activity = new LedgerPermitActivity();
         activity.setActivityType(event.getActivityType());

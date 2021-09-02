@@ -25,11 +25,11 @@ public class KeyCreatedLedgerEventHandler implements LedgerEventHandler {
     public void handle(Map<String, Object> claims) {
         log.info("KeyCreatedEventHandler started with {}", claims);
         KeyCreatedLedgerEvent e = GsonUtil.fromMap(claims, KeyCreatedLedgerEvent.class);
-        boolean keyExist = keyRepository.existsByAuthorityCodeAndKeyId(e.getProducer(), e.getKid());
+        boolean keyExist = keyRepository.existsByAuthorityCodeAndKeyId(e.getEventProducer(), e.getKid());
         Check.assertFalse(keyExist, ErrorCodes.KEYID_ALREADY_EXISTS);
         LedgerPublicKey key = new LedgerPublicKey();
         key.setKeyId(e.getKid());
-        key.setAuthorityCode(e.getProducer());
+        key.setAuthorityCode(e.getEventProducer());
         key.setJwk(GsonUtil.getGson().toJson(modelMapper.map(e, PublicJwk.class)));
         log.info("KeyCreatedEventHandler ended with {}", key.getJwk());
         keyRepository.save(key);

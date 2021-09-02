@@ -1,5 +1,6 @@
 package epermit.utils;
 
+import com.nimbusds.jose.Algorithm;
 import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.jwk.KeyUse;
@@ -24,8 +25,8 @@ public class PrivateKeyUtil {
 
     @SneakyThrows
     public PrivateKey create(String keyId) {
-        ECKey key =
-                new ECKeyGenerator(Curve.P_256).keyUse(KeyUse.SIGNATURE).keyID(keyId).generate();
+        ECKey key = new ECKeyGenerator(Curve.P_256).algorithm(Algorithm.parse("ES256"))
+                .keyUse(KeyUse.SIGNATURE).keyID(keyId).generate();
         return create(key);
     }
 

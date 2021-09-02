@@ -1,7 +1,6 @@
 package epermit.commons;
 
 public enum ErrorCodes {
-    INVALID_EVENT,
     EVENT_ALREADY_EXISTS,
     PREVIOUS_EVENT_NOTFOUND,
     GENESIS_EVENT_ALREADY_EXISTS,

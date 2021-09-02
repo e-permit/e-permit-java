@@ -11,11 +11,11 @@ import lombok.Getter;
 public class LedgerEventBase {
     @NotNull
     @Size(min = 2, max = 2)
-    private String producer;
+    private String eventProducer;
 
     @NotNull
     @Size(min = 2, max = 2)
-    private String consumer;
+    private String eventConsumer;
 
     @NotNull
     @Min(1609459200)
@@ -36,8 +36,8 @@ public class LedgerEventBase {
         this.eventId = UUID.randomUUID().toString();
         this.eventTimestamp = Instant.now().getEpochSecond();
         this.eventType = eventType;
-        this.producer = producer;
-        this.consumer = consumer;
+        this.eventProducer = producer;
+        this.eventConsumer = consumer;
         this.previousEventId = prevEventId;
     }
 }

@@ -113,8 +113,9 @@ public class PermitServiceTest {
         input.setPlateNumber("plateNumber");
         SerialNumber serialNumber = new SerialNumber();
         serialNumber.setSerialNumber(1);
-        when(serialNumberRepository.findOne(ArgumentMatchers.<Specification<SerialNumber>>any()))
-                .thenReturn(Optional.of(serialNumber));
+        
+        when(serialNumberRepository.findAll(ArgumentMatchers.<Specification<SerialNumber>>any(), ArgumentMatchers.<Pageable>any()))
+                .thenReturn(new PageImpl<>(List.of(serialNumber)));
         when(properties.getIssuerCode()).thenReturn("TR");
         when(ledgerEventUtil.getPreviousEventId("UZ")).thenReturn("123");
         when(permitUtil.generateQrCode(any())).thenReturn("QR");
@@ -124,8 +125,8 @@ public class PermitServiceTest {
         assertEquals("QR", result.getQrCode());
         verify(ledgerEventUtil, times(1)).persistAndPublishEvent(createdCaptor.capture());
         PermitCreatedLedgerEvent event = createdCaptor.getValue();
-        assertEquals("TR", event.getProducer());
-        assertEquals("UZ", event.getConsumer());
+        assertEquals("TR", event.getEventProducer());
+        assertEquals("UZ", event.getEventConsumer());
         assertEquals(LedgerEventType.PERMIT_CREATED, event.getEventType());
         assertEquals("TR", event.getPermitIssuer());
         assertEquals("UZ", event.getPermitIssuedFor());
@@ -150,8 +151,8 @@ public class PermitServiceTest {
         permitService.permitUsed(input);
         verify(ledgerEventUtil, times(1)).persistAndPublishEvent(usedCaptor.capture());
         PermitUsedLedgerEvent event = usedCaptor.getValue();
-        assertEquals("TR", event.getProducer());
-        assertEquals("UZ", event.getConsumer());
+        assertEquals("TR", event.getEventProducer());
+        assertEquals("UZ", event.getEventConsumer());
         assertEquals(LedgerEventType.PERMIT_USED, event.getEventType());
         assertEquals("Details", event.getActivityDetails());
         assertEquals(Long.valueOf(12344), event.getActivityTimestamp());
@@ -172,8 +173,8 @@ public class PermitServiceTest {
         permitService.revokePermit(Long.valueOf(1));
         verify(ledgerEventUtil, times(1)).persistAndPublishEvent(revokedCaptor.capture());
         PermitRevokedLedgerEvent event = revokedCaptor.getValue();
-        assertEquals("TR", event.getProducer());
-        assertEquals("UZ", event.getConsumer());
+        assertEquals("TR", event.getEventProducer());
+        assertEquals("UZ", event.getEventConsumer());
         assertEquals(LedgerEventType.PERMIT_REVOKED, event.getEventType());
         assertEquals("TR-UZ-2021-1-1", event.getPermitId());
         assertEquals("123", event.getPreviousEventId());

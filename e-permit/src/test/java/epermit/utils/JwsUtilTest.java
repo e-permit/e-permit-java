@@ -57,8 +57,8 @@ public class JwsUtilTest {
     void validateJwsOkTest() {
         ECKey key = new ECKeyGenerator(Curve.P_256).keyUse(KeyUse.SIGNATURE).keyID("1").generate();
         Map<String, String> claims = new HashMap<>();
-        claims.put("issuer", "TR");
-        claims.put("issued_for", "UA");
+        claims.put("event_producer", "TR");
+        claims.put("event_consumer", "UA");
         String jws = util.createJws(key, claims);
         LedgerPublicKey authorityKey = new LedgerPublicKey();
         authorityKey.setJwk(key.toPublicJWK().toJSONString());
@@ -74,8 +74,8 @@ public class JwsUtilTest {
     void validateJwsInvalidIssuedForTest() {
         ECKey key = new ECKeyGenerator(Curve.P_256).keyUse(KeyUse.SIGNATURE).keyID("1").generate();
         Map<String, String> claims = new HashMap<>();
-        claims.put("issuer", "TR");
-        claims.put("issued_for", "UA2");
+        claims.put("event_producer", "TR");
+        claims.put("event_consumer", "UA2");
         String jws = util.createJws(key, claims);
         when(properties.getIssuerCode()).thenReturn("UA");
         Boolean r = util.validateJws(jws);
@@ -87,8 +87,8 @@ public class JwsUtilTest {
     void validateJwsInvalidKeyIdTest() {
         ECKey key = new ECKeyGenerator(Curve.P_256).keyUse(KeyUse.SIGNATURE).keyID("1").generate();
         Map<String, String> claims = new HashMap<>();
-        claims.put("issuer", "TR");
-        claims.put("issued_for", "UA");
+        claims.put("event_producer", "TR");
+        claims.put("event_consumer", "UA");
         String jws = util.createJws(key, claims);
         when(properties.getIssuerCode()).thenReturn("UA");
         Boolean r = util.validateJws(jws);

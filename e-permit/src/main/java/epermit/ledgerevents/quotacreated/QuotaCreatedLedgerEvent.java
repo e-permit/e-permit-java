@@ -42,13 +42,19 @@ public class QuotaCreatedLedgerEvent extends LedgerEventBase {
 
     @AssertTrue(message = "Invalid permit issuer or issued_for")
     private boolean isValid() {
-        if (!this.getProducer().equals(this.permitIssuedFor)) {
+        if (!this.getEventProducer().equals(this.permitIssuedFor)) {
             return false;
         }
-        if (!this.getConsumer().equals(this.permitIssuer)) {
+        if (!this.getEventConsumer().equals(this.permitIssuer)) {
             return false;
         }
         return true;
     }
+
+    @AssertTrue(message = "End number should be grater than start number")
+    private boolean isValidStartAndEndNumber() {
+        return endNumber > startNumber;
+    }
+
 
 }

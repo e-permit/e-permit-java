@@ -8,8 +8,12 @@ import java.util.List;
 import java.util.Optional;
 import javax.persistence.criteria.Predicate;
 import org.modelmapper.ModelMapper;
+import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties.Pageable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,11 +67,12 @@ public class PermitService {
     public CreatePermitResult createPermit(CreatePermitInput input) {
         log.info("Permit create command {}", input);
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        Optional<SerialNumber> serialNumberR =
-                serialNumberRepository.findOne(filterSerialNumbers(properties.getIssuerCode(),
-                        input.getPermitYear(), input.getPermitType()));
-        Check.assertTrue(serialNumberR.isPresent(), ErrorCodes.INSUFFICIENT_PERMIT_QUOTA);
-        SerialNumber serialNumber = serialNumberR.get();
+        PageRequest pageable = PageRequest.of(0, 1, Sort.by(Direction.ASC, "serialNumber"));
+        List<SerialNumber> serialNumbers = serialNumberRepository.findAll(
+                filterSerialNumbers(input.getIssuedFor(), input.getPermitYear(), input.getPermitType()),
+                pageable).toList();
+        Check.assertFalse(serialNumbers.isEmpty(), ErrorCodes.INSUFFICIENT_PERMIT_QUOTA);
+        SerialNumber serialNumber = serialNumbers.get(0);
         CreatePermitIdInput idInput = new CreatePermitIdInput();
         idInput.setIssuedFor(input.getIssuedFor());
         idInput.setIssuer(properties.getIssuerCode());
@@ -166,7 +171,6 @@ public class PermitService {
             Predicate p2 = cb.equal(sn.get("state"), SerialNumberState.REVOKED);
             predicates.add(cb.or(p1, p2));
             Predicate p = cb.and(predicates.toArray(new Predicate[predicates.size()]));
-            cq.orderBy(cb.desc(sn.get("serialNumber")));
             return p;
         };
         return spec;

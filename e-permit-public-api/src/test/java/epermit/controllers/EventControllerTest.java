@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -46,11 +47,12 @@ public class EventControllerTest {
       headers.add("authorization", "1234");
       doThrow(new EpermitValidationException("message", ErrorCodes.EVENT_ALREADY_EXISTS))
             .when(eventService).handleReceivedEvent(any(), anyMap());
-      LedgerEventResult r = controller.permitCreated(headers, e);
-      assertFalse(r.isOk());
-      assertEquals(ErrorCodes.EVENT_ALREADY_EXISTS.name(), r.getErrorCode());
+      EpermitValidationException ex =
+            Assertions.assertThrows(EpermitValidationException.class, () -> {
+               controller.permitCreated(headers, e);
+            });
+      assertEquals(ErrorCodes.EVENT_ALREADY_EXISTS.name(), ex.getErrorCode());
    }
-
 }
 
 

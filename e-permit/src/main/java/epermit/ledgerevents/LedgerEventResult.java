@@ -10,11 +10,10 @@ public class LedgerEventResult {
 
     private String errorMessage;
 
-    public static LedgerEventResult fail(String errorCode, String errorMessage){
+    public static LedgerEventResult fail(String errorCode){
         LedgerEventResult r = new LedgerEventResult();
         r.ok = false;
         r.errorCode = errorCode;
-        r.errorMessage = errorMessage;
         return r;
     }
 
