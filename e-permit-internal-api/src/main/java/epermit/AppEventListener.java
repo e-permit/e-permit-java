@@ -12,7 +12,6 @@ import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.web.client.RestTemplate;
 import epermit.appevents.LedgerEventCreated;
 import epermit.ledgerevents.LedgerEventResult;
-import epermit.ledgerevents.LedgerEventUtil;
 import epermit.models.enums.AuthenticationType;
 import epermit.services.EventService;
 import lombok.RequiredArgsConstructor;
@@ -25,11 +24,10 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class AppEventListener {
     private final RestTemplate restTemplate;
-    private final EventService persistedEventService;
+    private final EventService eventService;
 
     @Async
     @TransactionalEventListener
-
     public void onAppEvent(LedgerEventCreated event) {
         log.info("onAppEvent is fired. {}", event);
         sendEvent(event);
@@ -38,24 +36,19 @@ public class AppEventListener {
 
     @SneakyThrows
     private void sendEvent(LedgerEventCreated event) {
-        HttpComponentsClientHttpRequestFactory rf =
-                (HttpComponentsClientHttpRequestFactory) restTemplate.getRequestFactory();
-        rf.setReadTimeout(2 * 1000);
-        rf.setConnectTimeout(2 * 1000);
-        restTemplate.setRequestFactory(rf);
         HttpHeaders headers = createEventRequestHeader(event.getProofType(), event.getProof());
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(event.getContent(), headers);
         LedgerEventResult result =
                 restTemplate.postForObject(event.getUri(), request, LedgerEventResult.class);
         if (result.isOk()) {
-            persistedEventService.handleSendedEvent(event.getEventId());
+            eventService.handleSendedEvent(event.getEventId());
         }
     }
 
     private HttpHeaders createEventRequestHeader(AuthenticationType proofType, String proof) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.add("Authoriation",
+        headers.add("Authorization",
                 proofType == AuthenticationType.BASIC ? "Basic " : "Bearer " + proof);
         return headers;
     }

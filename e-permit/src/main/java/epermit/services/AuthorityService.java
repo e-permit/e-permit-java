@@ -99,17 +99,20 @@ public class AuthorityService {
         Optional<LedgerQuota> r = ledgerQuotaRepository.findOne(filterEvents(e));
         if (r.isPresent()) {
             LedgerQuota lq = r.get();
+            log.info("Ledger quota found {}", lq.getPermitIssuedFor());
             List<SerialNumber> serialNumbers = new ArrayList<>();
-            for(int i = lq.getStartNumber(); i< lq.getEndNumber(); i ++){
+            for (int i = lq.getStartNumber(); i <= lq.getEndNumber(); i++) {
                 SerialNumber s = new SerialNumber();
                 s.setAuthorityCode(lq.getPermitIssuedFor());
                 s.setPermitType(lq.getPermitType());
                 s.setPermitYear(lq.getPermitYear());
                 s.setSerialNumber(i);
-                s.setState(SerialNumberState.CREATED);      
+                s.setState(SerialNumberState.CREATED);
+                serialNumbers.add(s);
             }
             serialNumberRepository.saveAll(serialNumbers);
         } else {
+            log.error("Ledger quota not found");
             throw new Exception("Ledger quota not found");
         }
     }
@@ -117,11 +120,11 @@ public class AuthorityService {
     static Specification<LedgerQuota> filterEvents(QuotaCreated e) {
         Specification<LedgerQuota> spec = (q, cq, cb) -> {
             List<Predicate> predicates = new ArrayList<Predicate>();
-            predicates.add(cb.equal(q.get("permit_issued_for"), e.getPermitIssuedFor()));
-            predicates.add(cb.equal(q.get("start_number"), e.getStartNumber()));
-            predicates.add(cb.equal(q.get("end_number"), e.getEndNumber()));
-            predicates.add(cb.equal(q.get("permit_year"), e.getPermitYear()));
-            predicates.add(cb.equal(q.get("permit_type"), e.getPermitType()));
+            predicates.add(cb.equal(q.get("permitIssuedFor"), e.getPermitIssuedFor()));
+            predicates.add(cb.equal(q.get("startNumber"), e.getStartNumber()));
+            predicates.add(cb.equal(q.get("endNumber"), e.getEndNumber()));
+            predicates.add(cb.equal(q.get("permitYear"), e.getPermitYear()));
+            predicates.add(cb.equal(q.get("permitType"), e.getPermitType()));
             return cb.and(predicates.toArray(new Predicate[predicates.size()]));
         };
         return spec;

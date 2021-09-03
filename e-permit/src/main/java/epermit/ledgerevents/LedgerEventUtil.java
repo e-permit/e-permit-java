@@ -4,10 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Map;
 import java.util.Optional;
-import com.nimbusds.jose.JWSObject;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import epermit.appevents.LedgerEventCreated;
 import epermit.commons.Check;
@@ -66,7 +63,8 @@ public class LedgerEventUtil {
         LedgerEventCreated appEvent = new LedgerEventCreated();
         appEvent.setEventId(createdEvent.getEventId());
         appEvent.setProofType(authority.getAuthenticationType());
-        appEvent.setUri(authority.getApiUri());
+        appEvent.setUri(authority.getApiUri() + "/events/"
+                + ledgerEvent.getEventType().name().toLowerCase().replace("_", "-"));
         appEvent.setContent(GsonUtil.toMap(ledgerEvent.getEventContent()));
         appEvent.setProof(ledgerEvent.getProof());
         eventPublisher.publishEvent(appEvent);
@@ -116,20 +114,20 @@ public class LedgerEventUtil {
             return proof;
         } else {
             String jws = jwsUtil.createJws(event);
-            JWSObject jwsObject = JWSObject.parse(jws);
-            return jwsObject.getParsedParts()[0].decodeToString() + "."
-                    + jwsObject.getParsedParts()[1].decodeToString();
+            log.info("Created jws length: {}", jws.length());
+            String[] parts = jws.split("\\.");
+            return parts[0] + "." + parts[2];
         }
     }
 
     @SneakyThrows
-    public Boolean verifyProof(Map<String, Object> claims, String authorization) {
+    public Boolean verifyProof(Object e, String authorization) {
         if (authorization == null) {
             return false;
         }
-        Authority authority =
-                authorityRepository.findOneByCode(claims.get("event_producer").toString());
-        if(authority == null){
+        LedgerEventBase eb = (LedgerEventBase) e;
+        Authority authority = authorityRepository.findOneByCode(eb.getEventProducer());
+        if (authority == null) {
             return false;
         }
         if (authority.getAuthenticationType() == AuthenticationType.BASIC) {
@@ -151,11 +149,12 @@ public class LedgerEventUtil {
             }
             String proof = authorization.substring(7);
             String[] proofArr = proof.split("\\.");
-            String payloadJsonStr = GsonUtil.getGson().toJson(claims);
+            String payloadJsonStr = GsonUtil.getGson().toJson(e);
             String payloadBase64 = Base64.getUrlEncoder().withoutPadding()
                     .encodeToString(payloadJsonStr.getBytes());
             String jws = proofArr[0] + "." + payloadBase64 + "." + proofArr[1];
             log.info("Constructed jws: {}", jws);
+            log.info("Constructed jws length: {}", jws.length());
             return jwsUtil.validateJws(jws);
         }
     }

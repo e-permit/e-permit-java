@@ -69,6 +69,7 @@ public class JwsUtil {
             log.info("The key is revoked");
             return false;
         }
+        log.info("Key jwk {}", k.get().getJwk());
         ECKey key = ECKey.parse(k.get().getJwk()).toPublicJWK();
         JWSVerifier verifier = new ECDSAVerifier(key);
         Boolean valid = jwsObject.verify(verifier);

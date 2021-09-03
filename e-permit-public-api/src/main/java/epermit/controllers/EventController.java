@@ -43,35 +43,35 @@ public class EventController {
     @PostMapping("/permit-used")
     public LedgerEventResult permitUsed(@RequestHeader HttpHeaders headers,
             @RequestBody @Valid PermitUsedLedgerEvent event) {
-        eventService.handleReceivedEvent(headers, GsonUtil.toMap(event));
+        eventService.handleReceivedEvent(headers, event);
         return LedgerEventResult.success();
     }
 
     @PostMapping("/permit-revoked")
     public LedgerEventResult permitRevoked(@RequestHeader HttpHeaders headers,
             @RequestBody @Valid PermitRevokedLedgerEvent event) {
-        eventService.handleReceivedEvent(headers, GsonUtil.toMap(event));
+        eventService.handleReceivedEvent(headers, event);
         return LedgerEventResult.success();
     }
 
     @PostMapping("/quota-created")
     public LedgerEventResult quotaCreated(@RequestHeader HttpHeaders headers,
             @RequestBody @Valid QuotaCreatedLedgerEvent event) {
-        eventService.handleReceivedEvent(headers, GsonUtil.toMap(event));
+        eventService.handleReceivedEvent(headers, event);
         return LedgerEventResult.success();
     }
 
     @PostMapping("/key-created")
     public LedgerEventResult keyCreated(@RequestHeader HttpHeaders headers,
             @RequestBody @Valid KeyCreatedLedgerEvent event) {
-        eventService.handleReceivedEvent(headers, GsonUtil.toMap(event));
+        eventService.handleReceivedEvent(headers, event);
         return LedgerEventResult.success();
     }
 
     @PostMapping("/key-revoked")
     public LedgerEventResult keyRevoked(@RequestHeader HttpHeaders headers,
             @RequestBody @Valid KeyRevokedLedgerEvent event) {
-        eventService.handleReceivedEvent(headers, GsonUtil.toMap(event));
+        eventService.handleReceivedEvent(headers, event);
         return LedgerEventResult.success();
     }
 

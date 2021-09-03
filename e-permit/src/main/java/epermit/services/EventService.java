@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import epermit.commons.GsonUtil;
 import epermit.entities.CreatedEvent;
 import epermit.entities.LedgerEvent;
 import epermit.ledgerevents.LedgerEventUtil;
@@ -40,15 +41,15 @@ public class EventService {
     }
 
     @Transactional
-    public void handleReceivedEvent(HttpHeaders headers, Map<String, Object> claims) {
-        log.info("Event claims. {}", claims);
+    public void handleReceivedEvent(HttpHeaders headers, Object e) {
+        log.info("Event claims. {}", e);
         String proof = headers.getFirst(HttpHeaders.AUTHORIZATION);
         log.info("Event jws. {}", proof);
-        Boolean r = ledgerEventUtil.verifyProof(claims, proof);
+        Boolean r = ledgerEventUtil.verifyProof(e, proof);
         if (!r) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED");
         }
-        ledgerEventUtil.handleEvent(claims, proof);
+        ledgerEventUtil.handleEvent(GsonUtil.toMap(e), proof);
     }
 
     static Specification<LedgerEvent> filterEvents(Long id, String producer, String consumer) {
