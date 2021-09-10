@@ -75,7 +75,7 @@ public class LedgerPermit {
     private boolean deleted;
 
     
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "ledgerPermit")
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     private List<LedgerPermitActivity> activities = new ArrayList<>();

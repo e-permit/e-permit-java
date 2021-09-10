@@ -3,6 +3,7 @@ package epermit.controllers;
 import java.util.Map;
 import javax.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/permits")
+@CrossOrigin(origins = "*")
 public class PermitController {
 
     private final PermitService permitService;
@@ -56,6 +58,6 @@ public class PermitController {
     @PostMapping("/{id}/activities")
     public void setUsed(@PathVariable("id") String id, @RequestBody @Valid PermitUsedInput input) {
         log.info("Permit used request. {}, {}", id, input);
-        permitService.permitUsed(input);
+        permitService.permitUsed(id, input);
     }
 }

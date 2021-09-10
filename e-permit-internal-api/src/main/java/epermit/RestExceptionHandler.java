@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import epermit.commons.EpermitValidationException;
 import lombok.Getter;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -18,31 +19,40 @@ import lombok.Getter;
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     private final static Logger logger = LoggerFactory.getLogger(RestExceptionHandler.class);
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<Object> handleIllegalArgument(final Exception ex) {
-        final int hataKodu = ThreadLocalRandom.current().nextInt(0, 99999);
-        final String hataMesaji = "Beklenmeyen bir hata oluştu";
-        MDC.put("hataKodu", Integer.toString(hataKodu));
-        logger.error(hataMesaji, ex);
-    
-        return buildResponseEntity(new ApiHata(HttpStatus.BAD_REQUEST, hataMesaji, hataKodu));
+    @ExceptionHandler(EpermitValidationException.class)
+    public ResponseEntity<Object> handleEpermitValidation(final EpermitValidationException ex) {
+        final int errorCode = ThreadLocalRandom.current().nextInt(0, 99999);
+        final String errorMessage = "Internal Server Error";
+        MDC.put("errorCode", Integer.toString(errorCode));
+        logger.error(errorMessage, ex);
+        return buildResponseEntity(new ApiError(HttpStatus.BAD_REQUEST, ex.getErrorCode(), ex.getMessage()));
     }
 
-    private ResponseEntity<Object> buildResponseEntity(final ApiHata apiError) {
-        return new ResponseEntity<>(apiError, apiError.getHttpKodu());
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Object> handle(final Exception ex) {
+        final int errorCode = ThreadLocalRandom.current().nextInt(0, 99999);
+        final String errorMessage = "Internal Server Error";
+        MDC.put("errorCode", Integer.toString(errorCode));
+        logger.error(errorMessage, ex);
+    
+        return buildResponseEntity(new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR", errorMessage));
+    }
+
+    private ResponseEntity<Object> buildResponseEntity(final ApiError apiError) {
+        return new ResponseEntity<>(apiError, apiError.getStatus());
     }
 
     @Getter
-    private class ApiHata {
+    private class ApiError {
 
-        private HttpStatus httpKodu;
-        private String hataMesaji;
-        private int hataKodu;
+        private HttpStatus status;
+        private String errorCode;
+        private String errorMessage;
 
-        public ApiHata(HttpStatus httpKodu, String hataMesaji, int hataKodu) {
-            this.httpKodu = httpKodu;
-            this.hataMesaji = hataMesaji;
-            this.hataKodu = hataKodu;
+        public ApiError(HttpStatus status, String errorCode, String errorMessage) {
+            this.status = status;
+            this.errorCode = errorCode;
+            this.errorMessage = errorMessage;
         }
     }
 }

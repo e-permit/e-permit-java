@@ -20,4 +20,5 @@ public class PermitListInput {
 
     @JsonProperty("page")
     private Integer page = 0;
+
 }

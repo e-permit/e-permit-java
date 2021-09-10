@@ -26,6 +26,7 @@ public class PermitRevokedLedgerEventHandler implements LedgerEventHandler {
         Optional<LedgerPermit> permitR = permitRepository.findOneByPermitId(event.getPermitId());
         Check.assertTrue(permitR.isPresent(), ErrorCodes.PERMIT_NOTFOUND);
         LedgerPermit permit = permitR.get();
+        Check.assertFalse(permit.isUsed(), ErrorCodes.PERMIT_USED);
         Check.assertEquals(permit.getIssuer(), event.getEventProducer(), ErrorCodes.PERMIT_NOTFOUND);
         Check.assertEquals(permit.getIssuedFor(), event.getEventConsumer(), ErrorCodes.PERMIT_NOTFOUND);
         permitRepository.delete(permit);

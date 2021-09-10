@@ -93,6 +93,7 @@ public class AuthorityServiceTest {
         config.setName("Uzbekistan");
         PublicJwk publicJwk = GsonUtil.getGson().fromJson(jwk, PublicJwk.class);
         config.setKeys(List.of(publicJwk));
+        when(authorityRepository.findOneByCode("UZ")).thenReturn(null);
         authorityService.create(input, config);
         Authority authority = new Authority();
         authority.setApiUri("apiUri");

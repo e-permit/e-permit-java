@@ -5,7 +5,11 @@ import java.util.Base64;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 import epermit.appevents.LedgerEventCreated;
 import epermit.commons.Check;
 import epermit.commons.ErrorCodes;
@@ -34,6 +38,7 @@ public class LedgerEventUtil {
     private final AuthorityRepository authorityRepository;
     private final CreatedEventRepository createdEventRepository;
     private final Map<String, LedgerEventHandler> eventHandlers;
+    private final RestTemplate restTemplate;
 
     public String getPreviousEventId(String consumer) {
         String previousEventId = "0";
@@ -56,7 +61,7 @@ public class LedgerEventUtil {
         publishAppEvent(createdEvent);
     }
 
-    public void publishAppEvent(CreatedEvent createdEvent) {
+    public LedgerEventCreated createAppEvent(CreatedEvent createdEvent) {
         LedgerEvent ledgerEvent =
                 ledgerEventRepository.findOneByEventId(createdEvent.getEventId()).get();
         Authority authority = authorityRepository.findOneByCode(ledgerEvent.getConsumer());
@@ -67,6 +72,11 @@ public class LedgerEventUtil {
                 + ledgerEvent.getEventType().name().toLowerCase().replace("_", "-"));
         appEvent.setContent(GsonUtil.toMap(ledgerEvent.getEventContent()));
         appEvent.setProof(ledgerEvent.getProof());
+        return appEvent;
+    }
+
+    public void publishAppEvent(CreatedEvent createdEvent) {
+        LedgerEventCreated appEvent = createAppEvent(createdEvent);
         eventPublisher.publishEvent(appEvent);
         log.info("Event published {}", appEvent);
     }
@@ -159,4 +169,20 @@ public class LedgerEventUtil {
         }
     }
 
+    @SneakyThrows
+    public LedgerEventResult sendEvent(LedgerEventCreated event) {
+        HttpHeaders headers = createEventRequestHeader(event.getProofType(), event.getProof());
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(event.getContent(), headers);
+        LedgerEventResult result =
+                restTemplate.postForObject(event.getUri(), request, LedgerEventResult.class);
+        return result;
+    }
+
+    private HttpHeaders createEventRequestHeader(AuthenticationType proofType, String proof) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.add("Authorization",
+                proofType == AuthenticationType.BASIC ? "Basic " : "Bearer " + proof);
+        return headers;
+    }
 }

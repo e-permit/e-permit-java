@@ -8,6 +8,10 @@ import lombok.Data;
 public class PermitDto {
     private Long id;
 
+    private String issuer;
+
+    private String issuedFor;
+
     private String permitId;
 
     private String qrCode;

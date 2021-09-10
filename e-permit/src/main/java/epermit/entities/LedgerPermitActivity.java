@@ -33,7 +33,7 @@ public class LedgerPermitActivity {
     @Column(name = "activity_timestamp", nullable = false)
     private Long activityTimestamp;
 
-    @Column(name = "activity_details", nullable = false)
+    @Column(name = "activity_details", nullable = true)
     private String activityDetails;
 
     @ManyToOne

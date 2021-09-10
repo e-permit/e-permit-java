@@ -10,6 +10,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface CreatedEventRepository
         extends JpaRepository<CreatedEvent, Long> {
       Optional<CreatedEvent> findByEventId(String eventId);
-      List<CreatedEvent> findAllBySendedFalse();
+      List<CreatedEvent> findAllBySendedFalseOrderByIdAsc();
 }
 

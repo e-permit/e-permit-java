@@ -1,9 +1,7 @@
 package epermit.services;
 
 import java.time.Instant;
-import java.time.ZoneOffset;
 import java.util.Base64;
-import java.util.List;
 import java.util.Optional;
 import com.nimbusds.jose.jwk.ECKey;
 import org.springframework.http.HttpStatus;

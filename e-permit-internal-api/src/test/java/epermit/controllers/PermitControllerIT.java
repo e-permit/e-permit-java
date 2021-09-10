@@ -142,7 +142,7 @@ public class PermitControllerIT {
         permit.setSerialNumber(1);
         permitRepository.save(permit);
         PermitUsedInput input = new PermitUsedInput();
-        input.setActivityType(PermitActivityType.ENTERANCE);
+        input.setActivityType(PermitActivityType.ENTRANCE);
         ResponseEntity<Void> r = getTestRestTemplate().postForEntity(
                 getBaseUrl() + "/" + permit.getPermitId() + "/activities", input, Void.class);
         assertEquals(HttpStatus.OK, r.getStatusCode());

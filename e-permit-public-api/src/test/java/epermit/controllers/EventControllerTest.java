@@ -46,7 +46,7 @@ public class EventControllerTest {
       HttpHeaders headers = new HttpHeaders();
       headers.add("authorization", "1234");
       doThrow(new EpermitValidationException("message", ErrorCodes.EVENT_ALREADY_EXISTS))
-            .when(eventService).handleReceivedEvent(any(), anyMap());
+            .when(eventService).handleReceivedEvent(any(), any());
       EpermitValidationException ex =
             Assertions.assertThrows(EpermitValidationException.class, () -> {
                controller.permitCreated(headers, e);

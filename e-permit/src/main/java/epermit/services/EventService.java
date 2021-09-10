@@ -10,12 +10,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import epermit.appevents.LedgerEventCreated;
 import epermit.commons.GsonUtil;
+import epermit.entities.Authority;
 import epermit.entities.CreatedEvent;
 import epermit.entities.LedgerEvent;
 import epermit.ledgerevents.LedgerEventUtil;
+import epermit.repositories.AuthorityRepository;
 import epermit.repositories.CreatedEventRepository;
+import epermit.repositories.LedgerEventRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -33,11 +38,15 @@ public class EventService {
     }
 
     @Transactional
-    public void handleUnSendedEvents() {
-        List<CreatedEvent> events = createdEventRepository.findAllBySendedFalse();
+    @SneakyThrows
+    public List<LedgerEventCreated> getUnSendedEvents() {
+        List<LedgerEventCreated> list = new ArrayList<>();
+        List<CreatedEvent> events = createdEventRepository.findAllBySendedFalseOrderByIdAsc();
         for (CreatedEvent createdEvent : events) {
-            ledgerEventUtil.publishAppEvent(createdEvent);
+            LedgerEventCreated appEvent = ledgerEventUtil.createAppEvent(createdEvent);
+            list.add(appEvent);
         }
+        return list;
     }
 
     @Transactional

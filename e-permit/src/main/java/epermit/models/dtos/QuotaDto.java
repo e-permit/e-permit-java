@@ -8,13 +8,15 @@ public class QuotaDto {
 
     private int id;
 
-    private int year;
+    private String permitIssuer;
+
+    private String permitIssuedFor;
+
+    private int permitYear;
 
     private PermitType permitType;
 
-    private int startId;
+    private int startNumber;
 
-    private int currentId;
-
-    private int endId;
+    private int endNumber;
 }

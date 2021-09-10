@@ -13,9 +13,17 @@ public class Check {
         }
     }
 
+    public static void assertNull(Object obj, ErrorCodes errorCode) {
+        if (obj != null) {
+            throw new EpermitValidationException(errorCode.name(), errorCode);
+        }
+    }
+
     public static void assertEquals(Object first, Object last, ErrorCodes errorCode) {
         if (!first.equals(last)) {
             throw new EpermitValidationException(errorCode.name(), errorCode);
         }
     }
+
+    
 }

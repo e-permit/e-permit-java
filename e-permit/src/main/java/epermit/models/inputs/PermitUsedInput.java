@@ -5,7 +5,6 @@ import lombok.Data;
 
 @Data
 public class PermitUsedInput {
-    private String permitId;
     private PermitActivityType activityType;
     private Long activityTimestamp;
     private String activityDetails;

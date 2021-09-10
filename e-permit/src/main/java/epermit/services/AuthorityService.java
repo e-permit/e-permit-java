@@ -10,6 +10,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import epermit.appevents.QuotaCreated;
+import epermit.commons.Check;
+import epermit.commons.ErrorCodes;
 import epermit.commons.GsonUtil;
 import epermit.entities.Authority;
 import epermit.entities.SerialNumber;
@@ -20,6 +22,7 @@ import epermit.ledgerevents.quotacreated.QuotaCreatedLedgerEvent;
 import epermit.models.EPermitProperties;
 import epermit.models.dtos.AuthorityConfig;
 import epermit.models.dtos.AuthorityDto;
+import epermit.models.dtos.QuotaDto;
 import epermit.models.enums.SerialNumberState;
 import epermit.models.inputs.CreateAuthorityInput;
 import epermit.models.inputs.CreateQuotaInput;
@@ -43,24 +46,28 @@ public class AuthorityService {
     private final SerialNumberRepository serialNumberRepository;
     private final ModelMapper modelMapper;
 
-    private AuthorityDto entityToDto(Authority authority) {
-        AuthorityDto dto = modelMapper.map(authority, AuthorityDto.class);
-        return dto;
-    }
-
     public List<AuthorityDto> getAll() {
         List<epermit.entities.Authority> all = authorityRepository.findAll();
-        return all.stream().map(x -> entityToDto(x)).collect(Collectors.toList());
+        return all.stream().map(x -> modelMapper.map(x, AuthorityDto.class))
+                .collect(Collectors.toList());
     }
 
     public AuthorityDto getByCode(String code) {
         Authority authority = authorityRepository.findOneByCode(code);
-        return entityToDto(authority);
+        AuthorityDto dto = modelMapper.map(authority, AuthorityDto.class);
+        List<epermit.entities.LedgerQuota> entities = ledgerQuotaRepository.findAll();
+        List<QuotaDto> quotas = entities.stream().filter(
+                x -> x.getPermitIssuer().equals(code) || x.getPermitIssuedFor().equals(code))
+                .map(x -> modelMapper.map(x, QuotaDto.class)).collect(Collectors.toList());
+        dto.setQuotas(quotas);
+        return dto;
     }
 
     @Transactional
     public void create(CreateAuthorityInput input, AuthorityConfig config) {
         log.info("Authority create command: {}", input);
+        Authority exist = authorityRepository.findOneByCode(config.getCode());
+        Check.assertNull(exist, ErrorCodes.AUTHORITY_ALREADY_EXISTS);
         Authority authority = new Authority();
         authority.setApiUri(input.getApiUri());
         authority.setCode(config.getCode());

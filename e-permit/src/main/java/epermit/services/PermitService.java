@@ -68,9 +68,9 @@ public class PermitService {
         log.info("Permit create command {}", input);
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         PageRequest pageable = PageRequest.of(0, 1, Sort.by(Direction.ASC, "serialNumber"));
-        List<SerialNumber> serialNumbers = serialNumberRepository.findAll(
-                filterSerialNumbers(input.getIssuedFor(), input.getPermitYear(), input.getPermitType()),
-                pageable).toList();
+        List<SerialNumber> serialNumbers =
+                serialNumberRepository.findAll(filterSerialNumbers(input.getIssuedFor(),
+                        input.getPermitYear(), input.getPermitType()), pageable).toList();
         Check.assertFalse(serialNumbers.isEmpty(), ErrorCodes.INSUFFICIENT_PERMIT_QUOTA);
         SerialNumber serialNumber = serialNumbers.get(0);
         CreatePermitIdInput idInput = new CreatePermitIdInput();
@@ -123,21 +123,25 @@ public class PermitService {
         PermitRevokedLedgerEvent e =
                 new PermitRevokedLedgerEvent(issuer, permit.getIssuedFor(), prevEventId);
         e.setPermitId(permit.getPermitId());
-        // set revoked serial number
+
+        SerialNumber serialNumber =serialNumberRepository.findOne(filterSerialNumber(permit.getIssuedFor(),
+                permit.getPermitYear(), permit.getPermitType(), permit.getSerialNumber())).get();
+        serialNumber.setState(SerialNumberState.REVOKED);
+        serialNumberRepository.save(serialNumber);
         ledgerEventUtil.persistAndPublishEvent(e);
     }
 
     @Transactional
-    public void permitUsed(PermitUsedInput input) {
+    public void permitUsed(String permitId, PermitUsedInput input) {
         log.info("Permit used started {}", input);
-        LedgerPermit permit = permitRepository.findOneByPermitId(input.getPermitId()).get();
+        LedgerPermit permit = permitRepository.findOneByPermitId(permitId).get();
         String prevEventId = ledgerEventUtil.getPreviousEventId(permit.getIssuer());
         PermitUsedLedgerEvent e = new PermitUsedLedgerEvent(properties.getIssuerCode(),
                 permit.getIssuer(), prevEventId);
         e.setPermitId(permit.getPermitId());
         e.setActivityTimestamp(input.getActivityTimestamp());
         e.setActivityDetails(input.getActivityDetails());
-        e.setPermitId(input.getPermitId());
+        e.setPermitId(permitId);
         e.setActivityType(input.getActivityType());
         ledgerEventUtil.persistAndPublishEvent(e);
 
@@ -148,6 +152,9 @@ public class PermitService {
             List<Predicate> predicates = new ArrayList<Predicate>();
             if (input.getIssuer() != null) {
                 predicates.add(cb.equal(permit.get("issuer"), input.getIssuer()));
+            }
+            if (input.getIssuedFor() != null) {
+                predicates.add(cb.equal(permit.get("issuedFor"), input.getIssuedFor()));
             }
             if (input.getPermitType() != null) {
                 predicates.add(cb.equal(permit.get("permitType"), input.getPermitType()));
@@ -170,6 +177,20 @@ public class PermitService {
             Predicate p1 = cb.equal(sn.get("state"), SerialNumberState.CREATED);
             Predicate p2 = cb.equal(sn.get("state"), SerialNumberState.REVOKED);
             predicates.add(cb.or(p1, p2));
+            Predicate p = cb.and(predicates.toArray(new Predicate[predicates.size()]));
+            return p;
+        };
+        return spec;
+    }
+
+    static Specification<SerialNumber> filterSerialNumber(String authority, int py, PermitType pt,
+            int num) {
+        Specification<SerialNumber> spec = (sn, cq, cb) -> {
+            List<Predicate> predicates = new ArrayList<Predicate>();
+            predicates.add(cb.equal(sn.get("authorityCode"), authority));
+            predicates.add(cb.equal(sn.get("permitType"), pt));
+            predicates.add(cb.equal(sn.get("permitYear"), py));
+            predicates.add(cb.equal(sn.get("serialNumber"), num));
             Predicate p = cb.and(predicates.toArray(new Predicate[predicates.size()]));
             return p;
         };

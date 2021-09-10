@@ -1,6 +1,7 @@
 package epermit.commons;
 
 public enum ErrorCodes {
+    AUTHORITY_ALREADY_EXISTS,
     EVENT_ALREADY_EXISTS,
     PREVIOUS_EVENT_NOTFOUND,
     GENESIS_EVENT_ALREADY_EXISTS,
@@ -11,5 +12,6 @@ public enum ErrorCodes {
     INVALID_QUOTA_INTERVAL,
     PERMITID_ALREADY_EXISTS,
     PERMIT_NOTFOUND,
+    PERMIT_USED,
     INVALID_PERMITID;
 }

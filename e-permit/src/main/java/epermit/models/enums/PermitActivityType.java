@@ -1,7 +1,7 @@
 package epermit.models.enums;
 
 public enum PermitActivityType {
-    ENTERANCE("ENTERANCE"), EXIT("EXIT");
+    ENTRANCE("ENTRANCE"), EXIT("EXIT");
     public final String activityType;
 
     private PermitActivityType(String activityType) {

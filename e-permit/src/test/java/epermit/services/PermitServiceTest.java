@@ -113,9 +113,10 @@ public class PermitServiceTest {
         input.setPlateNumber("plateNumber");
         SerialNumber serialNumber = new SerialNumber();
         serialNumber.setSerialNumber(1);
-        
-        when(serialNumberRepository.findAll(ArgumentMatchers.<Specification<SerialNumber>>any(), ArgumentMatchers.<Pageable>any()))
-                .thenReturn(new PageImpl<>(List.of(serialNumber)));
+
+        when(serialNumberRepository.findAll(ArgumentMatchers.<Specification<SerialNumber>>any(),
+                ArgumentMatchers.<Pageable>any()))
+                        .thenReturn(new PageImpl<>(List.of(serialNumber)));
         when(properties.getIssuerCode()).thenReturn("TR");
         when(ledgerEventUtil.getPreviousEventId("UZ")).thenReturn("123");
         when(permitUtil.generateQrCode(any())).thenReturn("QR");
@@ -140,15 +141,14 @@ public class PermitServiceTest {
         PermitUsedInput input = new PermitUsedInput();
         input.setActivityDetails("Details");
         input.setActivityTimestamp(Long.valueOf(12344));
-        input.setActivityType(PermitActivityType.ENTERANCE);
-        input.setPermitId("UZ-TR-2021-1-1");
+        input.setActivityType(PermitActivityType.ENTRANCE);
         when(properties.getIssuerCode()).thenReturn("TR");
         when(ledgerEventUtil.getPreviousEventId("UZ")).thenReturn("123");
         LedgerPermit permit = new LedgerPermit();
         permit.setPermitId("permitId");
         permit.setIssuer("UZ");
         when(permitRepository.findOneByPermitId("UZ-TR-2021-1-1")).thenReturn(Optional.of(permit));
-        permitService.permitUsed(input);
+        permitService.permitUsed("UZ-TR-2021-1-1", input);
         verify(ledgerEventUtil, times(1)).persistAndPublishEvent(usedCaptor.capture());
         PermitUsedLedgerEvent event = usedCaptor.getValue();
         assertEquals("TR", event.getEventProducer());
@@ -156,7 +156,7 @@ public class PermitServiceTest {
         assertEquals(LedgerEventType.PERMIT_USED, event.getEventType());
         assertEquals("Details", event.getActivityDetails());
         assertEquals(Long.valueOf(12344), event.getActivityTimestamp());
-        assertEquals(PermitActivityType.ENTERANCE, event.getActivityType());
+        assertEquals(PermitActivityType.ENTRANCE, event.getActivityType());
         assertEquals("UZ-TR-2021-1-1", event.getPermitId());
         assertEquals("123", event.getPreviousEventId());
     }
@@ -169,6 +169,9 @@ public class PermitServiceTest {
         permit.setPermitId("TR-UZ-2021-1-1");
         permit.setIssuer("TR");
         permit.setIssuedFor("UZ");
+        SerialNumber serialNumber = new SerialNumber();
+        when(serialNumberRepository.findOne(ArgumentMatchers.<Specification<SerialNumber>>any()))
+                .thenReturn(Optional.of(serialNumber));
         when(permitRepository.findById(Long.valueOf(1))).thenReturn(Optional.of(permit));
         permitService.revokePermit(Long.valueOf(1));
         verify(ledgerEventUtil, times(1)).persistAndPublishEvent(revokedCaptor.capture());

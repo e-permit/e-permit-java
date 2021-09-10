@@ -36,7 +36,7 @@ public class EventController {
     @PostMapping("/permit-created")
     public LedgerEventResult permitCreated(@RequestHeader HttpHeaders headers,
             @Valid @RequestBody PermitCreatedLedgerEvent event) {
-        eventService.handleReceivedEvent(headers, GsonUtil.toMap(event));
+        eventService.handleReceivedEvent(headers, event);
         return LedgerEventResult.success();
     }
 
