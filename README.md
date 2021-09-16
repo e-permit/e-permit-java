@@ -32,22 +32,24 @@ EPERMIT_VERIFY_URI=https://e-permit.github.io/verify
 EPERMIT_ADMIN_PASSWORD=******
 ```
 
-```docker-compose up```
+To run execute: ```docker-compose up```
 
 After services are up and running following script can be executed:
 
 ```
 #!/bin/bash 
 CT="Content-Type: application/json"
-TR_URI="http://10.6.7.214:3020"
-UZ_URI="http://10.6.7.214:3030"
+TR_PUBLIC_URI="http://localhost:3021"
+TR_INTERNAL_URI="http://localhost:3020"
+UZ_PUBLIC_URI="http://localhost:3031"
+UZ_INTERNAL_URI="http://localhost:3030"
 AUTH="admin:******"
 
 create_tr_authority()
 {
   cat <<EOF
   {
-    "api_uri": "$TR_URI"
+    "api_uri": "$TR_PUBLIC_URI"
   }
 EOF
 }
@@ -56,7 +58,7 @@ create_uz_authority()
 {
   cat <<EOF
   {
-    "api_uri": "$UZ_URI"
+    "api_uri": "$UZ_PUBLIC_URI"
   }
 EOF
 }
@@ -101,13 +103,13 @@ create_tr_permit()
 EOF
 }
 
-curl "$TR_URI/authorities" -H "Content-Type: application/json" -u "$AUTH" -X POST --data "$(create_uz_authority)" 
-curl "$UZ_URI/authorities" -H "Content-Type: application/json" -u "$AUTH" -X POST --data "$(create_tr_authority)" 
-curl "$UZ_URI/authority_quotas" -H "Content-Type: application/json" -u "$AUTH" -X POST --data "$(create_tr_quota)" 
-curl "$TR_URI/authority_quotas" -H "Content-Type: application/json" -u "$AUTH" -X POST --data "$(create_uz_quota)" 
+curl "$TR_INTERNAL_URI/authorities" -H "Content-Type: application/json" -u "$AUTH" -X POST --data "$(create_uz_authority)" 
+curl "$UZ_INTERNAL_URI/authorities" -H "Content-Type: application/json" -u "$AUTH" -X POST --data "$(create_tr_authority)" 
+curl "$UZ_INTERNAL_URI/authority_quotas" -H "Content-Type: application/json" -u "$AUTH" -X POST --data "$(create_tr_quota)" 
+curl "$TR_INTERNAL_URI/authority_quotas" -H "Content-Type: application/json" -u "$AUTH" -X POST --data "$(create_uz_quota)" 
 
 for i in {1..250}
 do
-   curl "$TR_URI/permits" -H "Content-Type: application/json" -u "$AUTH" -X POST --data "$(create_tr_permit)" -H '$CT'; 
+   curl "$TR_INTERNAL_URI/permits" -H "Content-Type: application/json" -u "$AUTH" -X POST --data "$(create_tr_permit)" -H '$CT'; 
 done
 ```
