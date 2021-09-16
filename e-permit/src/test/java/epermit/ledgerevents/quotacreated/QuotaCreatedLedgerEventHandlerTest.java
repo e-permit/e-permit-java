@@ -1,16 +1,15 @@
 package epermit.ledgerevents.quotacreated;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -19,7 +18,6 @@ import org.springframework.data.jpa.domain.Specification;
 import epermit.commons.EpermitValidationException;
 import epermit.commons.ErrorCodes;
 import epermit.commons.GsonUtil;
-import epermit.entities.Authority;
 import epermit.entities.LedgerQuota;
 import epermit.models.EPermitProperties;
 import epermit.models.enums.PermitType;
@@ -59,7 +57,8 @@ public class QuotaCreatedLedgerEventHandlerTest {
     @Test
     void handleInvalidQuotaIntervalTest() {
         QuotaCreatedLedgerEvent event = new QuotaCreatedLedgerEvent("TR", "UZ", "0");
-        when(quotaRepository.count(any(Specification.class))).thenReturn(Long.valueOf(1));
+        when(quotaRepository.count(ArgumentMatchers.<Specification<LedgerQuota>>any()))
+                .thenReturn(Long.valueOf(1));
         EpermitValidationException ex =
                 Assertions.assertThrows(EpermitValidationException.class, () -> {
                     handler.handle(GsonUtil.toMap(event));

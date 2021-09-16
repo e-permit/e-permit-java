@@ -1,14 +1,17 @@
 package epermit;
 
 import java.util.List;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import epermit.appevents.LedgerEventCreated;
+import epermit.appevents.LedgerEventReplay;
 import epermit.ledgerevents.LedgerEventResult;
 import epermit.ledgerevents.LedgerEventUtil;
 import epermit.services.EventService;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -18,17 +21,16 @@ import lombok.extern.slf4j.Slf4j;
 public class EventScheduler {
 
     private final EventService eventService;
-    private final LedgerEventUtil ledgerEventUtil;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Scheduled(fixedDelay = 3 * 60 * 1000)
+    @SneakyThrows
     public void unsentEventsTask() {
         log.info("Unsent events task started");
-        List<LedgerEventCreated> list = eventService.getUnSendedEvents();
-        for (LedgerEventCreated ledgerEventCreated : list) {
-            LedgerEventResult r = ledgerEventUtil.sendEvent(ledgerEventCreated);
-            if (r.isOk()) {
-                eventService.handleSendedEvent(ledgerEventCreated.getEventId());
-            }
+        List<LedgerEventReplay> list = eventService.getUnSendedEvents();
+        for (LedgerEventReplay ledgerEventReplay : list) {
+            Thread.sleep(1 * 1000);
+            eventPublisher.publishEvent(ledgerEventReplay);
         }
     }
 }
