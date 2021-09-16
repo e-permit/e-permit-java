@@ -36,7 +36,7 @@ EPERMIT_PRIVATEKEY=******
 
 ```docker-compose up```
 
-After services are up it can be executed following script:
+After services are up and running following script can be executed:
 
 ```
 #!/bin/bash 
