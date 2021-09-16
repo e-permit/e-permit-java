@@ -15,7 +15,6 @@ EPERMIT_ADMIN_PASSWORD=******
 EPERMIT_KEY_PASSWORD=******
 EPERMIT_VERIFY_URI=https://e-permit.github.io/verify
 EPERMIT_ADMIN_PASSWORD=******
-EPERMIT_PRIVATEKEY=******
 ```
 
 #### uz.env
@@ -31,7 +30,6 @@ EPERMIT_ADMIN_PASSWORD=******
 EPERMIT_KEY_PASSWORD=******
 EPERMIT_VERIFY_URI=https://e-permit.github.io/verify
 EPERMIT_ADMIN_PASSWORD=******
-EPERMIT_PRIVATEKEY=******
 ```
 
 ```docker-compose up```
