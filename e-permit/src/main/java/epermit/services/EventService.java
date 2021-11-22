@@ -42,7 +42,7 @@ public class EventService {
     @SneakyThrows
     public List<LedgerEventReplay> getUnSendedEvents() {
         List<LedgerEventReplay> list = new ArrayList<>();
-        List<CreatedEvent> events = createdEventRepository.findAllBySendedFalseOrderByIdAsc();
+        List<CreatedEvent> events = createdEventRepository.findAllBySendedFalseOrderByCreatedAtAsc();
         for (CreatedEvent createdEvent : events) {
             LedgerEventReplay appEvent =  new LedgerEventReplay();
             appEvent.setEventCreated(ledgerEventUtil.createAppEvent(createdEvent));

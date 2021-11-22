@@ -3,6 +3,7 @@ package epermit.services;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.Optional;
+import java.util.UUID;
 import com.nimbusds.jose.jwk.ECKey;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -92,7 +93,7 @@ public class PrivateKeyService {
     }
 
     @Transactional
-    public void delete(Integer id) {
+    public void delete(UUID id) {
         log.info("KeyService delete started {}", id);
         Optional<PrivateKey> keyR = keyRepository.findById(id);
         if (!keyR.isPresent()) {

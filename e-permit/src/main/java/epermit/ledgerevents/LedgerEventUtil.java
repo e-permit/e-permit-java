@@ -43,7 +43,7 @@ public class LedgerEventUtil {
     public String getPreviousEventId(String consumer) {
         String previousEventId = "0";
         Optional<LedgerEvent> lastEventR = ledgerEventRepository
-                .findTopByProducerAndConsumerOrderByIdDesc(properties.getIssuerCode(), consumer);
+                .findTopByProducerAndConsumerOrderByCreatedAtDesc(properties.getIssuerCode(), consumer);
         if (lastEventR.isPresent()) {
             previousEventId = lastEventR.get().getEventId();
         }

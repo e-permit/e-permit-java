@@ -1,7 +1,9 @@
 package epermit.entities;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,6 +14,8 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 import epermit.models.enums.PermitType;
@@ -23,13 +27,17 @@ import lombok.ToString;
 @Data
 @NoArgsConstructor // JPA
 @Entity
-@Table(name = "ledger_permits")
+@Table(name = "epermitv2_ledger_permits")
 @SQLDelete(sql = "UPDATE ledger_permits SET deleted = true WHERE id = ?")
 @Where(clause = "deleted = false")
 public class LedgerPermit {
     @Id
-    @GeneratedValue
-    private Long id;
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(
+        name = "UUID",
+        strategy = "org.hibernate.id.UUIDGenerator"
+    )
+    private UUID id;
 
     @Column(name = "permit_id", nullable = false)
     private String permitId;
@@ -73,6 +81,10 @@ public class LedgerPermit {
 
     @Column(name = "deleted", nullable = false)
     private boolean deleted;
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
 
     
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "ledgerPermit")

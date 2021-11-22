@@ -1,6 +1,7 @@
 package epermit.controllers;
 
 import java.util.Map;
+import java.util.UUID;
 import javax.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -39,7 +40,7 @@ public class PermitController {
     }
 
     @GetMapping("/{id}")
-    public PermitDto getById(@PathVariable("id") Long id) {
+    public PermitDto getById(@PathVariable("id") UUID id) {
         return permitService.getById(id);
     }
 
@@ -50,7 +51,7 @@ public class PermitController {
     }
 
     @DeleteMapping("/{id}")
-    public void revoke(@PathVariable("id") Long id) {
+    public void revoke(@PathVariable("id") UUID id) {
         log.info("Revoke permit request. {}", id);
         permitService.revokePermit(id);
     }

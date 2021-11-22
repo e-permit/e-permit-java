@@ -1,5 +1,7 @@
 package epermit.entities;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -11,6 +13,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.GenericGenerator;
 import epermit.models.enums.PermitActivityType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -20,11 +24,15 @@ import lombok.ToString;
 @Data
 @NoArgsConstructor // JPA
 @Entity
-@Table(name = "ledger_permit_activities")
+@Table(name = "epermitv2_ledger_permit_activities")
 public class LedgerPermitActivity {
     @Id
-    @GeneratedValue
-    private int id;
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(
+        name = "UUID",
+        strategy = "org.hibernate.id.UUIDGenerator"
+    )
+    private UUID id;
 
     @Column(name = "activity_type", nullable = false)
     @Enumerated(EnumType.STRING)
@@ -35,6 +43,10 @@ public class LedgerPermitActivity {
 
     @Column(name = "activity_details", nullable = true)
     private String activityDetails;
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
 
     @ManyToOne
     @JoinColumn(name = "ledger_permit_id") 

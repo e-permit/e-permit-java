@@ -1,21 +1,29 @@
 package epermit.entities;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.GenericGenerator;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor // JPA
 @Entity
-@Table(name = "ledger_public_keys")
+@Table(name = "epermitv2_ledger_public_keys")
 public class LedgerPublicKey {
     @Id
-    @GeneratedValue
-    private int id;
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(
+        name = "UUID",
+        strategy = "org.hibernate.id.UUIDGenerator"
+    )
+    private UUID id;
 
     @Column(name = "authority_code", nullable = false)
     private String authorityCode;
@@ -25,6 +33,10 @@ public class LedgerPublicKey {
 
     @Column(name = "jwk", nullable = false, length = 5000)
     private String jwk;
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
 
     @Column(name = "revoked", nullable = false)
     private boolean revoked;

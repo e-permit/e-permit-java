@@ -6,6 +6,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import javax.persistence.criteria.Predicate;
 import org.modelmapper.ModelMapper;
 import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties.Pageable;
@@ -52,7 +53,7 @@ public class PermitService {
     private final LedgerPermitRepository permitRepository;
     private final SerialNumberRepository serialNumberRepository;
 
-    public PermitDto getById(Long id) {
+    public PermitDto getById(UUID id) {
         PermitDto dto = modelMapper.map(permitRepository.findById(id).get(), PermitDto.class);
         return dto;
     }
@@ -115,7 +116,7 @@ public class PermitService {
     }
 
     @Transactional
-    public void revokePermit(Long id) {
+    public void revokePermit(UUID id) {
         log.info("Revoke permit started {}", id);
         LedgerPermit permit = permitRepository.findById(id).get();
         String issuer = properties.getIssuerCode();

@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -79,7 +80,7 @@ public class PermitServiceTest {
 
     @Test
     void getByIdTest() {
-        Long id = Long.valueOf(1);
+        UUID id = UUID.randomUUID();
         LedgerPermit permit = new LedgerPermit();
         permit.setPermitId("permitId");
         when(permitRepository.findById(id)).thenReturn(Optional.of(permit));
@@ -172,8 +173,9 @@ public class PermitServiceTest {
         SerialNumber serialNumber = new SerialNumber();
         when(serialNumberRepository.findOne(ArgumentMatchers.<Specification<SerialNumber>>any()))
                 .thenReturn(Optional.of(serialNumber));
-        when(permitRepository.findById(Long.valueOf(1))).thenReturn(Optional.of(permit));
-        permitService.revokePermit(Long.valueOf(1));
+        UUID id = UUID.randomUUID();
+        when(permitRepository.findById(id)).thenReturn(Optional.of(permit));
+        permitService.revokePermit(id);
         verify(ledgerEventUtil, times(1)).persistAndPublishEvent(revokedCaptor.capture());
         PermitRevokedLedgerEvent event = revokedCaptor.getValue();
         assertEquals("TR", event.getEventProducer());

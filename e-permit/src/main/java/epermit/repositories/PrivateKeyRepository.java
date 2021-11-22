@@ -4,10 +4,11 @@ import org.springframework.stereotype.Repository;
 import epermit.entities.PrivateKey;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 @Repository
-public interface PrivateKeyRepository extends JpaRepository<PrivateKey, Integer> {
+public interface PrivateKeyRepository extends JpaRepository<PrivateKey, UUID> {
 
     PrivateKey findFirstByEnabledTrueOrderByIdDesc();
 

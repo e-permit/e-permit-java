@@ -1,12 +1,13 @@
 package epermit.models.dtos;
 
 import java.util.Date;
+import java.util.UUID;
 import epermit.models.enums.PermitType;
 import lombok.Data;
 
 @Data
 public class PermitDto {
-    private Long id;
+    private UUID id;
 
     private String issuer;
 

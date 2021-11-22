@@ -1,6 +1,7 @@
 package epermit.controllers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +39,7 @@ public class AuthorityQuotaControllerIT {
     @LocalServerPort
     private int port;
 
-    private int quotaId;
+    private UUID quotaId;
 
     @Autowired
     private TestRestTemplate testRestTemplate;

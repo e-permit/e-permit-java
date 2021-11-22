@@ -1,13 +1,14 @@
 package epermit.entities;
 
 import java.time.LocalDateTime;
-
+import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.Where;
@@ -17,13 +18,17 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor // JPA
 @Entity
-@Table(name = "keys")
+@Table(name = "epermitv2_keys")
 @SQLDelete(sql = "UPDATE keys SET deleted = true WHERE id = ?")
 @Where(clause = "deleted = false")
 public class PrivateKey {
     @Id
-    @GeneratedValue
-    private int id;
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(
+        name = "UUID",
+        strategy = "org.hibernate.id.UUIDGenerator"
+    )
+    private UUID id;
 
     @Column(name = "key_id", nullable = false)
     private String keyId;

@@ -1,12 +1,13 @@
 package epermit.models.dtos;
 
+import java.util.UUID;
 import epermit.models.enums.PermitType;
 import lombok.Data;
 
 @Data
 public class QuotaDto {
 
-    private int id;
+    private UUID id;
 
     private String permitIssuer;
 

@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -50,10 +51,11 @@ public class IssuedPermitControllerTest {
     @Test
     void getByIdTest() {
         PermitDto permit = new PermitDto();
-        when(permitService.getById(Long.valueOf(1))).thenReturn(permit);
-        PermitDto dto = controller.getById(Long.valueOf(1));
+        UUID id = UUID.randomUUID();
+        when(permitService.getById(id)).thenReturn(permit);
+        PermitDto dto = controller.getById(id);
         assertNotNull(dto);
-        verify(permitService, times(1)).getById(Long.valueOf(1));
+        verify(permitService, times(1)).getById(id);
     }
 
 
@@ -68,7 +70,8 @@ public class IssuedPermitControllerTest {
 
     @Test
     void revokeTest() {
-        controller.revoke(Long.valueOf(1));
-        verify(permitService, times(1)).revokePermit(eq(Long.valueOf(1)));
+        UUID id = UUID.randomUUID();
+        controller.revoke(id);
+        verify(permitService, times(1)).revokePermit(eq(id));
     }
 }

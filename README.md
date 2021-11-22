@@ -31,9 +31,13 @@ EPERMIT_KEY_PASSWORD=******
 EPERMIT_VERIFY_URI=https://e-permit.github.io/verify
 EPERMIT_ADMIN_PASSWORD=******
 ```
-To pacakage: ```mvn package```
+To package: 
 
-To run services execute: ```docker-compose up```
+```mvn package```
+
+To make services up:
+
+```docker-compose up```
 
 After services are up and running following script can be executed:
 

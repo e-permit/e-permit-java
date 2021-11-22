@@ -41,14 +41,12 @@ services:
     ports:
       - "3031:8080"
   trdb:
-    image: 'postgres:13.1-alpine'
+    image: oracleinanutshell/oracle-xe-11g:latest
     container_name: trdb
-    environment:
-      - POSTGRES_USER=compose-postgres
-      - POSTGRES_PASSWORD=compose-postgres
-      - POSTGRES_DB=devdb
     ports:
-      - "5432:5432"
+      - "1521:1521"
+    environment:
+      - ORACLE_ALLOW_REMOTE=true
   uzdb:
     image: 'postgres:13.1-alpine'
     container_name: uzdb

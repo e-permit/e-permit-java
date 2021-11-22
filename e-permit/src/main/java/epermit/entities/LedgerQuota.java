@@ -1,5 +1,7 @@
 package epermit.entities;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -7,6 +9,8 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.GenericGenerator;
 import epermit.models.enums.PermitType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,11 +18,15 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name = "ledger_quotas")
+@Table(name = "epermitv2_ledger_quotas")
 public class LedgerQuota {
     @Id
-    @GeneratedValue
-    private int id;
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(
+        name = "UUID",
+        strategy = "org.hibernate.id.UUIDGenerator"
+    )
+    private UUID id;
 
     @Column(name = "permit_issuer", nullable = false)
     private String permitIssuer;
@@ -41,6 +49,10 @@ public class LedgerQuota {
 
     @Column(name = "active", nullable = false)
     private boolean active;
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
 }
 
 
