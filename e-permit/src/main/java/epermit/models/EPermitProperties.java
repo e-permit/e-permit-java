@@ -8,8 +8,7 @@ import lombok.Setter;
 
 @Component
 @Getter
-@Setter
-@ConfigurationProperties(prefix = "epermit")
+@Setter@ConfigurationProperties(prefix = "epermit")
 public class EPermitProperties {
 
     private String keyPassword;

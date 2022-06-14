@@ -4,11 +4,11 @@ Create ```.env``` files in the root directory to run services.
 The sample ```.env``` file is like following:
 
 
-#### uz.env
+#### epermit.env
 
 ```
 SPRING_PROFILES_ACTIVE=dev
-SPRING_DATASOURCE_URL=jdbc:postgresql://uzdb:5432/devdb
+SPRING_DATASOURCE_URL=jdbc:postgresql://epermitdb:5432/devdb
 SPRING_DATASOURCE_USERNAME=compose-postgres
 SPRING_DATASOURCE_PASSWORD=compose-postgres
 SPRING_DATASOURCE_DRIVER=org.postgresql.Driver
