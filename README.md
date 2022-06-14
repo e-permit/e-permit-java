@@ -1,21 +1,8 @@
 # e-permit-java
 
-Create ```tr.env``` and ```uz.env``` files in the root directory to run services. The sample ```.env``` file is like following:
+Create ```.env``` files in the root directory to run services. 
+The sample ```.env``` file is like following:
 
-#### tr.env
-
-```
-SPRING_PROFILES_ACTIVE=dev
-SPRING_DATASOURCE_URL=jdbc:postgresql://trdb:5432/devdb
-SPRING_DATASOURCE_USERNAME=compose-postgres
-SPRING_DATASOURCE_PASSWORD=compose-postgres
-EPERMIT_ISSUER_CODE=TR
-EPERMIT_ISSUER_NAME=Turkey
-EPERMIT_ADMIN_PASSWORD=******
-EPERMIT_KEY_PASSWORD=******
-EPERMIT_VERIFY_URI=https://e-permit.github.io/verify
-EPERMIT_ADMIN_PASSWORD=******
-```
 
 #### uz.env
 
@@ -24,14 +11,18 @@ SPRING_PROFILES_ACTIVE=dev
 SPRING_DATASOURCE_URL=jdbc:postgresql://uzdb:5432/devdb
 SPRING_DATASOURCE_USERNAME=compose-postgres
 SPRING_DATASOURCE_PASSWORD=compose-postgres
+SPRING_DATASOURCE_DRIVER=org.postgresql.Driver
+SPRING_DATASOURCE_DIALECT=org.hibernate.dialect.PostgreSQLDialect
 EPERMIT_ISSUER_CODE=UZ
 EPERMIT_ISSUER_NAME=Uzbekistan
-EPERMIT_ADMIN_PASSWORD=******
-EPERMIT_KEY_PASSWORD=******
-EPERMIT_VERIFY_URI=https://e-permit.github.io/verify
-EPERMIT_ADMIN_PASSWORD=******
+EPERMIT_ADMIN_PASSWORD=<pwd>
+EPERMIT_KEY_PASSWORD=<pwd>
+EPERMIT_VERIFY_URI=<verify uri eg https://e-permit.github.io/verify>
+EPERMIT_GRAYLOG_HOST=<Graylog host>
+EPERMIT_GRAYLOG_PORT=12301
+
 ```
-To package: 
+To build: 
 
 ```mvn package```
 
@@ -39,7 +30,56 @@ To make services up:
 
 ```docker-compose up```
 
+Your internal api: ```http://localhost:3020``` or ```https://<your domain>:3020```
+
+Your public api: ```http://localhost:3021``` or ```https://<your domain>:3021```
+
 After services are up and running following script can be executed:
+
+To add a new country, send http post to your internal api(http://localhost:3020/authorities). Suppose country api url is "http:/country.gov" then post body should be like this:
+
+`POST` to `http://localhost:3020/authorities`
+
+```json
+{
+  "api_uri": "http:/country.gov"
+}
+```
+
+Then executing same request for other side(country), handshaking will be estabilished. 
+
+After handshaking you can define a quota for that country(suppose TR) with:
+
+`POST` to `http://localhost:3020/authority_quotas`
+
+```json
+{
+    "authority_code": "TR",
+    "permit_type": "BILITERAL",
+    "permit_year": 2021,
+    "start_number": 1,
+    "end_number": 250
+}
+```
+
+Now other country can define permits for own vehicles.
+If other country gives you some quota with same way, you can also define permit like below:
+
+
+`POST` to `http://localhost:3020/permits`
+
+```json
+{
+    "issued_for": "TR",
+    "permit_year": 2021,
+    "permit_type": "BILITERAL",
+    "company_name": "TECT",
+    "company_id": "123",
+    "plate_number": "TECT"
+}
+```
+
+Sample script with tr-uz scenerio:
 
 ```
 #!/bin/bash 
