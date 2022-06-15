@@ -24,14 +24,14 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
     - name: Build and push public api
-        uses: docker/build-push-action@v3
-        with:
-          context: "{{defaultContext}}:e-permit-public-api"
-          push: true
-          tags: epermit/publicapi:latest
+      uses: docker/build-push-action@v3
+      with:
+        context: "{{defaultContext}}:e-permit-public-api"
+        push: true
+        tags: epermit/publicapi:latest
     - name: Build and push internal api
-        uses: docker/build-push-action@v3
-        with:
-          context: "{{defaultContext}}:e-permit-internal-api"
-          push: true
-          tags: epermit/internalapi:latest
+      uses: docker/build-push-action@v3
+      with:
+        context: "{{defaultContext}}:e-permit-internal-api"
+        push: true
+        tags: epermit/internalapi:latest
