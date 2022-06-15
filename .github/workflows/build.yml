@@ -35,10 +35,10 @@ jobs:
       with:
         context: ./e-permit-public-api
         push: true
-        tags: e-permit/publicapi:latest
+        tags: ghcr.io/e-permit/publicapi:latest
     - name: Build and push internal api
       uses: docker/build-push-action@v3
       with:
         context: ./e-permit-internal-api
         push: true
-        tags: e-permit/internalapi:latest
+        tags: ghcr.io/e-permit/internalapi:latest
