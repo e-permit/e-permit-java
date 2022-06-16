@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor // JPA
 @Entity
-@Table(name = "epermitv2_authorities")
+@Table(name = "epermit_authorities")
 public class Authority {
 
   @Id

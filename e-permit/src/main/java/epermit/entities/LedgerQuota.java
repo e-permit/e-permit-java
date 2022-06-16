@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name = "epermitv2_ledger_quotas")
+@Table(name = "epermit_ledger_quotas")
 public class LedgerQuota {
     @Id
     @GeneratedValue(generator = "UUID")

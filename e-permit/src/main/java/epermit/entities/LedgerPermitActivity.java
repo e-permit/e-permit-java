@@ -24,7 +24,7 @@ import lombok.ToString;
 @Data
 @NoArgsConstructor // JPA
 @Entity
-@Table(name = "epermitv2_ledger_permit_activities")
+@Table(name = "epermit_ledger_permit_activities")
 public class LedgerPermitActivity {
     @Id
     @GeneratedValue(generator = "UUID")

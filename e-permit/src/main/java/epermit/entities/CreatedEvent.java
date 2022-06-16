@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name = "epermitv2_created_events")
+@Table(name = "epermit_created_events")
 public class CreatedEvent {
     @Id
     @GeneratedValue(generator = "UUID")

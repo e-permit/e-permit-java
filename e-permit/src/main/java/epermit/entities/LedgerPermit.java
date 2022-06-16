@@ -27,8 +27,8 @@ import lombok.ToString;
 @Data
 @NoArgsConstructor // JPA
 @Entity
-@Table(name = "epermitv2_ledger_permits")
-@SQLDelete(sql = "UPDATE ledger_permits SET deleted = true WHERE id = ?")
+@Table(name = "epermit_ledger_permits")
+@SQLDelete(sql = "UPDATE epermit_ledger_permits SET deleted = true WHERE id = ?")
 @Where(clause = "deleted = false")
 public class LedgerPermit {
     @Id

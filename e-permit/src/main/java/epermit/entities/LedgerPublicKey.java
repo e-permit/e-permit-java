@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor // JPA
 @Entity
-@Table(name = "epermitv2_ledger_public_keys")
+@Table(name = "epermit_ledger_public_keys")
 public class LedgerPublicKey {
     @Id
     @GeneratedValue(generator = "UUID")

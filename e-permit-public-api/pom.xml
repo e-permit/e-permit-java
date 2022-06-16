@@ -32,6 +32,10 @@
 			<artifactId>e-permit</artifactId>
 			<version>1.0.0</version>
 		</dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+         </dependency>
 	</dependencies>
 	<build>
         <finalName>e-permit-public-api</finalName>

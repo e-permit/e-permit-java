@@ -45,9 +45,14 @@ public class PrivateKeyService {
             epermit.models.dtos.PrivateKey key;
             String privateKey = properties.getIssuerPrivateKey();
             if (privateKey != null && !privateKey.isBlank()) {
-                String jwkStr = new String(Base64.getUrlDecoder().decode(privateKey));
-                log.info("Private key exist");
-                key = keyUtil.create(ECKey.parse(jwkStr));
+                // if an encrypted key is provided via env, use it
+                try {
+                    String jwkStr = new String(Base64.getUrlDecoder().decode(privateKey));
+                    log.info("Private key exist");
+                    key = keyUtil.create(ECKey.parse(jwkStr));
+                } catch (Exception ex) {
+                    key = keyUtil.create("1");
+                }
             } else {
                 key = keyUtil.create("1");
             }

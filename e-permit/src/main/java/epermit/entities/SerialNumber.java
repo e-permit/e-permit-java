@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor // JPA
 @Entity
-@Table(name = "epermitv2_serial_numbers")
+@Table(name = "epermit_serial_numbers")
 public class SerialNumber {
     @Id
     @GeneratedValue(generator = "UUID")
