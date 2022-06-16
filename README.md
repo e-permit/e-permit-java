@@ -1,28 +1,111 @@
 # e-permit-java
 
-Create ```.env``` files in the root directory to run services. 
-The sample ```.env``` file is like following:
+## Quickstart
 
+Create ```epermit.env``` file in the working directory and fill below properties: 
 
 #### epermit.env
 
+```properties
+SPRING_PROFILES_ACTIVE=dev
+SPRING_DATASOURCE_URL=<db url>
+SPRING_DATASOURCE_USERNAME=<db user>
+SPRING_DATASOURCE_PASSWORD=<db pwd>
+SPRING_DATASOURCE_DRIVER=<db driver>
+SPRING_DATASOURCE_DIALECT=<dialect>
+EPERMIT_ISSUER_CODE=<Country code>
+EPERMIT_ISSUER_NAME=<Country name>
+EPERMIT_ADMIN_PASSWORD=<admin pwd>
+EPERMIT_KEY_PASSWORD=<admin pwd for encrypt key>
+EPERMIT_VERIFY_URI=<verify uri eg https://e-permit.github.io/verify>
+EPERMIT_GRAYLOG_HOST=<Graylog host eg *>
+EPERMIT_GRAYLOG_PORT=12301
 ```
+
+### To run public api
+
+Create a docker-compose.yml file in working directory with following content:
+
+```yaml
+version: '3.7'
+services:
+  public-api:
+    image: ghcr.io/e-permit/publicapi:latest
+    env_file: 
+      - epermit.env
+    ports:
+      - "8080:8080"
+```
+
+### To run internal api
+
+Create a docker-compose.yml file in working directory with following content:
+
+```yaml
+version: '3.7'
+services:
+  public-api:
+    image: ghcr.io/e-permit/internalapi:latest
+    env_file: 
+      - epermit.env
+    ports:
+      - "8080:8080"
+```
+
+## Development node
+
+### Docker compose
+
+```yaml
+version: '3.7'
+services:
+  internal-api:
+    image: ghcr.io/e-permit/internalapi:latest
+    depends_on:
+      - epermitdb
+    env_file: 
+      - epermit.env
+    ports:
+      - "3020:8080"
+  public-api:
+    image: ghcr.io/e-permit/publicapi:latest
+    depends_on:
+      - epermitdb
+    env_file: 
+      - epermit.env
+    ports:
+      - "3021:8080"
+  epermitdb:
+    image: 'postgres:13.1-alpine'
+    container_name: epermitdb
+    environment:
+      - POSTGRES_USER=compose-postgres
+      - POSTGRES_PASSWORD=compose-postgres
+      - POSTGRES_DB=devdb
+    ports:
+      - "5432:5432"
+```
+
+### Environment Variables
+
+```properties
 SPRING_PROFILES_ACTIVE=dev
 SPRING_DATASOURCE_URL=jdbc:postgresql://epermitdb:5432/devdb
 SPRING_DATASOURCE_USERNAME=compose-postgres
 SPRING_DATASOURCE_PASSWORD=compose-postgres
 SPRING_DATASOURCE_DRIVER=org.postgresql.Driver
 SPRING_DATASOURCE_DIALECT=org.hibernate.dialect.PostgreSQLDialect
-EPERMIT_ISSUER_CODE=UZ
-EPERMIT_ISSUER_NAME=Uzbekistan
-EPERMIT_ADMIN_PASSWORD=<pwd>
-EPERMIT_KEY_PASSWORD=<pwd>
-EPERMIT_VERIFY_URI=<verify uri eg https://e-permit.github.io/verify>
-EPERMIT_GRAYLOG_HOST=<Graylog host>
+EPERMIT_ISSUER_CODE=TR
+EPERMIT_ISSUER_NAME=Turkiye
+EPERMIT_ADMIN_PASSWORD=*
+EPERMIT_KEY_PASSWORD=*
+EPERMIT_VERIFY_URI=https://e-permit.github.io/verify
+EPERMIT_GRAYLOG_HOST=*
 EPERMIT_GRAYLOG_PORT=12301
-
 ```
-To build: 
+
+
+## Build 
 
 ```mvn package```
 
@@ -62,7 +145,7 @@ After handshaking you can define a quota for that country(suppose TR) with:
 }
 ```
 
-Now other country can define permits for own vehicles.
+Now other country can define permits for its own vehicles.
 If other country gives you some quota with same way, you can also define permit like below:
 
 
