@@ -1,38 +1,51 @@
 <configuration>
-    <springProperty scope="context" name="host" source="epermit.graylog.host"/>
-    <springProperty scope="context" name="port" source="epermit.graylog.port"/>
-    <springProperty scope="context" name="environment" source="spring.profiles.active"/>
-    <appender name="GELF" class="de.siegmar.logbackgelf.GelfTcpAppender">
-        <graylogHost>${host}</graylogHost>
-        <graylogPort>${port}</graylogPort>
-        <connectTimeout>15000</connectTimeout>
-        <reconnectInterval>300</reconnectInterval>
-        <maxRetries>2</maxRetries>
-        <retryDelay>3000</retryDelay>
-        <poolSize>2</poolSize>
-        <poolMaxWaitTime>5000</poolMaxWaitTime>
-        <encoder class="de.siegmar.logbackgelf.GelfEncoder">
-            <originHost>${host}</originHost>
-            <includeRawMessage>false</includeRawMessage>
-            <includeMarker>true</includeMarker>
-            <includeMdcData>true</includeMdcData>
-            <includeCallerData>false</includeCallerData>
-            <includeRootCauseData>false</includeRootCauseData>
-            <includeLevelName>false</includeLevelName>
-            <shortPatternLayout class="ch.qos.logback.classic.PatternLayout">
-                <pattern>%m%nopex</pattern>
-            </shortPatternLayout>
-            <fullPatternLayout class="ch.qos.logback.classic.PatternLayout">
-                <pattern>%m%n</pattern>
-            </fullPatternLayout>
-            <numbersAsString>false</numbersAsString>
-            <staticField>Environment:${environment}</staticField>
-        </encoder>
-    </appender>
-    <appender name="ASYNC GELF" class="ch.qos.logback.classic.AsyncAppender">
-        <appender-ref ref="GELF" />
-    </appender>
-
+    <springProperty scope="context" name="environment" source="spring.profiles.active" />
+    <if condition='isDefined("EPERMIT_LOG_BASEPATH")'>
+        <then>
+            <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+                <file>${EPERMIT_LOG_BASEPATH}/epermit-internal.log</file>
+                <append>false</append>
+                <immediateFlush>true</immediateFlush>
+                <encoder>
+                    <pattern>%-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
+                </encoder>
+            </appender>
+        </then>
+    </if>
+    <if condition='isDefined("EPERMIT_GRAYLOG_HOST")'>
+        <then>
+            <appender name="GELF" class="de.siegmar.logbackgelf.GelfTcpAppender">
+                <graylogHost>${EPERMIT_GRAYLOG_HOST}</graylogHost>
+                <graylogPort>${EPERMIT_GRAYLOG_PORT}</graylogPort>
+                <connectTimeout>15000</connectTimeout>
+                <reconnectInterval>300</reconnectInterval>
+                <maxRetries>2</maxRetries>
+                <retryDelay>3000</retryDelay>
+                <poolSize>2</poolSize>
+                <poolMaxWaitTime>5000</poolMaxWaitTime>
+                <encoder class="de.siegmar.logbackgelf.GelfEncoder">
+                    <originHost>${EPERMIT_GRAYLOG_HOST}</originHost>
+                    <includeRawMessage>false</includeRawMessage>
+                    <includeMarker>true</includeMarker>
+                    <includeMdcData>true</includeMdcData>
+                    <includeCallerData>false</includeCallerData>
+                    <includeRootCauseData>false</includeRootCauseData>
+                    <includeLevelName>false</includeLevelName>
+                    <shortPatternLayout class="ch.qos.logback.classic.PatternLayout">
+                        <pattern>%m%nopex</pattern>
+                    </shortPatternLayout>
+                    <fullPatternLayout class="ch.qos.logback.classic.PatternLayout">
+                        <pattern>%m%n</pattern>
+                    </fullPatternLayout>
+                    <numbersAsString>false</numbersAsString>
+                    <staticField>Environment:${environment}</staticField>
+                </encoder>
+            </appender>
+            <appender name="ASYNC GELF" class="ch.qos.logback.classic.AsyncAppender">
+                <appender-ref ref="GELF" />
+            </appender>
+        </then>
+    </if>
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <layout class="ch.qos.logback.classic.PatternLayout">
             <Pattern>
@@ -42,6 +55,15 @@
     </appender>
     <root level="info">
         <appender-ref ref="CONSOLE" />
-        <appender-ref ref="ASYNC GELF" />
+        <if condition='isDefined("EPERMIT_GRAYLOG_HOST")'>
+            <then>
+                <appender-ref ref="ASYNC GELF" />
+            </then>
+        </if>
+        <if condition='isDefined("EPERMIT_LOG_BASEPATH")'>
+            <then>
+                <appender-ref ref="FILE" />
+            </then>
+        </if>
     </root>
 </configuration>

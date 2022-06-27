@@ -16,10 +16,10 @@ SPRING_DATASOURCE_DIALECT=<dialect>
 EPERMIT_ISSUER_CODE=<Country code>
 EPERMIT_ISSUER_NAME=<Country name>
 EPERMIT_ADMIN_PASSWORD=<admin pwd>
-EPERMIT_KEY_PASSWORD=<admin pwd for encrypt key>
-EPERMIT_VERIFY_URI=<verify uri eg https://e-permit.github.io/verify>
-EPERMIT_GRAYLOG_HOST=<Graylog host eg *>
-EPERMIT_GRAYLOG_PORT=12301
+EPERMIT_KEY_PASSWORD=<admin pwd for encrypting key>
+EPERMIT_VERIFY_URI=<verify uri e.g https://e-permit.github.io/verify>
+# Optional(if you use docker compose you can mount host volume to container volume )
+EPERMIT_LOG_BASEPATH=<log base path e.g /var/log/epermit> 
 ```
 
 ### To run public api
@@ -100,8 +100,6 @@ EPERMIT_ISSUER_NAME=Turkiye
 EPERMIT_ADMIN_PASSWORD=*
 EPERMIT_KEY_PASSWORD=*
 EPERMIT_VERIFY_URI=https://e-permit.github.io/verify
-EPERMIT_GRAYLOG_HOST=*
-EPERMIT_GRAYLOG_PORT=12301
 ```
 
 
