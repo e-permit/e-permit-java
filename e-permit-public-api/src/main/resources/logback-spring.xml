@@ -24,7 +24,7 @@
                 <poolSize>2</poolSize>
                 <poolMaxWaitTime>5000</poolMaxWaitTime>
                 <encoder class="de.siegmar.logbackgelf.GelfEncoder">
-                    <originHost>${EPERMIT_GRAYLOG_HOST}</originHost>
+                    <originHost>epermit-public-api</originHost>
                     <includeRawMessage>false</includeRawMessage>
                     <includeMarker>true</includeMarker>
                     <includeMdcData>true</includeMdcData>

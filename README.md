@@ -90,6 +90,9 @@ services:
 
 ```properties
 SPRING_PROFILES_ACTIVE=dev
+HIBERNATE_DDL_AUTO=none
+FLYWAY_ENABLED=true
+FLYWAY_SCHEMAS=public
 SPRING_DATASOURCE_URL=jdbc:postgresql://epermitdb:5432/devdb
 SPRING_DATASOURCE_USERNAME=compose-postgres
 SPRING_DATASOURCE_PASSWORD=compose-postgres
