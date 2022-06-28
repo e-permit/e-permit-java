@@ -1,6 +1,5 @@
 package epermit.ledgerevents.permitused;
 
-import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -29,7 +28,5 @@ public class PermitUsedLedgerEvent extends LedgerEventBase {
     @Min(1609459200)
     private Long activityTimestamp;
 
-    @Max(1000)
     private String activityDetails;
-
 }
