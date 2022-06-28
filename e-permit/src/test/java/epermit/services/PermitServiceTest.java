@@ -173,9 +173,8 @@ public class PermitServiceTest {
         SerialNumber serialNumber = new SerialNumber();
         when(serialNumberRepository.findOne(ArgumentMatchers.<Specification<SerialNumber>>any()))
                 .thenReturn(Optional.of(serialNumber));
-        UUID id = UUID.randomUUID();
-        when(permitRepository.findById(id)).thenReturn(Optional.of(permit));
-        permitService.revokePermit(id);
+        when(permitRepository.findOneByPermitId("TR-UZ-2021-1-1")).thenReturn(Optional.of(permit));
+        permitService.revokePermit("TR-UZ-2021-1-1");
         verify(ledgerEventUtil, times(1)).persistAndPublishEvent(revokedCaptor.capture());
         PermitRevokedLedgerEvent event = revokedCaptor.getValue();
         assertEquals("TR", event.getEventProducer());

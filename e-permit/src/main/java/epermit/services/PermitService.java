@@ -116,9 +116,9 @@ public class PermitService {
     }
 
     @Transactional
-    public void revokePermit(UUID id) {
-        log.info("Revoke permit started {}", id);
-        LedgerPermit permit = permitRepository.findById(id).get();
+    public void revokePermit(String permitId) {
+        log.info("Revoke permit started {}", permitId);
+        LedgerPermit permit = permitRepository.findOneByPermitId(permitId).get();
         String issuer = properties.getIssuerCode();
         String prevEventId = ledgerEventUtil.getPreviousEventId(permit.getIssuedFor());
         PermitRevokedLedgerEvent e =

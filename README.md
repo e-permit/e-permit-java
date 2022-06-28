@@ -166,6 +166,26 @@ If other country gives you some quota with same way, you can also define permit 
 }
 ```
 
+When vehicle does enter-exit, target country can send info via:
+
+`POST` to `http://localhost:3020/permits/{id}/activities`
+
+id: e.g TR-UZ-2022-1-1
+
+```json
+{
+    "activity_type": "ENTRANCE | EXIT",
+    "activity_timestamp": 1656406166,
+    "activity_details": "Optional"
+}
+```
+
+If a country needs to revoke unused permit:
+
+`DELETE` to `http://localhost:3020/permits/{id}`
+
+id is UUID for permit
+
 Sample script with tr-uz scenerio:
 
 ```

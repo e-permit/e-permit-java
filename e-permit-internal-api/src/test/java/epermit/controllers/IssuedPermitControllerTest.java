@@ -70,7 +70,7 @@ public class IssuedPermitControllerTest {
 
     @Test
     void revokeTest() {
-        UUID id = UUID.randomUUID();
+        String id = "TR-UZ-2022-1-1";
         controller.revoke(id);
         verify(permitService, times(1)).revokePermit(eq(id));
     }

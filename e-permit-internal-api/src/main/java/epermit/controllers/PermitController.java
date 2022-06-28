@@ -51,7 +51,7 @@ public class PermitController {
     }
 
     @DeleteMapping("/{id}")
-    public void revoke(@PathVariable("id") UUID id) {
+    public void revoke(@PathVariable("id") String id) {
         log.info("Revoke permit request. {}", id);
         permitService.revokePermit(id);
     }
