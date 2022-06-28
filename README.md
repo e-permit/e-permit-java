@@ -8,6 +8,9 @@ Create ```epermit.env``` file in the working directory and fill below properties
 
 ```properties
 SPRING_PROFILES_ACTIVE=dev
+HIBERNATE_DDL_AUTO=none
+FLYWAY_ENABLED=true
+FLYWAY_SCHEMAS=public
 SPRING_DATASOURCE_URL=<db url>
 SPRING_DATASOURCE_USERNAME=<db user>
 SPRING_DATASOURCE_PASSWORD=<db pwd>
