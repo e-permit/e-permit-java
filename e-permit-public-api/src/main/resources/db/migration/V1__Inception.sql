@@ -43,7 +43,7 @@ CREATE TABLE public.epermit_ledger_events (
 );
 
 
-CREATE TABLE public.epermit_ledger_permit_activities (
+CREATE TABLE public.epermit_ledger_permit_acts (
     id uuid NOT NULL,
     activity_details character varying(255),
     activity_timestamp bigint NOT NULL,
@@ -120,8 +120,8 @@ ALTER TABLE ONLY public.epermit_keys
 ALTER TABLE ONLY public.epermit_ledger_events
     ADD CONSTRAINT epermit_ledger_events_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY public.epermit_ledger_permit_activities
-    ADD CONSTRAINT epermit_ledger_permit_activities_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY public.epermit_ledger_permit_acts
+    ADD CONSTRAINT epermit_ledger_permit_acts_pkey PRIMARY KEY (id);
 
 
 ALTER TABLE ONLY public.epermit_ledger_permits
@@ -136,6 +136,6 @@ ALTER TABLE ONLY public.epermit_ledger_quotas
 ALTER TABLE ONLY public.epermit_serial_numbers
     ADD CONSTRAINT epermit_serial_numbers_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY public.epermit_ledger_permit_activities
+ALTER TABLE ONLY public.epermit_ledger_permit_acts
     ADD CONSTRAINT fkk6245uf9t2hvkpx2ckvq6hx04 FOREIGN KEY (ledger_permit_id) REFERENCES public.epermit_ledger_permits(id);
 

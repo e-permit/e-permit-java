@@ -6,12 +6,13 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import com.google.gson.ToNumberPolicy;
 import com.google.gson.reflect.TypeToken;
 
 public class GsonUtil {
     public static Gson getGson() {
         return new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-                .create();
+                .setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE).create();
     }
 
     public static <T> T fromMap(Map<String, Object> payload, Class<T> objectClass) {

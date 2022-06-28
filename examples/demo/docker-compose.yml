@@ -7,7 +7,7 @@ services:
     env_file:
       - tr.env
     ports:
-      - "3020:8080"
+      - "3050:8080"
     volumes:
       - ${EPERMIT_LOG_VOLUME}/tr:/var/log/epermit
   tr-public-api:
@@ -17,7 +17,7 @@ services:
     env_file:
       - tr.env
     ports:
-      - "3021:8080"
+      - "3051:8080"
     volumes:
       - ${EPERMIT_LOG_VOLUME}/tr:/var/log/epermit
   uz-internal-api:
@@ -27,7 +27,7 @@ services:
     env_file:
       - uz.env
     ports:
-      - "3030:8080"
+      - "3060:8080"
     volumes:
       - ${EPERMIT_LOG_VOLUME}/uz:/var/log/epermit
   uz-public-api:
@@ -37,7 +37,7 @@ services:
     env_file:
       - uz.env
     ports:
-      - "3031:8080"
+      - "3061:8080"
     volumes:
       - ${EPERMIT_LOG_VOLUME}/tr:/var/log/epermit
   trdb:
@@ -47,6 +47,8 @@ services:
       - POSTGRES_USER=compose-postgres
       - POSTGRES_PASSWORD=compose-postgres
       - POSTGRES_DB=devdb
+    ports:
+      - "5432:5432"
   uzdb:
     image: 'postgres:13.1-alpine'
     container_name: uzdb
@@ -54,3 +56,5 @@ services:
       - POSTGRES_USER=compose-postgres
       - POSTGRES_PASSWORD=compose-postgres
       - POSTGRES_DB=devdb
+    ports:
+      - "5433:5432"
