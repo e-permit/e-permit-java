@@ -184,7 +184,7 @@ If a country needs to revoke unused permit:
 
 `DELETE` to `http://localhost:3020/permits/{id}`
 
-id is UUID for permit
+id: e.g TR-UZ-2022-1-1
 
 Sample script with tr-uz scenerio:
 
