@@ -48,7 +48,7 @@ services:
       - POSTGRES_PASSWORD=compose-postgres
       - POSTGRES_DB=devdb
     ports:
-      - "5432:5432"
+      - "5434:5432"
   uzdb:
     image: 'postgres:13.1-alpine'
     container_name: uzdb

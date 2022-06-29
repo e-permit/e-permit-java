@@ -64,6 +64,7 @@ public class PermitCreatedLedgerEventHandlerTest {
         event.setPermitYear(2021);
         event.setPlateNumber("A");
         event.setSerialNumber(1);
+        event.setQrCode("qrCode");
         Set<ConstraintViolation<PermitCreatedLedgerEvent>> constraintViolations =
                 validator.validate(event);
         assertEquals(constraintViolations.size(), 0);

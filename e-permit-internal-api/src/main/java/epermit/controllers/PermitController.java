@@ -29,7 +29,6 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/permits")
 @CrossOrigin(origins = "*")
 public class PermitController {
-
     private final PermitService permitService;
 
     @GetMapping()
@@ -41,7 +40,8 @@ public class PermitController {
 
     @GetMapping("/{id}")
     public PermitDto getById(@PathVariable("id") UUID id) {
-        return permitService.getById(id);
+        PermitDto permit = permitService.getById(id);
+        return permit;
     }
 
     @PostMapping()

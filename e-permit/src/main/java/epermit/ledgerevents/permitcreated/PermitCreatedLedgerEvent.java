@@ -61,6 +61,9 @@ public class PermitCreatedLedgerEvent extends LedgerEventBase {
     @NotNull
     private String plateNumber;
 
+    @NotNull
+    private String qrCode;
+
     private Map<String, Object> otherClaims;
 
     @AssertTrue(message = "Invalid issued_at")

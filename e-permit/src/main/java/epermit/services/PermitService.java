@@ -105,6 +105,7 @@ public class PermitService {
         e.setSerialNumber(serialNumber.getSerialNumber());
         e.setPermitIssuer(properties.getIssuerCode());
         e.setPermitIssuedFor(input.getIssuedFor());
+        e.setQrCode(qrCode);
         if (!input.getOtherClaims().isEmpty()) {
             e.setOtherClaims(input.getOtherClaims());
         }

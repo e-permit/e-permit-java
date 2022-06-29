@@ -67,6 +67,7 @@ CREATE TABLE public.epermit_ledger_permits (
     permit_type character varying(255) NOT NULL,
     permit_year integer NOT NULL,
     plate_number character varying(255) NOT NULL,
+    qr_code character varying(5000) NOT NULL,
     serial_number integer NOT NULL,
     used boolean NOT NULL
 );
