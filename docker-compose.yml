@@ -27,3 +27,5 @@ services:
       - POSTGRES_USER=compose-postgres
       - POSTGRES_PASSWORD=compose-postgres
       - POSTGRES_DB=devdb
+    ports:
+      - "5432:5432"

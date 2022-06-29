@@ -2,11 +2,6 @@ package epermit.utils;
 
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import java.util.Optional;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -18,8 +13,6 @@ import epermit.models.EPermitProperties;
 import epermit.models.enums.PermitType;
 import epermit.models.inputs.CreatePermitIdInput;
 import epermit.repositories.AuthorityRepository;
-import epermit.repositories.LedgerQuotaRepository;
-import lombok.SneakyThrows;
 
 @ExtendWith(MockitoExtension.class)
 public class PermitUtilTest {
@@ -60,7 +53,7 @@ public class PermitUtilTest {
         Assertions.assertEquals(1, result.get());
     }*/
 
-    @SneakyThrows
+
     @ParameterizedTest
     @ValueSource(ints = {2, 3})
     void generateSerialNumberParameterizedTest(int endNumber) {

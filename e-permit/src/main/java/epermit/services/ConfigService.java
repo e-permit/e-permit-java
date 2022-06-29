@@ -30,6 +30,7 @@ public class ConfigService {
         dto.setName(properties.getIssuerName());
         Gson gson = GsonUtil.getGson();
         List<PublicJwk> keyDtoList = new ArrayList<>();
+        // Get all revoked keys and set revoked list (id-validfrom-validto)
         List<LedgerPublicKey> keys = ledgerPublicKeyRepository
                 .findAllByAuthorityCodeAndRevokedFalse(properties.getIssuerCode());
         keys.forEach(key -> {

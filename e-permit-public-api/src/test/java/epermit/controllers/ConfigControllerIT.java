@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +16,6 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import epermit.PermitPostgresContainer;
 import epermit.models.dtos.AuthorityConfig;
-import epermit.models.dtos.PrivateKey;
 import epermit.repositories.PrivateKeyRepository;
 import epermit.utils.PrivateKeyUtil;
 
@@ -44,7 +43,7 @@ public class ConfigControllerIT {
     @BeforeEach
     @Transactional
     void setUp() {
-        PrivateKey key = keyUtil.create("1");
+        keyUtil.create("1");
         epermit.entities.PrivateKey keyEntity = new epermit.entities.PrivateKey();
         keyEntity.setEnabled(true);
         keyRepository.save(keyEntity);
