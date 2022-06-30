@@ -1,22 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>epermit</groupId>
-		<artifactId>e-permit-parent</artifactId>
-		<version>1.0.0</version>
-	</parent>
-	<groupId>epermit</groupId>
-	<artifactId>e-permit-public-api</artifactId>
-	<version>1.0.0</version>
-	<name>e-permit-public-api</name>
-	<description>E-Permit Public Api</description>
-	<dependencies>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-		</dependency>
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>epermit</groupId>
+        <artifactId>e-permit-parent</artifactId>
+        <version>1.0.0</version>
+    </parent>
+    <groupId>epermit</groupId>
+    <artifactId>e-permit-public-api</artifactId>
+    <version>1.0.0</version>
+    <name>e-permit-public-api</name>
+    <description>E-Permit Public Api</description>
+    <dependencies>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!--<dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
@@ -26,18 +31,18 @@
                     <artifactId>junit-vintage-engine</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>		
-		<dependency>
-			<groupId>epermit</groupId>
-			<artifactId>e-permit</artifactId>
-			<version>1.0.0</version>
-		</dependency>
+        </dependency>-->
+        <dependency>
+            <groupId>epermit</groupId>
+            <artifactId>e-permit</artifactId>
+            <version>1.0.0</version>
+        </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
-         </dependency>
-	</dependencies>
-	<build>
+        </dependency>
+    </dependencies>
+    <build>
         <finalName>e-permit-public-api</finalName>
         <resources>
             <resource>

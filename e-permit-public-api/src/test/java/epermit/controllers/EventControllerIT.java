@@ -78,13 +78,6 @@ public class EventControllerIT {
         @BeforeEach
         @Transactional
         void setUp() {
-                PrivateKey key = keyUtil.create("1");
-                epermit.entities.PrivateKey pKey = new epermit.entities.PrivateKey();
-                pKey.setKeyId("1");
-                pKey.setEnabled(true);
-                pKey.setSalt(key.getSalt());
-                pKey.setPrivateJwk(key.getPrivateJwk());
-                keyRepository.save(pKey);
                 Authority authority = new Authority();
                 authority.setApiUri("apiUri");
                 authority.setCode("UZ");
@@ -93,7 +86,7 @@ public class EventControllerIT {
                 LedgerPublicKey ledgerKey = new LedgerPublicKey();
                 ledgerKey.setAuthorityCode("UZ");
                 ledgerKey.setKeyId("1");
-                ledgerKey.setJwk(key.getPublicJwk());
+                ledgerKey.setJwk(keyUtil.getKey().toJSONString());
                 ledgerPublicKeyRepository.save(ledgerKey);
         }
 
@@ -238,6 +231,7 @@ public class EventControllerIT {
                 event.setPermitYear(2021);
                 event.setPlateNumber("ABC");
                 event.setSerialNumber(1);
+                event.setQrCode("1");
                 String jws = jwsUtil.createJws(GsonUtil.toMap(event));
                 HttpHeaders headers = createEventRequestHeader(AuthenticationType.PUBLICKEY, jws);
                 HttpEntity<Map<?, ?>> request = new HttpEntity<>(GsonUtil.toMap(event), headers);

@@ -27,27 +27,12 @@ public class ConfigControllerIT {
     private int port;
 
     @Autowired
-    private PrivateKeyUtil keyUtil;
-
-    @Autowired
-    private PrivateKeyRepository keyRepository;
-
-    @Autowired
     private TestRestTemplate restTemplate;
 
     @Container
     public static PostgreSQLContainer<PermitPostgresContainer> postgreSQLContainer =
             PermitPostgresContainer.getInstance();
 
-
-    @BeforeEach
-    @Transactional
-    void setUp() {
-        keyUtil.create("1");
-        epermit.entities.PrivateKey keyEntity = new epermit.entities.PrivateKey();
-        keyEntity.setEnabled(true);
-        keyRepository.save(keyEntity);
-    }
 
     @Test
     void getTest() {

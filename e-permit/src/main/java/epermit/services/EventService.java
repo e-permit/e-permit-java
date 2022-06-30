@@ -14,6 +14,7 @@ import epermit.commons.GsonUtil;
 import epermit.entities.CreatedEvent;
 import epermit.entities.LedgerEvent;
 import epermit.ledgerevents.LedgerEventUtil;
+import epermit.models.results.VerifyProofResult;
 import epermit.repositories.CreatedEventRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -49,13 +50,13 @@ public class EventService {
     @Transactional
     public void handleReceivedEvent(HttpHeaders headers, Object e) {
         log.info("Event claims. {}", e);
-        String proof = headers.getFirst(HttpHeaders.AUTHORIZATION);
-        log.info("Event jws. {}", proof);
-        Boolean r = ledgerEventUtil.verifyProof(e, proof);
-        if (!r) {
+        String authorization = headers.getFirst(HttpHeaders.AUTHORIZATION);
+        log.info("Event jws. {}", authorization);
+        VerifyProofResult r = ledgerEventUtil.verifyProof(e, authorization);
+        if (!r.isValid()) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED");
         }
-        ledgerEventUtil.handleEvent(GsonUtil.toMap(e), proof);
+        ledgerEventUtil.handleEvent(GsonUtil.toMap(e), r.getProof());
     }
 
     static Specification<LedgerEvent> filterEvents(Long id, String producer, String consumer) {

@@ -19,6 +19,7 @@ import epermit.entities.CreatedEvent;
 import epermit.entities.LedgerEvent;
 import epermit.models.EPermitProperties;
 import epermit.models.enums.AuthenticationType;
+import epermit.models.results.VerifyProofResult;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.CreatedEventRepository;
 import epermit.repositories.LedgerEventRepository;
@@ -131,18 +132,18 @@ public class LedgerEventUtil {
     }
 
     @SneakyThrows
-    public Boolean verifyProof(Object e, String authorization) {
+    public VerifyProofResult verifyProof(Object e, String authorization) {
         if (authorization == null) {
-            return false;
+            return VerifyProofResult.fail("HEADER_NOTFOUND");
         }
         LedgerEventBase eb = (LedgerEventBase) e;
         Authority authority = authorityRepository.findOneByCode(eb.getEventProducer());
         if (authority == null) {
-            return false;
+            return VerifyProofResult.fail("AUTHORITY_NOTFOUND");
         }
         if (authority.getAuthenticationType() == AuthenticationType.BASIC) {
             if (!authorization.toLowerCase().startsWith("basic")) {
-                return false;
+                return VerifyProofResult.fail("INVALID_AUTH_TYPE");
             }
             String proofB64 = authorization.substring(6);
             String proof = new String(Base64.getDecoder().decode(proofB64), StandardCharsets.UTF_8);
@@ -150,12 +151,16 @@ public class LedgerEventUtil {
             String authorityCode = values[0];
             String apiSecret = values[1];
             if (!authorityCode.equals(authority.getCode())) {
-                return false;
+                return VerifyProofResult.fail("INVALID_AUTHORITY");
             }
-            return apiSecret.equals(authority.getApiSecret());
+            Boolean isValid = apiSecret.equals(authority.getApiSecret());
+            if(!isValid){
+                return VerifyProofResult.fail("UNAUTHORIZED");
+            }
+            return VerifyProofResult.success(proofB64);
         } else {
             if (!authorization.toLowerCase().startsWith("bearer")) {
-                return false;
+                return VerifyProofResult.fail("INVALID_AUTH_TYPE");
             }
             String proof = authorization.substring(7);
             String[] proofArr = proof.split("\\.");
@@ -165,7 +170,11 @@ public class LedgerEventUtil {
             String jws = proofArr[0] + "." + payloadBase64 + "." + proofArr[1];
             log.info("Constructed jws: {}", jws);
             log.info("Constructed jws length: {}", jws.length());
-            return jwsUtil.validateJws(jws);
+            Boolean isValid = jwsUtil.validateJws(jws);
+            if(!isValid){
+                return VerifyProofResult.fail("UNAUTHORIZED");
+            }
+            return VerifyProofResult.success(proof);
         }
     }
 
