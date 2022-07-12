@@ -155,6 +155,9 @@ public class PermitService {
             if (input.getIssuedFor() != null) {
                 predicates.add(cb.equal(permit.get("issuedFor"), input.getIssuedFor()));
             }
+            if (input.getIssuedAt() != null) {
+                predicates.add(cb.equal(permit.get("issuedAt"), input.getIssuedAt()));
+            }
             if (input.getPermitType() != null) {
                 predicates.add(cb.equal(permit.get("permitType"), input.getPermitType()));
             }

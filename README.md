@@ -115,7 +115,7 @@ EPERMIT_VERIFY_URI=https://e-permit.github.io/verify
 
 To make services up:
 
-```docker-compose up```
+```docker-compose pull  && docker-compose up -d```
 
 Your internal api: ```http://localhost:3020``` or ```https://<your domain>:3020```
 

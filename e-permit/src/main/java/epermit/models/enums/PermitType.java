@@ -1,6 +1,7 @@
 package epermit.models.enums;
 
 import com.fasterxml.jackson.annotation.JsonValue;
+import lombok.SneakyThrows;
 
 public enum PermitType {
     BILITERAL("BILITERAL"), TRANSIT("TRANSIT"), THIRDCOUNTRY("THIRDCOUNTRY"), BILITERAL_FEE(
@@ -12,6 +13,7 @@ public enum PermitType {
         this.permitType = permitType;
     }
 
+    @SneakyThrows
     public String getCode() {
         String code;
         switch (permitType) {
@@ -34,7 +36,7 @@ public enum PermitType {
                 code = "6";
                 break;
             default:
-                code = "";
+                throw new Exception("Unknown permit code");
         }
         return code;
     }
