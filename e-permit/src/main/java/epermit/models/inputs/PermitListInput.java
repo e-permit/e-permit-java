@@ -24,7 +24,7 @@ public class PermitListInput {
     private PermitType permitType;
 
     @JsonProperty("created_at")
-    private LocalDateTime createdAt;
+    private String createdAt;
 
     @JsonProperty("page")
     private Integer page = 0;
