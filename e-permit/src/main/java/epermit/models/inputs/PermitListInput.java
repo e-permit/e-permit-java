@@ -1,5 +1,7 @@
 package epermit.models.inputs;
 
+import java.time.LocalDateTime;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import epermit.models.enums.PermitType;
 import lombok.Data;
@@ -20,6 +22,9 @@ public class PermitListInput {
 
     @JsonProperty("permit_type")
     private PermitType permitType;
+
+    @JsonProperty("created_at")
+    private LocalDateTime createdAt;
 
     @JsonProperty("page")
     private Integer page = 0;

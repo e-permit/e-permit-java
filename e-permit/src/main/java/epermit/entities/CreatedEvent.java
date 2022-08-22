@@ -25,7 +25,7 @@ public class CreatedEvent {
     )
     private UUID id;
 
-    @Column(name = "event_id", nullable = false)
+    @Column(name = "event_id", nullable = false, unique = true)
     private String eventId;
 
     @Column(name = "sended", nullable = false)

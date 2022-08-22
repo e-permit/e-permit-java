@@ -164,6 +164,9 @@ public class PermitService {
             if (input.getPermitYear() != null) {
                 predicates.add(cb.equal(permit.get("permitYear"), input.getPermitYear()));
             }
+            if (input.getCreatedAt() != null) {
+                predicates.add(cb.greaterThan(permit.get("createdAt"), input.getCreatedAt()));
+            }
             return cb.and(predicates.toArray(new Predicate[predicates.size()]));
         };
         return spec;

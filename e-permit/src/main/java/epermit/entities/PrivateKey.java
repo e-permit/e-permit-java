@@ -30,7 +30,7 @@ public class PrivateKey {
     )
     private UUID id;
 
-    @Column(name = "key_id", nullable = false)
+    @Column(name = "key_id", nullable = false, unique = true)
     private String keyId;
 
     @Column(name = "salt", nullable = false)
