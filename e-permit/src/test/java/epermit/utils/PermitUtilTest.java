@@ -10,8 +10,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import epermit.models.EPermitProperties;
+import epermit.models.dtos.CreatePermitIdDto;
 import epermit.models.enums.PermitType;
-import epermit.models.inputs.CreatePermitIdInput;
 import epermit.repositories.AuthorityRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -30,7 +30,7 @@ public class PermitUtilTest {
 
     @Test
     void getPermitIdTest() {
-        CreatePermitIdInput input = new CreatePermitIdInput();
+        CreatePermitIdDto input = new CreatePermitIdDto();
         input.setIssuedFor("UA");
         input.setIssuer("TR");
         input.setPermitType(PermitType.BILITERAL);

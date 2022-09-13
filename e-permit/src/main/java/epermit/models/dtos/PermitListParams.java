@@ -1,13 +1,12 @@
-package epermit.models.inputs;
+package epermit.models.dtos;
 
-import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import epermit.models.enums.PermitType;
 import lombok.Data;
 
 @Data
-public class PermitListInput {
+public class PermitListParams {
     @JsonProperty("issuer")
     private String issuer;
 

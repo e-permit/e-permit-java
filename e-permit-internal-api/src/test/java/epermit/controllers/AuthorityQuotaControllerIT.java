@@ -62,6 +62,7 @@ public class AuthorityQuotaControllerIT {
         PrivateKey keyEntity = new PrivateKey();
         keyEntity.setKeyId(key.getKeyId());
         keyEntity.setPrivateJwk(key.getPrivateJwk());
+        keyEntity.setSalt(key.getSalt());
         keyEntity.setEnabled(true);
         keyRepository.save(keyEntity);
     }

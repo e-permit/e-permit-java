@@ -5,9 +5,9 @@ import java.util.Map;
 import java.util.StringJoiner;
 import org.springframework.stereotype.Component;
 import epermit.models.EPermitProperties;
-import epermit.models.inputs.CreatePermitIdInput;
-import epermit.models.inputs.CreateQrCodeInput;
-import epermit.models.inputs.QuotaSufficientInput;
+import epermit.models.dtos.CreatePermitIdDto;
+import epermit.models.dtos.CreateQrCodeDto;
+import epermit.models.dtos.QuotaSufficientDto;
 import epermit.repositories.LedgerQuotaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +20,7 @@ public class PermitUtil {
     private final LedgerQuotaRepository quotaRepository;
     private final EPermitProperties properties;
 
-    public String getPermitId(CreatePermitIdInput input) {
+    public String getPermitId(CreatePermitIdDto input) {
         StringJoiner joiner = new StringJoiner("-");
         String permitId = joiner.add(input.getIssuer()).add(input.getIssuedFor())
                 .add(Integer.toString(input.getPermitYear())).add(input.getPermitType().getCode())
@@ -28,7 +28,7 @@ public class PermitUtil {
         return permitId;
     }
 
-    public boolean isQuotaSufficient(QuotaSufficientInput input) {
+    public boolean isQuotaSufficient(QuotaSufficientDto input) {
         Boolean r = quotaRepository.findAll().stream()
                 .anyMatch(x -> x.getPermitIssuer().equals(input.getIssuer())
                         && x.getPermitIssuedFor().equals(input.getIssuedFor()) && x.isActive()
@@ -39,7 +39,7 @@ public class PermitUtil {
         return r;
     }
 
-    public String generateQrCode(CreateQrCodeInput input) {
+    public String generateQrCode(CreateQrCodeDto input) {
         log.info("generateQrCode started with {}", input);
 
         Map<String, String> claims = new HashMap<>();

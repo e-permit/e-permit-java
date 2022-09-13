@@ -1,11 +1,16 @@
 package epermit.controllers;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -14,7 +19,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import epermit.models.dtos.PermitDto;
+import epermit.models.inputs.CreatePermitInput;
 import epermit.models.inputs.PermitUsedInput;
+import epermit.models.results.CreatePermitResult;
 import epermit.services.PermitService;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,9 +46,36 @@ public class PermitControllerTest {
     }
 
     @Test
+    void getByIdTest() {
+        PermitDto permit = new PermitDto();
+        UUID id = UUID.randomUUID();
+        when(permitService.getById(id)).thenReturn(permit);
+        PermitDto dto = controller.getById(id);
+        assertNotNull(dto);
+        verify(permitService, times(1)).getById(id);
+    }
+
+
+    @Test
+    void createTest() {
+        CreatePermitInput input = new CreatePermitInput();
+        when(permitService.createPermit(input)).thenReturn(CreatePermitResult.success("ABC", "ABC"));
+        CreatePermitResult r = controller.createPermit(input);
+        assertEquals("ABC", r.getPermitId());
+        verify(permitService, times(1)).createPermit(input);
+    }
+
+    @Test
+    void revokeTest() {
+        String id = "TR-UZ-2022-1-1";
+        controller.revoke(id);
+        verify(permitService, times(1)).revokePermit(eq(id));
+    }
+
+    @Test
     void usedTest() {
         PermitUsedInput input = new PermitUsedInput();
         controller.setUsed("TR", input);
-        //verify(permitService, times(1)).permitUsed("TR", input);
+        verify(permitService, times(1)).permitUsed("TR", input);
     }
 }

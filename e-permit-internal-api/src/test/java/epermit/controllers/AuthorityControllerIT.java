@@ -94,13 +94,13 @@ public class AuthorityControllerIT {
         assertEquals("UZ", r.getBody().getCode());
         assertEquals("apiUri", r.getBody().getApiUri());
         assertEquals("name", r.getBody().getName());
-        assertEquals("verifyUri", r.getBody().getVerifyUri());
     }
 
     @Test
     void createTest() {
         AuthorityConfig config = new AuthorityConfig();
         config.setCode("UZ");
+        config.setName("Uzbekistan");
         PublicJwk jwk = new PublicJwk();
         jwk.setCrv("crv");
         jwk.setKid("1");
@@ -109,16 +109,20 @@ public class AuthorityControllerIT {
         jwk.setX("x");
         jwk.setY("y");
         config.setKeys(List.of(jwk));
-        //config.setTrustedAuthorities(List.of());
-        mockServer.expect(once(), requestTo("http://localhost/epermit-configuration")).andRespond(
-                withSuccess(GsonUtil.getGson().toJson(config), MediaType.APPLICATION_JSON));
+        // config.setTrustedAuthorities(List.of());
+        String configUri = "http://localhost/epermit-configuration";
+        String configJson = GsonUtil.getGson().toJson(config);
+        mockServer.expect(once(), requestTo(configUri))
+                .andRespond(withSuccess(configJson, MediaType.APPLICATION_JSON));
 
         CreateAuthorityInput input = new CreateAuthorityInput();
         input.setApiUri("http://localhost");
-        ResponseEntity<Void> r =
-                getTestRestTemplate().postForEntity(getBaseUrl(), input, Void.class);
+        ResponseEntity<?> r =
+                getTestRestTemplate().postForEntity(getBaseUrl(), input, String.class);
         assertEquals(HttpStatus.OK, r.getStatusCode());
-        AuthorityDto authority = getTestRestTemplate().getForObject(getBaseUrl() + "/UZ", AuthorityDto.class);
+        AuthorityDto authority =
+                getTestRestTemplate().getForObject(getBaseUrl() + "/UZ", AuthorityDto.class);
+        assertEquals("UZ", authority.getCode());
         assertEquals(1, authority.getKeys().size());
     }
 }

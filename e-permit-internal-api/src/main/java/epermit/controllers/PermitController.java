@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import epermit.commons.GsonUtil;
 import epermit.models.dtos.PermitDto;
+import epermit.models.dtos.PermitListParams;
 import epermit.models.inputs.CreatePermitInput;
-import epermit.models.inputs.PermitListInput;
 import epermit.models.inputs.PermitUsedInput;
 import epermit.models.results.CreatePermitResult;
 import epermit.services.PermitService;
@@ -33,7 +33,7 @@ public class PermitController {
 
     @GetMapping()
     public Page<PermitDto> getAll(@RequestParam Map<String, Object> params) {
-        PermitListInput input = GsonUtil.fromMap(params, PermitListInput.class);
+        PermitListParams input = GsonUtil.fromMap(params, PermitListParams.class);
         Page<PermitDto> r = permitService.getAll(input);
         return r;
     }

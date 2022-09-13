@@ -25,13 +25,13 @@ import epermit.ledgerevents.permitcreated.PermitCreatedLedgerEvent;
 import epermit.ledgerevents.permitrevoked.PermitRevokedLedgerEvent;
 import epermit.ledgerevents.permitused.PermitUsedLedgerEvent;
 import epermit.models.EPermitProperties;
+import epermit.models.dtos.CreatePermitIdDto;
+import epermit.models.dtos.CreateQrCodeDto;
 import epermit.models.dtos.PermitDto;
+import epermit.models.dtos.PermitListParams;
 import epermit.models.enums.SerialNumberState;
 import epermit.models.enums.PermitType;
-import epermit.models.inputs.CreatePermitIdInput;
 import epermit.models.inputs.CreatePermitInput;
-import epermit.models.inputs.CreateQrCodeInput;
-import epermit.models.inputs.PermitListInput;
 import epermit.models.inputs.PermitUsedInput;
 import epermit.models.results.CreatePermitResult;
 import epermit.repositories.SerialNumberRepository;
@@ -55,7 +55,7 @@ public class PermitService {
         return dto;
     }
 
-    public Page<PermitDto> getAll(PermitListInput input) {
+    public Page<PermitDto> getAll(PermitListParams input) {
         Page<epermit.entities.LedgerPermit> entities =
                 permitRepository.findAll(filterPermits(input), PageRequest.of(input.getPage(), 10));
         return entities.map(x -> modelMapper.map(x, PermitDto.class));
@@ -71,7 +71,7 @@ public class PermitService {
                         input.getPermitYear(), input.getPermitType()), pageable).toList();
         Check.assertFalse(serialNumbers.isEmpty(), ErrorCodes.INSUFFICIENT_PERMIT_QUOTA);
         SerialNumber serialNumber = serialNumbers.get(0);
-        CreatePermitIdInput idInput = new CreatePermitIdInput();
+        CreatePermitIdDto idInput = new CreatePermitIdDto();
         idInput.setIssuedFor(input.getIssuedFor());
         idInput.setIssuer(properties.getIssuerCode());
         idInput.setPermitType(input.getPermitType());
@@ -82,7 +82,7 @@ public class PermitService {
         String issuedAt = LocalDateTime.now(ZoneOffset.UTC).format(dtf);
         String expireAt = "30/01/" + Integer.toString(input.getPermitYear() + 1);
         String prevEventId = ledgerEventUtil.getPreviousEventId(input.getIssuedFor());
-        CreateQrCodeInput qrCodeInput = new CreateQrCodeInput();
+        CreateQrCodeDto qrCodeInput = new CreateQrCodeDto();
         qrCodeInput.setCompanyName(input.getCompanyName());
         qrCodeInput.setExpireAt(expireAt);
         qrCodeInput.setId(permitId);
@@ -146,7 +146,7 @@ public class PermitService {
 
     }
 
-    static Specification<LedgerPermit> filterPermits(PermitListInput input) {
+    static Specification<LedgerPermit> filterPermits(PermitListParams input) {
         Specification<LedgerPermit> spec = (permit, cq, cb) -> {
             List<Predicate> predicates = new ArrayList<Predicate>();
             if (input.getIssuer() != null) {

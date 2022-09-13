@@ -36,7 +36,6 @@ import epermit.models.enums.PermitType;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.LedgerPublicKeyRepository;
 import epermit.repositories.LedgerQuotaRepository;
-import epermit.repositories.PrivateKeyRepository;
 import epermit.utils.JwsUtil;
 import epermit.utils.PrivateKeyUtil;
 
@@ -49,10 +48,6 @@ public class EventControllerIT {
 
         @Autowired
         private AuthorityRepository authorityRepository;
-
-        @Autowired
-        private PrivateKeyRepository keyRepository;
-
 
         @Autowired
         private LedgerPublicKeyRepository ledgerPublicKeyRepository;
@@ -104,10 +99,9 @@ public class EventControllerIT {
                 HttpHeaders headers = createEventRequestHeader(AuthenticationType.PUBLICKEY, jws);
                 HttpEntity<Map<?, ?>> request = new HttpEntity<>(GsonUtil.toMap(event), headers);
 
-                ResponseEntity<LedgerEventResult> result = this.restTemplate.postForEntity(baseUrl,
-                                request, LedgerEventResult.class);
+                ResponseEntity<?> result =
+                                this.restTemplate.postForEntity(baseUrl, request, String.class);
                 Assert.assertEquals(200, result.getStatusCodeValue());
-                Assert.assertEquals(true, result.getBody().isOk());
         }
 
         @Test
@@ -124,8 +118,8 @@ public class EventControllerIT {
                 HttpHeaders headers = createEventRequestHeader(AuthenticationType.PUBLICKEY, jws);
                 HttpEntity<Map<?, ?>> request = new HttpEntity<>(GsonUtil.toMap(event), headers);
 
-                ResponseEntity<LedgerEventResult> result = this.restTemplate.postForEntity(baseUrl,
-                                request, LedgerEventResult.class);
+                ResponseEntity<?> result =
+                                this.restTemplate.postForEntity(baseUrl, request, Object.class);
                 Assert.assertEquals(400, result.getStatusCodeValue());
         }
 
@@ -157,8 +151,8 @@ public class EventControllerIT {
                 String jws2 = jwsUtil.createJws(GsonUtil.toMap(event2));
                 HttpHeaders headers2 = createEventRequestHeader(AuthenticationType.PUBLICKEY, jws2);
                 HttpEntity<Map<?, ?>> request2 = new HttpEntity<>(GsonUtil.toMap(event2), headers2);
-                ResponseEntity<LedgerEventResult> result2 = this.restTemplate.postForEntity(baseUrl,
-                                request2, LedgerEventResult.class);
+                ResponseEntity<?> result2 =
+                                this.restTemplate.postForEntity(baseUrl, request2, Object.class);
                 Assert.assertEquals(400, result2.getStatusCodeValue());
 
         }
@@ -180,12 +174,12 @@ public class EventControllerIT {
                 HttpHeaders headers = createEventRequestHeader(AuthenticationType.PUBLICKEY, jws);
                 HttpEntity<Map<?, ?>> request = new HttpEntity<>(GsonUtil.toMap(event), headers);
 
-                ResponseEntity<?> result = this.restTemplate.postForEntity(baseUrl,
-                                request, String.class);
+                ResponseEntity<?> result =
+                                this.restTemplate.postForEntity(baseUrl, request, String.class);
                 Assert.assertEquals(200, result.getStatusCodeValue());
         }
 
-        
+
         @Test
         void keyRevokedEventOkTest() {
                 PrivateKey key = keyUtil.create("2");
@@ -202,8 +196,8 @@ public class EventControllerIT {
                 HttpHeaders headers = createEventRequestHeader(AuthenticationType.PUBLICKEY, jws);
                 HttpEntity<Map<?, ?>> request = new HttpEntity<>(GsonUtil.toMap(event), headers);
 
-                ResponseEntity<?> result = this.restTemplate.postForEntity(baseUrl,
-                                request, String.class);
+                ResponseEntity<?> result =
+                                this.restTemplate.postForEntity(baseUrl, request, String.class);
                 Assert.assertEquals(200, result.getStatusCodeValue());
         }
 
@@ -236,8 +230,8 @@ public class EventControllerIT {
                 HttpHeaders headers = createEventRequestHeader(AuthenticationType.PUBLICKEY, jws);
                 HttpEntity<Map<?, ?>> request = new HttpEntity<>(GsonUtil.toMap(event), headers);
 
-                ResponseEntity<?> result = this.restTemplate.postForEntity(baseUrl,
-                                request, String.class);
+                ResponseEntity<?> result =
+                                this.restTemplate.postForEntity(baseUrl, request, String.class);
                 Assert.assertEquals(200, result.getStatusCodeValue());
         }
 

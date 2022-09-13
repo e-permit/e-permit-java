@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
 import epermit.appevents.LedgerEventCreated;
 import epermit.appevents.LedgerEventReplay;
-import epermit.ledgerevents.LedgerEventResult;
 import epermit.ledgerevents.LedgerEventUtil;
 import epermit.services.EventService;
 import lombok.RequiredArgsConstructor;
@@ -25,8 +24,8 @@ public class AppEventListener {
     @TransactionalEventListener
     public void onAppEvent(LedgerEventCreated event) {
         log.info("onAppEvent is fired. {}", event);
-        LedgerEventResult r = ledgerEventUtil.sendEvent(event);
-        if (r.isOk()) {
+        Boolean isOk = ledgerEventUtil.sendEvent(event);
+        if (isOk) {
             eventService.handleSendedEvent(event.getEventId());
         }
         log.info("Sending event is finished");
@@ -36,8 +35,8 @@ public class AppEventListener {
     @EventListener
     public void onAppEvent(LedgerEventReplay event) {
         log.info("onAppEvent is fired. {}", event);
-        LedgerEventResult r = ledgerEventUtil.sendEvent(event.getEventCreated());
-        if (r.isOk()) {
+        Boolean isOk = ledgerEventUtil.sendEvent(event.getEventCreated());
+        if (isOk) {
             eventService.handleSendedEvent(event.getEventCreated().getEventId());
         }
         log.info("Sending event is finished");

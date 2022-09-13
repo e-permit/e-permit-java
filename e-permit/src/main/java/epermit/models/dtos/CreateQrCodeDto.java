@@ -1,9 +1,9 @@
-package epermit.models.inputs;
+package epermit.models.dtos;
 
 import lombok.Data;
 
 @Data
-public class CreateQrCodeInput {
+public class CreateQrCodeDto {
     private String id;
     private String issuedAt;
     private String expireAt;

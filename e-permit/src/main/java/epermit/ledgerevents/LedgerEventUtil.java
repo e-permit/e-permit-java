@@ -4,13 +4,17 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Map;
 import java.util.Optional;
+import org.slf4j.MDC;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import epermit.appevents.LedgerEventCreated;
+import epermit.commons.ApiErrorResponse;
 import epermit.commons.Check;
 import epermit.commons.ErrorCodes;
 import epermit.commons.GsonUtil;
@@ -43,8 +47,9 @@ public class LedgerEventUtil {
 
     public String getPreviousEventId(String consumer) {
         String previousEventId = "0";
-        Optional<LedgerEvent> lastEventR = ledgerEventRepository
-                .findTopByProducerAndConsumerOrderByCreatedAtDesc(properties.getIssuerCode(), consumer);
+        Optional<LedgerEvent> lastEventR =
+                ledgerEventRepository.findTopByProducerAndConsumerOrderByCreatedAtDesc(
+                        properties.getIssuerCode(), consumer);
         if (lastEventR.isPresent()) {
             previousEventId = lastEventR.get().getEventId();
         }
@@ -154,7 +159,7 @@ public class LedgerEventUtil {
                 return VerifyProofResult.fail("INVALID_AUTHORITY");
             }
             Boolean isValid = apiSecret.equals(authority.getApiSecret());
-            if(!isValid){
+            if (!isValid) {
                 return VerifyProofResult.fail("UNAUTHORIZED");
             }
             return VerifyProofResult.success(proofB64);
@@ -171,7 +176,7 @@ public class LedgerEventUtil {
             log.info("Constructed jws: {}", jws);
             log.info("Constructed jws length: {}", jws.length());
             Boolean isValid = jwsUtil.validateJws(jws);
-            if(!isValid){
+            if (!isValid) {
                 return VerifyProofResult.fail("UNAUTHORIZED");
             }
             return VerifyProofResult.success(proof);
@@ -179,12 +184,18 @@ public class LedgerEventUtil {
     }
 
     @SneakyThrows
-    public LedgerEventResult sendEvent(LedgerEventCreated event) {
+    public Boolean sendEvent(LedgerEventCreated event) {
         HttpHeaders headers = createEventRequestHeader(event.getProofType(), event.getProof());
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(event.getContent(), headers);
-        LedgerEventResult result =
-                restTemplate.postForObject(event.getUri(), request, LedgerEventResult.class);
-        return result;
+        ResponseEntity<?> result =
+                restTemplate.postForEntity(event.getUri(), request, Object.class);
+        if (result.getStatusCode() == HttpStatus.ACCEPTED) {
+            return true;
+        }
+        MDC.put("epermitError", "SEND_EPERMIT_EVENT_ERROR");
+        log.error(GsonUtil.getGson().toJson(result.getBody()));
+        MDC.remove("epermitError");
+        return false;
     }
 
     private HttpHeaders createEventRequestHeader(AuthenticationType proofType, String proof) {

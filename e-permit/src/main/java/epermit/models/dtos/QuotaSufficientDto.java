@@ -1,10 +1,10 @@
-package epermit.models.inputs;
+package epermit.models.dtos;
 
 import epermit.models.enums.PermitType;
 import lombok.Data;
 
 @Data
-public class CreatePermitIdInput {
+public class QuotaSufficientDto {
     private String issuer;
     private String issuedFor;
     private PermitType permitType;

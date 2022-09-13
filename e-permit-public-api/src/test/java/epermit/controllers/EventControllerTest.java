@@ -13,7 +13,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpHeaders;
 import epermit.commons.EpermitValidationException;
 import epermit.commons.ErrorCodes;
-import epermit.ledgerevents.LedgerEventResult;
 import epermit.ledgerevents.permitcreated.PermitCreatedLedgerEvent;
 import epermit.services.EventService;
 
@@ -32,8 +31,7 @@ public class EventControllerTest {
       PermitCreatedLedgerEvent e = new PermitCreatedLedgerEvent("TR", "UZ", "0");
       HttpHeaders headers = new HttpHeaders();
       headers.add("authorization", "1234");
-      LedgerEventResult r = controller.permitCreated(headers, e);
-      assertTrue(r.isOk());
+      controller.permitCreated(headers, e);
    }
 
    @Test

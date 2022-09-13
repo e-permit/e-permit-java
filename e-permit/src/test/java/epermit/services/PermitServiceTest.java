@@ -32,10 +32,10 @@ import epermit.ledgerevents.permitrevoked.PermitRevokedLedgerEvent;
 import epermit.ledgerevents.permitused.PermitUsedLedgerEvent;
 import epermit.models.EPermitProperties;
 import epermit.models.dtos.PermitDto;
+import epermit.models.dtos.PermitListParams;
 import epermit.models.enums.PermitActivityType;
 import epermit.models.enums.PermitType;
 import epermit.models.inputs.CreatePermitInput;
-import epermit.models.inputs.PermitListInput;
 import epermit.models.inputs.PermitUsedInput;
 import epermit.models.results.CreatePermitResult;
 import epermit.repositories.SerialNumberRepository;
@@ -91,7 +91,7 @@ public class PermitServiceTest {
         LedgerPermit permit = new LedgerPermit();
         permit.setPermitId("permitId");
 
-        PermitListInput input = new PermitListInput();
+        PermitListParams input = new PermitListParams();
         input.setPage(1);
         Page<LedgerPermit> pagedList = new PageImpl<>(List.of(permit));
 

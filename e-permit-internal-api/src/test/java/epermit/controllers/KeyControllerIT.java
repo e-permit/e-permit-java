@@ -61,6 +61,7 @@ public class KeyControllerIT {
         PrivateKey keyEntity = new PrivateKey();
         keyEntity.setKeyId(key.getKeyId());
         keyEntity.setPrivateJwk(key.getPrivateJwk());
+        keyEntity.setSalt(key.getSalt());
         keyEntity.setEnabled(true);
         keyRepository.save(keyEntity);
     }
@@ -86,24 +87,6 @@ public class KeyControllerIT {
         assertEquals(HttpStatus.OK, r.getStatusCode());
     }
 
-    @Test
-    void enableTest() {
-        epermit.models.dtos.PrivateKey key = keyUtil.create("2");
-        PrivateKey keyEntity = new PrivateKey();
-        keyEntity.setKeyId(key.getKeyId());
-        keyEntity.setPrivateJwk(key.getPrivateJwk());
-        keyRepository.save(keyEntity);
-        RestTemplate restTemplate = getTestRestTemplate().getRestTemplate();
-        HttpComponentsClientHttpRequestFactory requestFactory =
-                new HttpComponentsClientHttpRequestFactory();
-        requestFactory.setConnectTimeout(0);
-        requestFactory.setReadTimeout(0);
-        restTemplate.setRequestFactory(requestFactory);
-        HttpEntity<String> entity = new HttpEntity<String>("{}");
-        ResponseEntity<Void> r = restTemplate.exchange(getBaseUrl() + "/" + keyEntity.getId() + "/enable",
-                HttpMethod.PATCH, entity, Void.class);
-        assertEquals(HttpStatus.OK, r.getStatusCode());
-    }
 
     @Test
     void revokeTest() {
@@ -111,11 +94,12 @@ public class KeyControllerIT {
         PrivateKey keyEntity = new PrivateKey();
         keyEntity.setKeyId(key.getKeyId());
         keyEntity.setPrivateJwk(key.getPrivateJwk());
+        keyEntity.setSalt(key.getSalt());
         keyEntity.setEnabled(true);
         keyRepository.save(keyEntity);
         HttpEntity<String> entity = new HttpEntity<String>("{}");
-        ResponseEntity<Void> r = getTestRestTemplate().exchange(getBaseUrl() + "/" + keyEntity.getId(),
-                HttpMethod.DELETE, entity, Void.class);
+        ResponseEntity<?> r = getTestRestTemplate().exchange(getBaseUrl() + "/" + keyEntity.getId(),
+                HttpMethod.DELETE, entity, String.class);
         assertEquals(HttpStatus.OK, r.getStatusCode());
     }
 }

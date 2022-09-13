@@ -5,8 +5,8 @@ import epermit.commons.ErrorCodes;
 import epermit.commons.GsonUtil;
 import epermit.entities.LedgerPermit;
 import epermit.ledgerevents.LedgerEventHandler;
-import epermit.models.inputs.CreatePermitIdInput;
-import epermit.models.inputs.QuotaSufficientInput;
+import epermit.models.dtos.CreatePermitIdDto;
+import epermit.models.dtos.QuotaSufficientDto;
 import epermit.repositories.LedgerPermitRepository;
 import epermit.utils.PermitUtil;
 import java.util.Map;
@@ -54,8 +54,8 @@ public class PermitCreatedLedgerEventHandler implements LedgerEventHandler {
         permitRepository.save(permit);
     }
 
-    private CreatePermitIdInput getCreatePermitIdInput(PermitCreatedLedgerEvent event) {
-        CreatePermitIdInput input = new CreatePermitIdInput();
+    private CreatePermitIdDto getCreatePermitIdInput(PermitCreatedLedgerEvent event) {
+        CreatePermitIdDto input = new CreatePermitIdDto();
         input.setIssuedFor(event.getEventConsumer());
         input.setIssuer(event.getEventProducer());
         input.setPermitType(event.getPermitType());
@@ -64,8 +64,8 @@ public class PermitCreatedLedgerEventHandler implements LedgerEventHandler {
         return input;
     }
 
-    private QuotaSufficientInput getQuotaSufficientInput(PermitCreatedLedgerEvent event) {
-        QuotaSufficientInput input = new QuotaSufficientInput();
+    private QuotaSufficientDto getQuotaSufficientInput(PermitCreatedLedgerEvent event) {
+        QuotaSufficientDto input = new QuotaSufficientDto();
         input.setIssuedFor(event.getEventConsumer());
         input.setIssuer(event.getEventProducer());
         input.setPermitType(event.getPermitType());

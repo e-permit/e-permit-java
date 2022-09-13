@@ -22,6 +22,7 @@ import epermit.ledgerevents.quotacreated.QuotaCreatedLedgerEvent;
 import epermit.models.EPermitProperties;
 import epermit.models.dtos.AuthorityConfig;
 import epermit.models.dtos.AuthorityDto;
+import epermit.models.dtos.PublicJwk;
 import epermit.models.dtos.QuotaDto;
 import epermit.models.enums.SerialNumberState;
 import epermit.models.inputs.CreateAuthorityInput;
@@ -55,11 +56,17 @@ public class AuthorityService {
     public AuthorityDto getByCode(String code) {
         Authority authority = authorityRepository.findOneByCode(code);
         AuthorityDto dto = modelMapper.map(authority, AuthorityDto.class);
-        List<epermit.entities.LedgerQuota> entities = ledgerQuotaRepository.findAll();
-        List<QuotaDto> quotas = entities.stream().filter(
+        List<epermit.entities.LedgerQuota> quotaEntities = ledgerQuotaRepository.findAll();
+        List<epermit.entities.LedgerPublicKey> keyEntities = ledgerPublicKeyRepository.findAllByAuthorityCodeAndRevokedFalse(code);
+        List<PublicJwk> keyDtoList = new ArrayList<>();
+        keyEntities.forEach(key -> {
+            keyDtoList.add(GsonUtil.getGson().fromJson(key.getJwk(), PublicJwk.class));
+        });
+        List<QuotaDto> quotas = quotaEntities.stream().filter(
                 x -> x.getPermitIssuer().equals(code) || x.getPermitIssuedFor().equals(code))
                 .map(x -> modelMapper.map(x, QuotaDto.class)).collect(Collectors.toList());
         dto.setQuotas(quotas);
+        dto.setKeys(keyDtoList);
         return dto;
     }
 
