@@ -42,7 +42,6 @@ public class PermitUtil {
     public String generateQrCode(CreateQrCodeInput input) {
         log.info("generateQrCode started with {}", input);
 
-        String verifyUri = "https://e-permit.github.io/verify";
         Map<String, String> claims = new HashMap<>();
         claims.put("id", input.getId());
         claims.put("iat", input.getIssuedAt());
@@ -50,7 +49,7 @@ public class PermitUtil {
         claims.put("pn", input.getPlateNumber());
         claims.put("cn", input.getCompanyName());
         String jws = jwsUtil.createJws(claims);
-        String qrCode = verifyUri + "#" + properties.getQrcodeVersion() + "." + jws;
+        String qrCode = properties.getQrcodeVersion() + "." + jws;
         log.info("generateQrCode ended jws is {}", jws);
 
         return qrCode;
