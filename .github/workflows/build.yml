@@ -38,4 +38,4 @@ jobs:
       with:
         context: ./e-permit-internal-api
         push: true
-        tags: ghcr.io/e-permit/internalapi:latest
+        tags: ghcr.io/e-permit/internalapi:latest,ghcr.io/e-permit/internalapi:${{ steps.version.outputs.version }}
