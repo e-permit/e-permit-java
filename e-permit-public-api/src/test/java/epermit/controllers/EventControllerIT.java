@@ -100,8 +100,20 @@ public class EventControllerIT {
                 HttpEntity<Map<?, ?>> request = new HttpEntity<>(GsonUtil.toMap(event), headers);
 
                 ResponseEntity<?> result =
-                                this.restTemplate.postForEntity(baseUrl, request, String.class);
+                                this.restTemplate.postForEntity(baseUrl, request, Void.class);
+                System.out.println(result.getBody());
                 Assert.assertEquals(200, result.getStatusCodeValue());
+        }
+
+        @Test
+        void notFoundTest() {
+                final String baseUrl = "http://localhost:" + port + "/events/quota-created2";
+               
+                HttpEntity<String> request = new HttpEntity<>("");
+
+                ResponseEntity<?> result =
+                                this.restTemplate.postForEntity(baseUrl, request, Void.class);
+                Assert.assertEquals(404, result.getStatusCodeValue());
         }
 
         @Test

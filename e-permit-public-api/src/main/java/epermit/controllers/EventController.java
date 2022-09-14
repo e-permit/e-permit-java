@@ -27,9 +27,7 @@ import epermit.ledgerevents.permitused.PermitUsedLedgerEvent;
 import epermit.ledgerevents.quotacreated.QuotaCreatedLedgerEvent;
 import epermit.services.EventService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/events")

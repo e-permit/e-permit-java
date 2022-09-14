@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
@@ -19,13 +20,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import epermit.AppEventListener;
 import epermit.PermitPostgresContainer;
 import epermit.RestResponsePage;
+import epermit.commons.GsonUtil;
 import epermit.entities.Authority;
 import epermit.entities.LedgerPermit;
 import epermit.entities.LedgerQuota;
@@ -37,7 +41,6 @@ import epermit.models.enums.PermitType;
 import epermit.models.enums.SerialNumberState;
 import epermit.models.inputs.CreatePermitInput;
 import epermit.models.inputs.PermitUsedInput;
-import epermit.models.results.CreatePermitResult;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.LedgerPermitRepository;
 import epermit.repositories.LedgerQuotaRepository;
@@ -49,6 +52,7 @@ import epermit.utils.PrivateKeyUtil;
 @Testcontainers
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
+@TestPropertySource(properties = {"EPERMIT_VERIFIER_PASSWORD = 123"})
 public class PermitControllerIT {
 
     @LocalServerPort
@@ -75,13 +79,17 @@ public class PermitControllerIT {
     @Autowired
     SerialNumberRepository serialNumberRepository;
 
+    @MockBean
+    AppEventListener appEventListener;
+
     @BeforeEach
     @Transactional
     void setUp() {
         Authority authority = new Authority();
         authority.setApiUri("apiUri");
         authority.setCode("UZ");
-        authority.setName("name");
+        authority.setName("Uzbekistan");
+        authorityRepository.save(authority);
         LedgerQuota quota = new LedgerQuota();
         quota.setActive(true);
         quota.setEndNumber(30);
@@ -117,6 +125,10 @@ public class PermitControllerIT {
 
     private TestRestTemplate getTestRestTemplate() {
         return testRestTemplate.withBasicAuth("admin", "123456");
+    }
+
+    private TestRestTemplate getTestRestTemplateForVerifier() {
+        return testRestTemplate.withBasicAuth("verifier", "123");
     }
 
     private String getBaseUrl() {
@@ -198,7 +210,9 @@ public class PermitControllerIT {
     @Test
     void revokeTest() {
         LedgerPermit permit = new LedgerPermit();
+        permit.setCompanyId("123");
         permit.setCompanyName("ABC");
+        permit.setIssuer("TR");
         permit.setIssuedFor("UZ");
         permit.setPermitType(PermitType.BILITERAL);
         permit.setPermitYear(2021);
@@ -210,33 +224,48 @@ public class PermitControllerIT {
         permit.setSerialNumber(1);
         permitRepository.save(permit);
         HttpEntity<String> entity = new HttpEntity<String>("{}");
-        ResponseEntity<Void> r = getTestRestTemplate().exchange(getBaseUrl() + "/" + permit.getId(),
+        ResponseEntity<Void> r = getTestRestTemplate().exchange(getBaseUrl() + "/" + permit.getPermitId(),
                 HttpMethod.DELETE, entity, Void.class);
         assertEquals(HttpStatus.OK, r.getStatusCode());
     }
 
     @Test
+    void revokeUnauthorizedTest() {
+        HttpEntity<String> entity = new HttpEntity<String>("{}");
+        ResponseEntity<?> r = getTestRestTemplateForVerifier().exchange(getBaseUrl() + "/" + "12",
+                HttpMethod.DELETE, entity, String.class);
+        System.out.println(r.getBody());
+        assertEquals(HttpStatus.FORBIDDEN, r.getStatusCode());
+    }
+
+    @Test
     void usePermitTest() {
+        Authority authority = new Authority();
+        authority.setApiUri("apiUri");
+        authority.setCode("TR");
+        authority.setName("Uzbekistan");
+        authorityRepository.save(authority);
         LedgerPermit permit = new LedgerPermit();
+        permit.setCompanyId("123");
         permit.setCompanyName("ABC");
         permit.setIssuer("UZ");
+        permit.setIssuedFor("TR");
         permit.setPermitType(PermitType.BILITERAL);
         permit.setPermitYear(2021);
         permit.setPlateNumber("06AA1234");
         permit.setExpireAt("31/01/2022");
         permit.setIssuedAt("03/03/2021");
         permit.setPermitId("ABC");
+        permit.setQrCode("qrCode");
         permit.setSerialNumber(1);
         permitRepository.save(permit);
         PermitUsedInput input = new PermitUsedInput();
         input.setActivityType(PermitActivityType.ENTRANCE);
-        ResponseEntity<Void> r = getTestRestTemplate().postForEntity(
-                getBaseUrl() + "/" + permit.getPermitId() + "/activities", input, Void.class);
+        input.setActivityTimestamp(0L);
+        ResponseEntity<?> r = getTestRestTemplateForVerifier().postForEntity(
+                getBaseUrl() + "/" + permit.getPermitId() + "/activities", input, String.class);
+        
+        //System.out.println("Error body: " + GsonUtil.getGson().toJson(r.getBody()));
         assertEquals(HttpStatus.OK, r.getStatusCode());
     }
 }
-
-
-/*
- * final String response = getTestRestTemplate().getForObject(getBaseUrl(), String.class);
- */

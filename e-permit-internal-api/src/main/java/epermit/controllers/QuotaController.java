@@ -1,6 +1,7 @@
 package epermit.controllers;
 
 import javax.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 @RequestMapping("/authority_quotas")
+@PreAuthorize("hasRole('ADMIN')")
 public class QuotaController {
     private final AuthorityService service;
 

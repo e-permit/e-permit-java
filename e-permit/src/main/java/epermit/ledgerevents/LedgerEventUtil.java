@@ -192,9 +192,10 @@ public class LedgerEventUtil {
         if (result.getStatusCode() == HttpStatus.ACCEPTED) {
             return true;
         }
-        MDC.put("epermitError", "SEND_EPERMIT_EVENT_ERROR");
+        MDC.put("epermitSendError", "SEND_EPERMIT_EVENT_ERROR");
         log.error(GsonUtil.getGson().toJson(result.getBody()));
-        MDC.remove("epermitError");
+        MDC.remove("epermitSendError");
+
         return false;
     }
 

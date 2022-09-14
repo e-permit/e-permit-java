@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpEntity;
@@ -21,10 +22,13 @@ import org.springframework.web.client.RestTemplate;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import epermit.AppEventListener;
 import epermit.PermitPostgresContainer;
 import epermit.entities.Authority;
+import epermit.entities.LedgerPublicKey;
 import epermit.entities.PrivateKey;
 import epermit.repositories.AuthorityRepository;
+import epermit.repositories.LedgerPublicKeyRepository;
 import epermit.repositories.PrivateKeyRepository;
 import epermit.utils.PrivateKeyUtil;
 
@@ -44,10 +48,16 @@ public class KeyControllerIT {
     AuthorityRepository authorityRepository;
 
     @Autowired
+    LedgerPublicKeyRepository ledgerPublicKeyRepository;
+
+    @Autowired
     PrivateKeyRepository keyRepository;
 
     @Autowired
     PrivateKeyUtil keyUtil;
+
+    @MockBean
+    AppEventListener appEventListener;
 
     @BeforeEach
     @Transactional
@@ -64,6 +74,11 @@ public class KeyControllerIT {
         keyEntity.setSalt(key.getSalt());
         keyEntity.setEnabled(true);
         keyRepository.save(keyEntity);
+        LedgerPublicKey pubKey = new LedgerPublicKey();
+        pubKey.setAuthorityCode("TR");
+        pubKey.setJwk(key.getPublicJwk());
+        pubKey.setKeyId("1");
+        ledgerPublicKeyRepository.save(pubKey);
     }
 
     @Container
@@ -97,6 +112,11 @@ public class KeyControllerIT {
         keyEntity.setSalt(key.getSalt());
         keyEntity.setEnabled(true);
         keyRepository.save(keyEntity);
+        LedgerPublicKey pubKey = new LedgerPublicKey();
+        pubKey.setAuthorityCode("TR");
+        pubKey.setJwk(key.getPublicJwk());
+        pubKey.setKeyId("2");
+        ledgerPublicKeyRepository.save(pubKey);
         HttpEntity<String> entity = new HttpEntity<String>("{}");
         ResponseEntity<?> r = getTestRestTemplate().exchange(getBaseUrl() + "/" + keyEntity.getId(),
                 HttpMethod.DELETE, entity, String.class);

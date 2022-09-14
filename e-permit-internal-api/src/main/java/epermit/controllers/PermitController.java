@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.UUID;
 import javax.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,6 +33,7 @@ public class PermitController {
     private final PermitService permitService;
 
     @GetMapping()
+    @PreAuthorize("hasRole('ADMIN') OR hasRole('VERIFIER')")
     public Page<PermitDto> getAll(@RequestParam Map<String, Object> params) {
         PermitListParams input = GsonUtil.fromMap(params, PermitListParams.class);
         Page<PermitDto> r = permitService.getAll(input);
@@ -39,24 +41,28 @@ public class PermitController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') OR hasRole('VERIFIER')")
     public PermitDto getById(@PathVariable("id") UUID id) {
         PermitDto permit = permitService.getById(id);
         return permit;
     }
 
     @PostMapping()
+    @PreAuthorize("hasRole('ADMIN')")
     public CreatePermitResult createPermit(@RequestBody @Valid CreatePermitInput input) {
         log.info("Permit create request. {}", input);
         return permitService.createPermit(input);
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public void revoke(@PathVariable("id") String id) {
         log.info("Revoke permit request. {}", id);
         permitService.revokePermit(id);
     }
 
     @PostMapping("/{id}/activities")
+    @PreAuthorize("hasRole('ADMIN') OR hasRole('VERIFIER')")
     public void setUsed(@PathVariable("id") String id, @RequestBody @Valid PermitUsedInput input) {
         log.info("Permit used request. {}, {}", id, input);
         permitService.permitUsed(id, input);
