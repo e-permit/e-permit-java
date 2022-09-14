@@ -18,7 +18,9 @@ jobs:
         distribution: 'adopt'
     - name: Run the mvn package
       run: mvn --batch-mode --update-snapshots package
-      
+    - name: Extract Maven project version
+      run: echo ::set-output name=version::$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
+      id: version
     - name: Login to Github Packages
       uses: docker/login-action@v2
       with:
@@ -30,7 +32,7 @@ jobs:
       with:
         context: ./e-permit-public-api
         push: true
-        tags: ghcr.io/e-permit/publicapi:latest
+        tags: ghcr.io/e-permit/publicapi:latest,ghcr.io/e-permit/publicapi:'${{ steps.version.outputs.version }}'
     - name: Build and push internal api
       uses: docker/build-push-action@v3
       with:
