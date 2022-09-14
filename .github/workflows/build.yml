@@ -32,7 +32,7 @@ jobs:
       with:
         context: ./e-permit-public-api
         push: true
-        tags: ghcr.io/e-permit/publicapi:latest,ghcr.io/e-permit/publicapi:'${{ steps.version.outputs.version }}'
+        tags: ghcr.io/e-permit/publicapi:latest,ghcr.io/e-permit/publicapi:${{ steps.version.outputs.version }}
     - name: Build and push internal api
       uses: docker/build-push-action@v3
       with:
