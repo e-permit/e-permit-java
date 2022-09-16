@@ -162,7 +162,7 @@ public class LedgerEventUtil {
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(event.getContent(), headers);
         ResponseEntity<?> result =
                 restTemplate.postForEntity(event.getUri(), request, Object.class);
-        if (result.getStatusCode() == HttpStatus.ACCEPTED) {
+        if (result.getStatusCode() == HttpStatus.OK) {
             return true;
         }
         MDC.put("epermitSendError", "SEND_EPERMIT_EVENT_ERROR");
