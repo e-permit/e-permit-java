@@ -1,5 +1,6 @@
 package epermit;
 
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Component;
@@ -19,7 +20,7 @@ public class AppEventListener {
     private final LedgerEventUtil ledgerEventUtil;
 
     @Async
-    @TransactionalEventListener
+    @TransactionalEventListener(fallbackExecution = true)
     public void onAppEvent(LedgerEventCreated event) {
         log.info("onAppEvent is fired. {}", event);
         Boolean isOk = ledgerEventUtil.sendEvent(event);
