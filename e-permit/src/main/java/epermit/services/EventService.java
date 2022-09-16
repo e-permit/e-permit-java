@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import epermit.appevents.LedgerEventReplay;
+import epermit.appevents.LedgerEventCreated;
 import epermit.commons.GsonUtil;
 import epermit.entities.CreatedEvent;
 import epermit.entities.LedgerEvent;
@@ -36,13 +36,11 @@ public class EventService {
 
     @Transactional
     @SneakyThrows
-    public List<LedgerEventReplay> getUnSendedEvents() {
-        List<LedgerEventReplay> list = new ArrayList<>();
+    public List<LedgerEventCreated> getUnSendedEvents() {
+        List<LedgerEventCreated> list = new ArrayList<>();
         List<CreatedEvent> events = createdEventRepository.findAllBySendedFalseOrderByCreatedAtAsc();
         for (CreatedEvent createdEvent : events) {
-            LedgerEventReplay appEvent =  new LedgerEventReplay();
-            appEvent.setEventCreated(ledgerEventUtil.createAppEvent(createdEvent));
-            list.add(appEvent);
+            list.add(ledgerEventUtil.createAppEvent(createdEvent));
         }
         return list;
     }

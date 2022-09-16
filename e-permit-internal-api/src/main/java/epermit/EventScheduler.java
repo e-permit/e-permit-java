@@ -5,7 +5,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
-import epermit.appevents.LedgerEventReplay;
+import epermit.appevents.LedgerEventCreated;
 import epermit.services.EventService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -24,10 +24,10 @@ public class EventScheduler {
     @SneakyThrows
     public void unsentEventsTask() {
         log.info("Unsent events task started");
-        List<LedgerEventReplay> list = eventService.getUnSendedEvents();
-        for (LedgerEventReplay ledgerEventReplay : list) {
+        List<LedgerEventCreated> list = eventService.getUnSendedEvents();
+        for (LedgerEventCreated event : list) {
             Thread.sleep(1 * 1000);
-            eventPublisher.publishEvent(ledgerEventReplay);
+            eventPublisher.publishEvent(event);
         }
     }
 }
