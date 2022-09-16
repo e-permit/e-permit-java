@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import org.slf4j.MDC;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpEntity;
@@ -71,6 +72,7 @@ public class LedgerEventUtil {
                 ledgerEventRepository.findOneByEventId(createdEvent.getEventId()).get();
         Authority authority = authorityRepository.findOneByCode(ledgerEvent.getConsumer());
         LedgerEventCreated appEvent = new LedgerEventCreated();
+        appEvent.setId(UUID.randomUUID());
         appEvent.setEventId(createdEvent.getEventId());
         appEvent.setUri(authority.getApiUri() + "/events/"
                 + ledgerEvent.getEventType().name().toLowerCase().replace("_", "-"));
