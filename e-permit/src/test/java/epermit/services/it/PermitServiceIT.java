@@ -1,4 +1,4 @@
-package epermit.services;
+package epermit.services.it;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,9 +25,12 @@ import epermit.models.enums.SerialNumberState;
 import epermit.models.inputs.CreatePermitInput;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.LedgerPermitRepository;
+import epermit.repositories.LedgerPublicKeyRepository;
 import epermit.repositories.LedgerQuotaRepository;
 import epermit.repositories.PrivateKeyRepository;
 import epermit.repositories.SerialNumberRepository;
+import epermit.services.PermitService;
+import epermit.services.PrivateKeyService;
 import epermit.utils.PermitUtil;
 
 @Testcontainers
@@ -57,16 +60,14 @@ public class PermitServiceIT {
 
 
     @BeforeAll
-    static void seed(@Autowired PrivateKeyService privateKeyService) {
-        privateKeyService.seed();
+    @Transactional
+    static void up(@Autowired PrivateKeyService privateKeyService,
+            @Autowired PrivateKeyRepository keyRepository) {
+        if (keyRepository.count() == 0) {
+            privateKeyService.seed();
+        }
     }
 
-    @AfterAll
-    @Transactional
-    static void down(@Autowired PrivateKeyRepository keyRepository){
-        keyRepository.deleteAll();
-    }
-    
     @BeforeAll
     @Transactional
     static void setUp(@Autowired AuthorityRepository authorityRepository,
@@ -74,14 +75,14 @@ public class PermitServiceIT {
             @Autowired SerialNumberRepository serialNumberRepository) {
         Authority authority = new Authority();
         authority.setApiUri("apiUri");
-        authority.setCode("UZ");
+        authority.setCode("FR");
         authority.setName("Uz");
         authorityRepository.save(authority);
 
         LedgerQuota quota = new LedgerQuota();
         quota.setActive(true);
         quota.setEndNumber(100);
-        quota.setPermitIssuedFor("UZ");
+        quota.setPermitIssuedFor("FR");
         quota.setPermitIssuer("TR");
         quota.setPermitType(PermitType.BILITERAL);
         quota.setPermitYear(2021);
@@ -91,7 +92,7 @@ public class PermitServiceIT {
         for (int i = 1; i <= 100; i++) {
             SerialNumber serialNumber = new SerialNumber();
             serialNumber.setSerialNumber(i);
-            serialNumber.setAuthorityCode("UZ");
+            serialNumber.setAuthorityCode("FR");
             serialNumber.setPermitType(PermitType.BILITERAL);
             serialNumber.setPermitYear(2021);
             serialNumber.setState(SerialNumberState.CREATED);
@@ -107,7 +108,7 @@ public class PermitServiceIT {
         CreatePermitInput input = new CreatePermitInput();
         input.setCompanyId("ABC");
         input.setCompanyName("ABC");
-        input.setIssuedFor("UZ");
+        input.setIssuedFor("FR");
         input.setPermitType(PermitType.BILITERAL);
         input.setPermitYear(2021);
         input.setPlateNumber("ABC");

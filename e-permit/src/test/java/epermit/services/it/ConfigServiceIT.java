@@ -1,4 +1,4 @@
-package epermit.services;
+package epermit.services.it;
 
 import static org.junit.Assert.assertEquals;
 import java.util.List;
@@ -25,6 +25,8 @@ import epermit.models.dtos.TrustedAuthority;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.LedgerPublicKeyRepository;
 import epermit.repositories.PrivateKeyRepository;
+import epermit.services.ConfigService;
+import epermit.services.PrivateKeyService;
 
 @Testcontainers
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -51,43 +53,44 @@ public class ConfigServiceIT {
 
 
     @BeforeAll
-    static void setUp(@Autowired PrivateKeyService privateKeyService) {
-        privateKeyService.seed();
-    }
-
-    @AfterAll
     @Transactional
-    static void down(@Autowired PrivateKeyRepository keyRepository){
-        keyRepository.deleteAll();
+    static void up(@Autowired PrivateKeyService privateKeyService,
+            @Autowired PrivateKeyRepository keyRepository) {
+        if (keyRepository.count() == 0) {
+            privateKeyService.seed();
+        }
     }
 
     @Test
     void getConfigTest() {
-        ConfigService configService = new ConfigService(authorityRepository, properties, ledgerPublicKeyRepository);
+        ConfigService configService =
+                new ConfigService(authorityRepository, properties, ledgerPublicKeyRepository);
         AuthorityConfig config = configService.getConfig();
         assertEquals("TR", config.getCode());
         assertEquals(1, config.getKeys().size());
     }
 
     @Test
-    void getTrustedAuthoritiesTest() { 
+    void getTrustedAuthoritiesTest() {
         seedAuthorities();
-        ConfigService configService = new ConfigService(authorityRepository, properties, ledgerPublicKeyRepository);
+        ConfigService configService =
+                new ConfigService(authorityRepository, properties, ledgerPublicKeyRepository);
         List<TrustedAuthority> authorities = configService.getTrustedAuthorities();
         assertEquals(1, authorities.size());
     }
 
     @Transactional
-    void seedAuthorities(){
+    void seedAuthorities() {
+        authorityRepository.deleteAll();
         Authority authority = new Authority();
         authority.setApiUri("apiUri");
-        authority.setCode("UZ");
+        authority.setCode("RU");
         authority.setName("Uz");
         authorityRepository.save(authority);
         LedgerPublicKey publicKey = new LedgerPublicKey();
         publicKey.setJwk(jwk);
         publicKey.setKeyId("1");
-        publicKey.setAuthorityCode("UZ");
+        publicKey.setAuthorityCode("RU");
         ledgerPublicKeyRepository.save(publicKey);
     }
 }

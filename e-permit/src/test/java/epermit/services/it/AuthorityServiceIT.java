@@ -1,4 +1,4 @@
-package epermit.services;
+package epermit.services.it;
 
 import static org.junit.Assert.assertEquals;
 import java.util.List;
@@ -22,14 +22,15 @@ import epermit.entities.Authority;
 import epermit.ledgerevents.LedgerEventUtil;
 import epermit.models.EPermitProperties;
 import epermit.models.dtos.AuthorityConfig;
-import epermit.models.dtos.PrivateKey;
 import epermit.models.enums.PermitType;
 import epermit.models.inputs.CreateAuthorityInput;
 import epermit.models.inputs.CreateQuotaInput;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.LedgerPublicKeyRepository;
+import epermit.repositories.LedgerQuotaRepository;
 import epermit.repositories.PrivateKeyRepository;
-import epermit.utils.PrivateKeyUtil;
+import epermit.services.AuthorityService;
+import epermit.services.PrivateKeyService;
 
 @Testcontainers
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -46,6 +47,9 @@ public class AuthorityServiceIT {
     private LedgerPublicKeyRepository ledgerPublicKeyRepository;
 
     @Autowired
+    private LedgerQuotaRepository ledgerQuotaRepository;
+
+    @Autowired
     private EPermitProperties properties;
 
 
@@ -56,20 +60,10 @@ public class AuthorityServiceIT {
 
     @BeforeAll
     @Transactional
-    static void setUp(@Autowired PrivateKeyRepository keyRepository, @Autowired PrivateKeyUtil keyUtil) {
-        PrivateKey key = keyUtil.create("1");
-        epermit.entities.PrivateKey keyEntity = new epermit.entities.PrivateKey();
-        keyEntity.setEnabled(true);
-        keyEntity.setKeyId(key.getKeyId());
-        keyEntity.setPrivateJwk(key.getPrivateJwk());
-        keyEntity.setSalt(key.getSalt());
-        keyRepository.save(keyEntity);
-    }
-
-    @AfterAll
-    @Transactional
-    static void down(@Autowired PrivateKeyRepository keyRepository){
-        keyRepository.deleteAll();
+    static void up(@Autowired PrivateKeyService privateKeyService, @Autowired PrivateKeyRepository keyRepository) {
+        if(keyRepository.count() == 0){
+            privateKeyService.seed();
+        }    
     }
 
     @Test
