@@ -2,7 +2,8 @@ package epermit.services;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,13 +20,13 @@ import epermit.entities.LedgerQuota;
 import epermit.entities.SerialNumber;
 import epermit.ledgerevents.LedgerEventUtil;
 import epermit.models.EPermitProperties;
-import epermit.models.enums.AuthenticationType;
 import epermit.models.enums.PermitType;
 import epermit.models.enums.SerialNumberState;
 import epermit.models.inputs.CreatePermitInput;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.LedgerPermitRepository;
 import epermit.repositories.LedgerQuotaRepository;
+import epermit.repositories.PrivateKeyRepository;
 import epermit.repositories.SerialNumberRepository;
 import epermit.utils.PermitUtil;
 
@@ -35,16 +36,7 @@ import epermit.utils.PermitUtil;
 public class PermitServiceIT {
 
     @Autowired
-    private AuthorityRepository authorityRepository;
-
-    @Autowired
     private SerialNumberRepository serialNumberRepository;
-
-    @Autowired
-    private PrivateKeyService privateKeyService;
-
-    @Autowired
-    private LedgerQuotaRepository ledgerQuotaRepository;
 
     @Autowired
     private EPermitProperties properties;
@@ -64,13 +56,24 @@ public class PermitServiceIT {
             PermitPostgresContainer.getInstance();
 
 
-    @BeforeEach
-    @Transactional
-    void setUp() {
+    @BeforeAll
+    static void seed(@Autowired PrivateKeyService privateKeyService) {
         privateKeyService.seed();
+    }
+
+    @AfterAll
+    @Transactional
+    static void down(@Autowired PrivateKeyRepository keyRepository){
+        keyRepository.deleteAll();
+    }
+    
+    @BeforeAll
+    @Transactional
+    static void setUp(@Autowired AuthorityRepository authorityRepository,
+            @Autowired LedgerQuotaRepository ledgerQuotaRepository,
+            @Autowired SerialNumberRepository serialNumberRepository) {
         Authority authority = new Authority();
         authority.setApiUri("apiUri");
-        authority.setAuthenticationType(AuthenticationType.BASIC);
         authority.setCode("UZ");
         authority.setName("Uz");
         authorityRepository.save(authority);

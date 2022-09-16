@@ -39,6 +39,7 @@ import epermit.models.inputs.CreatePermitInput;
 import epermit.models.inputs.PermitUsedInput;
 import epermit.models.results.CreatePermitResult;
 import epermit.repositories.SerialNumberRepository;
+import epermit.repositories.AuthorityRepository;
 import epermit.repositories.LedgerPermitRepository;
 import epermit.utils.PermitUtil;
 
@@ -52,6 +53,9 @@ public class PermitServiceTest {
 
     @Mock
     PermitUtil permitUtil;
+
+    @Mock
+    AuthorityRepository authorityRepository;
 
     @Mock
     SerialNumberRepository serialNumberRepository;

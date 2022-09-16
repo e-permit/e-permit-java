@@ -22,7 +22,6 @@ import epermit.entities.Authority;
 import epermit.entities.CreatedEvent;
 import epermit.entities.LedgerEvent;
 import epermit.models.EPermitProperties;
-import epermit.models.enums.AuthenticationType;
 import epermit.models.results.VerifyProofResult;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.CreatedEventRepository;
@@ -73,7 +72,6 @@ public class LedgerEventUtil {
         Authority authority = authorityRepository.findOneByCode(ledgerEvent.getConsumer());
         LedgerEventCreated appEvent = new LedgerEventCreated();
         appEvent.setEventId(createdEvent.getEventId());
-        appEvent.setProofType(authority.getAuthenticationType());
         appEvent.setUri(authority.getApiUri() + "/events/"
                 + ledgerEvent.getEventType().name().toLowerCase().replace("_", "-"));
         appEvent.setContent(GsonUtil.toMap(ledgerEvent.getEventContent()));
@@ -122,18 +120,10 @@ public class LedgerEventUtil {
 
     @SneakyThrows
     public <T extends LedgerEventBase> String createProof(T event) {
-        Authority authority = authorityRepository.findOneByCode(event.getEventConsumer());
-        if (authority.getAuthenticationType() == AuthenticationType.BASIC) {
-            String proofStr = authority.getCode() + ":" + authority.getApiSecret();
-            String proof =
-                    Base64.getEncoder().encodeToString(proofStr.getBytes(StandardCharsets.UTF_8));
-            return proof;
-        } else {
-            String jws = jwsUtil.createJws(event);
-            log.info("Created jws length: {}", jws.length());
-            String[] parts = jws.split("\\.");
-            return parts[0] + "." + parts[2];
-        }
+        String jws = jwsUtil.createJws(event);
+        log.info("Created jws length: {}", jws.length());
+        String[] parts = jws.split("\\.");
+        return parts[0] + "." + parts[2];
     }
 
     @SneakyThrows
@@ -146,46 +136,29 @@ public class LedgerEventUtil {
         if (authority == null) {
             return VerifyProofResult.fail("AUTHORITY_NOTFOUND");
         }
-        if (authority.getAuthenticationType() == AuthenticationType.BASIC) {
-            if (!authorization.toLowerCase().startsWith("basic")) {
-                return VerifyProofResult.fail("INVALID_AUTH_TYPE");
-            }
-            String proofB64 = authorization.substring(6);
-            String proof = new String(Base64.getDecoder().decode(proofB64), StandardCharsets.UTF_8);
-            final String[] values = proof.split(":", 2);
-            String authorityCode = values[0];
-            String apiSecret = values[1];
-            if (!authorityCode.equals(authority.getCode())) {
-                return VerifyProofResult.fail("INVALID_AUTHORITY");
-            }
-            Boolean isValid = apiSecret.equals(authority.getApiSecret());
-            if (!isValid) {
-                return VerifyProofResult.fail("UNAUTHORIZED");
-            }
-            return VerifyProofResult.success(proofB64);
-        } else {
-            if (!authorization.toLowerCase().startsWith("bearer")) {
-                return VerifyProofResult.fail("INVALID_AUTH_TYPE");
-            }
-            String proof = authorization.substring(7);
-            String[] proofArr = proof.split("\\.");
-            String payloadJsonStr = GsonUtil.getGson().toJson(e);
-            String payloadBase64 = Base64.getUrlEncoder().withoutPadding()
-                    .encodeToString(payloadJsonStr.getBytes());
-            String jws = proofArr[0] + "." + payloadBase64 + "." + proofArr[1];
-            log.info("Constructed jws: {}", jws);
-            log.info("Constructed jws length: {}", jws.length());
-            Boolean isValid = jwsUtil.validateJws(jws);
-            if (!isValid) {
-                return VerifyProofResult.fail("UNAUTHORIZED");
-            }
-            return VerifyProofResult.success(proof);
+        if (!authorization.toLowerCase().startsWith("bearer")) {
+            return VerifyProofResult.fail("INVALID_AUTH_TYPE");
         }
+        String proof = authorization.substring(7);
+        String[] proofArr = proof.split("\\.");
+        String payloadJsonStr = GsonUtil.getGson().toJson(e);
+        String payloadBase64 =
+                Base64.getUrlEncoder().withoutPadding().encodeToString(payloadJsonStr.getBytes());
+        String jws = proofArr[0] + "." + payloadBase64 + "." + proofArr[1];
+        log.info("Constructed jws: {}", jws);
+        log.info("Constructed jws length: {}", jws.length());
+        Boolean isValid = jwsUtil.validateJws(jws);
+        if (!isValid) {
+            return VerifyProofResult.fail("UNAUTHORIZED");
+        }
+        return VerifyProofResult.success(proof);
     }
 
     @SneakyThrows
     public Boolean sendEvent(LedgerEventCreated event) {
-        HttpHeaders headers = createEventRequestHeader(event.getProofType(), event.getProof());
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.add("Authorization", "Bearer " + event.getProof());
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(event.getContent(), headers);
         ResponseEntity<?> result =
                 restTemplate.postForEntity(event.getUri(), request, Object.class);
@@ -197,13 +170,5 @@ public class LedgerEventUtil {
         MDC.remove("epermitSendError");
 
         return false;
-    }
-
-    private HttpHeaders createEventRequestHeader(AuthenticationType proofType, String proof) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.add("Authorization",
-                proofType == AuthenticationType.BASIC ? "Basic " : "Bearer " + proof);
-        return headers;
     }
 }

@@ -2,8 +2,9 @@ package epermit.services;
 
 import static org.junit.Assert.assertEquals;
 import java.util.List;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,6 @@ import epermit.ledgerevents.LedgerEventUtil;
 import epermit.models.EPermitProperties;
 import epermit.models.dtos.AuthorityConfig;
 import epermit.models.dtos.PrivateKey;
-import epermit.models.enums.AuthenticationType;
 import epermit.models.enums.PermitType;
 import epermit.models.inputs.CreateAuthorityInput;
 import epermit.models.inputs.CreateQuotaInput;
@@ -40,12 +40,6 @@ public class AuthorityServiceIT {
     private AuthorityRepository authorityRepository;
 
     @Autowired
-    private PrivateKeyRepository keyRepository;
-
-    @Autowired
-    private PrivateKeyUtil keyUtil;
-
-    @Autowired
     private LedgerEventUtil ledgerEventUtil;
 
     @Autowired
@@ -60,9 +54,9 @@ public class AuthorityServiceIT {
             PermitPostgresContainer.getInstance();
 
 
-    @BeforeEach
+    @BeforeAll
     @Transactional
-    void setUp() {
+    static void setUp(@Autowired PrivateKeyRepository keyRepository, @Autowired PrivateKeyUtil keyUtil) {
         PrivateKey key = keyUtil.create("1");
         epermit.entities.PrivateKey keyEntity = new epermit.entities.PrivateKey();
         keyEntity.setEnabled(true);
@@ -72,27 +66,32 @@ public class AuthorityServiceIT {
         keyRepository.save(keyEntity);
     }
 
+    @AfterAll
+    @Transactional
+    static void down(@Autowired PrivateKeyRepository keyRepository){
+        keyRepository.deleteAll();
+    }
+
     @Test
     void createTest() {
         AuthorityService authorityService = new AuthorityService(authorityRepository, properties,
                 ledgerEventUtil, ledgerPublicKeyRepository, null, null, new ModelMapper());
         AuthorityConfig config = new AuthorityConfig();
-        config.setCode("UZ");
-        config.setName("Uzbekistan");
+        config.setCode("AZ");
+        config.setName("Uz");
         config.setKeys(List.of());
         CreateAuthorityInput input = new CreateAuthorityInput();
         input.setApiUri("apiUri");
         authorityService.create(input, config);
     }
 
-    
+
     @Test
     void createQuotaTest() {
         AuthorityService authorityService = new AuthorityService(authorityRepository, properties,
                 ledgerEventUtil, ledgerPublicKeyRepository, null, null, new ModelMapper());
         Authority authority = new Authority();
         authority.setApiUri("apiUri");
-        authority.setAuthenticationType(AuthenticationType.BASIC);
         authority.setCode("UZ");
         authority.setName("Uz");
         authorityRepository.save(authority);
@@ -103,9 +102,10 @@ public class AuthorityServiceIT {
         input.setPermitYear(2021);
         input.setStartNumber(1);
         authorityService.createQuota(input);
-        EpermitValidationException ex = Assertions.assertThrows(EpermitValidationException.class, () -> {
-            authorityService.createQuota(input);
-        });
+        EpermitValidationException ex =
+                Assertions.assertThrows(EpermitValidationException.class, () -> {
+                    authorityService.createQuota(input);
+                });
         assertEquals(ErrorCodes.INVALID_QUOTA_INTERVAL.name(), ex.getErrorCode());
     }
 }

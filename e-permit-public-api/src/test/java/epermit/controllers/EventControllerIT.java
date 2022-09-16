@@ -3,7 +3,7 @@ package epermit.controllers;
 import java.time.Instant;
 import java.util.Map;
 import org.junit.Assert;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -31,9 +31,9 @@ import epermit.ledgerevents.permitcreated.PermitCreatedLedgerEvent;
 import epermit.ledgerevents.quotacreated.QuotaCreatedLedgerEvent;
 import epermit.models.dtos.PrivateKey;
 import epermit.models.dtos.PublicJwk;
-import epermit.models.enums.AuthenticationType;
 import epermit.models.enums.PermitType;
 import epermit.repositories.AuthorityRepository;
+import epermit.repositories.LedgerEventRepository;
 import epermit.repositories.LedgerPublicKeyRepository;
 import epermit.repositories.LedgerQuotaRepository;
 import epermit.utils.JwsUtil;
@@ -45,9 +45,6 @@ import epermit.utils.PrivateKeyUtil;
 public class EventControllerIT {
         @LocalServerPort
         private int port;
-
-        @Autowired
-        private AuthorityRepository authorityRepository;
 
         @Autowired
         private LedgerPublicKeyRepository ledgerPublicKeyRepository;
@@ -64,15 +61,21 @@ public class EventControllerIT {
         @Autowired
         JwsUtil jwsUtil;
 
+        @Autowired
+        LedgerEventRepository ledgerEventRepository;
+
+        static String previousEventId = "0";
 
         @Container
         public static PostgreSQLContainer<PermitPostgresContainer> postgreSQLContainer =
                         PermitPostgresContainer.getInstance();
 
 
-        @BeforeEach
+        @BeforeAll
         @Transactional
-        void setUp() {
+        public static void setUp(@Autowired AuthorityRepository authorityRepository,
+                        @Autowired PrivateKeyUtil keyUtil,
+                        @Autowired LedgerPublicKeyRepository ledgerPublicKeyRepository) {
                 Authority authority = new Authority();
                 authority.setApiUri("apiUri");
                 authority.setCode("UZ");
@@ -86,29 +89,9 @@ public class EventControllerIT {
         }
 
         @Test
-        void quotaCreatedEventOkTest() {
-                final String baseUrl = "http://localhost:" + port + "/events/quota-created";
-                QuotaCreatedLedgerEvent event = new QuotaCreatedLedgerEvent("UZ", "TR", "0");
-                event.setEndNumber(100);
-                event.setPermitIssuedFor("UZ");
-                event.setPermitIssuer("TR");
-                event.setPermitType(PermitType.BILITERAL);
-                event.setPermitYear(2021);
-                event.setStartNumber(1);
-                String jws = jwsUtil.createJws(GsonUtil.toMap(event));
-                HttpHeaders headers = createEventRequestHeader(AuthenticationType.PUBLICKEY, jws);
-                HttpEntity<Map<?, ?>> request = new HttpEntity<>(GsonUtil.toMap(event), headers);
-
-                ResponseEntity<?> result =
-                                this.restTemplate.postForEntity(baseUrl, request, Void.class);
-                System.out.println(result.getBody());
-                Assert.assertEquals(200, result.getStatusCodeValue());
-        }
-
-        @Test
         void notFoundTest() {
                 final String baseUrl = "http://localhost:" + port + "/events/quota-created2";
-               
+
                 HttpEntity<String> request = new HttpEntity<>("");
 
                 ResponseEntity<?> result =
@@ -127,7 +110,7 @@ public class EventControllerIT {
                 event.setPermitYear(2021);
                 event.setStartNumber(100);
                 String jws = jwsUtil.createJws(GsonUtil.toMap(event));
-                HttpHeaders headers = createEventRequestHeader(AuthenticationType.PUBLICKEY, jws);
+                HttpHeaders headers = createEventRequestHeader(jws);
                 HttpEntity<Map<?, ?>> request = new HttpEntity<>(GsonUtil.toMap(event), headers);
 
                 ResponseEntity<?> result =
@@ -136,9 +119,11 @@ public class EventControllerIT {
         }
 
         @Test
-        void quotaCreatedEventTest() {
+        void quotaCreatedEventOkTest() {
                 final String baseUrl = "http://localhost:" + port + "/events/quota-created";
-                QuotaCreatedLedgerEvent event = new QuotaCreatedLedgerEvent("UZ", "TR", "0");
+                QuotaCreatedLedgerEvent event =
+                                new QuotaCreatedLedgerEvent("UZ", "TR", previousEventId);
+                previousEventId = event.getEventId();
                 event.setEndNumber(100);
                 event.setPermitIssuedFor("UZ");
                 event.setPermitIssuer("TR");
@@ -146,14 +131,41 @@ public class EventControllerIT {
                 event.setPermitYear(2021);
                 event.setStartNumber(1);
                 String jws = jwsUtil.createJws(GsonUtil.toMap(event));
-                HttpHeaders headers = createEventRequestHeader(AuthenticationType.PUBLICKEY, jws);
+                HttpHeaders headers = createEventRequestHeader(jws);
+                HttpEntity<Map<?, ?>> request = new HttpEntity<>(GsonUtil.toMap(event), headers);
+
+                ResponseEntity<?> result =
+                                this.restTemplate.postForEntity(baseUrl, request, Void.class);
+                Assert.assertEquals(200, result.getStatusCodeValue());
+
+        }
+
+
+
+        @Test
+        void quotaCreatedEventTest() {
+                final String baseUrl = "http://localhost:" + port + "/events/quota-created";
+                // Boolean isPresent =
+                // ledgerEventRepository.findOneByProducerAndConsumerAndEventId("UZ", "TR",
+                // previousEventId).isPresent();
+                QuotaCreatedLedgerEvent event =
+                                new QuotaCreatedLedgerEvent("UZ", "TR", previousEventId);
+                previousEventId = event.getEventId();
+                event.setEndNumber(200);
+                event.setPermitIssuedFor("UZ");
+                event.setPermitIssuer("TR");
+                event.setPermitType(PermitType.BILITERAL);
+                event.setPermitYear(2021);
+                event.setStartNumber(101);
+                String jws = jwsUtil.createJws(GsonUtil.toMap(event));
+                HttpHeaders headers = createEventRequestHeader(jws);
                 HttpEntity<Map<?, ?>> request = new HttpEntity<>(GsonUtil.toMap(event), headers);
 
                 ResponseEntity<LedgerEventResult> result = this.restTemplate.postForEntity(baseUrl,
                                 request, LedgerEventResult.class);
                 Assert.assertEquals(200, result.getStatusCodeValue());
-
-                QuotaCreatedLedgerEvent event2 = new QuotaCreatedLedgerEvent("UZ", "TR", "0");
+                QuotaCreatedLedgerEvent event2 =
+                                new QuotaCreatedLedgerEvent("UZ", "TR", previousEventId);
                 event2.setEndNumber(100);
                 event2.setPermitIssuedFor("UZ");
                 event2.setPermitIssuer("TR");
@@ -161,18 +173,20 @@ public class EventControllerIT {
                 event2.setPermitYear(2021);
                 event2.setStartNumber(1);
                 String jws2 = jwsUtil.createJws(GsonUtil.toMap(event2));
-                HttpHeaders headers2 = createEventRequestHeader(AuthenticationType.PUBLICKEY, jws2);
+                HttpHeaders headers2 = createEventRequestHeader(jws2);
                 HttpEntity<Map<?, ?>> request2 = new HttpEntity<>(GsonUtil.toMap(event2), headers2);
                 ResponseEntity<?> result2 =
                                 this.restTemplate.postForEntity(baseUrl, request2, Object.class);
-                Assert.assertEquals(400, result2.getStatusCodeValue());
+                Assert.assertEquals(422, result2.getStatusCodeValue());
 
         }
 
         @Test
         void keyCreatedEventOkTest() {
                 final String baseUrl = "http://localhost:" + port + "/events/key-created";
-                KeyCreatedLedgerEvent event = new KeyCreatedLedgerEvent("UZ", "TR", "0");
+                KeyCreatedLedgerEvent event =
+                                new KeyCreatedLedgerEvent("UZ", "TR", previousEventId);
+                previousEventId = event.getEventId();
                 PrivateKey key = keyUtil.create("2");
                 event.setKid(key.getKeyId());
                 PublicJwk jwk = GsonUtil.getGson().fromJson(key.getPublicJwk(), PublicJwk.class);
@@ -183,7 +197,7 @@ public class EventControllerIT {
                 event.setX(jwk.getX());
                 event.setY(jwk.getY());
                 String jws = jwsUtil.createJws(GsonUtil.toMap(event));
-                HttpHeaders headers = createEventRequestHeader(AuthenticationType.PUBLICKEY, jws);
+                HttpHeaders headers = createEventRequestHeader(jws);
                 HttpEntity<Map<?, ?>> request = new HttpEntity<>(GsonUtil.toMap(event), headers);
 
                 ResponseEntity<?> result =
@@ -194,18 +208,20 @@ public class EventControllerIT {
 
         @Test
         void keyRevokedEventOkTest() {
-                PrivateKey key = keyUtil.create("2");
+                PrivateKey key = keyUtil.create("3");
                 LedgerPublicKey ledgerKey = new LedgerPublicKey();
                 ledgerKey.setAuthorityCode("UZ");
-                ledgerKey.setKeyId("2");
+                ledgerKey.setKeyId("3");
                 ledgerKey.setJwk(key.getPublicJwk());
                 ledgerPublicKeyRepository.save(ledgerKey);
                 final String baseUrl = "http://localhost:" + port + "/events/key-revoked";
-                KeyRevokedLedgerEvent event = new KeyRevokedLedgerEvent("UZ", "TR", "0");
-                event.setKeyId("1");
+                KeyRevokedLedgerEvent event =
+                                new KeyRevokedLedgerEvent("UZ", "TR", previousEventId);
+                previousEventId = event.getEventId();
+                event.setKeyId("3");
                 event.setRevokedAt(Instant.now().getEpochSecond());
                 String jws = jwsUtil.createJws(GsonUtil.toMap(event));
-                HttpHeaders headers = createEventRequestHeader(AuthenticationType.PUBLICKEY, jws);
+                HttpHeaders headers = createEventRequestHeader(jws);
                 HttpEntity<Map<?, ?>> request = new HttpEntity<>(GsonUtil.toMap(event), headers);
 
                 ResponseEntity<?> result =
@@ -225,7 +241,9 @@ public class EventControllerIT {
                 quota.setStartNumber(1);
                 ledgerQuotaRepository.save(quota);
                 final String baseUrl = "http://localhost:" + port + "/events/permit-created";
-                PermitCreatedLedgerEvent event = new PermitCreatedLedgerEvent("UZ", "TR", "0");
+                PermitCreatedLedgerEvent event =
+                                new PermitCreatedLedgerEvent("UZ", "TR", previousEventId);
+                previousEventId = event.getEventId();
                 event.setCompanyId("ABC");
                 event.setCompanyName("ABC");
                 event.setExpireAt("31/01/2022");
@@ -239,7 +257,7 @@ public class EventControllerIT {
                 event.setSerialNumber(1);
                 event.setQrCode("1");
                 String jws = jwsUtil.createJws(GsonUtil.toMap(event));
-                HttpHeaders headers = createEventRequestHeader(AuthenticationType.PUBLICKEY, jws);
+                HttpHeaders headers = createEventRequestHeader(jws);
                 HttpEntity<Map<?, ?>> request = new HttpEntity<>(GsonUtil.toMap(event), headers);
 
                 ResponseEntity<?> result =
@@ -248,13 +266,12 @@ public class EventControllerIT {
         }
 
 
-        private HttpHeaders createEventRequestHeader(AuthenticationType proofType, String jws) {
+        private HttpHeaders createEventRequestHeader(String jws) {
                 String[] proofArr = jws.split("\\.");
                 String proof = proofArr[0] + "." + proofArr[2];
                 HttpHeaders headers = new HttpHeaders();
                 headers.setContentType(MediaType.APPLICATION_JSON);
-                headers.add("Authorization", proofType == AuthenticationType.BASIC ? "Basic "
-                                : "Bearer " + proof);
+                headers.add("Authorization", "Bearer " + proof);
                 return headers;
         }
 }

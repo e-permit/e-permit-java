@@ -123,8 +123,10 @@ public class PermitService {
                 new PermitRevokedLedgerEvent(issuer, permit.getIssuedFor(), prevEventId);
         e.setPermitId(permit.getPermitId());
 
-        SerialNumber serialNumber =serialNumberRepository.findOne(filterSerialNumber(permit.getIssuedFor(),
-                permit.getPermitYear(), permit.getPermitType(), permit.getSerialNumber())).get();
+        SerialNumber serialNumber = serialNumberRepository
+                .findOne(filterSerialNumber(permit.getIssuedFor(), permit.getPermitYear(),
+                        permit.getPermitType(), permit.getSerialNumber()))
+                .get();
         serialNumber.setState(SerialNumberState.REVOKED);
         serialNumberRepository.save(serialNumber);
         ledgerEventUtil.persistAndPublishEvent(e);

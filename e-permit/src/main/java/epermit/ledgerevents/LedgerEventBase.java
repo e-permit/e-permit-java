@@ -32,7 +32,8 @@ public class LedgerEventBase {
     @Size(min = 1, max = 100)
     private String previousEventId;
 
-    public LedgerEventBase(String producer, String consumer, String prevEventId, LedgerEventType eventType) {
+    public LedgerEventBase(String producer, String consumer, String prevEventId,
+            LedgerEventType eventType) {
         this.eventId = UUID.randomUUID().toString();
         this.eventTimestamp = Instant.now().getEpochSecond();
         this.eventType = eventType;

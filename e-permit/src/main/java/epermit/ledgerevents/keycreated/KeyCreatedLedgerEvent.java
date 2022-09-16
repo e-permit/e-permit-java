@@ -15,15 +15,15 @@ public class KeyCreatedLedgerEvent extends LedgerEventBase {
     }
 
     @NotNull
-    @Pattern( regexp = "^EC$")
+    @Pattern(regexp = "^EC$")
     private String kty;
 
     @NotNull
-    @Pattern( regexp = "^sig$")
+    @Pattern(regexp = "^sig$")
     private String use;
 
     @NotNull
-    @Pattern( regexp = "^P-256$")
+    @Pattern(regexp = "^P-256$")
     private String crv;
 
     @NotNull
@@ -36,6 +36,6 @@ public class KeyCreatedLedgerEvent extends LedgerEventBase {
     private String y;
 
     @NotNull
-    @Pattern( regexp = "^ES256$")
+    @Pattern(regexp = "^ES256$")
     private String alg;
 }
