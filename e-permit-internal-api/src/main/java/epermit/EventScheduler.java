@@ -25,11 +25,10 @@ public class EventScheduler {
     public void unsentEventsTask() {
         log.info("Unsent events task started");
         List<LedgerEventCreated> list = eventService.getUnSendedEvents();
-        log.info( String.format("Found %d unsended events", list.size()));
+        log.info(String.format("Found %d unsended events", list.size()));
         for (LedgerEventCreated event : list) {
-            Thread.sleep(1 * 100);
             eventPublisher.publishEvent(event);
-            log.info("Event published id: %s", event.getEventId());
+            log.info( String.format("Event published id: %s", event.getEventId()));
         }
     }
 }
