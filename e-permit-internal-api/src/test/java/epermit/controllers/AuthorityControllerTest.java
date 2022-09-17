@@ -13,7 +13,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
+import epermit.models.dtos.AuthorityConfig;
 import epermit.models.dtos.AuthorityDto;
 import epermit.models.inputs.CreateAuthorityInput;
 import epermit.services.AuthorityService;
@@ -53,8 +56,11 @@ public class AuthorityControllerTest {
     void createTest() {
         CreateAuthorityInput input = new CreateAuthorityInput();
         input.setApiUri("apiUri");
-        when(restTemplate.getForObject("apiUri/epermit-configuration", String.class)).thenReturn(
-                "{\"code\":\"UZ\",\"verify_uri\":\"https://e-permit.github.io/verify\"}");
+        AuthorityConfig config = new AuthorityConfig();
+        config.setCode("UZ");
+        config.setName("name");
+        when(restTemplate.getForEntity("apiUri/epermit-configuration", AuthorityConfig.class))
+                .thenReturn(new ResponseEntity<>(config, HttpStatus.OK));
         controller.create(input);
         verify(authorityService, times(1)).create(eq(input), any());
     }
