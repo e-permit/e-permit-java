@@ -114,7 +114,6 @@ public class AuthorityControllerIT {
         String configJson = GsonUtil.getGson().toJson(config);
         mockServer.expect(once(), requestTo(configUri))
                 .andRespond(withSuccess(configJson, MediaType.APPLICATION_JSON));
-
         CreateAuthorityInput input = new CreateAuthorityInput();
         input.setApiUri("http://localhost");
         ResponseEntity<?> r =
