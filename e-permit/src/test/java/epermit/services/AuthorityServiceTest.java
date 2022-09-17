@@ -117,6 +117,7 @@ public class AuthorityServiceTest {
         input.setStartNumber(1);
         when(properties.getIssuerCode()).thenReturn("UZ");
         when(ledgerEventUtil.getPreviousEventId("TR")).thenReturn("123");
+        when(authorityRepository.findOneByCode("TR")).thenReturn(new Authority());
         authorityService.createQuota(input);
         verify(ledgerEventUtil, times(1)).persistAndPublishEvent(captor.capture());
         QuotaCreatedLedgerEvent event = captor.getValue();

@@ -35,7 +35,7 @@ public class ApiErrorResponse {
 
     public ApiErrorResponse(EpermitValidationException ex) {
         this(HttpStatus.UNPROCESSABLE_ENTITY, "Error, please contact system manager with error id");
-        details.put("errorCode", errorMessage);
+        details.put("errorCode", ex.getErrorCode());
     }
 
     public ApiErrorResponse(MethodArgumentNotValidException ex){

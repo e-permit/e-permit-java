@@ -2,6 +2,7 @@ package epermit.commons;
 
 public enum ErrorCodes {
     AUTHORITY_ALREADY_EXISTS,
+    AUTHORITY_NOT_FOUND,
     EVENT_ALREADY_EXISTS,
     PREVIOUS_EVENT_NOTFOUND,
     GENESIS_EVENT_ALREADY_EXISTS,

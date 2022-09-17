@@ -93,6 +93,8 @@ public class AuthorityService {
     @Transactional
     public void createQuota(CreateQuotaInput input) {
         log.info("Quota create command: {}", input);
+        Authority authority = authorityRepository.findOneByCode(input.getAuthorityCode());
+        Check.assertFalse(authority == null, ErrorCodes.AUTHORITY_NOT_FOUND);
         String issuer = properties.getIssuerCode();
         String prevEventId = ledgerEventUtil.getPreviousEventId(input.getAuthorityCode());
         QuotaCreatedLedgerEvent event =
@@ -103,8 +105,8 @@ public class AuthorityService {
         event.setPermitYear(input.getPermitYear());
         event.setPermitIssuer(input.getAuthorityCode());
         event.setPermitIssuedFor(issuer);
-        log.info("Quota created: {}", event);
         ledgerEventUtil.persistAndPublishEvent(event);
+        log.info("Quota created: {}", event);
     }
 
     @Transactional
