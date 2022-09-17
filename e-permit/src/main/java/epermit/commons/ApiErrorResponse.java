@@ -8,6 +8,8 @@ import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import lombok.Getter;
 
 @Getter
@@ -16,6 +18,7 @@ public class ApiErrorResponse {
     private String timestamp;
     private String errorId;
     private String errorMessage;
+    @JsonInclude(value = Include.NON_EMPTY, content = Include.ALWAYS)
     private Map<String, Object> details = new HashMap<>();
 
     public ApiErrorResponse(HttpStatus status, String errorMessage) {
@@ -27,7 +30,7 @@ public class ApiErrorResponse {
 
     public ApiErrorResponse(Exception ex) {
         this(HttpStatus.INTERNAL_SERVER_ERROR,
-                "Error!!, please contact system manager with error id");
+                "Internal Server Error!!, please contact system manager with error id");
     }
 
     public ApiErrorResponse(EpermitValidationException ex) {
