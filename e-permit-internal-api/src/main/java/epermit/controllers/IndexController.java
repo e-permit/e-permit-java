@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import epermit.models.EPermitProperties;
 import epermit.models.dtos.IndexDto;
 import epermit.services.AuthorityService;
 import lombok.RequiredArgsConstructor;
@@ -19,10 +20,12 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/")
 public class IndexController {
     private final AuthorityService service;
+    private final EPermitProperties properties;
 
     @GetMapping()
     public IndexDto index() {
         IndexDto dto = new IndexDto();
+        dto.setAuthority(properties.getIssuerCode());
         dto.setAuthorities(
                 service.getAll().stream().map(x -> x.getCode()).collect(Collectors.toList()));
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();

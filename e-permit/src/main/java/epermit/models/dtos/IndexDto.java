@@ -7,6 +7,7 @@ import lombok.Data;
 @Data
 public class IndexDto {
     private String username;
+    private String authority;
     private List<String> roles = new ArrayList<>();
     private List<String> authorities = new ArrayList<>();
 }
