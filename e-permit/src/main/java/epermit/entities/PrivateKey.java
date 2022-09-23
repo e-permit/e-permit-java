@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor // JPA
 @Entity
 @Table(name = "epermit_keys")
-@SQLDelete(sql = "UPDATE epermit_keys SET deleted = true WHERE id = ?")
+@SQLDelete(sql = "UPDATE epermit_keys SET deleted = '1' WHERE id = ?")
 @Where(clause = "deleted = false")
 public class PrivateKey {
     @Id

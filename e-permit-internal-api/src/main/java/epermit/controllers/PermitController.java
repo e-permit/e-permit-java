@@ -1,6 +1,7 @@
 package epermit.controllers;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import javax.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import epermit.commons.GsonUtil;
 import epermit.models.dtos.PermitDto;
+import epermit.models.dtos.PermitListItem;
 import epermit.models.dtos.PermitListParams;
 import epermit.models.inputs.CreatePermitInput;
 import epermit.models.inputs.PermitUsedInput;
@@ -34,17 +36,22 @@ public class PermitController {
 
     @GetMapping()
     @PreAuthorize("hasRole('ADMIN') OR hasRole('VERIFIER')")
-    public Page<PermitDto> getAll(@RequestParam Map<String, Object> params) {
+    public Page<PermitListItem> getAll(@RequestParam Map<String, Object> params) {
         PermitListParams input = GsonUtil.fromMap(params, PermitListParams.class);
-        Page<PermitDto> r = permitService.getAll(input);
+        Page<PermitListItem> r = permitService.getAll(input);
         return r;
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') OR hasRole('VERIFIER')")
     public PermitDto getById(@PathVariable("id") UUID id) {
-        PermitDto permit = permitService.getById(id);
-        return permit;
+        return permitService.getById(id);
+    }
+
+    @GetMapping("/find/{id}")
+    @PreAuthorize("hasRole('ADMIN') OR hasRole('VERIFIER')")
+    public Optional<PermitDto> getByPermitId(@PathVariable("id") String id) {
+        return permitService.getByPermitId(id);
     }
 
     @PostMapping()

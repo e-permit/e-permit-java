@@ -2,7 +2,9 @@ package epermit.services.it;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
@@ -16,13 +18,16 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import epermit.PermitPostgresContainer;
 import epermit.entities.Authority;
+import epermit.entities.LedgerPermit;
 import epermit.entities.LedgerQuota;
 import epermit.entities.SerialNumber;
 import epermit.ledgerevents.LedgerEventUtil;
 import epermit.models.EPermitProperties;
+import epermit.models.dtos.PermitDto;
 import epermit.models.enums.PermitType;
 import epermit.models.enums.SerialNumberState;
 import epermit.models.inputs.CreatePermitInput;
+import epermit.models.results.CreatePermitResult;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.LedgerPermitRepository;
 import epermit.repositories.LedgerPublicKeyRepository;
@@ -37,22 +42,11 @@ import epermit.utils.PermitUtil;
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 public class PermitServiceIT {
+    @Autowired
+    private PermitService permitService;
 
     @Autowired
-    private SerialNumberRepository serialNumberRepository;
-
-    @Autowired
-    private EPermitProperties properties;
-
-    @Autowired
-    private PermitUtil permitUtil;
-
-    @Autowired
-    private LedgerEventUtil ledgerEventUtil;
-
-    @Autowired
-    private LedgerPermitRepository permitRepository;
-
+    private LedgerPermitRepository ledgerPermitRepository;
 
     @Container
     public static PostgreSQLContainer<PermitPostgresContainer> postgreSQLContainer =
@@ -103,8 +97,6 @@ public class PermitServiceIT {
 
     @Test
     void permitCreatedTest() {
-        PermitService permitService = new PermitService(permitUtil, properties, ledgerEventUtil,
-                new ModelMapper(), permitRepository, serialNumberRepository);
         CreatePermitInput input = new CreatePermitInput();
         input.setCompanyId("ABC");
         input.setCompanyName("ABC");
@@ -113,6 +105,23 @@ public class PermitServiceIT {
         input.setPermitYear(2021);
         input.setPlateNumber("ABC");
         permitService.createPermit(input);
+    }
+
+    @Test
+    void permitRevokedTest() {
+        CreatePermitInput input = new CreatePermitInput();
+        input.setCompanyId("ABC");
+        input.setCompanyName("ABC");
+        input.setIssuedFor("FR");
+        input.setPermitType(PermitType.BILITERAL);
+        input.setPermitYear(2021);
+        input.setPlateNumber("ABC");
+        CreatePermitResult r = permitService.createPermit(input);
+        Optional<LedgerPermit> permit = ledgerPermitRepository.findOneByPermitId(r.getPermitId());
+        Assertions.assertTrue(permit.isPresent());
+        permitService.revokePermit(r.getPermitId());
+        Optional<LedgerPermit> permit2 = ledgerPermitRepository.findOneByPermitId(r.getPermitId());
+        Assertions.assertTrue(permit2.isEmpty());
     }
 }
 

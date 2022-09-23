@@ -14,6 +14,7 @@ import epermit.commons.Check;
 import epermit.commons.ErrorCodes;
 import epermit.commons.GsonUtil;
 import epermit.entities.Authority;
+import epermit.entities.LedgerPermit;
 import epermit.entities.SerialNumber;
 import epermit.entities.LedgerPublicKey;
 import epermit.entities.LedgerQuota;
@@ -28,6 +29,7 @@ import epermit.models.enums.SerialNumberState;
 import epermit.models.inputs.CreateAuthorityInput;
 import epermit.models.inputs.CreateQuotaInput;
 import epermit.repositories.AuthorityRepository;
+import epermit.repositories.LedgerPermitRepository;
 import epermit.repositories.SerialNumberRepository;
 import epermit.repositories.LedgerPublicKeyRepository;
 import epermit.repositories.LedgerQuotaRepository;
@@ -44,6 +46,7 @@ public class AuthorityService {
     private final LedgerEventUtil ledgerEventUtil;
     private final LedgerPublicKeyRepository ledgerPublicKeyRepository;
     private final LedgerQuotaRepository ledgerQuotaRepository;
+    private final LedgerPermitRepository ledgerPermitRepository;
     private final SerialNumberRepository serialNumberRepository;
     private final ModelMapper modelMapper;
 
@@ -57,7 +60,8 @@ public class AuthorityService {
         Authority authority = authorityRepository.findOneByCode(code);
         AuthorityDto dto = modelMapper.map(authority, AuthorityDto.class);
         List<epermit.entities.LedgerQuota> quotaEntities = ledgerQuotaRepository.findAll();
-        List<epermit.entities.LedgerPublicKey> keyEntities = ledgerPublicKeyRepository.findAllByAuthorityCodeAndRevokedFalse(code);
+        List<epermit.entities.LedgerPublicKey> keyEntities =
+                ledgerPublicKeyRepository.findAllByAuthorityCodeAndRevokedFalse(code);
         List<PublicJwk> keyDtoList = new ArrayList<>();
         keyEntities.forEach(key -> {
             keyDtoList.add(GsonUtil.getGson().fromJson(key.getJwk(), PublicJwk.class));
@@ -65,6 +69,9 @@ public class AuthorityService {
         List<QuotaDto> quotas = quotaEntities.stream().filter(
                 x -> x.getPermitIssuer().equals(code) || x.getPermitIssuedFor().equals(code))
                 .map(x -> modelMapper.map(x, QuotaDto.class)).collect(Collectors.toList());
+        quotas.forEach(quota -> {
+            quota.setUsedCount(ledgerPermitRepository.count(filterUsedPermits(quota)));
+        });
         dto.setQuotas(quotas);
         dto.setKeys(keyDtoList);
         return dto;
@@ -141,6 +148,19 @@ public class AuthorityService {
             predicates.add(cb.equal(q.get("endNumber"), e.getEndNumber()));
             predicates.add(cb.equal(q.get("permitYear"), e.getPermitYear()));
             predicates.add(cb.equal(q.get("permitType"), e.getPermitType()));
+            return cb.and(predicates.toArray(new Predicate[predicates.size()]));
+        };
+        return spec;
+    }
+
+    static Specification<LedgerPermit> filterUsedPermits(QuotaDto quota) {
+        Specification<LedgerPermit> spec = (permit, cq, cb) -> {
+            List<Predicate> predicates = new ArrayList<Predicate>();
+            predicates.add(cb.equal(permit.get("issuer"), quota.getPermitIssuer()));
+            predicates.add(cb.equal(permit.get("issuedFor"), quota.getPermitIssuedFor()));
+            predicates.add(cb.equal(permit.get("permitType"), quota.getPermitType()));
+            predicates.add(cb.equal(permit.get("permitYear"), quota.getPermitYear()));
+            predicates.add(cb.between(permit.get("serialNumber"), quota.getStartNumber(), quota.getEndNumber()));
             return cb.and(predicates.toArray(new Predicate[predicates.size()]));
         };
         return spec;

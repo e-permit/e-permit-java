@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import epermit.models.dtos.PermitDto;
+import epermit.models.dtos.PermitListItem;
 import epermit.models.inputs.CreatePermitInput;
 import epermit.models.inputs.PermitUsedInput;
 import epermit.models.results.CreatePermitResult;
@@ -34,14 +35,14 @@ public class PermitControllerTest {
 
     @Test
     void getAllTest() {
-        List<PermitDto> permits = new ArrayList<>();
+        List<PermitListItem> permits = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
-            PermitDto dto = new PermitDto();
+            PermitListItem dto = new PermitListItem();
             permits.add(dto);
         }
-        Page<PermitDto> pagedList = new PageImpl<>(permits);
+        Page<PermitListItem> pagedList = new PageImpl<>(permits);
         when(permitService.getAll(any())).thenReturn(pagedList);
-        Page<PermitDto> result = controller.getAll(Map.of());
+        Page<PermitListItem> result = controller.getAll(Map.of());
         assertEquals(10, result.getTotalElements());
     }
 

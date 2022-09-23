@@ -20,4 +20,6 @@ public class QuotaDto {
     private int startNumber;
 
     private int endNumber;
+
+    private Long usedCount;
 }

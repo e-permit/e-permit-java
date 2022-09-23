@@ -32,6 +32,7 @@ import epermit.ledgerevents.permitrevoked.PermitRevokedLedgerEvent;
 import epermit.ledgerevents.permitused.PermitUsedLedgerEvent;
 import epermit.models.EPermitProperties;
 import epermit.models.dtos.PermitDto;
+import epermit.models.dtos.PermitListItem;
 import epermit.models.dtos.PermitListParams;
 import epermit.models.enums.PermitActivityType;
 import epermit.models.enums.PermitType;
@@ -101,7 +102,7 @@ public class PermitServiceTest {
 
         when(permitRepository.findAll(ArgumentMatchers.<Specification<LedgerPermit>>any(),
                 ArgumentMatchers.<Pageable>any())).thenReturn(pagedList);
-        Page<PermitDto> result = permitService.getAll(input);
+        Page<PermitListItem> result = permitService.getAll(input);
         assertEquals(1, result.getContent().size());
     }
 

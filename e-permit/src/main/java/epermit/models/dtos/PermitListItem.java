@@ -1,14 +1,11 @@
 package epermit.models.dtos;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
-import epermit.models.enums.PermitActivityType;
 import epermit.models.enums.PermitType;
 import lombok.Data;
 
 @Data
-public class PermitDto {
+public class PermitListItem {
     private UUID id;
 
     private String issuer;
@@ -38,13 +35,4 @@ public class PermitDto {
     private String claims;
 
     private boolean used;
-
-    private List<PermitActivityDto> activities = new ArrayList<>();
-
-    @Data
-    public class PermitActivityDto{
-        private PermitActivityType activityType;
-        private String activityTimestamp;
-        private String activityDetails;
-    }
 }

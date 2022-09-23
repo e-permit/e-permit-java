@@ -36,11 +36,13 @@ import epermit.entities.LedgerQuota;
 import epermit.entities.PrivateKey;
 import epermit.entities.SerialNumber;
 import epermit.models.dtos.PermitDto;
+import epermit.models.dtos.PermitListItem;
 import epermit.models.enums.PermitActivityType;
 import epermit.models.enums.PermitType;
 import epermit.models.enums.SerialNumberState;
 import epermit.models.inputs.CreatePermitInput;
 import epermit.models.inputs.PermitUsedInput;
+import epermit.models.results.CreatePermitResult;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.LedgerPermitRepository;
 import epermit.repositories.LedgerQuotaRepository;
@@ -161,9 +163,9 @@ public class PermitControllerIT {
 
         HttpEntity<?> entity = new HttpEntity<>(headers);
 
-        ParameterizedTypeReference<RestResponsePage<PermitDto>> responseType =
-                new ParameterizedTypeReference<RestResponsePage<PermitDto>>() {};
-        ResponseEntity<RestResponsePage<PermitDto>> result = getTestRestTemplate()
+        ParameterizedTypeReference<RestResponsePage<PermitListItem>> responseType =
+                new ParameterizedTypeReference<RestResponsePage<PermitListItem>>() {};
+        ResponseEntity<RestResponsePage<PermitListItem>> result = getTestRestTemplate()
                 .exchange(builder.toUriString(), HttpMethod.GET, entity, responseType);
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertEquals(25, result.getBody().getTotalElements());
@@ -201,10 +203,10 @@ public class PermitControllerIT {
         input.setPermitType(PermitType.BILITERAL);
         input.setPermitYear(2021);
         input.setPlateNumber("06AA1234");
-        ResponseEntity<?> r =
-                getTestRestTemplate().postForEntity(getBaseUrl(), input, Object.class);
+        ResponseEntity<String> r =
+                getTestRestTemplate().postForEntity(getBaseUrl(), input, String.class);
+        GsonUtil.getGson().fromJson(r.getBody(), CreatePermitResult.class);
         assertEquals(HttpStatus.OK, r.getStatusCode());
-
     }
 
     @Test

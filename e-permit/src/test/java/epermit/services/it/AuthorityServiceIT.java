@@ -19,14 +19,15 @@ import epermit.PermitPostgresContainer;
 import epermit.commons.EpermitValidationException;
 import epermit.commons.ErrorCodes;
 import epermit.entities.Authority;
-import epermit.ledgerevents.LedgerEventUtil;
-import epermit.models.EPermitProperties;
+import epermit.entities.LedgerPermit;
+import epermit.entities.LedgerQuota;
 import epermit.models.dtos.AuthorityConfig;
+import epermit.models.dtos.AuthorityDto;
 import epermit.models.enums.PermitType;
 import epermit.models.inputs.CreateAuthorityInput;
 import epermit.models.inputs.CreateQuotaInput;
 import epermit.repositories.AuthorityRepository;
-import epermit.repositories.LedgerPublicKeyRepository;
+import epermit.repositories.LedgerPermitRepository;
 import epermit.repositories.LedgerQuotaRepository;
 import epermit.repositories.PrivateKeyRepository;
 import epermit.services.AuthorityService;
@@ -38,19 +39,16 @@ import epermit.services.PrivateKeyService;
 public class AuthorityServiceIT {
 
     @Autowired
+    private AuthorityService authorityService;
+
+    @Autowired
     private AuthorityRepository authorityRepository;
-
-    @Autowired
-    private LedgerEventUtil ledgerEventUtil;
-
-    @Autowired
-    private LedgerPublicKeyRepository ledgerPublicKeyRepository;
 
     @Autowired
     private LedgerQuotaRepository ledgerQuotaRepository;
 
     @Autowired
-    private EPermitProperties properties;
+    private LedgerPermitRepository ledgerPermitRepository;
 
 
     @Container
@@ -67,9 +65,43 @@ public class AuthorityServiceIT {
     }
 
     @Test
+    void getByCodeTest(){
+        AuthorityConfig config = new AuthorityConfig();
+        config.setCode("AY");
+        config.setName("Ay");
+        config.setKeys(List.of());
+        CreateAuthorityInput input = new CreateAuthorityInput();
+        input.setApiUri("apiUri");
+        authorityService.create(input, config);
+        LedgerQuota quota = new LedgerQuota();
+        quota.setActive(true);
+        quota.setPermitIssuedFor("AY");
+        quota.setPermitIssuer("TR");
+        quota.setPermitType(PermitType.BILITERAL);
+        quota.setPermitYear(2022);
+        quota.setStartNumber(1);
+        quota.setEndNumber(100);
+        ledgerQuotaRepository.save(quota);
+        LedgerPermit permit = new LedgerPermit();
+        permit.setCompanyId("companyId");
+        permit.setCompanyName("companyId");
+        permit.setExpireAt("companyId");
+        permit.setIssuedAt("companyId");
+        permit.setIssuedFor("AY");
+        permit.setIssuer("TR");
+        permit.setPermitId("1");
+        permit.setPermitType(PermitType.BILITERAL);
+        permit.setPermitYear(2022);
+        permit.setPlateNumber("companyId");
+        permit.setQrCode("companyId");
+        permit.setUsed(false);
+        permit.setSerialNumber(100);
+        ledgerPermitRepository.save(permit);
+        AuthorityDto dto = authorityService.getByCode("AY");
+        Assertions.assertEquals(dto.getQuotas().get(0).getUsedCount(), 1L);
+    }
+    @Test
     void createTest() {
-        AuthorityService authorityService = new AuthorityService(authorityRepository, properties,
-                ledgerEventUtil, ledgerPublicKeyRepository, null, null, new ModelMapper());
         AuthorityConfig config = new AuthorityConfig();
         config.setCode("AZ");
         config.setName("Uz");
@@ -79,11 +111,8 @@ public class AuthorityServiceIT {
         authorityService.create(input, config);
     }
 
-
     @Test
     void createQuotaTest() {
-        AuthorityService authorityService = new AuthorityService(authorityRepository, properties,
-                ledgerEventUtil, ledgerPublicKeyRepository, null, null, new ModelMapper());
         Authority authority = new Authority();
         authority.setApiUri("apiUri");
         authority.setCode("UZ");
@@ -96,11 +125,12 @@ public class AuthorityServiceIT {
         input.setPermitYear(2021);
         input.setStartNumber(1);
         authorityService.createQuota(input);
+ 
         EpermitValidationException ex =
                 Assertions.assertThrows(EpermitValidationException.class, () -> {
                     authorityService.createQuota(input);
                 });
-        assertEquals(ErrorCodes.INVALID_QUOTA_INTERVAL.name(), ex.getErrorCode());
+        Assertions.assertEquals(ErrorCodes.INVALID_QUOTA_INTERVAL.name(), ex.getErrorCode());
     }
 }
 

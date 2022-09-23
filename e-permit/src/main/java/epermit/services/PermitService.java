@@ -5,6 +5,7 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import javax.persistence.criteria.Predicate;
 import org.modelmapper.ModelMapper;
@@ -28,7 +29,9 @@ import epermit.models.EPermitProperties;
 import epermit.models.dtos.CreatePermitIdDto;
 import epermit.models.dtos.CreateQrCodeDto;
 import epermit.models.dtos.PermitDto;
+import epermit.models.dtos.PermitListItem;
 import epermit.models.dtos.PermitListParams;
+import epermit.models.dtos.PermitDto.PermitActivityDto;
 import epermit.models.enums.SerialNumberState;
 import epermit.models.enums.PermitType;
 import epermit.models.inputs.CreatePermitInput;
@@ -50,15 +53,33 @@ public class PermitService {
     private final LedgerPermitRepository permitRepository;
     private final SerialNumberRepository serialNumberRepository;
 
-    public PermitDto getById(UUID id) {
-        PermitDto dto = modelMapper.map(permitRepository.findById(id).get(), PermitDto.class);
+    private PermitDto mapPermit(LedgerPermit permit){
+        PermitDto dto = modelMapper.map(permit, PermitDto.class);
+        List<PermitActivityDto> activityDtos = new ArrayList<>();
+        permit.getActivities().forEach(act -> {
+            activityDtos.add(modelMapper.map(act, PermitActivityDto.class));
+        });
         return dto;
     }
 
-    public Page<PermitDto> getAll(PermitListParams input) {
+    public PermitDto getById(UUID id) {
+        PermitDto dto = mapPermit(permitRepository.findById(id).get());
+        return dto;
+    }
+
+    public Optional<PermitDto> getByPermitId(String id) {
+        Optional<LedgerPermit> permitR = permitRepository.findOneByPermitId(id);
+        if(permitR.isEmpty()){
+            return Optional.empty();
+        }
+        return Optional.of(mapPermit(permitR.get()));    
+    }
+
+
+    public Page<PermitListItem> getAll(PermitListParams input) {
         Page<epermit.entities.LedgerPermit> entities =
                 permitRepository.findAll(filterPermits(input), PageRequest.of(input.getPage(), 10));
-        return entities.map(x -> modelMapper.map(x, PermitDto.class));
+        return entities.map(x -> modelMapper.map(x, PermitListItem.class));
     }
 
     @Transactional
@@ -80,7 +101,7 @@ public class PermitService {
         String permitId = permitUtil.getPermitId(idInput);
         String issuer = properties.getIssuerCode();
         String issuedAt = LocalDateTime.now(ZoneOffset.UTC).format(dtf);
-        String expireAt = "30/01/" + Integer.toString(input.getPermitYear() + 1);
+        String expireAt = "31/01/" + Integer.toString(input.getPermitYear() + 1);
         String prevEventId = ledgerEventUtil.getPreviousEventId(input.getIssuedFor());
         CreateQrCodeDto qrCodeInput = new CreateQrCodeDto();
         qrCodeInput.setCompanyName(input.getCompanyName());
@@ -103,7 +124,7 @@ public class PermitService {
         e.setPermitIssuer(properties.getIssuerCode());
         e.setPermitIssuedFor(input.getIssuedFor());
         e.setQrCode(qrCode);
-        if (!input.getOtherClaims().isEmpty()) {
+        if (input != null && !input.getOtherClaims().isEmpty()) {
             e.setOtherClaims(input.getOtherClaims());
         }
         serialNumber.setState(SerialNumberState.USED);
