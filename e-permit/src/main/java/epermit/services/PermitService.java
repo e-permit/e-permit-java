@@ -1,6 +1,8 @@
 package epermit.services;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -31,7 +33,7 @@ import epermit.models.dtos.CreateQrCodeDto;
 import epermit.models.dtos.PermitDto;
 import epermit.models.dtos.PermitListItem;
 import epermit.models.dtos.PermitListParams;
-import epermit.models.dtos.PermitDto.PermitActivityDto;
+import epermit.models.dtos.PermitActivityDto;
 import epermit.models.enums.SerialNumberState;
 import epermit.models.enums.PermitType;
 import epermit.models.inputs.CreatePermitInput;
@@ -53,10 +55,16 @@ public class PermitService {
     private final LedgerPermitRepository permitRepository;
     private final SerialNumberRepository serialNumberRepository;
 
-    private PermitDto mapPermit(LedgerPermit permit){
+    private PermitDto mapPermit(LedgerPermit permit) {
         PermitDto dto = modelMapper.map(permit, PermitDto.class);
         List<PermitActivityDto> activityDtos = new ArrayList<>();
         permit.getActivities().forEach(act -> {
+            PermitActivityDto actDto = new PermitActivityDto();
+            actDto.setActivityType(act.getActivityType());
+            actDto.setActivityDetails(act.getActivityDetails());
+            LocalDateTime ts = LocalDateTime
+                    .ofInstant(Instant.ofEpochSecond(act.getActivityTimestamp()), ZoneId.of("UTC"));
+            actDto.setActivityTimestamp(ts.toString());
             activityDtos.add(modelMapper.map(act, PermitActivityDto.class));
         });
         return dto;
@@ -69,10 +77,10 @@ public class PermitService {
 
     public Optional<PermitDto> getByPermitId(String id) {
         Optional<LedgerPermit> permitR = permitRepository.findOneByPermitId(id);
-        if(permitR.isEmpty()){
+        if (permitR.isEmpty()) {
             return Optional.empty();
         }
-        return Optional.of(mapPermit(permitR.get()));    
+        return Optional.of(mapPermit(permitR.get()));
     }
 
 

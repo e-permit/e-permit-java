@@ -40,11 +40,4 @@ public class PermitDto {
     private boolean used;
 
     private List<PermitActivityDto> activities = new ArrayList<>();
-
-    @Data
-    public class PermitActivityDto{
-        private PermitActivityType activityType;
-        private String activityTimestamp;
-        private String activityDetails;
-    }
 }
