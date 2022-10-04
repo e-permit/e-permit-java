@@ -65,7 +65,7 @@ public class PermitService {
             LocalDateTime ts = LocalDateTime
                     .ofInstant(Instant.ofEpochSecond(act.getActivityTimestamp()), ZoneId.of("UTC"));
             actDto.setActivityTimestamp(ts.toString());
-            activityDtos.add(modelMapper.map(act, PermitActivityDto.class));
+            activityDtos.add(actDto);
         });
         return dto;
     }
