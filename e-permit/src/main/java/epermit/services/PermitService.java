@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.UUID;
 import javax.persistence.criteria.Predicate;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.PropertyMap;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -23,6 +24,7 @@ import epermit.commons.Check;
 import epermit.commons.ErrorCodes;
 import epermit.entities.SerialNumber;
 import epermit.entities.LedgerPermit;
+import epermit.entities.LedgerPermitActivity;
 import epermit.ledgerevents.LedgerEventUtil;
 import epermit.ledgerevents.permitcreated.PermitCreatedLedgerEvent;
 import epermit.ledgerevents.permitrevoked.PermitRevokedLedgerEvent;
@@ -67,6 +69,7 @@ public class PermitService {
             actDto.setActivityTimestamp(ts.toString());
             activityDtos.add(actDto);
         });
+        dto.setActivities(activityDtos);
         return dto;
     }
 

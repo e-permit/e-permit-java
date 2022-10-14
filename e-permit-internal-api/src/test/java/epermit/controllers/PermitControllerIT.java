@@ -266,8 +266,6 @@ public class PermitControllerIT {
         input.setActivityTimestamp(0L);
         ResponseEntity<?> r = getTestRestTemplateForVerifier().postForEntity(
                 getBaseUrl() + "/" + permit.getPermitId() + "/activities", input, String.class);
-        
-        //System.out.println("Error body: " + GsonUtil.getGson().toJson(r.getBody()));
         assertEquals(HttpStatus.OK, r.getStatusCode());
     }
 }
