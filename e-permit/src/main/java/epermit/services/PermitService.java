@@ -11,20 +11,27 @@ import java.util.Optional;
 import java.util.UUID;
 import javax.persistence.criteria.Predicate;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.PropertyMap;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
+import com.github.dockerjava.api.exception.UnauthorizedException;
+import epermit.utils.JwsUtil;
 import epermit.utils.PermitUtil;
 import epermit.commons.Check;
 import epermit.commons.ErrorCodes;
 import epermit.entities.SerialNumber;
+import epermit.entities.Authority;
 import epermit.entities.LedgerPermit;
-import epermit.entities.LedgerPermitActivity;
 import epermit.ledgerevents.LedgerEventUtil;
 import epermit.ledgerevents.permitcreated.PermitCreatedLedgerEvent;
 import epermit.ledgerevents.permitrevoked.PermitRevokedLedgerEvent;
@@ -35,6 +42,7 @@ import epermit.models.dtos.CreateQrCodeDto;
 import epermit.models.dtos.PermitDto;
 import epermit.models.dtos.PermitListItem;
 import epermit.models.dtos.PermitListParams;
+import epermit.models.dtos.PermitLockedDto;
 import epermit.models.dtos.PermitActivityDto;
 import epermit.models.enums.SerialNumberState;
 import epermit.models.enums.PermitType;
@@ -42,6 +50,7 @@ import epermit.models.inputs.CreatePermitInput;
 import epermit.models.inputs.PermitUsedInput;
 import epermit.models.results.CreatePermitResult;
 import epermit.repositories.SerialNumberRepository;
+import epermit.repositories.AuthorityRepository;
 import epermit.repositories.LedgerPermitRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,9 +62,12 @@ public class PermitService {
     private final PermitUtil permitUtil;
     private final EPermitProperties properties;
     private final LedgerEventUtil ledgerEventUtil;
+    private final JwsUtil jwsUtil;
     private final ModelMapper modelMapper;
+    private final AuthorityRepository authorityRepository;
     private final LedgerPermitRepository permitRepository;
     private final SerialNumberRepository serialNumberRepository;
+    private final RestTemplate restTemplate;
 
     private PermitDto mapPermit(LedgerPermit permit) {
         PermitDto dto = modelMapper.map(permit, PermitDto.class);
@@ -145,29 +157,24 @@ public class PermitService {
         return CreatePermitResult.success(permitId, qrCode);
     }
 
-    @Transactional
-    public void revokePermit(String permitId) {
+    public void revokePermit(String permitId){
         log.info("Revoke permit started {}", permitId);
-        LedgerPermit permit = permitRepository.findOneByPermitId(permitId).get();
-        String issuer = properties.getIssuerCode();
-        String prevEventId = ledgerEventUtil.getPreviousEventId(permit.getIssuedFor());
-        PermitRevokedLedgerEvent e =
-                new PermitRevokedLedgerEvent(issuer, permit.getIssuedFor(), prevEventId);
-        e.setPermitId(permit.getPermitId());
-
-        SerialNumber serialNumber = serialNumberRepository
-                .findOne(filterSerialNumber(permit.getIssuedFor(), permit.getPermitYear(),
-                        permit.getPermitType(), permit.getSerialNumber()))
-                .get();
-        serialNumber.setState(SerialNumberState.REVOKED);
-        serialNumberRepository.save(serialNumber);
-        ledgerEventUtil.persistAndPublishEvent(e);
+        Optional<LedgerPermit> permitR = permitRepository.findOneByPermitId(permitId);
+        Check.assertTrue(permitR.isPresent(), ErrorCodes.PERMIT_NOTFOUND);
+        LedgerPermit permit = permitR.get();
+        Check.assertEquals(permit.getIssuer(), properties.getIssuerCode(), ErrorCodes.PERMIT_NOTFOUND);
+        tryLockPermit(permit);
+        commitRevokePermit(permit);
     }
 
     @Transactional
     public void permitUsed(String permitId, PermitUsedInput input) {
         log.info("Permit used started {}", input);
-        LedgerPermit permit = permitRepository.findOneByPermitId(permitId).get();
+        Optional<LedgerPermit> permitR = permitRepository.findOneByPermitId(permitId);
+        Check.assertTrue(permitR.isPresent(), ErrorCodes.PERMIT_NOTFOUND);
+        LedgerPermit permit = permitR.get();
+        Check.assertEquals(permit.getIssuedFor(), properties.getIssuerCode(), ErrorCodes.PERMIT_NOTFOUND);
+        Check.assertFalse(permit.isLocked(), ErrorCodes.PERMIT_NOTFOUND);
         String prevEventId = ledgerEventUtil.getPreviousEventId(permit.getIssuer());
         PermitUsedLedgerEvent e = new PermitUsedLedgerEvent(properties.getIssuerCode(),
                 permit.getIssuer(), prevEventId);
@@ -178,6 +185,55 @@ public class PermitService {
         e.setActivityType(input.getActivityType());
         ledgerEventUtil.persistAndPublishEvent(e);
 
+    }
+
+    @Transactional
+    public void handlePermitLocked(String jws){
+        if(!jwsUtil.validateJws(jws)){
+            throw new UnauthorizedException("Invalid jws");
+        }
+        String permitId = jwsUtil.getClaim(jws, "permit_id");
+        Optional<LedgerPermit> permitR = permitRepository.findOneByPermitId(permitId);
+        Check.assertTrue(permitR.isPresent(), ErrorCodes.PERMIT_NOTFOUND);
+        LedgerPermit permit = permitR.get();
+        Check.assertEquals(permit.getIssuedFor(), properties.getIssuerCode(), ErrorCodes.PERMIT_NOTFOUND);
+        permit.setLocked(true);
+        permitRepository.save(permit);
+    }
+
+    boolean tryLockPermit(LedgerPermit permit){
+        PermitLockedDto lockedDto = new PermitLockedDto();
+        lockedDto.setEventConsumer(permit.getIssuedFor());
+        lockedDto.setEventProducer(permit.getIssuer());
+        lockedDto.setEventTimestamp(Instant.now().getEpochSecond());
+        String jws = jwsUtil.createJws(lockedDto);
+        Authority authority = authorityRepository.findOneByCode(lockedDto.getEventConsumer());
+        String url = authority.getApiUri() + "/events/permit-locked";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> request = new HttpEntity<>(jws, headers);
+        ResponseEntity<?> result =
+                restTemplate.postForEntity(url, request, Void.class);
+        if (result.getStatusCode() != HttpStatus.OK) {
+            return false;
+        }
+        return true;
+    }
+
+    @Transactional
+    void commitRevokePermit(LedgerPermit permit) {
+        String prevEventId = ledgerEventUtil.getPreviousEventId(permit.getIssuedFor());
+        PermitRevokedLedgerEvent e =
+                new PermitRevokedLedgerEvent(properties.getIssuerCode(), permit.getIssuedFor(), prevEventId);
+        e.setPermitId(permit.getPermitId());
+
+        SerialNumber serialNumber = serialNumberRepository
+                .findOne(filterSerialNumber(permit.getIssuedFor(), permit.getPermitYear(),
+                        permit.getPermitType(), permit.getSerialNumber()))
+                .get();
+        serialNumber.setState(SerialNumberState.REVOKED);
+        serialNumberRepository.save(serialNumber);
+        ledgerEventUtil.persistAndPublishEvent(e);
     }
 
     static Specification<LedgerPermit> filterPermits(PermitListParams input) {

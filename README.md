@@ -20,7 +20,6 @@ EPERMIT_ISSUER_CODE=<Country code>
 EPERMIT_ISSUER_NAME=<Country name>
 EPERMIT_ADMIN_PASSWORD=<admin pwd>
 EPERMIT_KEY_PASSWORD=<admin pwd for encrypting key>
-EPERMIT_VERIFY_URI=<verify uri e.g https://e-permit.github.io/verify>
 # Optional(if you use docker compose you can mount host volume to container volume )
 EPERMIT_LOG_BASEPATH=<log base path e.g /var/log/epermit> 
 ```
@@ -105,7 +104,6 @@ EPERMIT_ISSUER_CODE=TR
 EPERMIT_ISSUER_NAME=Turkiye
 EPERMIT_ADMIN_PASSWORD=*
 EPERMIT_KEY_PASSWORD=*
-EPERMIT_VERIFY_URI=https://e-permit.github.io/verify
 ```
 
 

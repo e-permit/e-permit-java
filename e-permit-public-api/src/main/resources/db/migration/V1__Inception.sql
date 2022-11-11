@@ -77,6 +77,7 @@ create table epermit_ledger_permits (
     issued_at varchar(255) not null,
     issued_for varchar(255) not null,
     issuer varchar(255) not null,
+    locked boolean not null,
     other_claims varchar(255),
     permit_id varchar(255) not null,
     permit_type varchar(255) not null,
@@ -120,6 +121,26 @@ create table epermit_serial_numbers (
     permit_year int4 not null,
     serial_number int4 not null,
     state varchar(255) not null,
+    primary key (id)
+);
+
+create table epermit_terminals (
+    id uuid not null,
+    code varchar(255) not null,
+    created_at timestamp not null,
+    name varchar(255) not null,
+    primary key (id)
+);
+
+create table epermit_users (
+    id uuid not null,
+    created_at timestamp not null,
+    password varchar(255) not null,
+    revoked boolean,
+    revoked_at timestamp,
+    role varchar(255) not null,
+    terminal varchar(255),
+    username varchar(255) not null,
     primary key (id)
 );
 

@@ -1,13 +1,18 @@
 package epermit.controllers;
 
+import java.util.Comparator;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import epermit.models.dtos.AuthorityDto;
+import epermit.models.dtos.QuotaDto;
+import epermit.models.inputs.AddQuotaInput;
 import epermit.models.inputs.CreateQuotaInput;
 import epermit.services.AuthorityService;
 import lombok.RequiredArgsConstructor;
@@ -26,5 +31,21 @@ public class QuotaController {
     public void createQuota(@RequestBody @Valid CreateQuotaInput input) {
         log.info("Authority quota create request. {}", input);
         service.createQuota(input);
+    }
+
+
+    @PostMapping("/add")
+    public void addQuota(@RequestBody @Valid AddQuotaInput input) {
+        log.info("Authority add quota  request. {}", input);
+        AuthorityDto authority = service.getByCode(input.getAuthorityCode());
+        Optional<QuotaDto> lastQuota = authority.getQuotas().stream()
+                .sorted(Comparator.comparingInt(QuotaDto::getEndNumber)).findFirst();
+        CreateQuotaInput createQuotaInput = new CreateQuotaInput();
+        createQuotaInput.setAuthorityCode(input.getAuthorityCode());
+        createQuotaInput.setPermitType(input.getPermitType());
+        createQuotaInput.setPermitYear(input.getPermitYear());
+        createQuotaInput.setStartNumber(lastQuota.isEmpty() ? 1 : lastQuota.get().getEndNumber() + 1);
+        createQuotaInput.setEndNumber(createQuotaInput.getStartNumber() + input.getQuantity() -1);
+        service.createQuota(createQuotaInput);
     }
 }

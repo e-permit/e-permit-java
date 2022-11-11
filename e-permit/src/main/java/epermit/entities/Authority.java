@@ -48,12 +48,9 @@ public class Authority {
   @Column(name = "updated_at", nullable = false)
   private LocalDateTime updatedAt;
 
-  @ManyToMany(fetch = FetchType.LAZY,
-  cascade = {
-      CascadeType.PERSIST,
-      CascadeType.MERGE
-  })
-  @JoinTable(name = "epermit_authority_features", joinColumns = {@JoinColumn(name = "authority_id")},
+  @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+  @JoinTable(name = "epermit_authority_features",
+      joinColumns = {@JoinColumn(name = "authority_id")},
       inverseJoinColumns = {@JoinColumn(name = "feature_id")})
   private Set<EpermitFeature> features = new HashSet<>();
 }

@@ -2,6 +2,9 @@ package epermit.controllers;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,9 +22,11 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -35,6 +40,7 @@ import epermit.entities.LedgerPermit;
 import epermit.entities.LedgerQuota;
 import epermit.entities.PrivateKey;
 import epermit.entities.SerialNumber;
+import epermit.entities.User;
 import epermit.models.dtos.PermitDto;
 import epermit.models.dtos.PermitListItem;
 import epermit.models.enums.PermitActivityType;
@@ -48,13 +54,14 @@ import epermit.repositories.LedgerPermitRepository;
 import epermit.repositories.LedgerQuotaRepository;
 import epermit.repositories.PrivateKeyRepository;
 import epermit.repositories.SerialNumberRepository;
+import epermit.repositories.UserRepository;
 import epermit.utils.PrivateKeyUtil;
 
 
 @Testcontainers
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-@TestPropertySource(properties = {"EPERMIT_VERIFIER_PASSWORD = 123"})
+// @TestPropertySource(properties = {"EPERMIT_VERIFIER_PASSWORD = 123"})
 public class PermitControllerIT {
 
     @LocalServerPort
@@ -84,11 +91,17 @@ public class PermitControllerIT {
     @MockBean
     AppEventListener appEventListener;
 
+    @MockBean
+    UserRepository userRepository;
+
+    @MockBean
+    RestTemplate restTemplate;
+
     @BeforeEach
     @Transactional
     void setUp() {
         Authority authority = new Authority();
-        authority.setApiUri("apiUri");
+        authority.setApiUri("http://api.gov");
         authority.setCode("UZ");
         authority.setName("Uzbekistan");
         authorityRepository.save(authority);
@@ -189,8 +202,8 @@ public class PermitControllerIT {
         permit.setQrCode("qrCode");
         permit.setSerialNumber(1);
         permitRepository.save(permit);
-        PermitDto dto = getTestRestTemplate()
-                .getForObject(getBaseUrl() + "/" + permit.getId(), PermitDto.class);
+        PermitDto dto = getTestRestTemplate().getForObject(getBaseUrl() + "/" + permit.getId(),
+                PermitDto.class);
         assertEquals("ABC", dto.getPermitId());
     }
 
@@ -225,14 +238,22 @@ public class PermitControllerIT {
         permit.setQrCode("qrCode");
         permit.setSerialNumber(1);
         permitRepository.save(permit);
+        when(restTemplate.postForEntity(anyString(), any(HttpEntity.class), any()))
+                .thenReturn(new ResponseEntity<>(HttpStatus.OK));
         HttpEntity<String> entity = new HttpEntity<String>("{}");
-        ResponseEntity<Void> r = getTestRestTemplate().exchange(getBaseUrl() + "/" + permit.getPermitId(),
-                HttpMethod.DELETE, entity, Void.class);
+        ResponseEntity<Void> r = getTestRestTemplate().exchange(
+                getBaseUrl() + "/" + permit.getPermitId(), HttpMethod.DELETE, entity, Void.class);
         assertEquals(HttpStatus.OK, r.getStatusCode());
     }
 
     @Test
     void revokeUnauthorizedTest() {
+        User user = new User();
+        user.setPassword(new BCryptPasswordEncoder().encode("123"));
+        user.setUsername("verifier");
+        user.setRole("VERIFIER");
+        user.setTerminal("EDIRNE");
+        when(userRepository.findOneByUsername("verifier")).thenReturn(user);
         HttpEntity<String> entity = new HttpEntity<String>("{}");
         ResponseEntity<?> r = getTestRestTemplateForVerifier().exchange(getBaseUrl() + "/" + "12",
                 HttpMethod.DELETE, entity, String.class);
@@ -242,6 +263,12 @@ public class PermitControllerIT {
 
     @Test
     void usePermitTest() {
+        User user = new User();
+        user.setPassword(new BCryptPasswordEncoder().encode("123"));
+        user.setUsername("verifier");
+        user.setRole("VERIFIER");
+        user.setTerminal("EDIRNE");
+        when(userRepository.findOneByUsername("verifier")).thenReturn(user);
         Authority authority = new Authority();
         authority.setApiUri("apiUri");
         authority.setCode("TR");
