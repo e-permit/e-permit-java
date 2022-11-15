@@ -101,7 +101,8 @@ public class PermitService {
 
     public Page<PermitListItem> getAll(PermitListParams input) {
         Page<epermit.entities.LedgerPermit> entities =
-                permitRepository.findAll(filterPermits(input), PageRequest.of(input.getPage(), 10));
+                permitRepository.findAll(filterPermits(input),
+                        PageRequest.of(input.getPage(), 10, Sort.by("serialNumber").descending()));
         return entities.map(x -> modelMapper.map(x, PermitListItem.class));
     }
 
@@ -157,12 +158,13 @@ public class PermitService {
         return CreatePermitResult.success(permitId, qrCode);
     }
 
-    public void revokePermit(String permitId){
+    public void revokePermit(String permitId) {
         log.info("Revoke permit started {}", permitId);
         Optional<LedgerPermit> permitR = permitRepository.findOneByPermitId(permitId);
         Check.assertTrue(permitR.isPresent(), ErrorCodes.PERMIT_NOTFOUND);
         LedgerPermit permit = permitR.get();
-        Check.assertEquals(permit.getIssuer(), properties.getIssuerCode(), ErrorCodes.PERMIT_NOTFOUND);
+        Check.assertEquals(permit.getIssuer(), properties.getIssuerCode(),
+                ErrorCodes.PERMIT_NOTFOUND);
         tryLockPermit(permit);
         commitRevokePermit(permit);
     }
@@ -173,7 +175,8 @@ public class PermitService {
         Optional<LedgerPermit> permitR = permitRepository.findOneByPermitId(permitId);
         Check.assertTrue(permitR.isPresent(), ErrorCodes.PERMIT_NOTFOUND);
         LedgerPermit permit = permitR.get();
-        Check.assertEquals(permit.getIssuedFor(), properties.getIssuerCode(), ErrorCodes.PERMIT_NOTFOUND);
+        Check.assertEquals(permit.getIssuedFor(), properties.getIssuerCode(),
+                ErrorCodes.PERMIT_NOTFOUND);
         Check.assertFalse(permit.isLocked(), ErrorCodes.PERMIT_NOTFOUND);
         String prevEventId = ledgerEventUtil.getPreviousEventId(permit.getIssuer());
         PermitUsedLedgerEvent e = new PermitUsedLedgerEvent(properties.getIssuerCode(),
@@ -188,20 +191,21 @@ public class PermitService {
     }
 
     @Transactional
-    public void handlePermitLocked(String jws){
-        if(!jwsUtil.validateJws(jws)){
+    public void handlePermitLocked(String jws) {
+        if (!jwsUtil.validateJws(jws)) {
             throw new UnauthorizedException("Invalid jws");
         }
         String permitId = jwsUtil.getClaim(jws, "permit_id");
         Optional<LedgerPermit> permitR = permitRepository.findOneByPermitId(permitId);
         Check.assertTrue(permitR.isPresent(), ErrorCodes.PERMIT_NOTFOUND);
         LedgerPermit permit = permitR.get();
-        Check.assertEquals(permit.getIssuedFor(), properties.getIssuerCode(), ErrorCodes.PERMIT_NOTFOUND);
+        Check.assertEquals(permit.getIssuedFor(), properties.getIssuerCode(),
+                ErrorCodes.PERMIT_NOTFOUND);
         permit.setLocked(true);
         permitRepository.save(permit);
     }
 
-    boolean tryLockPermit(LedgerPermit permit){
+    boolean tryLockPermit(LedgerPermit permit) {
         PermitLockedDto lockedDto = new PermitLockedDto();
         lockedDto.setEventConsumer(permit.getIssuedFor());
         lockedDto.setEventProducer(permit.getIssuer());
@@ -212,8 +216,7 @@ public class PermitService {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> request = new HttpEntity<>(jws, headers);
-        ResponseEntity<?> result =
-                restTemplate.postForEntity(url, request, Void.class);
+        ResponseEntity<?> result = restTemplate.postForEntity(url, request, Void.class);
         if (result.getStatusCode() != HttpStatus.OK) {
             return false;
         }
@@ -223,8 +226,8 @@ public class PermitService {
     @Transactional
     void commitRevokePermit(LedgerPermit permit) {
         String prevEventId = ledgerEventUtil.getPreviousEventId(permit.getIssuedFor());
-        PermitRevokedLedgerEvent e =
-                new PermitRevokedLedgerEvent(properties.getIssuerCode(), permit.getIssuedFor(), prevEventId);
+        PermitRevokedLedgerEvent e = new PermitRevokedLedgerEvent(properties.getIssuerCode(),
+                permit.getIssuedFor(), prevEventId);
         e.setPermitId(permit.getPermitId());
 
         SerialNumber serialNumber = serialNumberRepository
@@ -259,6 +262,7 @@ public class PermitService {
                 LocalDateTime createdAtTime = LocalDateTime.parse(input.getCreatedAt(), formatter);
                 predicates.add(cb.greaterThan(permit.get("createdAt"), createdAtTime));
             }
+            // predicates.add(cb.asc(permit.get("serial_number")));
             return cb.and(predicates.toArray(new Predicate[predicates.size()]));
         };
         return spec;
