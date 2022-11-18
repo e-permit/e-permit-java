@@ -39,7 +39,8 @@ public class QuotaController {
         log.info("Authority add quota  request. {}", input);
         AuthorityDto authority = service.getByCode(input.getAuthorityCode());
         Optional<QuotaDto> lastQuota = authority.getQuotas().stream()
-                .sorted(Comparator.comparingInt(QuotaDto::getEndNumber)).findFirst();
+                .filter(x-> x.getPermitIssuer().equals(input.getAuthorityCode()))
+                .sorted(Comparator.comparingInt(QuotaDto::getEndNumber).reversed()).findFirst();
         CreateQuotaInput createQuotaInput = new CreateQuotaInput();
         createQuotaInput.setAuthorityCode(input.getAuthorityCode());
         createQuotaInput.setPermitType(input.getPermitType());
