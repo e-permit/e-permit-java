@@ -1,5 +1,6 @@
 package epermit.services;
 
+import java.io.ByteArrayInputStream;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -28,6 +29,7 @@ import com.github.dockerjava.api.exception.UnauthorizedException;
 import epermit.utils.JwsUtil;
 import epermit.utils.PermitUtil;
 import epermit.commons.Check;
+import epermit.commons.EpermitValidationException;
 import epermit.commons.ErrorCodes;
 import epermit.entities.SerialNumber;
 import epermit.entities.Authority;
@@ -53,6 +55,7 @@ import epermit.repositories.SerialNumberRepository;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.LedgerPermitRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -203,6 +206,15 @@ public class PermitService {
                 ErrorCodes.PERMIT_NOTFOUND);
         permit.setLocked(true);
         permitRepository.save(permit);
+    }
+
+    @SneakyThrows
+    public ByteArrayInputStream generatePdf(String permitId) {
+        Optional<LedgerPermit> permitR = permitRepository.findOneByPermitId(permitId);
+        if(permitR.isPresent()){
+            return permitUtil.generatePdf(permitR.get());
+        }
+        throw new EpermitValidationException("Permit not found", ErrorCodes.PERMIT_NOTFOUND);
     }
 
     boolean tryLockPermit(LedgerPermit permit) {

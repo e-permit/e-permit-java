@@ -67,7 +67,7 @@ public class PermitUtil {
     }
 
     @SneakyThrows
-    public ByteArrayInputStream citiesReport(LedgerPermit permit) {
+    public ByteArrayInputStream generatePdf(LedgerPermit permit) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         PdfWriter writer = new PdfWriter(out);
         PdfDocument pdf = new PdfDocument(writer);

@@ -7,6 +7,7 @@ import javax.el.MethodNotFoundException;
 import javax.validation.Valid;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -32,6 +33,7 @@ import epermit.models.inputs.PermitUsedInput;
 import epermit.models.results.CreatePermitResult;
 import epermit.services.PermitService;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -62,7 +64,8 @@ public class PermitController {
             produces = MediaType.APPLICATION_PDF_VALUE)
     @PreAuthorize(permitAll)
     public ResponseEntity<InputStreamResource> getPdfById(@PathVariable("id") String id) {
-        throw new MethodNotFoundException();
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_PDF)
+                .body(new InputStreamResource(permitService.generatePdf(id)));
     }
 
 
