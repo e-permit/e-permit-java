@@ -209,7 +209,7 @@ public class PermitService {
     }
 
     @SneakyThrows
-    public ByteArrayInputStream generatePdf(String permitId) {
+    public byte[] generatePdf(String permitId) {
         Optional<LedgerPermit> permitR = permitRepository.findOneByPermitId(permitId);
         if(permitR.isPresent()){
             return permitUtil.generatePdf(permitR.get());

@@ -67,7 +67,7 @@ public class PermitUtil {
     }
 
     @SneakyThrows
-    public ByteArrayInputStream generatePdf(LedgerPermit permit) {
+    public byte[] generatePdf(LedgerPermit permit) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         PdfWriter writer = new PdfWriter(out);
         PdfDocument pdf = new PdfDocument(writer);
@@ -83,6 +83,6 @@ public class PermitUtil {
         document.add(barCodeImg);
         document.add(qrCodeImg);
         document.close();
-        return new ByteArrayInputStream(out.toByteArray());
+        return out.toByteArray();
     }
 }
