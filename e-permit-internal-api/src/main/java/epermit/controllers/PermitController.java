@@ -1,5 +1,6 @@
 package epermit.controllers;
 
+import java.io.ByteArrayInputStream;
 import java.util.Base64;
 import java.util.Map;
 import java.util.Optional;
@@ -61,21 +62,19 @@ public class PermitController {
         return permitService.getById(id);
     }
 
-    @RequestMapping(value = "/{id}/pdf", method = RequestMethod.GET)
+    @RequestMapping(value = "/{id}/base64pdf", method = RequestMethod.GET)
     @PreAuthorize(permitAll)
-    public String getPdfById(@PathVariable("id") String id) {
+    public String getBase64PdfById(@PathVariable("id") String id) {
         return Base64.getEncoder().encodeToString(permitService.generatePdf(id));
     }
-    /*
-     * @RequestMapping(value = "/{id}/pdf", method = RequestMethod.GET, produces =
-     * MediaType.APPLICATION_PDF_VALUE)
-     * 
-     * @PreAuthorize(permitAll) public ResponseEntity<InputStreamResource>
-     * getPdfById(@PathVariable("id") String id) { return
-     * ResponseEntity.ok().contentType(MediaType.APPLICATION_PDF) .body(new
-     * InputStreamResource(permitService.generatePdf(id))); }
-     */
 
+    @RequestMapping(value = "/{id}/pdf", method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_PDF_VALUE)
+    @PreAuthorize(permitAll)
+    public ResponseEntity<InputStreamResource> getPdfById(@PathVariable("id") String id) {
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_PDF).body(
+                new InputStreamResource(new ByteArrayInputStream(permitService.generatePdf(id))));
+    }
 
     @GetMapping("/find/{id}")
     @PreAuthorize(permitAll)
