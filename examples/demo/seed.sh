@@ -29,7 +29,7 @@ create_quota()
   cat <<EOF
   {
     "authority_code": "TR",
-    "permit_type": "BILITERAL",
+    "permit_type": "BILATERAL",
     "permit_year": 2022,
     "start_number": 1,
     "end_number": 250

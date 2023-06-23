@@ -48,7 +48,7 @@ public class PermitUtilTest {
         CreatePermitIdDto input = new CreatePermitIdDto();
         input.setIssuedFor("UA");
         input.setIssuer("TR");
-        input.setPermitType(PermitType.BILITERAL);
+        input.setPermitType(PermitType.BILATERAL);
         input.setPermitYear(2021);
         input.setSerialNumber(12);
         String permitId = util.getPermitId(input);
@@ -81,12 +81,12 @@ public class PermitUtilTest {
     void generateSerialNumberParameterizedTest(int endNumber) {
         /*
          * Authority authority = new Authority(); LedgerQuota quota = new LedgerQuota();
-         * quota.setPermitType(PermitType.BILITERAL); quota.setActive(true);
+         * quota.setPermitType(PermitType.BILATERAL); quota.setActive(true);
          * quota.setPermitYear(2021); quota.setEndNumber(endNumber);
          * authority.addIssuerQuota(quota);
          * when(issuedPermitRepository.findFirstByIssuedForAndRevokedTrue("UA")).thenReturn(Optional
          * .empty()); when(authorityRepository.findOneByCode("UA")).thenReturn(authority);
-         * Optional<Integer> result = util.generateSerialNumber("UA", 2021, PermitType.BILITERAL);
+         * Optional<Integer> result = util.generateSerialNumber("UA", 2021, PermitType.BILATERAL);
          * Assertions.assertEquals(2, result.get()); Assertions.assertEquals(endNumber == 3,
          * quota.isActive());
          */

@@ -35,7 +35,7 @@ public class RestExceptionHandler {
 
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<String> handleResponseStatusError(final ResponseStatusException ex) {
-        return new ResponseEntity<>(ex.getMessage(), ex.getStatus());
+        return new ResponseEntity<>(ex.getMessage(), ex.getStatusCode());
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)

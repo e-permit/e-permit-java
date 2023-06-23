@@ -1,7 +1,7 @@
 package epermit.models.inputs;
 
 import lombok.Data;
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 import org.hibernate.validator.constraints.URL;
 
 @Data

@@ -112,7 +112,7 @@ public class AuthorityServiceTest {
         CreateQuotaInput input = new CreateQuotaInput();
         input.setAuthorityCode("TR");
         input.setEndNumber(20);
-        input.setPermitType(PermitType.BILITERAL);
+        input.setPermitType(PermitType.BILATERAL);
         input.setPermitYear(2021);
         input.setStartNumber(1);
         when(properties.getIssuerCode()).thenReturn("UZ");
@@ -128,7 +128,7 @@ public class AuthorityServiceTest {
         assertEquals(LedgerEventType.QUOTA_CREATED, event.getEventType());
         assertEquals("TR", event.getPermitIssuer());
         assertEquals("UZ", event.getPermitIssuedFor());
-        assertEquals(PermitType.BILITERAL, event.getPermitType());
+        assertEquals(PermitType.BILATERAL, event.getPermitType());
         assertEquals(2021, event.getPermitYear());
         assertEquals("123", event.getPreviousEventId());
     }

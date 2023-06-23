@@ -2,7 +2,7 @@ package epermit.models.inputs;
 
 import java.util.HashMap;
 import java.util.Map;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import epermit.models.enums.PermitType;
 import lombok.Data;
 

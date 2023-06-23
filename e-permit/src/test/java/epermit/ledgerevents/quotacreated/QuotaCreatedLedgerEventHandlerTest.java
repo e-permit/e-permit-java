@@ -42,7 +42,7 @@ public class QuotaCreatedLedgerEventHandlerTest {
         QuotaCreatedLedgerEvent event = new QuotaCreatedLedgerEvent("TR", "UZ", "0");
         event.setStartNumber(4);
         event.setEndNumber(40);
-        event.setPermitType(PermitType.BILITERAL);
+        event.setPermitType(PermitType.BILATERAL);
         event.setPermitYear(2021);
         handler.handle(GsonUtil.toMap(event));
         verify(quotaRepository, times(1)).save(captor.capture());
@@ -50,7 +50,7 @@ public class QuotaCreatedLedgerEventHandlerTest {
         assertEquals(4, quota.getStartNumber());
         assertEquals(40, quota.getEndNumber());
         assertEquals(2021, quota.getPermitYear());
-        assertEquals(PermitType.BILITERAL, quota.getPermitType());
+        assertEquals(PermitType.BILATERAL, quota.getPermitType());
     }
 
     @Test

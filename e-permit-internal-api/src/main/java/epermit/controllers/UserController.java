@@ -1,7 +1,7 @@
 package epermit.controllers;
 
 import java.util.List;
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import epermit.entities.User;
 import epermit.models.inputs.CreateUserInput;

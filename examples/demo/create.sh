@@ -11,7 +11,7 @@ create_permit()
   {
     "issued_for": "UZ",
     "permit_year": 2022,
-    "permit_type": "BILITERAL",
+    "permit_type": "BILATERAL",
     "company_name": "TECT",
     "company_id": "123",
     "plate_number": "TECT"

@@ -48,7 +48,7 @@ public class PermitRevokedLedgerEventHandlerTest {
                     handler.handle(GsonUtil.toMap(event));
                 });
         assertEquals(ErrorCodes.PERMIT_NOTFOUND.name(), ex.getErrorCode());
-        verify(permitRepository, never()).delete(any());
+        verify(permitRepository, never()).delete(any(LedgerPermit.class));
     }
 
     @Test
@@ -64,7 +64,7 @@ public class PermitRevokedLedgerEventHandlerTest {
                     handler.handle(GsonUtil.toMap(event));
                 });
         assertEquals(ErrorCodes.PERMIT_NOTFOUND.name(), ex.getErrorCode());
-        verify(permitRepository, never()).delete(any());
+        verify(permitRepository, never()).delete(any(LedgerPermit.class));
     }
 
     @Test
@@ -80,7 +80,7 @@ public class PermitRevokedLedgerEventHandlerTest {
                     handler.handle(GsonUtil.toMap(event));
                 });
         assertEquals(ErrorCodes.PERMIT_NOTFOUND.name(), ex.getErrorCode());
-        verify(permitRepository, never()).delete(any());
+        verify(permitRepository, never()).delete(any(LedgerPermit.class));
     }
 
 }
