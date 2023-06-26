@@ -5,11 +5,9 @@ import java.util.Base64;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import jakarta.el.MethodNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -35,7 +33,6 @@ import epermit.models.inputs.PermitUsedInput;
 import epermit.models.results.CreatePermitResult;
 import epermit.services.PermitService;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -46,10 +43,10 @@ import lombok.extern.slf4j.Slf4j;
 public class PermitController {
     private final PermitService permitService;
     static final String permitAll = "hasAnyRole('ADMIN', 'MANAGER', 'VERIFIER')";
-    static final String permitAdmin = "hasAnyRole('ADMIN', 'MANAGER')";
+    static final String permitManager = "hasAnyRole('ADMIN', 'MANAGER')";
 
     @GetMapping()
-    @PreAuthorize(permitAdmin)
+    @PreAuthorize(permitManager)
     public Page<PermitListItem> getAll(@RequestParam Map<String, Object> params) {
         PermitListParams input = GsonUtil.fromMap(params, PermitListParams.class);
         Page<PermitListItem> r = permitService.getAll(input);
@@ -83,14 +80,14 @@ public class PermitController {
     }
 
     @PostMapping()
-    @PreAuthorize(permitAdmin)
+    @PreAuthorize(permitManager)
     public CreatePermitResult createPermit(@RequestBody @Valid CreatePermitInput input) {
         log.info("Permit create request. {}", input);
         return permitService.createPermit(input);
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize(permitAdmin)
+    @PreAuthorize(permitManager)
     public void revoke(@PathVariable("id") String id) {
         log.info("Revoke permit request. {}", id);
         permitService.revokePermit(id);

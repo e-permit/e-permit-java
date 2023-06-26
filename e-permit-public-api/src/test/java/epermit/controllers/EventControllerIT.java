@@ -96,7 +96,7 @@ public class EventControllerIT {
 
                 ResponseEntity<?> result =
                                 this.restTemplate.postForEntity(baseUrl, request, Void.class);
-                Assert.assertEquals(404, result.getStatusCodeValue());
+                Assert.assertEquals(404, result.getStatusCode());
         }
 
         @Test
@@ -115,7 +115,7 @@ public class EventControllerIT {
 
                 ResponseEntity<?> result =
                                 this.restTemplate.postForEntity(baseUrl, request, Object.class);
-                Assert.assertEquals(400, result.getStatusCodeValue());
+                Assert.assertEquals(400, result.getStatusCode());
         }
 
         @Test
@@ -136,7 +136,7 @@ public class EventControllerIT {
 
                 ResponseEntity<?> result =
                                 this.restTemplate.postForEntity(baseUrl, request, Void.class);
-                Assert.assertEquals(200, result.getStatusCodeValue());
+                Assert.assertEquals(200, result.getStatusCode());
 
         }
 
@@ -163,7 +163,7 @@ public class EventControllerIT {
 
                 ResponseEntity<LedgerEventResult> result = this.restTemplate.postForEntity(baseUrl,
                                 request, LedgerEventResult.class);
-                Assert.assertEquals(200, result.getStatusCodeValue());
+                Assert.assertEquals(200, result.getStatusCode());
                 QuotaCreatedLedgerEvent event2 =
                                 new QuotaCreatedLedgerEvent("UZ", "TR", previousEventId);
                 event2.setEndNumber(100);
@@ -177,7 +177,7 @@ public class EventControllerIT {
                 HttpEntity<Map<?, ?>> request2 = new HttpEntity<>(GsonUtil.toMap(event2), headers2);
                 ResponseEntity<?> result2 =
                                 this.restTemplate.postForEntity(baseUrl, request2, Object.class);
-                Assert.assertEquals(422, result2.getStatusCodeValue());
+                Assert.assertEquals(422, result2.getStatusCode());
 
         }
 
@@ -202,7 +202,7 @@ public class EventControllerIT {
 
                 ResponseEntity<?> result =
                                 this.restTemplate.postForEntity(baseUrl, request, String.class);
-                Assert.assertEquals(200, result.getStatusCodeValue());
+                Assert.assertEquals(200, result.getStatusCode());
         }
 
 
@@ -226,7 +226,7 @@ public class EventControllerIT {
 
                 ResponseEntity<?> result =
                                 this.restTemplate.postForEntity(baseUrl, request, String.class);
-                Assert.assertEquals(200, result.getStatusCodeValue());
+                Assert.assertEquals(200, result.getStatusCode());
         }
 
         @Test
@@ -262,7 +262,7 @@ public class EventControllerIT {
 
                 ResponseEntity<?> result =
                                 this.restTemplate.postForEntity(baseUrl, request, String.class);
-                Assert.assertEquals(200, result.getStatusCodeValue());
+                Assert.assertEquals(200, result.getStatusCode());
         }
 
 

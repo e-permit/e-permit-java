@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -181,8 +181,10 @@ public class PermitControllerIT {
         ResponseEntity<RestResponsePage<PermitListItem>> result = getTestRestTemplate()
                 .exchange(builder.toUriString(), HttpMethod.GET, entity, responseType);
         assertEquals(HttpStatus.OK, result.getStatusCode());
-        assertEquals(25, result.getBody().getTotalElements());
-        assertEquals(5, result.getBody().getContent().size());
+         var body = result.getBody();
+        Assert.assertNotNull("Null body", body);
+        assertEquals(25, body.getTotalElements());
+        assertEquals(5, body.getContent().size());
 
     }
 
