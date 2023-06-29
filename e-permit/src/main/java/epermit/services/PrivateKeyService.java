@@ -78,6 +78,7 @@ public class PrivateKeyService {
         keyEntity.setKeyId(key.getKeyId());
         keyEntity.setPrivateJwk(key.getPrivateJwk());
         keyEntity.setSalt(key.getSalt());
+        keyEntity.setEnabled(true);
         keyRepository.save(keyEntity);
         authorityRepository.findAll().forEach(authority -> {
             String prevEventId = eventUtil.getPreviousEventId(authority.getCode());
