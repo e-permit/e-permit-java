@@ -10,7 +10,7 @@ create_tr_authority()
 {
   cat <<EOF
   {
-    "api_uri": "http://localhost:3051"
+    "api_uri": "http://tr-public-api:8080"
   }
 EOF
 }
@@ -19,7 +19,7 @@ create_uz_authority()
 {
   cat <<EOF
   {
-    "api_uri": "http://10.6.7.214:3061"
+    "api_uri": "http://uz-public-api:8080"
   }
 EOF
 }

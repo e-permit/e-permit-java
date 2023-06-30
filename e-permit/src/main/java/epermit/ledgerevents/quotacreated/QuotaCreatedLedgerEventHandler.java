@@ -62,11 +62,15 @@ public class QuotaCreatedLedgerEventHandler implements LedgerEventHandler {
             predicates.add(cb.equal(quota.get("permitIssuedFor"), event.getPermitIssuedFor()));
             predicates.add(cb.equal(quota.get("permitType"), event.getPermitType()));
             predicates.add(cb.equal(quota.get("permitYear"), event.getPermitYear()));
+            Predicate eventStartPredicate = cb.between(cb.literal(event.getStartNumber()),
+                    quota.get("startNumber"), quota.get("endNumber"));
+            Predicate eventEndPredicate = cb.between(cb.literal(event.getEndNumber()),
+                    quota.get("startNumber"), quota.get("endNumber"));
             Predicate startPredicate = cb.between(quota.get("startNumber"), event.getStartNumber(),
                     event.getEndNumber());
             Predicate endPredicate = cb.between(quota.get("endNumber"), event.getStartNumber(),
                     event.getEndNumber());
-            predicates.add(cb.or(startPredicate, endPredicate));
+            predicates.add(cb.or(eventStartPredicate, eventEndPredicate, startPredicate, endPredicate));
             return cb.and(predicates.toArray(new Predicate[predicates.size()]));
         };
         return spec;

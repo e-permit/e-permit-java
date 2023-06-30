@@ -1,8 +1,9 @@
-version: '3.7'
+version: '3.8'
 services:
   tr-internal-api:
-    build: 
-      context: ../../e-permit-internal-api
+    container_name: tr-internal-api
+    image: ghcr.io/e-permit/internalapi:latest
+    pull_policy: always
     depends_on:
       - trdb
     env_file:
@@ -12,8 +13,9 @@ services:
     volumes:
       - ${EPERMIT_LOG_VOLUME}/tr:/var/log/epermit
   tr-public-api:
-    build: 
-      context: ../../e-permit-public-api
+    container_name: tr-public-api
+    image: ghcr.io/e-permit/publicapi:latest
+    pull_policy: always
     depends_on:
       - trdb
     env_file:
@@ -24,8 +26,9 @@ services:
     volumes:
       - ${EPERMIT_LOG_VOLUME}/tr:/var/log/epermit
   uz-internal-api:
-    build: 
-      context: ../../e-permit-internal-api
+    container_name: uz-internal-api
+    image: ghcr.io/e-permit/internalapi:latest
+    pull_policy: always
     depends_on:
       - uzdb
     env_file:
@@ -35,8 +38,9 @@ services:
     volumes:
       - ${EPERMIT_LOG_VOLUME}/uz:/var/log/epermit
   uz-public-api:
-    build: 
-      context: ../../e-permit-public-api
+    container_name: uz-public-api
+    image: ghcr.io/e-permit/publicapi:latest
+    pull_policy: always
     depends_on:
       - uzdb
     env_file:
