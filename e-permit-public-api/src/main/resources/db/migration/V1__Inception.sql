@@ -8,26 +8,12 @@ create table epermit_authorities (
     primary key (id)
 );
 
-create table epermit_authority_features (
-    authority_id uuid not null,
-    feature_id varchar(255) not null,
-    primary key (authority_id, feature_id)
-);
-
 create table epermit_created_events (
     id uuid not null,
     created_at timestamp not null,
     event_id varchar(255) not null,
     result varchar(255),
     sended boolean not null,
-    primary key (id)
-);
-
-create table epermit_features (
-    id varchar(255) not null,
-    created_at timestamp not null,
-    description varchar(255) not null,
-    title varchar(255) not null,
     primary key (id)
 );
 
@@ -124,25 +110,6 @@ create table epermit_serial_numbers (
     primary key (id)
 );
 
-create table epermit_terminals (
-    id uuid not null,
-    code varchar(255) not null,
-    created_at timestamp not null,
-    name varchar(255) not null,
-    primary key (id)
-);
-
-create table epermit_users (
-    id uuid not null,
-    created_at timestamp not null,
-    password varchar(255) not null,
-    revoked boolean,
-    revoked_at timestamp,
-    role varchar(255) not null,
-    terminal varchar(255),
-    username varchar(255) not null,
-    primary key (id)
-);
 
 alter table
     if exists epermit_created_events
@@ -158,16 +125,6 @@ alter table
     if exists epermit_ledger_public_keys
 add
     constraint UKkm69ocpvvqk5wi2gbalmam101 unique (authority_code, key_id);
-
-alter table
-    if exists epermit_authority_features
-add
-    constraint FKj85rljrwdfgpjnamsbubo7s8m foreign key (feature_id) references epermit_features;
-
-alter table
-    if exists epermit_authority_features
-add
-    constraint FKceg100m1fhrwsyt4088wka3x7 foreign key (authority_id) references epermit_authorities;
 
 alter table
     if exists epermit_ledger_permit_acts

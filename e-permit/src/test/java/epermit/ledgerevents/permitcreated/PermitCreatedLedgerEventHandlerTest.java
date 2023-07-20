@@ -77,7 +77,7 @@ public class PermitCreatedLedgerEventHandlerTest {
         when(permitUtil.getPermitId(any())).thenReturn("UZ-TR-2021-1-2");
         EpermitValidationException ex =
                 Assertions.assertThrows(EpermitValidationException.class, () -> {
-                    handler.handle(GsonUtil.toMap(event));
+                    handler.handle(event);
                 });
         assertEquals(ErrorCodes.INVALID_PERMITID.name(), ex.getErrorCode());
         verify(permitRepository, never()).save(any());
@@ -91,7 +91,7 @@ public class PermitCreatedLedgerEventHandlerTest {
         when(permitRepository.existsByPermitId(event.getPermitId())).thenReturn(true);
         EpermitValidationException ex =
                 Assertions.assertThrows(EpermitValidationException.class, () -> {
-                    handler.handle(GsonUtil.toMap(event));
+                    handler.handle(event);
                 });
         assertEquals(ErrorCodes.PERMITID_ALREADY_EXISTS.name(), ex.getErrorCode());
         verify(permitRepository, never()).save(any());
@@ -106,7 +106,7 @@ public class PermitCreatedLedgerEventHandlerTest {
         when(permitUtil.isQuotaSufficient(any())).thenReturn(false);
         EpermitValidationException ex =
                 Assertions.assertThrows(EpermitValidationException.class, () -> {
-                    handler.handle(GsonUtil.toMap(event));
+                    handler.handle(event);
                 });
         assertEquals(ErrorCodes.INSUFFICIENT_PERMIT_QUOTA.name(), ex.getErrorCode());
         verify(permitRepository, never()).save(any());
@@ -126,7 +126,7 @@ public class PermitCreatedLedgerEventHandlerTest {
         when(permitUtil.getPermitId(any())).thenReturn("UZ-TR-2021-1-1");
         when(permitRepository.existsByPermitId("UZ-TR-2021-1-1")).thenReturn(false);
         when(permitUtil.isQuotaSufficient(any())).thenReturn(true);
-        handler.handle(GsonUtil.toMap(event));
+        handler.handle(event);
         verify(permitRepository).save(captor.capture());
         LedgerPermit p = captor.getValue();
         assertEquals("A", p.getExpireAt());

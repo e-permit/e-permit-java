@@ -2,14 +2,14 @@ package epermit.ledgerevents.quotacreated;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import epermit.commons.Check;
+
+import epermit.commons.EpermitValidationException;
 import epermit.commons.ErrorCodes;
-import epermit.commons.GsonUtil;
 import epermit.entities.LedgerQuota;
+import epermit.ledgerevents.LedgerEventBase;
 import epermit.ledgerevents.LedgerEventHandler;
 import epermit.repositories.LedgerQuotaRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,11 +24,12 @@ public class QuotaCreatedLedgerEventHandler implements LedgerEventHandler {
 
     @Override
     @SneakyThrows
-    public void handle(Map<String, Object> claims) {
+    public <T extends LedgerEventBase> void handle(T claims) {
         log.info("QuotaCreatedEventHandler started with {}", claims);
-        QuotaCreatedLedgerEvent event = GsonUtil.fromMap(claims, QuotaCreatedLedgerEvent.class);
-        Long matched = quotaRepository.count(filterQuotas(event));
-        Check.assertTrue(matched == 0, ErrorCodes.INVALID_QUOTA_INTERVAL);
+        QuotaCreatedLedgerEvent event = (QuotaCreatedLedgerEvent) claims;
+        Boolean matched = quotaRepository.exists(filterQuotas(event));
+        if(matched)
+            throw new EpermitValidationException(ErrorCodes.INVALID_QUOTA_INTERVAL);
         LedgerQuota quota = new LedgerQuota();
         quota.setActive(true);
         quota.setEndNumber(event.getEndNumber());

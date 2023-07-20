@@ -79,10 +79,6 @@ public class PermitControllerTest {
 
     @Test
     void usedTest() {
-        Authentication authentication = Mockito.mock(Authentication.class);
-        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
-        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-        SecurityContextHolder.setContext(securityContext);
         PermitUsedInput input = new PermitUsedInput();
         controller.setUsed("TR", input);
         verify(permitService, times(1)).permitUsed("TR", input);

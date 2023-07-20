@@ -27,7 +27,6 @@ import org.springframework.web.client.RestTemplate;
 import com.github.dockerjava.api.exception.UnauthorizedException;
 import epermit.utils.JwsUtil;
 import epermit.utils.PermitUtil;
-import epermit.commons.Check;
 import epermit.commons.EpermitValidationException;
 import epermit.commons.ErrorCodes;
 import epermit.entities.SerialNumber;
@@ -100,11 +99,9 @@ public class PermitService {
         return Optional.of(mapPermit(permitR.get()));
     }
 
-
     public Page<PermitListItem> getAll(PermitListParams input) {
-        Page<epermit.entities.LedgerPermit> entities =
-                permitRepository.findAll(filterPermits(input),
-                        PageRequest.of(input.getPage(), 10, Sort.by("serialNumber").descending()));
+        Page<epermit.entities.LedgerPermit> entities = permitRepository.findAll(filterPermits(input),
+                PageRequest.of(input.getPage(), 10, Sort.by("serialNumber").descending()));
         return entities.map(x -> modelMapper.map(x, PermitListItem.class));
     }
 
@@ -113,10 +110,10 @@ public class PermitService {
         log.info("Permit create command {}", input);
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         PageRequest pageable = PageRequest.of(0, 1, Sort.by(Direction.ASC, "serialNumber"));
-        List<SerialNumber> serialNumbers =
-                serialNumberRepository.findAll(filterSerialNumbers(input.getIssuedFor(),
-                        input.getPermitYear(), input.getPermitType()), pageable).toList();
-        Check.assertFalse(serialNumbers.isEmpty(), ErrorCodes.INSUFFICIENT_PERMIT_QUOTA);
+        List<SerialNumber> serialNumbers = serialNumberRepository.findAll(filterSerialNumbers(input.getIssuedFor(),
+                input.getPermitYear(), input.getPermitType()), pageable).toList();
+        if (serialNumbers.isEmpty())
+            throw new EpermitValidationException(ErrorCodes.INSUFFICIENT_PERMIT_QUOTA);
         SerialNumber serialNumber = serialNumbers.get(0);
         CreatePermitIdDto idInput = new CreatePermitIdDto();
         idInput.setIssuedFor(input.getIssuedFor());
@@ -136,8 +133,7 @@ public class PermitService {
         qrCodeInput.setIssuedAt(issuedAt);
         qrCodeInput.setPlateNumber(input.getPlateNumber());
         String qrCode = permitUtil.generateQrCode(qrCodeInput);
-        PermitCreatedLedgerEvent e =
-                new PermitCreatedLedgerEvent(issuer, input.getIssuedFor(), prevEventId);
+        PermitCreatedLedgerEvent e = new PermitCreatedLedgerEvent(issuer, input.getIssuedFor(), prevEventId);
         e.setPermitId(permitId);
         e.setExpireAt(expireAt);
         e.setIssuedAt(issuedAt);
@@ -163,10 +159,11 @@ public class PermitService {
     public void revokePermit(String permitId) {
         log.info("Revoke permit started {}", permitId);
         Optional<LedgerPermit> permitR = permitRepository.findOneByPermitId(permitId);
-        Check.assertTrue(permitR.isPresent(), ErrorCodes.PERMIT_NOTFOUND);
+        if (permitR.isEmpty())
+            throw new EpermitValidationException(ErrorCodes.PERMIT_NOTFOUND);
         LedgerPermit permit = permitR.get();
-        Check.assertEquals(permit.getIssuer(), properties.getIssuerCode(),
-                ErrorCodes.PERMIT_NOTFOUND);
+        if (!permit.getIssuer().equals(properties.getIssuerCode()))
+            throw new EpermitValidationException(ErrorCodes.PERMIT_NOTFOUND);
         tryLockPermit(permit);
         commitRevokePermit(permit);
     }
@@ -174,16 +171,16 @@ public class PermitService {
     @Transactional
     public void permitUsed(String permitId, PermitUsedInput input) {
         log.info("Permit used started {}", input);
-        Optional<LedgerPermit> permitR = permitRepository.findOneByPermitId(permitId);
-        Check.assertTrue(permitR.isPresent(), ErrorCodes.PERMIT_NOTFOUND);
-        LedgerPermit permit = permitR.get();
-        Check.assertEquals(permit.getIssuedFor(), properties.getIssuerCode(),
-                ErrorCodes.PERMIT_NOTFOUND);
-        Check.assertFalse(permit.isLocked(), ErrorCodes.PERMIT_NOTFOUND);
+        LedgerPermit permit = permitRepository.findOneByPermitId(permitId)
+                .orElseThrow(() -> new EpermitValidationException(ErrorCodes.PERMIT_NOTFOUND));
+        if (!permit.getIssuedFor().equals(properties.getIssuerCode()))
+            throw new EpermitValidationException(ErrorCodes.PERMIT_NOTFOUND);
+        /*if (permit.isLocked())
+            throw new EpermitValidationException(ErrorCodes.PERMIT_NOTFOUND);*/
         String prevEventId = ledgerEventUtil.getPreviousEventId(permit.getIssuer());
         PermitUsedLedgerEvent e = new PermitUsedLedgerEvent(properties.getIssuerCode(),
                 permit.getIssuer(), prevEventId);
-        e.setPermitId(permit.getPermitId());
+     
         e.setActivityTimestamp(input.getActivityTimestamp());
         e.setActivityDetails(input.getActivityDetails());
         e.setPermitId(permitId);
@@ -199,10 +196,12 @@ public class PermitService {
         }
         String permitId = jwsUtil.getClaim(jws, "permit_id");
         Optional<LedgerPermit> permitR = permitRepository.findOneByPermitId(permitId);
-        Check.assertTrue(permitR.isPresent(), ErrorCodes.PERMIT_NOTFOUND);
+        if (permitR.isEmpty())
+            throw new EpermitValidationException(ErrorCodes.PERMIT_NOTFOUND);
         LedgerPermit permit = permitR.get();
-        Check.assertEquals(permit.getIssuedFor(), properties.getIssuerCode(),
-                ErrorCodes.PERMIT_NOTFOUND);
+        if (!permit.getIssuedFor().equals(properties.getIssuerCode()))
+            throw new EpermitValidationException(ErrorCodes.PERMIT_NOTFOUND);
+
         permit.setLocked(true);
         permitRepository.save(permit);
     }
@@ -210,7 +209,7 @@ public class PermitService {
     @SneakyThrows
     public byte[] generatePdf(String permitId) {
         Optional<LedgerPermit> permitR = permitRepository.findOneByPermitId(permitId);
-        if(permitR.isPresent()){
+        if (permitR.isPresent()) {
             return permitUtil.generatePdf(permitR.get());
         }
         throw new EpermitValidationException("Permit not found", ErrorCodes.PERMIT_NOTFOUND);

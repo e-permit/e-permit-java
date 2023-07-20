@@ -1,12 +1,12 @@
 package epermit.ledgerevents.keycreated;
 
-import java.util.Map;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
-import epermit.commons.Check;
+import epermit.commons.EpermitValidationException;
 import epermit.commons.ErrorCodes;
 import epermit.commons.GsonUtil;
 import epermit.entities.LedgerPublicKey;
+import epermit.ledgerevents.LedgerEventBase;
 import epermit.ledgerevents.LedgerEventHandler;
 import epermit.models.dtos.PublicJwk;
 import epermit.repositories.LedgerPublicKeyRepository;
@@ -22,11 +22,12 @@ public class KeyCreatedLedgerEventHandler implements LedgerEventHandler {
     private final ModelMapper modelMapper;
 
     @SneakyThrows
-    public void handle(Map<String, Object> claims) {
+    public <T extends LedgerEventBase> void handle(T claims) {
         log.info("KeyCreatedEventHandler started with {}", claims);
-        KeyCreatedLedgerEvent e = GsonUtil.fromMap(claims, KeyCreatedLedgerEvent.class);
+        KeyCreatedLedgerEvent e = (KeyCreatedLedgerEvent) claims;
         boolean keyExist = keyRepository.existsByAuthorityCodeAndKeyId(e.getEventProducer(), e.getKid());
-        Check.assertFalse(keyExist, ErrorCodes.KEYID_ALREADY_EXISTS);
+        if (keyExist)
+            throw new EpermitValidationException(ErrorCodes.KEYID_ALREADY_EXISTS);
         LedgerPublicKey key = new LedgerPublicKey();
         key.setKeyId(e.getKid());
         key.setAuthorityCode(e.getEventProducer());

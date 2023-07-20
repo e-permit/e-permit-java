@@ -35,7 +35,7 @@ public class PermitRevokedLedgerEventHandlerTest {
         p.setIssuer("UZ");
         p.setIssuedFor("TR");
         when(permitRepository.findOneByPermitId(event.getPermitId())).thenReturn(Optional.of(p));
-        handler.handle(GsonUtil.toMap(event));
+        handler.handle(event);
         verify(permitRepository, times(1)).delete(p);
     }
 
@@ -45,7 +45,7 @@ public class PermitRevokedLedgerEventHandlerTest {
         when(permitRepository.findOneByPermitId(event.getPermitId())).thenReturn(Optional.empty());
         EpermitValidationException ex =
                 Assertions.assertThrows(EpermitValidationException.class, () -> {
-                    handler.handle(GsonUtil.toMap(event));
+                    handler.handle(event);
                 });
         assertEquals(ErrorCodes.PERMIT_NOTFOUND.name(), ex.getErrorCode());
         verify(permitRepository, never()).delete(any(LedgerPermit.class));
@@ -61,7 +61,7 @@ public class PermitRevokedLedgerEventHandlerTest {
         when(permitRepository.findOneByPermitId(event.getPermitId())).thenReturn(Optional.of(p));
         EpermitValidationException ex =
                 Assertions.assertThrows(EpermitValidationException.class, () -> {
-                    handler.handle(GsonUtil.toMap(event));
+                    handler.handle(event);
                 });
         assertEquals(ErrorCodes.PERMIT_NOTFOUND.name(), ex.getErrorCode());
         verify(permitRepository, never()).delete(any(LedgerPermit.class));
@@ -77,7 +77,7 @@ public class PermitRevokedLedgerEventHandlerTest {
         when(permitRepository.findOneByPermitId(event.getPermitId())).thenReturn(Optional.of(p));
         EpermitValidationException ex =
                 Assertions.assertThrows(EpermitValidationException.class, () -> {
-                    handler.handle(GsonUtil.toMap(event));
+                    handler.handle(event);
                 });
         assertEquals(ErrorCodes.PERMIT_NOTFOUND.name(), ex.getErrorCode());
         verify(permitRepository, never()).delete(any(LedgerPermit.class));

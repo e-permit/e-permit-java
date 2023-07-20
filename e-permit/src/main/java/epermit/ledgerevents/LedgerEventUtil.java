@@ -14,7 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import epermit.appevents.LedgerEventCreated;
-import epermit.commons.Check;
+import epermit.commons.EpermitValidationException;
 import epermit.commons.ErrorCodes;
 import epermit.commons.GsonUtil;
 import epermit.entities.Authority;
@@ -45,9 +45,8 @@ public class LedgerEventUtil {
 
     public String getPreviousEventId(String consumer) {
         String previousEventId = "0";
-        Optional<LedgerEvent> lastEventR =
-                ledgerEventRepository.findTopByProducerAndConsumerOrderByCreatedAtDesc(
-                        properties.getIssuerCode(), consumer);
+        Optional<LedgerEvent> lastEventR = ledgerEventRepository.findTopByProducerAndConsumerOrderByCreatedAtDesc(
+                properties.getIssuerCode(), consumer);
         if (lastEventR.isPresent()) {
             previousEventId = lastEventR.get().getEventId();
         }
@@ -66,8 +65,7 @@ public class LedgerEventUtil {
     }
 
     public LedgerEventCreated createAppEvent(CreatedEvent createdEvent) {
-        LedgerEvent ledgerEvent =
-                ledgerEventRepository.findOneByEventId(createdEvent.getEventId()).get();
+        LedgerEvent ledgerEvent = ledgerEventRepository.findOneByEventId(createdEvent.getEventId()).get();
         Authority authority = authorityRepository.findOneByCode(ledgerEvent.getConsumer());
         LedgerEventCreated appEvent = new LedgerEventCreated();
         appEvent.setId(UUID.randomUUID());
@@ -90,17 +88,20 @@ public class LedgerEventUtil {
         log.info("Event handle started {}", e);
         Boolean eventExist = ledgerEventRepository.existsByProducerAndConsumerAndEventId(
                 e.getEventProducer(), e.getEventConsumer(), e.getEventId());
-        Check.assertFalse(eventExist, ErrorCodes.EVENT_ALREADY_EXISTS);
+        if (eventExist)
+            throw new EpermitValidationException(ErrorCodes.EVENT_ALREADY_EXISTS);
+
         if (e.getPreviousEventId().equals("0")) {
             Boolean genesisEventExist = ledgerEventRepository
                     .existsByProducerAndConsumer(e.getEventProducer(), e.getEventConsumer());
-            Check.assertFalse(genesisEventExist, ErrorCodes.GENESIS_EVENT_ALREADY_EXISTS);
+            if (genesisEventExist)
+                throw new EpermitValidationException(ErrorCodes.GENESIS_EVENT_ALREADY_EXISTS);
             log.info("First event received");
         } else {
-            Boolean previousEventExist =
-                    ledgerEventRepository.existsByProducerAndConsumerAndEventId(
-                            e.getEventProducer(), e.getEventConsumer(), e.getPreviousEventId());
-            Check.assertTrue(previousEventExist, ErrorCodes.PREVIOUS_EVENT_NOTFOUND);
+            Boolean previousEventExist = ledgerEventRepository.existsByProducerAndConsumerAndEventId(
+                    e.getEventProducer(), e.getEventConsumer(), e.getPreviousEventId());
+            if (!previousEventExist)
+                throw new EpermitValidationException(ErrorCodes.PREVIOUS_EVENT_NOTFOUND);
         }
         LedgerEvent ledgerEvent = new LedgerEvent();
         ledgerEvent.setEventId(e.getEventId());
@@ -112,9 +113,8 @@ public class LedgerEventUtil {
         ledgerEvent.setEventContent(GsonUtil.getGson().toJson(e));
         ledgerEvent.setProof(proof);
         ledgerEventRepository.save(ledgerEvent);
-        LedgerEventHandler eventHandler =
-                eventHandlers.get(e.getEventType().toString() + "_EVENT_HANDLER");
-        eventHandler.handle(GsonUtil.toMap(e));
+        LedgerEventHandler eventHandler = eventHandlers.get(e.getEventType().toString() + "_EVENT_HANDLER");
+        eventHandler.handle(e);
     }
 
     @SneakyThrows
@@ -141,8 +141,7 @@ public class LedgerEventUtil {
         String proof = authorization.substring(7);
         String[] proofArr = proof.split("\\.");
         String payloadJsonStr = GsonUtil.getGson().toJson(e);
-        String payloadBase64 =
-                Base64.getUrlEncoder().withoutPadding().encodeToString(payloadJsonStr.getBytes());
+        String payloadBase64 = Base64.getUrlEncoder().withoutPadding().encodeToString(payloadJsonStr.getBytes());
         String jws = proofArr[0] + "." + payloadBase64 + "." + proofArr[1];
         log.info("Constructed jws: {}", jws);
         log.info("Constructed jws length: {}", jws.length());
@@ -159,8 +158,7 @@ public class LedgerEventUtil {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.add("Authorization", "Bearer " + event.getProof());
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(event.getContent(), headers);
-        ResponseEntity<?> result =
-                restTemplate.postForEntity(event.getUri(), request, Object.class);
+        ResponseEntity<?> result = restTemplate.postForEntity(event.getUri(), request, Object.class);
         if (result.getStatusCode() != HttpStatus.OK) {
             MDC.put("epermitSendError", "SEND_EPERMIT_EVENT_ERROR");
             log.error(GsonUtil.getGson().toJson(result.getBody()));

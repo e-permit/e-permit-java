@@ -11,7 +11,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import epermit.commons.EpermitValidationException;
 import epermit.commons.ErrorCodes;
-import epermit.commons.GsonUtil;
 import epermit.entities.LedgerPublicKey;
 import epermit.repositories.LedgerPublicKeyRepository;
 
@@ -36,7 +35,7 @@ public class KeyRevokedLedgerEventHandlerTest {
         pubKey2.setKeyId("2");
         when(publicKeyRepository.findAllByAuthorityCodeAndRevokedFalse("TR"))
                 .thenReturn(List.of(pubKey1, pubKey2));
-        handler.handle(GsonUtil.toMap(event));
+        handler.handle(event);
     }
 
     @Test
@@ -50,7 +49,7 @@ public class KeyRevokedLedgerEventHandlerTest {
                 .thenReturn(List.of(pubKey1));
         EpermitValidationException ex =
                 Assertions.assertThrows(EpermitValidationException.class, () -> {
-                    handler.handle(GsonUtil.toMap(event));
+                     handler.handle(event);
                 });
         assertEquals(ErrorCodes.INSUFFICIENT_KEY.name(), ex.getErrorCode());
     }
@@ -69,7 +68,7 @@ public class KeyRevokedLedgerEventHandlerTest {
                 .thenReturn(List.of(pubKey1, pubKey2));
         EpermitValidationException ex =
                 Assertions.assertThrows(EpermitValidationException.class, () -> {
-                    handler.handle(GsonUtil.toMap(event));
+                     handler.handle(event);
                 });
         assertEquals(ErrorCodes.KEY_NOTFOUND.name(), ex.getErrorCode());
     }

@@ -40,7 +40,6 @@ import epermit.entities.LedgerPermit;
 import epermit.entities.LedgerQuota;
 import epermit.entities.PrivateKey;
 import epermit.entities.SerialNumber;
-import epermit.entities.User;
 import epermit.models.dtos.PermitDto;
 import epermit.models.dtos.PermitListItem;
 import epermit.models.enums.PermitActivityType;
@@ -54,7 +53,6 @@ import epermit.repositories.LedgerPermitRepository;
 import epermit.repositories.LedgerQuotaRepository;
 import epermit.repositories.PrivateKeyRepository;
 import epermit.repositories.SerialNumberRepository;
-import epermit.repositories.UserRepository;
 import epermit.utils.PrivateKeyUtil;
 
 
@@ -90,9 +88,6 @@ public class PermitControllerIT {
 
     @MockBean
     AppEventListener appEventListener;
-
-    @MockBean
-    UserRepository userRepository;
 
     @MockBean
     RestTemplate restTemplate;
@@ -250,12 +245,6 @@ public class PermitControllerIT {
 
     @Test
     void revokeUnauthorizedTest() {
-        User user = new User();
-        user.setPassword(new BCryptPasswordEncoder().encode("123"));
-        user.setUsername("verifier");
-        user.setRole("VERIFIER");
-        user.setTerminal("EDIRNE");
-        when(userRepository.findOneByUsername("verifier")).thenReturn(user);
         HttpEntity<String> entity = new HttpEntity<String>("{}");
         ResponseEntity<?> r = getTestRestTemplateForVerifier().exchange(getBaseUrl() + "/" + "12",
                 HttpMethod.DELETE, entity, String.class);
@@ -265,12 +254,6 @@ public class PermitControllerIT {
 
     @Test
     void usePermitTest() {
-        User user = new User();
-        user.setPassword(new BCryptPasswordEncoder().encode("123"));
-        user.setUsername("verifier");
-        user.setRole("VERIFIER");
-        user.setTerminal("EDIRNE");
-        when(userRepository.findOneByUsername("verifier")).thenReturn(user);
         Authority authority = new Authority();
         authority.setApiUri("apiUri");
         authority.setCode("TR");
