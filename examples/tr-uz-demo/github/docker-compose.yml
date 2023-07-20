@@ -7,11 +7,11 @@ services:
     depends_on:
       - trdb
     env_file:
-      - tr-shared.env
+      - ../envs/tr-shared.env
     ports:
       - "3050:8080"
     volumes:
-      - ${EPERMIT_LOG_VOLUME}/tr:/var/log/epermit
+      - /logs/tr:/var/log/epermit
   tr-public-api:
     container_name: tr-public-api
     image: ghcr.io/e-permit/publicapi:latest
@@ -19,12 +19,12 @@ services:
     depends_on:
       - trdb
     env_file:
-      - tr-shared.env
-      - tr-public.env
+      - ../envs/tr-shared.env
+      - ../envs/tr-public.env
     ports:
       - "3051:8080"
     volumes:
-      - ${EPERMIT_LOG_VOLUME}/tr:/var/log/epermit
+      - /logs/tr:/var/log/epermit
   uz-internal-api:
     container_name: uz-internal-api
     image: ghcr.io/e-permit/internalapi:latest
@@ -32,11 +32,11 @@ services:
     depends_on:
       - uzdb
     env_file:
-      - uz-shared.env
+      - ../envs/uz-shared.env
     ports:
       - "3060:8080"
     volumes:
-      - ${EPERMIT_LOG_VOLUME}/uz:/var/log/epermit
+      - /logs/uz:/var/log/epermit
   uz-public-api:
     container_name: uz-public-api
     image: ghcr.io/e-permit/publicapi:latest
@@ -44,12 +44,12 @@ services:
     depends_on:
       - uzdb
     env_file:
-      - uz-shared.env
-      - uz-public.env
+      - ../envs/uz-shared.env
+      - ../envs/uz-public.env
     ports:
       - "3061:8080"
     volumes:
-      - ${EPERMIT_LOG_VOLUME}/tr:/var/log/epermit
+      - /logs/uz/tr:/var/log/epermit
   trdb:
     image: 'postgres:13.1-alpine'
     container_name: trdb

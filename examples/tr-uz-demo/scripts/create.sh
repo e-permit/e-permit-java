@@ -1,7 +1,6 @@
 #!/bin/bash 
 CT="Content-Type: application/json"
 TR_URI="http://localhost:3050"
-UZ_URI="http://localhost:3060"
 AUTH="admin:admin"
 
 
