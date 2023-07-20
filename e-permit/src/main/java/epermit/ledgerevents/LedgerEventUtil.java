@@ -61,7 +61,7 @@ public class LedgerEventUtil {
         createdEvent.setSended(false);
         createdEventRepository.save(createdEvent);
         String proof = createProof(event);
-        handleEvent(GsonUtil.toMap(event), proof);
+        handleEvent(event, proof);
         publishAppEvent(createdEvent);
     }
 
@@ -86,9 +86,8 @@ public class LedgerEventUtil {
     }
 
     @SneakyThrows
-    public void handleEvent(Map<String, Object> claims, String proof) {
-        log.info("Event handle started {}", claims);
-        LedgerEventBase e = GsonUtil.fromMap(claims, LedgerEventBase.class);
+    public <T extends LedgerEventBase> void handleEvent(T e, String proof) {
+        log.info("Event handle started {}", e);
         Boolean eventExist = ledgerEventRepository.existsByProducerAndConsumerAndEventId(
                 e.getEventProducer(), e.getEventConsumer(), e.getEventId());
         Check.assertFalse(eventExist, ErrorCodes.EVENT_ALREADY_EXISTS);
@@ -110,12 +109,12 @@ public class LedgerEventUtil {
         ledgerEvent.setEventTimestamp(e.getEventTimestamp());
         ledgerEvent.setEventType(e.getEventType());
         ledgerEvent.setPreviousEventId(e.getPreviousEventId());
-        ledgerEvent.setEventContent(GsonUtil.getGson().toJson(claims));
+        ledgerEvent.setEventContent(GsonUtil.getGson().toJson(e));
         ledgerEvent.setProof(proof);
         ledgerEventRepository.save(ledgerEvent);
         LedgerEventHandler eventHandler =
                 eventHandlers.get(e.getEventType().toString() + "_EVENT_HANDLER");
-        eventHandler.handle(GsonUtil.toMap(claims));
+        eventHandler.handle(GsonUtil.toMap(e));
     }
 
     @SneakyThrows

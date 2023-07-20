@@ -38,7 +38,7 @@ public class QuotaCreatedLedgerEventHandlerTest {
 
     @Test
     void handleOkTest() {
-        when(properties.getIssuerCode()).thenReturn("TR");
+        //when(properties.getIssuerCode()).thenReturn("TR");
         QuotaCreatedLedgerEvent event = new QuotaCreatedLedgerEvent("TR", "UZ", "0");
         event.setStartNumber(4);
         event.setEndNumber(40);

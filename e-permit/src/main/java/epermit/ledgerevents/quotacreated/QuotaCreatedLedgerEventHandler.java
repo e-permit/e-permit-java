@@ -4,16 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import jakarta.persistence.criteria.Predicate;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import epermit.appevents.QuotaCreated;
 import epermit.commons.Check;
 import epermit.commons.ErrorCodes;
 import epermit.commons.GsonUtil;
 import epermit.entities.LedgerQuota;
 import epermit.ledgerevents.LedgerEventHandler;
-import epermit.models.EPermitProperties;
 import epermit.repositories.LedgerQuotaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -24,8 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class QuotaCreatedLedgerEventHandler implements LedgerEventHandler {
     private final LedgerQuotaRepository quotaRepository;
-    private final EPermitProperties properties;
-    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     @SneakyThrows
@@ -44,15 +39,6 @@ public class QuotaCreatedLedgerEventHandler implements LedgerEventHandler {
         quota.setPermitIssuedFor(event.getEventProducer());
         log.info("QuotaCreatedEventHandler ended with {}", quota);
         quotaRepository.save(quota);
-        if (properties.getIssuerCode().equals(quota.getPermitIssuer())) {
-            QuotaCreated quotaCreated = new QuotaCreated();
-            quotaCreated.setEndNumber(event.getEndNumber());
-            quotaCreated.setStartNumber(event.getStartNumber());
-            quotaCreated.setPermitYear(event.getPermitYear());
-            quotaCreated.setPermitIssuedFor(event.getPermitIssuedFor());
-            quotaCreated.setPermitType(event.getPermitType());
-            eventPublisher.publishEvent(quotaCreated);
-        }
     }
 
     static Specification<LedgerQuota> filterQuotas(QuotaCreatedLedgerEvent event) {
