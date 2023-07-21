@@ -11,7 +11,7 @@ services:
     ports:
       - "3050:8080"
     volumes:
-      - /logs/tr:/var/log/epermit
+      - /var/log/epermit
   tr-public-api:
     container_name: tr-public-api
     image: ghcr.io/e-permit/publicapi:latest
@@ -24,7 +24,7 @@ services:
     ports:
       - "3051:8080"
     volumes:
-      - /logs/tr:/var/log/epermit
+      - /var/log/epermit
   uz-internal-api:
     container_name: uz-internal-api
     image: ghcr.io/e-permit/internalapi:latest
@@ -36,7 +36,7 @@ services:
     ports:
       - "3060:8080"
     volumes:
-      - /logs/uz:/var/log/epermit
+      - /var/log/epermit
   uz-public-api:
     container_name: uz-public-api
     image: ghcr.io/e-permit/publicapi:latest
@@ -49,7 +49,7 @@ services:
     ports:
       - "3061:8080"
     volumes:
-      - /logs/uz/tr:/var/log/epermit
+      - /var/log/epermit
   trdb:
     image: 'postgres:13.1-alpine'
     container_name: trdb

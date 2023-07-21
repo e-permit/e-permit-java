@@ -36,4 +36,5 @@ secrets.yml
 .gradletasknamecache
 .sts4-cache
 epermit.env
+.env
 
