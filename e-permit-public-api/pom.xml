@@ -4,11 +4,11 @@
     <parent>
         <groupId>epermit</groupId>
         <artifactId>e-permit-parent</artifactId>
-        <version>1.0.0</version>
+        <version>${revision}</version>
     </parent>
     <groupId>epermit</groupId>
     <artifactId>e-permit-public-api</artifactId>
-    <version>1.0.0</version>
+    <version>${revision}</version>
     <name>e-permit-public-api</name>
     <description>E-Permit Public Api</description>
     <dependencies>
@@ -24,7 +24,7 @@
         <dependency>
             <groupId>epermit</groupId>
             <artifactId>e-permit</artifactId>
-            <version>1.0.0</version>
+            <version>${revision}</version>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
