@@ -16,21 +16,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
-import com.github.dockerjava.api.exception.UnauthorizedException;
-import epermit.utils.JwsUtil;
 import epermit.utils.PermitUtil;
 import epermit.commons.EpermitValidationException;
 import epermit.commons.ErrorCodes;
 import epermit.entities.SerialNumber;
-import epermit.entities.Authority;
 import epermit.entities.LedgerPermit;
 import epermit.ledgerevents.LedgerEventUtil;
 import epermit.ledgerevents.permitcreated.PermitCreatedLedgerEvent;
@@ -42,7 +33,6 @@ import epermit.models.dtos.CreateQrCodeDto;
 import epermit.models.dtos.PermitDto;
 import epermit.models.dtos.PermitListItem;
 import epermit.models.dtos.PermitListParams;
-import epermit.models.dtos.PermitLockedDto;
 import epermit.models.dtos.PermitActivityDto;
 import epermit.models.enums.SerialNumberState;
 import epermit.models.enums.PermitType;
@@ -50,7 +40,6 @@ import epermit.models.inputs.CreatePermitInput;
 import epermit.models.inputs.PermitUsedInput;
 import epermit.models.results.CreatePermitResult;
 import epermit.repositories.SerialNumberRepository;
-import epermit.repositories.AuthorityRepository;
 import epermit.repositories.LedgerPermitRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -98,7 +87,7 @@ public class PermitService {
 
     public Page<PermitListItem> getAll(PermitListParams input) {
         Page<epermit.entities.LedgerPermit> entities = permitRepository.findAll(filterPermits(input),
-                PageRequest.of(input.getPage(), 10, Sort.by("serialNumber").descending()));
+                PageRequest.of(input.getPage(), 10, Sort.by("createdAt").descending()));
         return entities.map(x -> modelMapper.map(x, PermitListItem.class));
     }
 
