@@ -63,12 +63,9 @@ public class PermitService {
     private final PermitUtil permitUtil;
     private final EPermitProperties properties;
     private final LedgerEventUtil ledgerEventUtil;
-    private final JwsUtil jwsUtil;
     private final ModelMapper modelMapper;
-    private final AuthorityRepository authorityRepository;
     private final LedgerPermitRepository permitRepository;
     private final SerialNumberRepository serialNumberRepository;
-    private final RestTemplate restTemplate;
 
     private PermitDto mapPermit(LedgerPermit permit) {
         PermitDto dto = modelMapper.map(permit, PermitDto.class);
@@ -155,7 +152,8 @@ public class PermitService {
         log.info("Permit create finished permit id is {}", permitId);
         return CreatePermitResult.success(permitId, qrCode);
     }
-
+    
+    @Transactional
     public void revokePermit(String permitId) {
         log.info("Revoke permit started {}", permitId);
         Optional<LedgerPermit> permitR = permitRepository.findOneByPermitId(permitId);
@@ -164,77 +162,6 @@ public class PermitService {
         LedgerPermit permit = permitR.get();
         if (!permit.getIssuer().equals(properties.getIssuerCode()))
             throw new EpermitValidationException(ErrorCodes.PERMIT_NOTFOUND);
-        tryLockPermit(permit);
-        commitRevokePermit(permit);
-    }
-
-    @Transactional
-    public void permitUsed(String permitId, PermitUsedInput input) {
-        log.info("Permit used started {}", input);
-        LedgerPermit permit = permitRepository.findOneByPermitId(permitId)
-                .orElseThrow(() -> new EpermitValidationException(ErrorCodes.PERMIT_NOTFOUND));
-        if (!permit.getIssuedFor().equals(properties.getIssuerCode()))
-            throw new EpermitValidationException(ErrorCodes.PERMIT_NOTFOUND);
-        /*if (permit.isLocked())
-            throw new EpermitValidationException(ErrorCodes.PERMIT_NOTFOUND);*/
-        String prevEventId = ledgerEventUtil.getPreviousEventId(permit.getIssuer());
-        PermitUsedLedgerEvent e = new PermitUsedLedgerEvent(properties.getIssuerCode(),
-                permit.getIssuer(), prevEventId);
-     
-        e.setActivityTimestamp(input.getActivityTimestamp());
-        e.setActivityDetails(input.getActivityDetails());
-        e.setPermitId(permitId);
-        e.setActivityType(input.getActivityType());
-        ledgerEventUtil.persistAndPublishEvent(e);
-
-    }
-
-    @Transactional
-    public void handlePermitLocked(String jws) {
-        if (!jwsUtil.validateJws(jws)) {
-            throw new UnauthorizedException("Invalid jws");
-        }
-        String permitId = jwsUtil.getClaim(jws, "permit_id");
-        Optional<LedgerPermit> permitR = permitRepository.findOneByPermitId(permitId);
-        if (permitR.isEmpty())
-            throw new EpermitValidationException(ErrorCodes.PERMIT_NOTFOUND);
-        LedgerPermit permit = permitR.get();
-        if (!permit.getIssuedFor().equals(properties.getIssuerCode()))
-            throw new EpermitValidationException(ErrorCodes.PERMIT_NOTFOUND);
-
-        permit.setLocked(true);
-        permitRepository.save(permit);
-    }
-
-    @SneakyThrows
-    public byte[] generatePdf(String permitId) {
-        Optional<LedgerPermit> permitR = permitRepository.findOneByPermitId(permitId);
-        if (permitR.isPresent()) {
-            return permitUtil.generatePdf(permitR.get());
-        }
-        throw new EpermitValidationException("Permit not found", ErrorCodes.PERMIT_NOTFOUND);
-    }
-
-    boolean tryLockPermit(LedgerPermit permit) {
-        PermitLockedDto lockedDto = new PermitLockedDto();
-        lockedDto.setEventConsumer(permit.getIssuedFor());
-        lockedDto.setEventProducer(permit.getIssuer());
-        lockedDto.setEventTimestamp(Instant.now().getEpochSecond());
-        String jws = jwsUtil.createJws(lockedDto);
-        Authority authority = authorityRepository.findOneByCode(lockedDto.getEventConsumer());
-        String url = authority.getApiUri() + "/events/permit-locked";
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<String> request = new HttpEntity<>(jws, headers);
-        ResponseEntity<?> result = restTemplate.postForEntity(url, request, Void.class);
-        if (result.getStatusCode() != HttpStatus.OK) {
-            return false;
-        }
-        return true;
-    }
-
-    @Transactional
-    void commitRevokePermit(LedgerPermit permit) {
         String prevEventId = ledgerEventUtil.getPreviousEventId(permit.getIssuedFor());
         PermitRevokedLedgerEvent e = new PermitRevokedLedgerEvent(properties.getIssuerCode(),
                 permit.getIssuedFor(), prevEventId);
@@ -247,6 +174,41 @@ public class PermitService {
         serialNumber.setState(SerialNumberState.REVOKED);
         serialNumberRepository.save(serialNumber);
         ledgerEventUtil.persistAndPublishEvent(e);
+    }
+
+    @Transactional
+    public void permitUsed(String permitId, PermitUsedInput input) {
+        log.info("Permit used started {}", input);
+        LedgerPermit permit = permitRepository.findOneByPermitId(permitId)
+                .orElseThrow(() -> new EpermitValidationException(ErrorCodes.PERMIT_NOTFOUND));
+        if (!permit.getIssuedFor().equals(properties.getIssuerCode()))
+            throw new EpermitValidationException(ErrorCodes.PERMIT_NOTFOUND);
+        String prevEventId = ledgerEventUtil.getPreviousEventId(permit.getIssuer());
+        PermitUsedLedgerEvent e = new PermitUsedLedgerEvent(properties.getIssuerCode(),
+                permit.getIssuer(), prevEventId);
+     
+        e.setActivityTimestamp(input.getActivityTimestamp());
+        e.setActivityDetails(input.getActivityDetails());
+        e.setPermitId(permitId);
+        e.setActivityType(input.getActivityType());
+        ledgerEventUtil.persistAndPublishEvent(e);
+
+    }
+
+    @SneakyThrows
+    public byte[] generatePdf(String permitId) {
+        Optional<LedgerPermit> permitR = permitRepository.findOneByPermitId(permitId);
+        if (permitR.isPresent()) {
+            return permitUtil.generatePdf(permitR.get());
+        }
+        throw new EpermitValidationException("Permit not found", ErrorCodes.PERMIT_NOTFOUND);
+    }
+
+   
+
+    @Transactional
+    void commitRevokePermit(LedgerPermit permit) {
+       
     }
 
     static Specification<LedgerPermit> filterPermits(PermitListParams input) {

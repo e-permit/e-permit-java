@@ -63,7 +63,6 @@ create table epermit_ledger_permits (
     issued_at varchar(255) not null,
     issued_for varchar(255) not null,
     issuer varchar(255) not null,
-    locked boolean not null,
     other_claims varchar(255),
     permit_id varchar(255) not null,
     permit_type varchar(255) not null,

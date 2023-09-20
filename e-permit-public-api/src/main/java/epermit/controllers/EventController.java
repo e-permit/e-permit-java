@@ -14,7 +14,6 @@ import epermit.ledgerevents.permitrevoked.PermitRevokedLedgerEvent;
 import epermit.ledgerevents.permitused.PermitUsedLedgerEvent;
 import epermit.ledgerevents.quotacreated.QuotaCreatedLedgerEvent;
 import epermit.services.EventService;
-import epermit.services.PermitService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -22,7 +21,6 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/events")
 public class EventController {
     private final EventService eventService;
-    private final PermitService permitService;
 
     @PostMapping("/permit-created")
     public void permitCreated(@RequestHeader HttpHeaders headers,
@@ -34,11 +32,6 @@ public class EventController {
     public void permitUsed(@RequestHeader HttpHeaders headers,
             @RequestBody @Valid PermitUsedLedgerEvent event) {
         eventService.handleReceivedEvent(headers, event);
-    }
-
-    @PostMapping("/permit-locked")
-    public void permitLocked(@RequestHeader HttpHeaders headers, @RequestBody String event) {
-        permitService.handlePermitLocked(event);
     }
 
     @PostMapping("/permit-revoked")

@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import epermit.appevents.LedgerEventCreated;
+import epermit.commons.ApiErrorResponse;
 import epermit.commons.EpermitValidationException;
 import epermit.commons.ErrorCodes;
 import epermit.commons.GsonUtil;
@@ -153,18 +154,21 @@ public class LedgerEventUtil {
     }
 
     @SneakyThrows
-    public Boolean sendEvent(LedgerEventCreated event) {
+    public ResponseEntity<?> sendEvent(LedgerEventCreated event) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.add("Authorization", "Bearer " + event.getProof());
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(event.getContent(), headers);
         ResponseEntity<?> result = restTemplate.postForEntity(event.getUri(), request, Object.class);
-        if (result.getStatusCode() != HttpStatus.OK) {
-            MDC.put("epermitSendError", "SEND_EPERMIT_EVENT_ERROR");
+        return result;
+        /*if (result.getStatusCode() != HttpStatus.OK) {
+            ApiErrorResponse error = (ApiErrorResponse)result.getBody();
+            if(error != null && error.getDetails().get("errorCode").equals("EVENT_ALREADY_EXISTS")){
+                
+            }
             log.error(GsonUtil.getGson().toJson(result.getBody()));
-            MDC.remove("epermitSendError");
             return false;
         }
-        return true;
+        return true;*/
     }
 }

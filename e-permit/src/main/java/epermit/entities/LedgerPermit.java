@@ -82,9 +82,6 @@ public class LedgerPermit {
     @Column(name = "used", nullable = false)
     private boolean used;
 
-    @Column(name = "locked", nullable = false)
-    private boolean locked;
-
     @Column(name = "deleted", nullable = false)
     private boolean deleted;
 

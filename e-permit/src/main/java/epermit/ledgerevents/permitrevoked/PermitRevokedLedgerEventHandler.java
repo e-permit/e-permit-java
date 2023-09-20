@@ -1,6 +1,5 @@
 package epermit.ledgerevents.permitrevoked;
 
-import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import epermit.commons.EpermitValidationException;

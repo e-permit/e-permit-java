@@ -31,8 +31,6 @@ public class PermitUsedLedgerEventHandler implements LedgerEventHandler {
             throw new EpermitValidationException(ErrorCodes.PERMIT_NOTFOUND);
         if (!permit.getIssuedFor().equals(event.getEventProducer()))
             throw new EpermitValidationException(ErrorCodes.PERMIT_NOTFOUND);
-        if (permit.isLocked())
-            throw new EpermitValidationException(ErrorCodes.PERMIT_NOTFOUND);
 
         permit.setUsed(true);
         LedgerPermitActivity activity = new LedgerPermitActivity();

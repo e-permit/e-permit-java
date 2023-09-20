@@ -183,7 +183,6 @@ public class PermitServiceTest {
     void permitRevokedTest() {
         when(properties.getIssuerCode()).thenReturn("TR");
         when(ledgerEventUtil.getPreviousEventId("UZ")).thenReturn("123");
-        when(authorityRepository.findOneByCode("UZ")).thenReturn(new Authority());
         LedgerPermit permit = new LedgerPermit();
         permit.setPermitId("TR-UZ-2021-1-1");
         permit.setIssuer("TR");
@@ -192,7 +191,6 @@ public class PermitServiceTest {
         when(serialNumberRepository.findOne(ArgumentMatchers.<Specification<SerialNumber>>any()))
                 .thenReturn(Optional.of(serialNumber));
         when(permitRepository.findOneByPermitId("TR-UZ-2021-1-1")).thenReturn(Optional.of(permit));
-        when(restTemplate.postForEntity(anyString(), any(HttpEntity.class), any())).thenReturn(new ResponseEntity<>(HttpStatus.OK));
         permitService.revokePermit("TR-UZ-2021-1-1");
         verify(ledgerEventUtil, times(1)).persistAndPublishEvent(revokedCaptor.capture());
         PermitRevokedLedgerEvent event = revokedCaptor.getValue();
