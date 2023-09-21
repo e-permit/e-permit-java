@@ -25,7 +25,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
@@ -40,7 +39,7 @@ import epermit.ledgerevents.permitused.PermitUsedLedgerEvent;
 import epermit.models.EPermitProperties;
 import epermit.models.dtos.PermitDto;
 import epermit.models.dtos.PermitListItem;
-import epermit.models.dtos.PermitListParams;
+import epermit.models.dtos.PermitListPageParams;
 import epermit.models.enums.PermitActivityType;
 import epermit.models.enums.PermitType;
 import epermit.models.inputs.CreatePermitInput;
@@ -110,20 +109,20 @@ public class PermitServiceTest {
         LedgerPermit permit = new LedgerPermit();
         permit.setPermitId("permitId");
 
-        PermitListParams input = new PermitListParams();
+        PermitListPageParams input = new PermitListPageParams();
         input.setPage(1);
         Page<LedgerPermit> pagedList = new PageImpl<>(List.of(permit));
 
         when(permitRepository.findAll(ArgumentMatchers.<Specification<LedgerPermit>>any(),
                 ArgumentMatchers.<Pageable>any())).thenReturn(pagedList);
-        Page<PermitListItem> result = permitService.getAll(input);
+        Page<PermitListItem> result = permitService.getPage(input);
         assertEquals(1, result.getContent().size());
     }
 
     @Test
     void createPermitTest() {
         CreatePermitInput input = new CreatePermitInput();
-        input.setPermitType(PermitType.BILITERAL);
+        input.setPermitType(PermitType.BILATERAL);
         input.setPermitYear(2021);
         input.setIssuedFor("UZ");
         input.setCompanyId("companyId");
@@ -149,7 +148,7 @@ public class PermitServiceTest {
         assertEquals(LedgerEventType.PERMIT_CREATED, event.getEventType());
         assertEquals("TR", event.getPermitIssuer());
         assertEquals("UZ", event.getPermitIssuedFor());
-        assertEquals(PermitType.BILITERAL, event.getPermitType());
+        assertEquals(PermitType.BILATERAL, event.getPermitType());
         assertEquals(2021, event.getPermitYear());
         assertEquals("123", event.getPreviousEventId());
     }
@@ -184,7 +183,6 @@ public class PermitServiceTest {
     void permitRevokedTest() {
         when(properties.getIssuerCode()).thenReturn("TR");
         when(ledgerEventUtil.getPreviousEventId("UZ")).thenReturn("123");
-        when(authorityRepository.findOneByCode("UZ")).thenReturn(new Authority());
         LedgerPermit permit = new LedgerPermit();
         permit.setPermitId("TR-UZ-2021-1-1");
         permit.setIssuer("TR");
@@ -193,7 +191,6 @@ public class PermitServiceTest {
         when(serialNumberRepository.findOne(ArgumentMatchers.<Specification<SerialNumber>>any()))
                 .thenReturn(Optional.of(serialNumber));
         when(permitRepository.findOneByPermitId("TR-UZ-2021-1-1")).thenReturn(Optional.of(permit));
-        when(restTemplate.postForEntity(anyString(), any(HttpEntity.class), any())).thenReturn(new ResponseEntity<>(HttpStatus.OK));
         permitService.revokePermit("TR-UZ-2021-1-1");
         verify(ledgerEventUtil, times(1)).persistAndPublishEvent(revokedCaptor.capture());
         PermitRevokedLedgerEvent event = revokedCaptor.getValue();

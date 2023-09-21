@@ -1,0 +1,70 @@
+version: '3.8'
+services:
+  tr-internal-api:
+    container_name: tr-internal-api
+    build: 
+      context: ../../../e-permit-internal-api
+    depends_on:
+      - trdb
+    env_file:
+      - ../envs/tr-shared.env
+    ports:
+      - "3050:8080"
+    volumes:
+      - /var/log/epermit
+  tr-public-api:
+    container_name: tr-public-api
+    build: 
+      context: ../../../e-permit-public-api
+    depends_on:
+      - trdb
+    env_file:
+      - ../envs/tr-shared.env
+      - ../envs/tr-public.env
+    ports:
+      - "3051:8080"
+    volumes:
+      - /var/log/epermit
+  uz-internal-api:
+    container_name: uz-internal-api
+    build: 
+      context: ../../../e-permit-internal-api
+    depends_on:
+      - uzdb
+    env_file:
+      - ../envs/uz-shared.env
+    ports:
+      - "3060:8080"
+    volumes:
+      - /var/log/epermit
+  uz-public-api:
+    container_name: uz-public-api
+    build: 
+      context: ../../../e-permit-public-api
+    depends_on:
+      - uzdb
+    env_file:
+      - ../envs/uz-shared.env
+      - ../envs/uz-public.env
+    ports:
+      - "3061:8080"
+    volumes:
+      - /var/log/epermit
+  trdb:
+    image: 'postgres:13.1-alpine'
+    container_name: trdb
+    environment:
+      - POSTGRES_USER=compose-postgres
+      - POSTGRES_PASSWORD=compose-postgres
+      - POSTGRES_DB=devdb
+    ports:
+      - "5434:5432"
+  uzdb:
+    image: 'postgres:13.1-alpine'
+    container_name: uzdb
+    environment:
+      - POSTGRES_USER=compose-postgres
+      - POSTGRES_PASSWORD=compose-postgres
+      - POSTGRES_DB=devdb
+    ports:
+      - "5433:5432"

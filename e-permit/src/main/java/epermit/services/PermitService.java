@@ -1,6 +1,5 @@
 package epermit.services;
 
-import java.io.ByteArrayInputStream;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -10,29 +9,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import javax.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Predicate;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
-import com.github.dockerjava.api.exception.UnauthorizedException;
-import epermit.utils.JwsUtil;
 import epermit.utils.PermitUtil;
-import epermit.commons.Check;
 import epermit.commons.EpermitValidationException;
 import epermit.commons.ErrorCodes;
 import epermit.entities.SerialNumber;
-import epermit.entities.Authority;
 import epermit.entities.LedgerPermit;
 import epermit.ledgerevents.LedgerEventUtil;
 import epermit.ledgerevents.permitcreated.PermitCreatedLedgerEvent;
@@ -43,8 +32,8 @@ import epermit.models.dtos.CreatePermitIdDto;
 import epermit.models.dtos.CreateQrCodeDto;
 import epermit.models.dtos.PermitDto;
 import epermit.models.dtos.PermitListItem;
+import epermit.models.dtos.PermitListPageParams;
 import epermit.models.dtos.PermitListParams;
-import epermit.models.dtos.PermitLockedDto;
 import epermit.models.dtos.PermitActivityDto;
 import epermit.models.enums.SerialNumberState;
 import epermit.models.enums.PermitType;
@@ -52,7 +41,6 @@ import epermit.models.inputs.CreatePermitInput;
 import epermit.models.inputs.PermitUsedInput;
 import epermit.models.results.CreatePermitResult;
 import epermit.repositories.SerialNumberRepository;
-import epermit.repositories.AuthorityRepository;
 import epermit.repositories.LedgerPermitRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -65,12 +53,9 @@ public class PermitService {
     private final PermitUtil permitUtil;
     private final EPermitProperties properties;
     private final LedgerEventUtil ledgerEventUtil;
-    private final JwsUtil jwsUtil;
     private final ModelMapper modelMapper;
-    private final AuthorityRepository authorityRepository;
     private final LedgerPermitRepository permitRepository;
     private final SerialNumberRepository serialNumberRepository;
-    private final RestTemplate restTemplate;
 
     private PermitDto mapPermit(LedgerPermit permit) {
         PermitDto dto = modelMapper.map(permit, PermitDto.class);
@@ -101,11 +86,14 @@ public class PermitService {
         return Optional.of(mapPermit(permitR.get()));
     }
 
+    public List<PermitListItem> getAll(PermitListParams input) {
+        List<epermit.entities.LedgerPermit> entities = permitRepository.findAll(filterAllPermits(input));
+        return entities.stream().map(x -> modelMapper.map(x, PermitListItem.class)).toList();
+    }
 
-    public Page<PermitListItem> getAll(PermitListParams input) {
-        Page<epermit.entities.LedgerPermit> entities =
-                permitRepository.findAll(filterPermits(input),
-                        PageRequest.of(input.getPage(), 10, Sort.by("serialNumber").descending()));
+    public Page<PermitListItem> getPage(PermitListPageParams input) {
+        Page<epermit.entities.LedgerPermit> entities = permitRepository.findAll(filterPermits(input),
+                PageRequest.of(input.getPage(), 10, Sort.by("createdAt").descending()));
         return entities.map(x -> modelMapper.map(x, PermitListItem.class));
     }
 
@@ -114,10 +102,10 @@ public class PermitService {
         log.info("Permit create command {}", input);
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         PageRequest pageable = PageRequest.of(0, 1, Sort.by(Direction.ASC, "serialNumber"));
-        List<SerialNumber> serialNumbers =
-                serialNumberRepository.findAll(filterSerialNumbers(input.getIssuedFor(),
-                        input.getPermitYear(), input.getPermitType()), pageable).toList();
-        Check.assertFalse(serialNumbers.isEmpty(), ErrorCodes.INSUFFICIENT_PERMIT_QUOTA);
+        List<SerialNumber> serialNumbers = serialNumberRepository.findAll(filterSerialNumbers(input.getIssuedFor(),
+                input.getPermitYear(), input.getPermitType()), pageable).toList();
+        if (serialNumbers.isEmpty())
+            throw new EpermitValidationException(ErrorCodes.INSUFFICIENT_PERMIT_QUOTA);
         SerialNumber serialNumber = serialNumbers.get(0);
         CreatePermitIdDto idInput = new CreatePermitIdDto();
         idInput.setIssuedFor(input.getIssuedFor());
@@ -137,8 +125,7 @@ public class PermitService {
         qrCodeInput.setIssuedAt(issuedAt);
         qrCodeInput.setPlateNumber(input.getPlateNumber());
         String qrCode = permitUtil.generateQrCode(qrCodeInput);
-        PermitCreatedLedgerEvent e =
-                new PermitCreatedLedgerEvent(issuer, input.getIssuedFor(), prevEventId);
+        PermitCreatedLedgerEvent e = new PermitCreatedLedgerEvent(issuer, input.getIssuedFor(), prevEventId);
         e.setPermitId(permitId);
         e.setExpireAt(expireAt);
         e.setIssuedAt(issuedAt);
@@ -161,82 +148,15 @@ public class PermitService {
         return CreatePermitResult.success(permitId, qrCode);
     }
 
+    @Transactional
     public void revokePermit(String permitId) {
         log.info("Revoke permit started {}", permitId);
         Optional<LedgerPermit> permitR = permitRepository.findOneByPermitId(permitId);
-        Check.assertTrue(permitR.isPresent(), ErrorCodes.PERMIT_NOTFOUND);
+        if (permitR.isEmpty())
+            throw new EpermitValidationException(ErrorCodes.PERMIT_NOTFOUND);
         LedgerPermit permit = permitR.get();
-        Check.assertEquals(permit.getIssuer(), properties.getIssuerCode(),
-                ErrorCodes.PERMIT_NOTFOUND);
-        tryLockPermit(permit);
-        commitRevokePermit(permit);
-    }
-
-    @Transactional
-    public void permitUsed(String permitId, PermitUsedInput input) {
-        log.info("Permit used started {}", input);
-        Optional<LedgerPermit> permitR = permitRepository.findOneByPermitId(permitId);
-        Check.assertTrue(permitR.isPresent(), ErrorCodes.PERMIT_NOTFOUND);
-        LedgerPermit permit = permitR.get();
-        Check.assertEquals(permit.getIssuedFor(), properties.getIssuerCode(),
-                ErrorCodes.PERMIT_NOTFOUND);
-        Check.assertFalse(permit.isLocked(), ErrorCodes.PERMIT_NOTFOUND);
-        String prevEventId = ledgerEventUtil.getPreviousEventId(permit.getIssuer());
-        PermitUsedLedgerEvent e = new PermitUsedLedgerEvent(properties.getIssuerCode(),
-                permit.getIssuer(), prevEventId);
-        e.setPermitId(permit.getPermitId());
-        e.setActivityTimestamp(input.getActivityTimestamp());
-        e.setActivityDetails(input.getActivityDetails());
-        e.setPermitId(permitId);
-        e.setActivityType(input.getActivityType());
-        ledgerEventUtil.persistAndPublishEvent(e);
-
-    }
-
-    @Transactional
-    public void handlePermitLocked(String jws) {
-        if (!jwsUtil.validateJws(jws)) {
-            throw new UnauthorizedException("Invalid jws");
-        }
-        String permitId = jwsUtil.getClaim(jws, "permit_id");
-        Optional<LedgerPermit> permitR = permitRepository.findOneByPermitId(permitId);
-        Check.assertTrue(permitR.isPresent(), ErrorCodes.PERMIT_NOTFOUND);
-        LedgerPermit permit = permitR.get();
-        Check.assertEquals(permit.getIssuedFor(), properties.getIssuerCode(),
-                ErrorCodes.PERMIT_NOTFOUND);
-        permit.setLocked(true);
-        permitRepository.save(permit);
-    }
-
-    @SneakyThrows
-    public byte[] generatePdf(String permitId) {
-        Optional<LedgerPermit> permitR = permitRepository.findOneByPermitId(permitId);
-        if(permitR.isPresent()){
-            return permitUtil.generatePdf(permitR.get());
-        }
-        throw new EpermitValidationException("Permit not found", ErrorCodes.PERMIT_NOTFOUND);
-    }
-
-    boolean tryLockPermit(LedgerPermit permit) {
-        PermitLockedDto lockedDto = new PermitLockedDto();
-        lockedDto.setEventConsumer(permit.getIssuedFor());
-        lockedDto.setEventProducer(permit.getIssuer());
-        lockedDto.setEventTimestamp(Instant.now().getEpochSecond());
-        String jws = jwsUtil.createJws(lockedDto);
-        Authority authority = authorityRepository.findOneByCode(lockedDto.getEventConsumer());
-        String url = authority.getApiUri() + "/events/permit-locked";
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<String> request = new HttpEntity<>(jws, headers);
-        ResponseEntity<?> result = restTemplate.postForEntity(url, request, Void.class);
-        if (result.getStatusCode() != HttpStatus.OK) {
-            return false;
-        }
-        return true;
-    }
-
-    @Transactional
-    void commitRevokePermit(LedgerPermit permit) {
+        if (!permit.getIssuer().equals(properties.getIssuerCode()))
+            throw new EpermitValidationException(ErrorCodes.PERMIT_NOTFOUND);
         String prevEventId = ledgerEventUtil.getPreviousEventId(permit.getIssuedFor());
         PermitRevokedLedgerEvent e = new PermitRevokedLedgerEvent(properties.getIssuerCode(),
                 permit.getIssuedFor(), prevEventId);
@@ -251,7 +171,55 @@ public class PermitService {
         ledgerEventUtil.persistAndPublishEvent(e);
     }
 
-    static Specification<LedgerPermit> filterPermits(PermitListParams input) {
+    @Transactional
+    public void permitUsed(String permitId, PermitUsedInput input) {
+        log.info("Permit used started {}", input);
+        LedgerPermit permit = permitRepository.findOneByPermitId(permitId)
+                .orElseThrow(() -> new EpermitValidationException(ErrorCodes.PERMIT_NOTFOUND));
+        if (!permit.getIssuedFor().equals(properties.getIssuerCode()))
+            throw new EpermitValidationException(ErrorCodes.PERMIT_NOTFOUND);
+        String prevEventId = ledgerEventUtil.getPreviousEventId(permit.getIssuer());
+        PermitUsedLedgerEvent e = new PermitUsedLedgerEvent(properties.getIssuerCode(),
+                permit.getIssuer(), prevEventId);
+
+        e.setActivityTimestamp(input.getActivityTimestamp());
+        e.setActivityDetails(input.getActivityDetails());
+        e.setPermitId(permitId);
+        e.setActivityType(input.getActivityType());
+        ledgerEventUtil.persistAndPublishEvent(e);
+
+    }
+
+    @SneakyThrows
+    public byte[] generatePdf(String permitId) {
+        Optional<LedgerPermit> permitR = permitRepository.findOneByPermitId(permitId);
+        if (permitR.isPresent()) {
+            return permitUtil.generatePdf(permitR.get());
+        }
+        throw new EpermitValidationException("Permit not found", ErrorCodes.PERMIT_NOTFOUND);
+    }
+
+    static Specification<LedgerPermit> filterAllPermits(PermitListParams input) {
+        Specification<LedgerPermit> spec = (permit, cq, cb) -> {
+            List<Predicate> predicates = new ArrayList<Predicate>();
+            if (input.getIssuer() != null) {
+                predicates.add(cb.equal(permit.get("issuer"), input.getIssuer()));
+            }
+            if (input.getIssuedFor() != null) {
+                predicates.add(cb.equal(permit.get("issuedFor"), input.getIssuedFor()));
+            }
+            if (input.getPermitType() != null) {
+                predicates.add(cb.equal(permit.get("permitType"), input.getPermitType()));
+            }
+            if (input.getPermitYear() != null) {
+                predicates.add(cb.equal(permit.get("permitYear"), input.getPermitYear()));
+            }
+            return cb.and(predicates.toArray(new Predicate[predicates.size()]));
+        };
+        return spec;
+    }
+
+    static Specification<LedgerPermit> filterPermits(PermitListPageParams input) {
         Specification<LedgerPermit> spec = (permit, cq, cb) -> {
             List<Predicate> predicates = new ArrayList<Predicate>();
             if (input.getIssuer() != null) {

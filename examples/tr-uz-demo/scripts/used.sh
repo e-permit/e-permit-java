@@ -1,7 +1,6 @@
 #!/bin/bash 
 CT="Content-Type: application/json"
-TR_URI="http://10.6.7.214:3050"
-UZ_URI="http://10.6.7.214:3060"
+UZ_URI="http://localhost:3060"
 AUTH="admin:admin"
 
 permit_used()

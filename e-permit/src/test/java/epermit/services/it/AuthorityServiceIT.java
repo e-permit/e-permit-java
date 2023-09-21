@@ -1,12 +1,9 @@
 package epermit.services.it;
 
-import static org.junit.Assert.assertEquals;
 import java.util.List;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -77,7 +74,7 @@ public class AuthorityServiceIT {
         quota.setActive(true);
         quota.setPermitIssuedFor("AY");
         quota.setPermitIssuer("TR");
-        quota.setPermitType(PermitType.BILITERAL);
+        quota.setPermitType(PermitType.BILATERAL);
         quota.setPermitYear(2022);
         quota.setStartNumber(1);
         quota.setEndNumber(100);
@@ -90,7 +87,7 @@ public class AuthorityServiceIT {
         permit.setIssuedFor("AY");
         permit.setIssuer("TR");
         permit.setPermitId("1");
-        permit.setPermitType(PermitType.BILITERAL);
+        permit.setPermitType(PermitType.BILATERAL);
         permit.setPermitYear(2022);
         permit.setPlateNumber("companyId");
         permit.setQrCode("companyId");
@@ -121,7 +118,7 @@ public class AuthorityServiceIT {
         CreateQuotaInput input = new CreateQuotaInput();
         input.setAuthorityCode("UZ");
         input.setEndNumber(20);
-        input.setPermitType(PermitType.BILITERAL);
+        input.setPermitType(PermitType.BILATERAL);
         input.setPermitYear(2021);
         input.setStartNumber(1);
         authorityService.createQuota(input);

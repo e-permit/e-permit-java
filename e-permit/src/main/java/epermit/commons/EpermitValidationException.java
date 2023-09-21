@@ -13,6 +13,11 @@ public class EpermitValidationException extends RuntimeException{
 		this.errorCode = errorCode;
 	}
 
+	public EpermitValidationException(ErrorCodes errorCode) {
+		super(errorCode.toString());
+		this.errorCode = errorCode;
+	}
+
 	public String getErrorCode() {
 		return this.errorCode.name();
 	}

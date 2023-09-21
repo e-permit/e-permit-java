@@ -2,7 +2,7 @@ package epermit.services;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -13,6 +13,7 @@ import epermit.appevents.LedgerEventCreated;
 import epermit.commons.GsonUtil;
 import epermit.entities.CreatedEvent;
 import epermit.entities.LedgerEvent;
+import epermit.ledgerevents.LedgerEventBase;
 import epermit.ledgerevents.LedgerEventUtil;
 import epermit.models.results.VerifyProofResult;
 import epermit.repositories.CreatedEventRepository;
@@ -46,7 +47,7 @@ public class EventService {
     }
 
     @Transactional
-    public void handleReceivedEvent(HttpHeaders headers, Object e) {
+    public <T extends LedgerEventBase> void handleReceivedEvent(HttpHeaders headers, T e) {
         log.info("Event claims. {}", e);
         String authorization = headers.getFirst(HttpHeaders.AUTHORIZATION);
         log.info("Event jws. {}", authorization);
@@ -54,7 +55,7 @@ public class EventService {
         if (!r.isValid()) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED");
         }
-        ledgerEventUtil.handleEvent(GsonUtil.toMap(e), r.getProof());
+        ledgerEventUtil.handleEvent(e, r.getProof());
     }
 
     static Specification<LedgerEvent> filterEvents(Long id, String producer, String consumer) {

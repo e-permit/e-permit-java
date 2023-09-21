@@ -4,11 +4,11 @@
     <parent>
         <groupId>epermit</groupId>
         <artifactId>e-permit-parent</artifactId>
-        <version>1.0.0</version>
+        <version>${revision}</version>
     </parent>
     <groupId>epermit</groupId>
     <artifactId>e-permit-public-api</artifactId>
-    <version>1.0.0</version>
+    <version>${revision}</version>
     <name>e-permit-public-api</name>
     <description>E-Permit Public Api</description>
     <dependencies>
@@ -21,21 +21,10 @@
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <!--<dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.junit.vintage</groupId>
-                    <artifactId>junit-vintage-engine</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>-->
         <dependency>
             <groupId>epermit</groupId>
             <artifactId>e-permit</artifactId>
-            <version>1.0.0</version>
+            <version>${revision}</version>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
@@ -64,6 +53,12 @@
                         <id>post-integration-test</id>
                         <goals>
                             <goal>stop</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>build-info</id>
+                        <goals>
+                            <goal>build-info</goal>
                         </goals>
                     </execution>
                 </executions>

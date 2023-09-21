@@ -18,7 +18,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import epermit.commons.EpermitValidationException;
 import epermit.commons.ErrorCodes;
-import epermit.commons.GsonUtil;
 import epermit.entities.LedgerPublicKey;
 import epermit.repositories.LedgerPublicKeyRepository;
 
@@ -48,7 +47,7 @@ public class KeyCreatedLedgerEventHandlerTest {
         event.setUse("sig");
         event.setX("b-twdhMdnpLQJ_pQx8meWsvevCyD0sufkdgF9nIsX-U");
         event.setY("U339OypYc4efK_xKJqnGSgWbLQ--47sCfpu-pJU2620");
-        handler.handle(GsonUtil.toMap(event));
+        handler.handle(event);
         verify(keyRepository, times(1)).save(captor.capture());
         assertEquals("1", captor.getValue().getKeyId());
         assertEquals("TR", captor.getValue().getAuthorityCode());
@@ -60,7 +59,7 @@ public class KeyCreatedLedgerEventHandlerTest {
         event.setKid("1");
         when(keyRepository.existsByAuthorityCodeAndKeyId("TR", "1")).thenReturn(true);
         EpermitValidationException ex = Assertions.assertThrows(EpermitValidationException.class, () -> {
-            handler.handle(GsonUtil.toMap(event));
+            handler.handle(event);
         });
         assertEquals(ErrorCodes.KEYID_ALREADY_EXISTS.name(), ex.getErrorCode());
         verify(keyRepository, never()).save(any());

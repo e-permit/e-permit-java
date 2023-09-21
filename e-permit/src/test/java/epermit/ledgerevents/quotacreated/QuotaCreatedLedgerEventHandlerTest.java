@@ -16,7 +16,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.jpa.domain.Specification;
 import epermit.commons.EpermitValidationException;
 import epermit.commons.ErrorCodes;
-import epermit.commons.GsonUtil;
 import epermit.entities.LedgerQuota;
 import epermit.models.EPermitProperties;
 import epermit.models.enums.PermitType;
@@ -38,29 +37,29 @@ public class QuotaCreatedLedgerEventHandlerTest {
 
     @Test
     void handleOkTest() {
-        when(properties.getIssuerCode()).thenReturn("TR");
+        //when(properties.getIssuerCode()).thenReturn("TR");
         QuotaCreatedLedgerEvent event = new QuotaCreatedLedgerEvent("TR", "UZ", "0");
         event.setStartNumber(4);
         event.setEndNumber(40);
-        event.setPermitType(PermitType.BILITERAL);
+        event.setPermitType(PermitType.BILATERAL);
         event.setPermitYear(2021);
-        handler.handle(GsonUtil.toMap(event));
+        handler.handle(event);
         verify(quotaRepository, times(1)).save(captor.capture());
         LedgerQuota quota = captor.getValue();
         assertEquals(4, quota.getStartNumber());
         assertEquals(40, quota.getEndNumber());
         assertEquals(2021, quota.getPermitYear());
-        assertEquals(PermitType.BILITERAL, quota.getPermitType());
+        assertEquals(PermitType.BILATERAL, quota.getPermitType());
     }
 
     @Test
     void handleInvalidQuotaIntervalTest() {
         QuotaCreatedLedgerEvent event = new QuotaCreatedLedgerEvent("TR", "UZ", "0");
-        when(quotaRepository.count(ArgumentMatchers.<Specification<LedgerQuota>>any()))
-                .thenReturn(Long.valueOf(1));
+        when(quotaRepository.exists(ArgumentMatchers.<Specification<LedgerQuota>>any()))
+                .thenReturn(true);
         EpermitValidationException ex =
                 Assertions.assertThrows(EpermitValidationException.class, () -> {
-                    handler.handle(GsonUtil.toMap(event));
+                    handler.handle(event);
                 });
         assertEquals(ErrorCodes.INVALID_QUOTA_INTERVAL.name(), ex.getErrorCode());
     }

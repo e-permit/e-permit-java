@@ -1,15 +1,15 @@
 package epermit.ledgerevents.permitcreated;
 
-import epermit.commons.Check;
+import epermit.commons.EpermitValidationException;
 import epermit.commons.ErrorCodes;
 import epermit.commons.GsonUtil;
 import epermit.entities.LedgerPermit;
+import epermit.ledgerevents.LedgerEventBase;
 import epermit.ledgerevents.LedgerEventHandler;
 import epermit.models.dtos.CreatePermitIdDto;
 import epermit.models.dtos.QuotaSufficientDto;
 import epermit.repositories.LedgerPermitRepository;
 import epermit.utils.PermitUtil;
-import java.util.Map;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -25,15 +25,18 @@ public class PermitCreatedLedgerEventHandler implements LedgerEventHandler {
     private final PermitUtil permitUtil;
 
     @SneakyThrows
-    public void handle(Map<String, Object> claims) {
+    public <T extends LedgerEventBase> void handle(T claims) {
         log.info("PermitCreatedEventHandler started with {}", claims);
-        PermitCreatedLedgerEvent event = GsonUtil.fromMap(claims, PermitCreatedLedgerEvent.class);
+        PermitCreatedLedgerEvent event = (PermitCreatedLedgerEvent) claims;
         String expectedPermitId = permitUtil.getPermitId(getCreatePermitIdInput(event));
-        Check.assertEquals(expectedPermitId, event.getPermitId(), ErrorCodes.INVALID_PERMITID);
+        if (!expectedPermitId.equals(event.getPermitId()))
+            throw new EpermitValidationException(ErrorCodes.INVALID_PERMITID);
         boolean exist = permitRepository.existsByPermitId(event.getPermitId());
-        Check.assertFalse(exist, ErrorCodes.PERMITID_ALREADY_EXISTS);
+        if (exist)
+            throw new EpermitValidationException(ErrorCodes.PERMITID_ALREADY_EXISTS);
         Boolean isQuotaSufficient = permitUtil.isQuotaSufficient(getQuotaSufficientInput(event));
-        Check.assertTrue(isQuotaSufficient, ErrorCodes.INSUFFICIENT_PERMIT_QUOTA);
+        if (!isQuotaSufficient)
+            throw new EpermitValidationException(ErrorCodes.INSUFFICIENT_PERMIT_QUOTA);
         LedgerPermit permit = new LedgerPermit();
         permit.setCompanyId(event.getCompanyId());
         permit.setCompanyName(event.getCompanyName());

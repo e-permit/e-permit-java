@@ -1,17 +1,20 @@
 <configuration>
     <springProperty scope="context" name="environment" source="spring.profiles.active" />
-    <if condition='isDefined("EPERMIT_LOG_BASEPATH")'>
-        <then>
-            <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-                <file>${EPERMIT_LOG_BASEPATH}/epermit-internal.log</file>
-                <append>false</append>
-                <immediateFlush>true</immediateFlush>
-                <encoder>
-                    <pattern>%-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
-                </encoder>
-            </appender>
-        </then>
-    </if>
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>/var/log/epermit/epermit-internal.log</file>
+        <append>false</append>
+        <immediateFlush>true</immediateFlush>
+        <encoder>
+            <pattern>%-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>
+                %d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n
+            </Pattern>
+        </layout>
+    </appender>
     <if condition='isDefined("EPERMIT_GRAYLOG_HOST")'>
         <then>
             <appender name="GELF" class="de.siegmar.logbackgelf.GelfTcpAppender">
@@ -46,23 +49,13 @@
             </appender>
         </then>
     </if>
-    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <layout class="ch.qos.logback.classic.PatternLayout">
-            <Pattern>
-                %d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n
-            </Pattern>
-        </layout>
-    </appender>
+
     <root level="info">
         <appender-ref ref="CONSOLE" />
+        <appender-ref ref="FILE" />
         <if condition='isDefined("EPERMIT_GRAYLOG_HOST")'>
             <then>
                 <appender-ref ref="ASYNC GELF" />
-            </then>
-        </if>
-        <if condition='isDefined("EPERMIT_LOG_BASEPATH")'>
-            <then>
-                <appender-ref ref="FILE" />
             </then>
         </if>
     </root>

@@ -1,13 +1,12 @@
 package epermit.ledgerevents.permitused;
 
-import java.util.Map;
-import java.util.Optional;
 import org.springframework.stereotype.Service;
-import epermit.commons.Check;
+
+import epermit.commons.EpermitValidationException;
 import epermit.commons.ErrorCodes;
-import epermit.commons.GsonUtil;
 import epermit.entities.LedgerPermit;
 import epermit.entities.LedgerPermitActivity;
+import epermit.ledgerevents.LedgerEventBase;
 import epermit.ledgerevents.LedgerEventHandler;
 import epermit.repositories.LedgerPermitRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,14 +22,16 @@ public class PermitUsedLedgerEventHandler implements LedgerEventHandler {
 
     @SneakyThrows
     @Override
-    public void handle(Map<String, Object> claims) {
+    public <T extends LedgerEventBase> void handle(T claims) {
         log.info("PermitUsedEventHandler started with {}", claims);
-        PermitUsedLedgerEvent event = GsonUtil.fromMap(claims, PermitUsedLedgerEvent.class);
-        Optional<LedgerPermit> permitR = permitRepository.findOneByPermitId(event.getPermitId());
-        Check.assertTrue(permitR.isPresent(), ErrorCodes.PERMIT_NOTFOUND);
-        LedgerPermit permit = permitR.get();
-        Check.assertEquals(permit.getIssuer(), event.getEventConsumer(), ErrorCodes.PERMIT_NOTFOUND);
-        Check.assertEquals(permit.getIssuedFor(), event.getEventProducer(), ErrorCodes.PERMIT_NOTFOUND);
+        PermitUsedLedgerEvent event = (PermitUsedLedgerEvent) claims;
+        LedgerPermit permit = permitRepository.findOneByPermitId(event.getPermitId())
+                .orElseThrow(() -> new EpermitValidationException(ErrorCodes.PERMIT_NOTFOUND));
+        if (!permit.getIssuer().equals(event.getEventConsumer()))
+            throw new EpermitValidationException(ErrorCodes.PERMIT_NOTFOUND);
+        if (!permit.getIssuedFor().equals(event.getEventProducer()))
+            throw new EpermitValidationException(ErrorCodes.PERMIT_NOTFOUND);
+
         permit.setUsed(true);
         LedgerPermitActivity activity = new LedgerPermitActivity();
         activity.setActivityType(event.getActivityType());

@@ -1,7 +1,7 @@
 package epermit.ledgerevents.permitrevoked;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import epermit.ledgerevents.LedgerEventBase;
 import epermit.ledgerevents.LedgerEventType;
 import lombok.Getter;

@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -40,7 +40,6 @@ import epermit.entities.LedgerPermit;
 import epermit.entities.LedgerQuota;
 import epermit.entities.PrivateKey;
 import epermit.entities.SerialNumber;
-import epermit.entities.User;
 import epermit.models.dtos.PermitDto;
 import epermit.models.dtos.PermitListItem;
 import epermit.models.enums.PermitActivityType;
@@ -54,7 +53,6 @@ import epermit.repositories.LedgerPermitRepository;
 import epermit.repositories.LedgerQuotaRepository;
 import epermit.repositories.PrivateKeyRepository;
 import epermit.repositories.SerialNumberRepository;
-import epermit.repositories.UserRepository;
 import epermit.utils.PrivateKeyUtil;
 
 
@@ -92,9 +90,6 @@ public class PermitControllerIT {
     AppEventListener appEventListener;
 
     @MockBean
-    UserRepository userRepository;
-
-    @MockBean
     RestTemplate restTemplate;
 
     @BeforeEach
@@ -109,7 +104,7 @@ public class PermitControllerIT {
         quota.setActive(true);
         quota.setEndNumber(30);
         quota.setStartNumber(1);
-        quota.setPermitType(PermitType.BILITERAL);
+        quota.setPermitType(PermitType.BILATERAL);
         quota.setPermitYear(2021);
         quota.setPermitIssuer("TR");
         quota.setPermitIssuedFor("UZ");
@@ -119,7 +114,7 @@ public class PermitControllerIT {
             SerialNumber serialNumber = new SerialNumber();
             serialNumber.setSerialNumber(i);
             serialNumber.setAuthorityCode("UZ");
-            serialNumber.setPermitType(PermitType.BILITERAL);
+            serialNumber.setPermitType(PermitType.BILATERAL);
             serialNumber.setPermitYear(2021);
             serialNumber.setState(SerialNumberState.CREATED);
             serialNumbers.add(serialNumber);
@@ -158,7 +153,7 @@ public class PermitControllerIT {
             permit.setCompanyName("ABC");
             permit.setCompanyId("1");
             permit.setIssuedFor("UZ");
-            permit.setPermitType(PermitType.BILITERAL);
+            permit.setPermitType(PermitType.BILATERAL);
             permit.setPermitYear(2021);
             permit.setPlateNumber("06AA1234");
             permit.setExpireAt("31/01/2022");
@@ -181,8 +176,10 @@ public class PermitControllerIT {
         ResponseEntity<RestResponsePage<PermitListItem>> result = getTestRestTemplate()
                 .exchange(builder.toUriString(), HttpMethod.GET, entity, responseType);
         assertEquals(HttpStatus.OK, result.getStatusCode());
-        assertEquals(25, result.getBody().getTotalElements());
-        assertEquals(5, result.getBody().getContent().size());
+         var body = result.getBody();
+        Assert.assertNotNull("Null body", body);
+        assertEquals(25, body.getTotalElements());
+        assertEquals(5, body.getContent().size());
 
     }
 
@@ -193,7 +190,7 @@ public class PermitControllerIT {
         permit.setCompanyId("1");
         permit.setIssuer("TR");
         permit.setIssuedFor("UZ");
-        permit.setPermitType(PermitType.BILITERAL);
+        permit.setPermitType(PermitType.BILATERAL);
         permit.setPermitYear(2021);
         permit.setPlateNumber("06AA1234");
         permit.setExpireAt("31/01/2022");
@@ -213,7 +210,7 @@ public class PermitControllerIT {
         input.setCompanyName("ABC");
         input.setCompanyId("123");
         input.setIssuedFor("UZ");
-        input.setPermitType(PermitType.BILITERAL);
+        input.setPermitType(PermitType.BILATERAL);
         input.setPermitYear(2021);
         input.setPlateNumber("06AA1234");
         ResponseEntity<String> r =
@@ -229,7 +226,7 @@ public class PermitControllerIT {
         permit.setCompanyName("ABC");
         permit.setIssuer("TR");
         permit.setIssuedFor("UZ");
-        permit.setPermitType(PermitType.BILITERAL);
+        permit.setPermitType(PermitType.BILATERAL);
         permit.setPermitYear(2021);
         permit.setPlateNumber("06AA1234");
         permit.setExpireAt("31/01/2022");
@@ -248,12 +245,6 @@ public class PermitControllerIT {
 
     @Test
     void revokeUnauthorizedTest() {
-        User user = new User();
-        user.setPassword(new BCryptPasswordEncoder().encode("123"));
-        user.setUsername("verifier");
-        user.setRole("VERIFIER");
-        user.setTerminal("EDIRNE");
-        when(userRepository.findOneByUsername("verifier")).thenReturn(user);
         HttpEntity<String> entity = new HttpEntity<String>("{}");
         ResponseEntity<?> r = getTestRestTemplateForVerifier().exchange(getBaseUrl() + "/" + "12",
                 HttpMethod.DELETE, entity, String.class);
@@ -263,12 +254,6 @@ public class PermitControllerIT {
 
     @Test
     void usePermitTest() {
-        User user = new User();
-        user.setPassword(new BCryptPasswordEncoder().encode("123"));
-        user.setUsername("verifier");
-        user.setRole("VERIFIER");
-        user.setTerminal("EDIRNE");
-        when(userRepository.findOneByUsername("verifier")).thenReturn(user);
         Authority authority = new Authority();
         authority.setApiUri("apiUri");
         authority.setCode("TR");
@@ -279,7 +264,7 @@ public class PermitControllerIT {
         permit.setCompanyName("ABC");
         permit.setIssuer("UZ");
         permit.setIssuedFor("TR");
-        permit.setPermitType(PermitType.BILITERAL);
+        permit.setPermitType(PermitType.BILATERAL);
         permit.setPermitYear(2021);
         permit.setPlateNumber("06AA1234");
         permit.setExpireAt("31/01/2022");

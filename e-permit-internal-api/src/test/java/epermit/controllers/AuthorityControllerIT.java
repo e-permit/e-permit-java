@@ -5,6 +5,7 @@ import static org.springframework.test.web.client.ExpectedCount.once;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 import java.util.List;
+import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,7 +79,10 @@ public class AuthorityControllerIT {
         ResponseEntity<AuthorityDto[]> r =
                 getTestRestTemplate().getForEntity(getBaseUrl(), AuthorityDto[].class);
         assertEquals(HttpStatus.OK, r.getStatusCode());
-        assertEquals(1, r.getBody().length);
+        var body = r.getBody();
+        Assert.assertNotNull("Null body", body);
+        assertEquals(1, body.length);
+
     }
 
     @Test
@@ -91,9 +95,11 @@ public class AuthorityControllerIT {
         ResponseEntity<AuthorityDto> r =
                 getTestRestTemplate().getForEntity(getBaseUrl() + "/UZ", AuthorityDto.class);
         assertEquals(HttpStatus.OK, r.getStatusCode());
-        assertEquals("UZ", r.getBody().getCode());
-        assertEquals("apiUri", r.getBody().getApiUri());
-        assertEquals("name", r.getBody().getName());
+        var body = r.getBody();
+        Assert.assertNotNull("", body);
+        assertEquals("UZ", body.getCode());
+        assertEquals("apiUri", body.getApiUri());
+        assertEquals("name", body.getName());
     }
 
     @Test

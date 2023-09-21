@@ -96,7 +96,7 @@ public class EventControllerIT {
 
                 ResponseEntity<?> result =
                                 this.restTemplate.postForEntity(baseUrl, request, Void.class);
-                Assert.assertEquals(404, result.getStatusCodeValue());
+                Assert.assertEquals(404, result.getStatusCode());
         }
 
         @Test
@@ -106,7 +106,7 @@ public class EventControllerIT {
                 event.setEndNumber(1);
                 event.setPermitIssuedFor("UZ");
                 event.setPermitIssuer("TR");
-                event.setPermitType(PermitType.BILITERAL);
+                event.setPermitType(PermitType.BILATERAL);
                 event.setPermitYear(2021);
                 event.setStartNumber(100);
                 String jws = jwsUtil.createJws(GsonUtil.toMap(event));
@@ -115,7 +115,7 @@ public class EventControllerIT {
 
                 ResponseEntity<?> result =
                                 this.restTemplate.postForEntity(baseUrl, request, Object.class);
-                Assert.assertEquals(400, result.getStatusCodeValue());
+                Assert.assertEquals(400, result.getStatusCode());
         }
 
         @Test
@@ -127,7 +127,7 @@ public class EventControllerIT {
                 event.setEndNumber(100);
                 event.setPermitIssuedFor("UZ");
                 event.setPermitIssuer("TR");
-                event.setPermitType(PermitType.BILITERAL);
+                event.setPermitType(PermitType.BILATERAL);
                 event.setPermitYear(2021);
                 event.setStartNumber(1);
                 String jws = jwsUtil.createJws(GsonUtil.toMap(event));
@@ -136,7 +136,7 @@ public class EventControllerIT {
 
                 ResponseEntity<?> result =
                                 this.restTemplate.postForEntity(baseUrl, request, Void.class);
-                Assert.assertEquals(200, result.getStatusCodeValue());
+                Assert.assertEquals(200, result.getStatusCode());
 
         }
 
@@ -154,7 +154,7 @@ public class EventControllerIT {
                 event.setEndNumber(200);
                 event.setPermitIssuedFor("UZ");
                 event.setPermitIssuer("TR");
-                event.setPermitType(PermitType.BILITERAL);
+                event.setPermitType(PermitType.BILATERAL);
                 event.setPermitYear(2021);
                 event.setStartNumber(101);
                 String jws = jwsUtil.createJws(GsonUtil.toMap(event));
@@ -163,13 +163,13 @@ public class EventControllerIT {
 
                 ResponseEntity<LedgerEventResult> result = this.restTemplate.postForEntity(baseUrl,
                                 request, LedgerEventResult.class);
-                Assert.assertEquals(200, result.getStatusCodeValue());
+                Assert.assertEquals(200, result.getStatusCode());
                 QuotaCreatedLedgerEvent event2 =
                                 new QuotaCreatedLedgerEvent("UZ", "TR", previousEventId);
                 event2.setEndNumber(100);
                 event2.setPermitIssuedFor("UZ");
                 event2.setPermitIssuer("TR");
-                event2.setPermitType(PermitType.BILITERAL);
+                event2.setPermitType(PermitType.BILATERAL);
                 event2.setPermitYear(2021);
                 event2.setStartNumber(1);
                 String jws2 = jwsUtil.createJws(GsonUtil.toMap(event2));
@@ -177,7 +177,7 @@ public class EventControllerIT {
                 HttpEntity<Map<?, ?>> request2 = new HttpEntity<>(GsonUtil.toMap(event2), headers2);
                 ResponseEntity<?> result2 =
                                 this.restTemplate.postForEntity(baseUrl, request2, Object.class);
-                Assert.assertEquals(422, result2.getStatusCodeValue());
+                Assert.assertEquals(422, result2.getStatusCode());
 
         }
 
@@ -202,7 +202,7 @@ public class EventControllerIT {
 
                 ResponseEntity<?> result =
                                 this.restTemplate.postForEntity(baseUrl, request, String.class);
-                Assert.assertEquals(200, result.getStatusCodeValue());
+                Assert.assertEquals(200, result.getStatusCode());
         }
 
 
@@ -226,7 +226,7 @@ public class EventControllerIT {
 
                 ResponseEntity<?> result =
                                 this.restTemplate.postForEntity(baseUrl, request, String.class);
-                Assert.assertEquals(200, result.getStatusCodeValue());
+                Assert.assertEquals(200, result.getStatusCode());
         }
 
         @Test
@@ -236,7 +236,7 @@ public class EventControllerIT {
                 quota.setEndNumber(100);
                 quota.setPermitIssuedFor("TR");
                 quota.setPermitIssuer("UZ");
-                quota.setPermitType(PermitType.BILITERAL);
+                quota.setPermitType(PermitType.BILATERAL);
                 quota.setPermitYear(2021);
                 quota.setStartNumber(1);
                 ledgerQuotaRepository.save(quota);
@@ -251,7 +251,7 @@ public class EventControllerIT {
                 event.setPermitId("UZ-TR-2021-1-1");
                 event.setPermitIssuedFor("TR");
                 event.setPermitIssuer("UZ");
-                event.setPermitType(PermitType.BILITERAL);
+                event.setPermitType(PermitType.BILATERAL);
                 event.setPermitYear(2021);
                 event.setPlateNumber("ABC");
                 event.setSerialNumber(1);
@@ -262,7 +262,7 @@ public class EventControllerIT {
 
                 ResponseEntity<?> result =
                                 this.restTemplate.postForEntity(baseUrl, request, String.class);
-                Assert.assertEquals(200, result.getStatusCodeValue());
+                Assert.assertEquals(200, result.getStatusCode());
         }
 
 

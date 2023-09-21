@@ -13,19 +13,10 @@ public class PermitListParams {
     @JsonProperty("issued_for")
     private String issuedFor;
 
-    @JsonProperty("issued_at")
-    private String issuedAt;
-
     @JsonProperty("permit_year")
     private Integer permitYear;
 
     @JsonProperty("permit_type")
     private PermitType permitType;
-
-    @JsonProperty("created_at")
-    private String createdAt;
-
-    @JsonProperty("page")
-    private Integer page = 0;
 
 }

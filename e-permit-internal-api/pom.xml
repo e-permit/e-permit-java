@@ -4,11 +4,11 @@
 	<parent>
 		<groupId>epermit</groupId>
 		<artifactId>e-permit-parent</artifactId>
-		<version>1.0.0</version>
+        <version>${revision}</version>
 	</parent>
 	<groupId>epermit</groupId>
 	<artifactId>e-permit-internal-api</artifactId>
-	<version>1.0.0</version>
+    <version>${revision}</version>
 	<name>e-permit-internal-api</name>
 	<description>E-Permit Internal Api</description>
 	<dependencies>
@@ -28,12 +28,12 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.5.13</version>
+            <version>4.5.14</version>
         </dependency>
 		<dependency>
 			<groupId>epermit</groupId>
 			<artifactId>e-permit</artifactId>
-			<version>1.0.0</version>
+            <version>${revision}</version>
 		</dependency>
 	</dependencies>
 	<build>

@@ -16,7 +16,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import epermit.commons.EpermitValidationException;
 import epermit.commons.ErrorCodes;
-import epermit.commons.GsonUtil;
 import epermit.entities.LedgerPermit;
 import epermit.repositories.LedgerPermitRepository;
 
@@ -37,7 +36,7 @@ public class PermitUsedLedgerEventHandlerTest {
         p.setIssuer("UZ");
         p.setIssuedFor("TR");
         when(permitRepository.findOneByPermitId(event.getPermitId())).thenReturn(Optional.of(p));
-        handler.handle(GsonUtil.toMap(event));
+        handler.handle(event);
         verify(permitRepository, times(1)).save(any());
         assertTrue(p.isUsed());
         assertEquals(1, p.getActivities().size());
@@ -49,7 +48,7 @@ public class PermitUsedLedgerEventHandlerTest {
         when(permitRepository.findOneByPermitId(event.getPermitId())).thenReturn(Optional.empty());
         EpermitValidationException ex =
                 Assertions.assertThrows(EpermitValidationException.class, () -> {
-                    handler.handle(GsonUtil.toMap(event));
+                    handler.handle(event);
                 });
         assertEquals(ErrorCodes.PERMIT_NOTFOUND.name(), ex.getErrorCode());
         verify(permitRepository, never()).save(any());
@@ -65,7 +64,7 @@ public class PermitUsedLedgerEventHandlerTest {
         when(permitRepository.findOneByPermitId(event.getPermitId())).thenReturn(Optional.of(p));
         EpermitValidationException ex =
                 Assertions.assertThrows(EpermitValidationException.class, () -> {
-                    handler.handle(GsonUtil.toMap(event));
+                    handler.handle(event);
                 });
         assertEquals(ErrorCodes.PERMIT_NOTFOUND.name(), ex.getErrorCode());
         verify(permitRepository, never()).save(any());
@@ -81,7 +80,7 @@ public class PermitUsedLedgerEventHandlerTest {
         when(permitRepository.findOneByPermitId(event.getPermitId())).thenReturn(Optional.of(p));
         EpermitValidationException ex =
                 Assertions.assertThrows(EpermitValidationException.class, () -> {
-                    handler.handle(GsonUtil.toMap(event));
+                    handler.handle(event);
                 });
         assertEquals(ErrorCodes.PERMIT_NOTFOUND.name(), ex.getErrorCode());
         verify(permitRepository, never()).save(any());

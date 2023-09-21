@@ -4,20 +4,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import javax.persistence.criteria.Predicate;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import epermit.appevents.QuotaCreated;
-import epermit.commons.Check;
+import epermit.commons.EpermitValidationException;
 import epermit.commons.ErrorCodes;
 import epermit.commons.GsonUtil;
 import epermit.entities.Authority;
 import epermit.entities.LedgerPermit;
-import epermit.entities.SerialNumber;
 import epermit.entities.LedgerPublicKey;
 import epermit.entities.LedgerQuota;
+import epermit.entities.SerialNumber;
 import epermit.ledgerevents.LedgerEventUtil;
 import epermit.ledgerevents.quotacreated.QuotaCreatedLedgerEvent;
 import epermit.models.EPermitProperties;
@@ -30,9 +31,10 @@ import epermit.models.inputs.CreateAuthorityInput;
 import epermit.models.inputs.CreateQuotaInput;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.LedgerPermitRepository;
-import epermit.repositories.SerialNumberRepository;
 import epermit.repositories.LedgerPublicKeyRepository;
 import epermit.repositories.LedgerQuotaRepository;
+import epermit.repositories.SerialNumberRepository;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -60,8 +62,8 @@ public class AuthorityService {
         Authority authority = authorityRepository.findOneByCode(code);
         AuthorityDto dto = modelMapper.map(authority, AuthorityDto.class);
         List<epermit.entities.LedgerQuota> quotaEntities = ledgerQuotaRepository.findAll();
-        List<epermit.entities.LedgerPublicKey> keyEntities =
-                ledgerPublicKeyRepository.findAllByAuthorityCodeAndRevokedFalse(code);
+        List<epermit.entities.LedgerPublicKey> keyEntities = ledgerPublicKeyRepository
+                .findAllByAuthorityCodeAndRevokedFalse(code);
         List<PublicJwk> keyDtoList = new ArrayList<>();
         keyEntities.forEach(key -> {
             keyDtoList.add(GsonUtil.getGson().fromJson(key.getJwk(), PublicJwk.class));
@@ -81,7 +83,9 @@ public class AuthorityService {
     public void create(CreateAuthorityInput input, AuthorityConfig config) {
         log.info("Authority create command: {}", input);
         Authority exist = authorityRepository.findOneByCode(config.getCode());
-        Check.assertNull(exist, ErrorCodes.AUTHORITY_ALREADY_EXISTS);
+        if (exist != null)
+            throw new EpermitValidationException(ErrorCodes.AUTHORITY_ALREADY_EXISTS);
+
         Authority authority = new Authority();
         authority.setApiUri(input.getApiUri());
         authority.setCode(config.getCode());
@@ -101,11 +105,11 @@ public class AuthorityService {
     public void createQuota(CreateQuotaInput input) {
         log.info("Quota create command: {}", input);
         Authority authority = authorityRepository.findOneByCode(input.getAuthorityCode());
-        Check.assertFalse(authority == null, ErrorCodes.AUTHORITY_NOT_FOUND);
+        if (authority == null)
+            throw new EpermitValidationException(ErrorCodes.AUTHORITY_ALREADY_EXISTS);
         String issuer = properties.getIssuerCode();
         String prevEventId = ledgerEventUtil.getPreviousEventId(input.getAuthorityCode());
-        QuotaCreatedLedgerEvent event =
-                new QuotaCreatedLedgerEvent(issuer, input.getAuthorityCode(), prevEventId);
+        QuotaCreatedLedgerEvent event = new QuotaCreatedLedgerEvent(issuer, input.getAuthorityCode(), prevEventId);
         event.setEndNumber(input.getEndNumber());
         event.setStartNumber(input.getStartNumber());
         event.setPermitType(input.getPermitType());
@@ -166,4 +170,3 @@ public class AuthorityService {
         return spec;
     }
 }
-

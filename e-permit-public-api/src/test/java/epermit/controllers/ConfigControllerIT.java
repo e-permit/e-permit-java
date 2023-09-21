@@ -35,9 +35,10 @@ public class ConfigControllerIT {
         final String baseUrl = "http://localhost:" + port + "/epermit-configuration";
         ResponseEntity<AuthorityConfig> result =
                 restTemplate.getForEntity(baseUrl, AuthorityConfig.class);
-        Assert.assertEquals(200, result.getStatusCodeValue());
-        Assert.assertEquals("TR", result.getBody().getCode()); 
-               
+        Assert.assertEquals(200, result.getStatusCode());
+        var body = result.getBody();
+        Assert.assertNotNull("Null body", body);
+        Assert.assertEquals("TR", body.getCode());
     }
 
 }

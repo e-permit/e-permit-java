@@ -1,6 +1,6 @@
 package epermit.ledgerevents.keyrevoked;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import epermit.ledgerevents.LedgerEventBase;
 import epermit.ledgerevents.LedgerEventType;
 import lombok.Getter;

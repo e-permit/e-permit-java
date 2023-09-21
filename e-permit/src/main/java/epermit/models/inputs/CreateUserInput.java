@@ -1,7 +1,7 @@
 package epermit.models.inputs;
 
 import java.util.Optional;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
