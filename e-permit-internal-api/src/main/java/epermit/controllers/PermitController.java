@@ -2,6 +2,7 @@ package epermit.controllers;
 
 import java.io.ByteArrayInputStream;
 import java.util.Base64;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import epermit.commons.GsonUtil;
 import epermit.models.dtos.PermitDto;
 import epermit.models.dtos.PermitListItem;
+import epermit.models.dtos.PermitListPageParams;
 import epermit.models.dtos.PermitListParams;
 import epermit.models.inputs.CreatePermitInput;
 import epermit.models.inputs.PermitUsedInput;
@@ -39,10 +41,17 @@ import lombok.extern.slf4j.Slf4j;
 public class PermitController {
     private final PermitService permitService;
 
-    @GetMapping()
-    public Page<PermitListItem> getAll(@RequestParam Map<String, Object> params) {
+    @GetMapping("/all")
+    public List<PermitListItem> getAll(@RequestParam Map<String, Object> params) {
         PermitListParams input = GsonUtil.fromMap(params, PermitListParams.class);
-        Page<PermitListItem> r = permitService.getAll(input);
+        List<PermitListItem> r = permitService.getAll(input);
+        return r;
+    }
+
+    @GetMapping()
+    public Page<PermitListItem> getPage(@RequestParam Map<String, Object> params) {
+        PermitListPageParams input = GsonUtil.fromMap(params, PermitListPageParams.class);
+        Page<PermitListItem> r = permitService.getPage(input);
         return r;
     }
 

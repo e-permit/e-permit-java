@@ -32,6 +32,7 @@ import epermit.models.dtos.CreatePermitIdDto;
 import epermit.models.dtos.CreateQrCodeDto;
 import epermit.models.dtos.PermitDto;
 import epermit.models.dtos.PermitListItem;
+import epermit.models.dtos.PermitListPageParams;
 import epermit.models.dtos.PermitListParams;
 import epermit.models.dtos.PermitActivityDto;
 import epermit.models.enums.SerialNumberState;
@@ -85,7 +86,12 @@ public class PermitService {
         return Optional.of(mapPermit(permitR.get()));
     }
 
-    public Page<PermitListItem> getAll(PermitListParams input) {
+    public List<PermitListItem> getAll(PermitListParams input) {
+        List<epermit.entities.LedgerPermit> entities = permitRepository.findAll(filterAllPermits(input));
+        return entities.stream().map(x -> modelMapper.map(x, PermitListItem.class)).toList();
+    }
+
+    public Page<PermitListItem> getPage(PermitListPageParams input) {
         Page<epermit.entities.LedgerPermit> entities = permitRepository.findAll(filterPermits(input),
                 PageRequest.of(input.getPage(), 10, Sort.by("createdAt").descending()));
         return entities.map(x -> modelMapper.map(x, PermitListItem.class));
@@ -141,7 +147,7 @@ public class PermitService {
         log.info("Permit create finished permit id is {}", permitId);
         return CreatePermitResult.success(permitId, qrCode);
     }
-    
+
     @Transactional
     public void revokePermit(String permitId) {
         log.info("Revoke permit started {}", permitId);
@@ -175,7 +181,7 @@ public class PermitService {
         String prevEventId = ledgerEventUtil.getPreviousEventId(permit.getIssuer());
         PermitUsedLedgerEvent e = new PermitUsedLedgerEvent(properties.getIssuerCode(),
                 permit.getIssuer(), prevEventId);
-     
+
         e.setActivityTimestamp(input.getActivityTimestamp());
         e.setActivityDetails(input.getActivityDetails());
         e.setPermitId(permitId);
@@ -193,14 +199,27 @@ public class PermitService {
         throw new EpermitValidationException("Permit not found", ErrorCodes.PERMIT_NOTFOUND);
     }
 
-   
-
-    @Transactional
-    void commitRevokePermit(LedgerPermit permit) {
-       
+    static Specification<LedgerPermit> filterAllPermits(PermitListParams input) {
+        Specification<LedgerPermit> spec = (permit, cq, cb) -> {
+            List<Predicate> predicates = new ArrayList<Predicate>();
+            if (input.getIssuer() != null) {
+                predicates.add(cb.equal(permit.get("issuer"), input.getIssuer()));
+            }
+            if (input.getIssuedFor() != null) {
+                predicates.add(cb.equal(permit.get("issuedFor"), input.getIssuedFor()));
+            }
+            if (input.getPermitType() != null) {
+                predicates.add(cb.equal(permit.get("permitType"), input.getPermitType()));
+            }
+            if (input.getPermitYear() != null) {
+                predicates.add(cb.equal(permit.get("permitYear"), input.getPermitYear()));
+            }
+            return cb.and(predicates.toArray(new Predicate[predicates.size()]));
+        };
+        return spec;
     }
 
-    static Specification<LedgerPermit> filterPermits(PermitListParams input) {
+    static Specification<LedgerPermit> filterPermits(PermitListPageParams input) {
         Specification<LedgerPermit> spec = (permit, cq, cb) -> {
             List<Predicate> predicates = new ArrayList<Predicate>();
             if (input.getIssuer() != null) {

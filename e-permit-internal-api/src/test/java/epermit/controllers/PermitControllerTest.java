@@ -15,13 +15,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import epermit.models.dtos.PermitDto;
 import epermit.models.dtos.PermitListItem;
 import epermit.models.inputs.CreatePermitInput;
@@ -45,8 +41,8 @@ public class PermitControllerTest {
             permits.add(dto);
         }
         Page<PermitListItem> pagedList = new PageImpl<>(permits);
-        when(permitService.getAll(any())).thenReturn(pagedList);
-        Page<PermitListItem> result = controller.getAll(Map.of());
+        when(permitService.getPage(any())).thenReturn(pagedList);
+        Page<PermitListItem> result = controller.getPage(Map.of());
         assertEquals(10, result.getTotalElements());
     }
 

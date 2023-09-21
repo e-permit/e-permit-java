@@ -39,7 +39,7 @@ import epermit.ledgerevents.permitused.PermitUsedLedgerEvent;
 import epermit.models.EPermitProperties;
 import epermit.models.dtos.PermitDto;
 import epermit.models.dtos.PermitListItem;
-import epermit.models.dtos.PermitListParams;
+import epermit.models.dtos.PermitListPageParams;
 import epermit.models.enums.PermitActivityType;
 import epermit.models.enums.PermitType;
 import epermit.models.inputs.CreatePermitInput;
@@ -109,13 +109,13 @@ public class PermitServiceTest {
         LedgerPermit permit = new LedgerPermit();
         permit.setPermitId("permitId");
 
-        PermitListParams input = new PermitListParams();
+        PermitListPageParams input = new PermitListPageParams();
         input.setPage(1);
         Page<LedgerPermit> pagedList = new PageImpl<>(List.of(permit));
 
         when(permitRepository.findAll(ArgumentMatchers.<Specification<LedgerPermit>>any(),
                 ArgumentMatchers.<Pageable>any())).thenReturn(pagedList);
-        Page<PermitListItem> result = permitService.getAll(input);
+        Page<PermitListItem> result = permitService.getPage(input);
         assertEquals(1, result.getContent().size());
     }
 
