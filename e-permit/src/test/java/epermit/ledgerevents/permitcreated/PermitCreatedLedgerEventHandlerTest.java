@@ -60,7 +60,7 @@ public class PermitCreatedLedgerEventHandlerTest {
         event.setPermitId("UZ-TR-2021-1-1");
         event.setPermitIssuedFor("TR");
         event.setPermitIssuer("UZ");
-        event.setPermitType(PermitType.BILATERAL);
+        event.setPermitType(PermitType.BILITERAL);
         event.setPermitYear(2021);
         event.setPlateNumber("A");
         event.setSerialNumber(1);
@@ -119,7 +119,7 @@ public class PermitCreatedLedgerEventHandlerTest {
         event.setIssuedAt("A");
         event.setCompanyName("A");
         event.setPermitId("UZ-TR-2021-1-1");
-        event.setPermitType(PermitType.BILATERAL);
+        event.setPermitType(PermitType.BILITERAL);
         event.setPermitYear(2021);
         event.setPlateNumber("A");
         event.setSerialNumber(1);
@@ -131,7 +131,7 @@ public class PermitCreatedLedgerEventHandlerTest {
         LedgerPermit p = captor.getValue();
         assertEquals("A", p.getExpireAt());
         assertEquals("UZ-TR-2021-1-1", p.getPermitId());
-        assertEquals(PermitType.BILATERAL, p.getPermitType());
+        assertEquals(PermitType.BILITERAL, p.getPermitType());
         assertEquals("A", p.getCompanyName());
         assertEquals("A", p.getIssuedAt());
         assertEquals("UZ", p.getIssuer());

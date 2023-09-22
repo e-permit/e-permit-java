@@ -60,7 +60,7 @@ public class AuthorityQuotaControllerIT {
         LedgerQuota quota = new LedgerQuota();
         quota.setEndNumber(30);
         quota.setStartNumber(1);
-        quota.setPermitType(PermitType.BILATERAL);
+        quota.setPermitType(PermitType.BILITERAL);
         quota.setPermitYear(2021);
         authorityRepository.save(authority);
         epermit.models.dtos.PrivateKey key = keyUtil.create("1");
@@ -95,7 +95,7 @@ public class AuthorityQuotaControllerIT {
         CreateQuotaInput input = new CreateQuotaInput();
         input.setAuthorityCode("UZ");
         input.setEndNumber(100);
-        input.setPermitType(PermitType.BILATERAL);
+        input.setPermitType(PermitType.BILITERAL);
         input.setPermitYear(2021);
         input.setStartNumber(1);
         ResponseEntity<Void> r =
