@@ -122,7 +122,7 @@ public class PermitServiceTest {
     @Test
     void createPermitTest() {
         CreatePermitInput input = new CreatePermitInput();
-        input.setPermitType(PermitType.BILATERAL);
+        input.setPermitType(PermitType.BILITERAL);
         input.setPermitYear(2021);
         input.setIssuedFor("UZ");
         input.setCompanyId("companyId");
@@ -148,7 +148,7 @@ public class PermitServiceTest {
         assertEquals(LedgerEventType.PERMIT_CREATED, event.getEventType());
         assertEquals("TR", event.getPermitIssuer());
         assertEquals("UZ", event.getPermitIssuedFor());
-        assertEquals(PermitType.BILATERAL, event.getPermitType());
+        assertEquals(PermitType.BILITERAL, event.getPermitType());
         assertEquals(2021, event.getPermitYear());
         assertEquals("123", event.getPreviousEventId());
     }

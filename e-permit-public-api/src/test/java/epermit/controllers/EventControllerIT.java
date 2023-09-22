@@ -106,7 +106,7 @@ public class EventControllerIT {
                 event.setEndNumber(1);
                 event.setPermitIssuedFor("UZ");
                 event.setPermitIssuer("TR");
-                event.setPermitType(PermitType.BILATERAL);
+                event.setPermitType(PermitType.BILITERAL);
                 event.setPermitYear(2021);
                 event.setStartNumber(100);
                 String jws = jwsUtil.createJws(GsonUtil.toMap(event));
@@ -127,7 +127,7 @@ public class EventControllerIT {
                 event.setEndNumber(100);
                 event.setPermitIssuedFor("UZ");
                 event.setPermitIssuer("TR");
-                event.setPermitType(PermitType.BILATERAL);
+                event.setPermitType(PermitType.BILITERAL);
                 event.setPermitYear(2021);
                 event.setStartNumber(1);
                 String jws = jwsUtil.createJws(GsonUtil.toMap(event));
@@ -154,7 +154,7 @@ public class EventControllerIT {
                 event.setEndNumber(200);
                 event.setPermitIssuedFor("UZ");
                 event.setPermitIssuer("TR");
-                event.setPermitType(PermitType.BILATERAL);
+                event.setPermitType(PermitType.BILITERAL);
                 event.setPermitYear(2021);
                 event.setStartNumber(101);
                 String jws = jwsUtil.createJws(GsonUtil.toMap(event));
@@ -169,7 +169,7 @@ public class EventControllerIT {
                 event2.setEndNumber(100);
                 event2.setPermitIssuedFor("UZ");
                 event2.setPermitIssuer("TR");
-                event2.setPermitType(PermitType.BILATERAL);
+                event2.setPermitType(PermitType.BILITERAL);
                 event2.setPermitYear(2021);
                 event2.setStartNumber(1);
                 String jws2 = jwsUtil.createJws(GsonUtil.toMap(event2));
@@ -236,7 +236,7 @@ public class EventControllerIT {
                 quota.setEndNumber(100);
                 quota.setPermitIssuedFor("TR");
                 quota.setPermitIssuer("UZ");
-                quota.setPermitType(PermitType.BILATERAL);
+                quota.setPermitType(PermitType.BILITERAL);
                 quota.setPermitYear(2021);
                 quota.setStartNumber(1);
                 ledgerQuotaRepository.save(quota);
@@ -251,7 +251,7 @@ public class EventControllerIT {
                 event.setPermitId("UZ-TR-2021-1-1");
                 event.setPermitIssuedFor("TR");
                 event.setPermitIssuer("UZ");
-                event.setPermitType(PermitType.BILATERAL);
+                event.setPermitType(PermitType.BILITERAL);
                 event.setPermitYear(2021);
                 event.setPlateNumber("ABC");
                 event.setSerialNumber(1);

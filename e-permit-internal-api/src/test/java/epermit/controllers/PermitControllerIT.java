@@ -104,7 +104,7 @@ public class PermitControllerIT {
         quota.setActive(true);
         quota.setEndNumber(30);
         quota.setStartNumber(1);
-        quota.setPermitType(PermitType.BILATERAL);
+        quota.setPermitType(PermitType.BILITERAL);
         quota.setPermitYear(2021);
         quota.setPermitIssuer("TR");
         quota.setPermitIssuedFor("UZ");
@@ -114,7 +114,7 @@ public class PermitControllerIT {
             SerialNumber serialNumber = new SerialNumber();
             serialNumber.setSerialNumber(i);
             serialNumber.setAuthorityCode("UZ");
-            serialNumber.setPermitType(PermitType.BILATERAL);
+            serialNumber.setPermitType(PermitType.BILITERAL);
             serialNumber.setPermitYear(2021);
             serialNumber.setState(SerialNumberState.CREATED);
             serialNumbers.add(serialNumber);
@@ -153,7 +153,7 @@ public class PermitControllerIT {
             permit.setCompanyName("ABC");
             permit.setCompanyId("1");
             permit.setIssuedFor("UZ");
-            permit.setPermitType(PermitType.BILATERAL);
+            permit.setPermitType(PermitType.BILITERAL);
             permit.setPermitYear(2021);
             permit.setPlateNumber("06AA1234");
             permit.setExpireAt("31/01/2022");
@@ -190,7 +190,7 @@ public class PermitControllerIT {
         permit.setCompanyId("1");
         permit.setIssuer("TR");
         permit.setIssuedFor("UZ");
-        permit.setPermitType(PermitType.BILATERAL);
+        permit.setPermitType(PermitType.BILITERAL);
         permit.setPermitYear(2021);
         permit.setPlateNumber("06AA1234");
         permit.setExpireAt("31/01/2022");
@@ -210,7 +210,7 @@ public class PermitControllerIT {
         input.setCompanyName("ABC");
         input.setCompanyId("123");
         input.setIssuedFor("UZ");
-        input.setPermitType(PermitType.BILATERAL);
+        input.setPermitType(PermitType.BILITERAL);
         input.setPermitYear(2021);
         input.setPlateNumber("06AA1234");
         ResponseEntity<String> r =
@@ -226,7 +226,7 @@ public class PermitControllerIT {
         permit.setCompanyName("ABC");
         permit.setIssuer("TR");
         permit.setIssuedFor("UZ");
-        permit.setPermitType(PermitType.BILATERAL);
+        permit.setPermitType(PermitType.BILITERAL);
         permit.setPermitYear(2021);
         permit.setPlateNumber("06AA1234");
         permit.setExpireAt("31/01/2022");
@@ -264,7 +264,7 @@ public class PermitControllerIT {
         permit.setCompanyName("ABC");
         permit.setIssuer("UZ");
         permit.setIssuedFor("TR");
-        permit.setPermitType(PermitType.BILATERAL);
+        permit.setPermitType(PermitType.BILITERAL);
         permit.setPermitYear(2021);
         permit.setPlateNumber("06AA1234");
         permit.setExpireAt("31/01/2022");
