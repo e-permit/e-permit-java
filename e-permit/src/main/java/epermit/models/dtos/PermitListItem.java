@@ -14,8 +14,6 @@ public class PermitListItem {
 
     private String permitId;
 
-    private String qrCode;
-
     private int serialNumber;
 
     private PermitType permitType;

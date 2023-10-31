@@ -16,36 +16,24 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import epermit.commons.GsonUtil;
 import epermit.entities.Authority;
-import epermit.entities.LedgerPublicKey;
 import epermit.ledgerevents.LedgerEventType;
 import epermit.ledgerevents.LedgerEventUtil;
 import epermit.ledgerevents.quotacreated.QuotaCreatedLedgerEvent;
 import epermit.models.EPermitProperties;
 import epermit.models.dtos.AuthorityConfig;
 import epermit.models.dtos.AuthorityDto;
-import epermit.models.dtos.PublicJwk;
 import epermit.models.enums.PermitType;
 import epermit.models.inputs.CreateAuthorityInput;
 import epermit.models.inputs.CreateQuotaInput;
 import epermit.repositories.AuthorityRepository;
-import epermit.repositories.LedgerPublicKeyRepository;
 import epermit.repositories.LedgerQuotaRepository;
-import epermit.repositories.PrivateKeyRepository;
 import lombok.SneakyThrows;
 
 @ExtendWith(MockitoExtension.class)
 public class AuthorityServiceTest {
-    private String jwk =
-            "{\"kty\":\"EC\",\"crv\":\"P-256\",\"x\":\"uWFoZ2J2BdSP-eCkqpNO2H4DoXeFNWEWrPiQ09hMJg8\",\"y\":\"FDqdZirvBlV_Au_4971Gd6d92_Z8abzSijr5a64vc9o\",\"use\":\"sig\",\"kid\":\"1\",\"alg\":\"ES256\"}";
-
+   
     @Mock
     AuthorityRepository authorityRepository;
-
-    @Mock
-    PrivateKeyRepository keyRepository;
-
-    @Mock
-    LedgerPublicKeyRepository ledgerPublicKeyRepository;
 
     @Mock
     LedgerQuotaRepository ledgerQuotaRepository;

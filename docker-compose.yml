@@ -10,16 +10,6 @@ services:
       context: ./e-permit-internal-api
     ports:
       - "3020:8080"
-  public-api:
-    container_name: publicapi
-    depends_on:
-      - epermitdb
-    env_file: 
-      - epermit.env
-    build: 
-      context: ./e-permit-public-api
-    ports:
-      - "3021:8080"
   epermitdb:
     image: 'postgres:13.1-alpine'
     container_name: epermitdb

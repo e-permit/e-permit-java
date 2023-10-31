@@ -21,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 import epermit.utils.PermitUtil;
 import epermit.commons.EpermitValidationException;
 import epermit.commons.ErrorCodes;
-import epermit.entities.SerialNumber;
 import epermit.entities.LedgerPermit;
 import epermit.ledgerevents.LedgerEventUtil;
 import epermit.ledgerevents.permitcreated.PermitCreatedLedgerEvent;
@@ -29,18 +28,15 @@ import epermit.ledgerevents.permitrevoked.PermitRevokedLedgerEvent;
 import epermit.ledgerevents.permitused.PermitUsedLedgerEvent;
 import epermit.models.EPermitProperties;
 import epermit.models.dtos.CreatePermitIdDto;
-import epermit.models.dtos.CreateQrCodeDto;
 import epermit.models.dtos.PermitDto;
 import epermit.models.dtos.PermitListItem;
 import epermit.models.dtos.PermitListPageParams;
 import epermit.models.dtos.PermitListParams;
 import epermit.models.dtos.PermitActivityDto;
-import epermit.models.enums.SerialNumberState;
 import epermit.models.enums.PermitType;
 import epermit.models.inputs.CreatePermitInput;
 import epermit.models.inputs.PermitUsedInput;
 import epermit.models.results.CreatePermitResult;
-import epermit.repositories.SerialNumberRepository;
 import epermit.repositories.LedgerPermitRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -55,7 +51,6 @@ public class PermitService {
     private final LedgerEventUtil ledgerEventUtil;
     private final ModelMapper modelMapper;
     private final LedgerPermitRepository permitRepository;
-    private final SerialNumberRepository serialNumberRepository;
 
     private PermitDto mapPermit(LedgerPermit permit) {
         PermitDto dto = modelMapper.map(permit, PermitDto.class);
@@ -101,12 +96,12 @@ public class PermitService {
     public CreatePermitResult createPermit(CreatePermitInput input) {
         log.info("Permit create command {}", input);
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        PageRequest pageable = PageRequest.of(0, 1, Sort.by(Direction.ASC, "serialNumber"));
+        
         List<SerialNumber> serialNumbers = serialNumberRepository.findAll(filterSerialNumbers(input.getIssuedFor(),
                 input.getPermitYear(), input.getPermitType()), pageable).toList();
         if (serialNumbers.isEmpty())
             throw new EpermitValidationException(ErrorCodes.INSUFFICIENT_PERMIT_QUOTA);
-        SerialNumber serialNumber = serialNumbers.get(0);
+        
         CreatePermitIdDto idInput = new CreatePermitIdDto();
         idInput.setIssuedFor(input.getIssuedFor());
         idInput.setIssuer(properties.getIssuerCode());
@@ -118,13 +113,7 @@ public class PermitService {
         String issuedAt = LocalDateTime.now(ZoneOffset.UTC).format(dtf);
         String expireAt = "31/01/" + Integer.toString(input.getPermitYear() + 1);
         String prevEventId = ledgerEventUtil.getPreviousEventId(input.getIssuedFor());
-        CreateQrCodeDto qrCodeInput = new CreateQrCodeDto();
-        qrCodeInput.setCompanyName(input.getCompanyName());
-        qrCodeInput.setExpireAt(expireAt);
-        qrCodeInput.setId(permitId);
-        qrCodeInput.setIssuedAt(issuedAt);
-        qrCodeInput.setPlateNumber(input.getPlateNumber());
-        String qrCode = permitUtil.generateQrCode(qrCodeInput);
+       
         PermitCreatedLedgerEvent e = new PermitCreatedLedgerEvent(issuer, input.getIssuedFor(), prevEventId);
         e.setPermitId(permitId);
         e.setExpireAt(expireAt);
@@ -134,18 +123,16 @@ public class PermitService {
         e.setPermitType(input.getPermitType());
         e.setPermitYear(input.getPermitYear());
         e.setPlateNumber(input.getPlateNumber());
-        e.setSerialNumber(serialNumber.getSerialNumber());
+        e.setSerialNumber();
         e.setPermitIssuer(properties.getIssuerCode());
         e.setPermitIssuedFor(input.getIssuedFor());
-        e.setQrCode(qrCode);
         if (input != null && !input.getOtherClaims().isEmpty()) {
             e.setOtherClaims(input.getOtherClaims());
         }
-        serialNumber.setState(SerialNumberState.USED);
-        serialNumberRepository.save(serialNumber);
+        
         ledgerEventUtil.persistAndPublishEvent(e);
         log.info("Permit create finished permit id is {}", permitId);
-        return CreatePermitResult.success(permitId, qrCode);
+        return CreatePermitResult.success(permitId);
     }
 
     @Transactional

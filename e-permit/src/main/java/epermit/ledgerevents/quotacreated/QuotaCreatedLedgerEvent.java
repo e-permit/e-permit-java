@@ -34,11 +34,7 @@ public class QuotaCreatedLedgerEvent extends LedgerEventBase {
 
     @NotNull
     @Min(1)
-    private int startNumber;
-
-    @NotNull
-    @Min(1)
-    private int endNumber;
+    private Long quantity;
 
     @AssertTrue(message = "Invalid permit issuer or issued_for")
     private boolean isValid() {
@@ -50,11 +46,5 @@ public class QuotaCreatedLedgerEvent extends LedgerEventBase {
         }
         return true;
     }
-
-    @AssertTrue(message = "End number should be grater than start number")
-    private boolean isValidStartAndEndNumber() {
-        return endNumber > startNumber;
-    }
-
 
 }

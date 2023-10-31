@@ -5,17 +5,13 @@ import java.util.List;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 import epermit.appevents.LedgerEventCreated;
-import epermit.commons.GsonUtil;
 import epermit.entities.CreatedEvent;
 import epermit.entities.LedgerEvent;
 import epermit.ledgerevents.LedgerEventBase;
 import epermit.ledgerevents.LedgerEventUtil;
-import epermit.models.results.VerifyProofResult;
 import epermit.repositories.CreatedEventRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -31,7 +27,7 @@ public class EventService {
     @Transactional
     public void handleSendedEvent(String eventId) {
         CreatedEvent event = createdEventRepository.findByEventId(eventId).get();
-        event.setSended(true);
+        event.setSent(true);
         createdEventRepository.save(event);
     }
 
@@ -49,13 +45,7 @@ public class EventService {
     @Transactional
     public <T extends LedgerEventBase> void handleReceivedEvent(HttpHeaders headers, T e) {
         log.info("Event claims. {}", e);
-        String authorization = headers.getFirst(HttpHeaders.AUTHORIZATION);
-        log.info("Event jws. {}", authorization);
-        VerifyProofResult r = ledgerEventUtil.verifyProof(e, authorization);
-        if (!r.isValid()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED");
-        }
-        ledgerEventUtil.handleEvent(e, r.getProof());
+        ledgerEventUtil.handleEvent(e);
     }
 
     static Specification<LedgerEvent> filterEvents(Long id, String producer, String consumer) {

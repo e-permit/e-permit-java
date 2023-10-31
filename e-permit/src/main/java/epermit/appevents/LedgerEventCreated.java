@@ -9,6 +9,5 @@ public class LedgerEventCreated {
     private UUID id;
     private String uri;
     private Map<String, Object> content;
-    private String proof;
     private String eventId;
 }

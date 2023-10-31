@@ -41,14 +41,11 @@ public class LedgerQuota {
     @Enumerated(EnumType.STRING)
     private PermitType permitType;
 
-    @Column(name = "start_number", nullable = false)
-    private int startNumber;
+    @Column(name = "quantity", nullable = false)
+    private Long quantity;
 
-    @Column(name = "end_number", nullable = false)
-    private int endNumber;
-
-    @Column(name = "active", nullable = false)
-    private boolean active;
+    @Column(name = "last_serial", nullable = false)
+    private Long lastSerial;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)

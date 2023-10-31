@@ -13,7 +13,5 @@ public class CreateQuotaInput {
     @NotNull
     private PermitType permitType;
     @NotNull
-    private int startNumber;
-    @NotNull
-    private int endNumber;
+    private Long quantity;
 }

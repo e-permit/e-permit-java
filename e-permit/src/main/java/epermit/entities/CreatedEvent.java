@@ -28,11 +28,8 @@ public class CreatedEvent {
     @Column(name = "event_id", nullable = false, unique = true)
     private String eventId;
 
-    @Column(name = "sended", nullable = false)
-    private boolean sended = false;
-
-    @Column(name = "result", nullable = true)
-    private String result;
+    @Column(name = "sent", nullable = false)
+    private boolean sent = false;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)

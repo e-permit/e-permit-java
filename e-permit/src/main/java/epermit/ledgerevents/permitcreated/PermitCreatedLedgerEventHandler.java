@@ -49,7 +49,6 @@ public class PermitCreatedLedgerEventHandler implements LedgerEventHandler {
         permit.setPermitYear(event.getPermitYear());
         permit.setPlateNumber(event.getPlateNumber());
         permit.setSerialNumber(event.getSerialNumber());
-        permit.setQrCode(event.getQrCode());
         if (event.getOtherClaims() != null && !event.getOtherClaims().isEmpty()) {
             permit.setOtherClaims(GsonUtil.getGson().toJson(event.getOtherClaims()));
         }

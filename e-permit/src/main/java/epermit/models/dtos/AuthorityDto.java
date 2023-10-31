@@ -16,8 +16,6 @@ public class AuthorityDto {
 
   private String apiUri;
 
-  private List<PublicJwk> keys = new ArrayList<>();
-
   private List<QuotaDto> quotas = new ArrayList<>();
 }
 

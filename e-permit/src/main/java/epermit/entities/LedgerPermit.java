@@ -73,9 +73,6 @@ public class LedgerPermit {
     @Column(name = "company_id", nullable = false, length = 100)
     private String companyId;
 
-    @Column(name = "qr_code", nullable = false, length = 5000)
-    private String qrCode;
-
     @Column(name = "other_claims", nullable = true)
     private String otherClaims;
 

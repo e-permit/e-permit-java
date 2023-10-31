@@ -1,20 +1,16 @@
 package epermit.ledgerevents;
 
-import java.util.Base64;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import org.slf4j.MDC;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import epermit.appevents.LedgerEventCreated;
-import epermit.commons.ApiErrorResponse;
 import epermit.commons.EpermitValidationException;
 import epermit.commons.ErrorCodes;
 import epermit.commons.GsonUtil;
@@ -22,11 +18,9 @@ import epermit.entities.Authority;
 import epermit.entities.CreatedEvent;
 import epermit.entities.LedgerEvent;
 import epermit.models.EPermitProperties;
-import epermit.models.results.VerifyProofResult;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.CreatedEventRepository;
 import epermit.repositories.LedgerEventRepository;
-import epermit.utils.JwsUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +31,6 @@ import lombok.extern.slf4j.Slf4j;
 public class LedgerEventUtil {
     private final EPermitProperties properties;
     private final ApplicationEventPublisher eventPublisher;
-    private final JwsUtil jwsUtil;
     private final LedgerEventRepository ledgerEventRepository;
     private final AuthorityRepository authorityRepository;
     private final CreatedEventRepository createdEventRepository;
@@ -58,10 +51,9 @@ public class LedgerEventUtil {
     public <T extends LedgerEventBase> void persistAndPublishEvent(T event) {
         CreatedEvent createdEvent = new CreatedEvent();
         createdEvent.setEventId(event.getEventId());
-        createdEvent.setSended(false);
+        createdEvent.setSent(false);
         createdEventRepository.save(createdEvent);
-        String proof = createProof(event);
-        handleEvent(event, proof);
+        handleEvent(event);
         publishAppEvent(createdEvent);
     }
 
@@ -74,7 +66,6 @@ public class LedgerEventUtil {
         appEvent.setUri(authority.getApiUri() + "/events/"
                 + ledgerEvent.getEventType().name().toLowerCase().replace("_", "-"));
         appEvent.setContent(GsonUtil.toMap(ledgerEvent.getEventContent()));
-        appEvent.setProof(ledgerEvent.getProof());
         return appEvent;
     }
 
@@ -85,7 +76,7 @@ public class LedgerEventUtil {
     }
 
     @SneakyThrows
-    public <T extends LedgerEventBase> void handleEvent(T e, String proof) {
+    public <T extends LedgerEventBase> void handleEvent(T e) {
         log.info("Event handle started {}", e);
         Boolean eventExist = ledgerEventRepository.existsByProducerAndConsumerAndEventId(
                 e.getEventProducer(), e.getEventConsumer(), e.getEventId());
@@ -112,52 +103,15 @@ public class LedgerEventUtil {
         ledgerEvent.setEventType(e.getEventType());
         ledgerEvent.setPreviousEventId(e.getPreviousEventId());
         ledgerEvent.setEventContent(GsonUtil.getGson().toJson(e));
-        ledgerEvent.setProof(proof);
         ledgerEventRepository.save(ledgerEvent);
         LedgerEventHandler eventHandler = eventHandlers.get(e.getEventType().toString() + "_EVENT_HANDLER");
         eventHandler.handle(e);
     }
 
     @SneakyThrows
-    public <T extends LedgerEventBase> String createProof(T event) {
-        String jws = jwsUtil.createJws(event);
-        log.info("Created jws length: {}", jws.length());
-        String[] parts = jws.split("\\.");
-        return parts[0] + "." + parts[2];
-    }
-
-    @SneakyThrows
-    public VerifyProofResult verifyProof(Object e, String authorization) {
-        if (authorization == null) {
-            return VerifyProofResult.fail("HEADER_NOTFOUND");
-        }
-        LedgerEventBase eb = (LedgerEventBase) e;
-        Authority authority = authorityRepository.findOneByCode(eb.getEventProducer());
-        if (authority == null) {
-            return VerifyProofResult.fail("AUTHORITY_NOTFOUND");
-        }
-        if (!authorization.toLowerCase().startsWith("bearer")) {
-            return VerifyProofResult.fail("INVALID_AUTH_TYPE");
-        }
-        String proof = authorization.substring(7);
-        String[] proofArr = proof.split("\\.");
-        String payloadJsonStr = GsonUtil.getGson().toJson(e);
-        String payloadBase64 = Base64.getUrlEncoder().withoutPadding().encodeToString(payloadJsonStr.getBytes());
-        String jws = proofArr[0] + "." + payloadBase64 + "." + proofArr[1];
-        log.info("Constructed jws: {}", jws);
-        log.info("Constructed jws length: {}", jws.length());
-        Boolean isValid = jwsUtil.validateJws(jws);
-        if (!isValid) {
-            return VerifyProofResult.fail("UNAUTHORIZED");
-        }
-        return VerifyProofResult.success(proof);
-    }
-
-    @SneakyThrows
     public ResponseEntity<?> sendEvent(LedgerEventCreated event) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.add("Authorization", "Bearer " + event.getProof());
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(event.getContent(), headers);
         ResponseEntity<?> result = restTemplate.postForEntity(event.getUri(), request, Object.class);
         return result;

@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.SneakyThrows;
 
 public enum PermitType {
-    BILITERAL("BILITERAL"), TRANSIT("TRANSIT"), THIRDCOUNTRY("THIRDCOUNTRY"), BILITERAL_FEE(
-            "BILITERAL_FEE"), TRANSIT_FEE("TRANSIT_FEE"), THIRDCOUNTRY_FEE("THIRDCOUNTRY_FEE");
+    BILITERAL("BILATERAL"), TRANSIT("TRANSIT"), THIRDCOUNTRY("THIRDCOUNTRY"), BILITERAL_FEE(
+            "BILATERAL_FEE"), TRANSIT_FEE("TRANSIT_FEE"), THIRDCOUNTRY_FEE("THIRDCOUNTRY_FEE");
 
     private final String permitType;
 
@@ -17,7 +17,7 @@ public enum PermitType {
     public String getCode() {
         String code;
         switch (permitType) {
-            case "BILITERAL":
+            case "BILATERAL":
                 code = "1";
                 break;
             case "TRANSIT":
@@ -26,7 +26,7 @@ public enum PermitType {
             case "THIRDCOUNTRY":
                 code = "3";
                 break;
-            case "BILITERAL_FEE":
+            case "BILATERAL_FEE":
                 code = "4";
                 break;
             case "TRANSIT_FEE":

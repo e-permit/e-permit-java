@@ -10,11 +10,10 @@ public class CreatePermitResult {
 
     private String qrCode;
     
-    public static CreatePermitResult success(String permitId, String qrCode){
+    public static CreatePermitResult success(String permitId){
         CreatePermitResult r = new CreatePermitResult();
         r.ok = true;
         r.permitId = permitId;
-        r.qrCode = qrCode;
         return r;
     }
 }

@@ -30,12 +30,3 @@ public class GsonUtil {
         return getGson().fromJson(json, mapType);
     }
 }
-
-
-
-
-    /*
-     * private ObjectMapper jacksonObjectMapper() { return new
-     * ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
-     * .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false); }
-     */
