@@ -127,6 +127,8 @@ public class PermitServiceIT {
         permitService.revokePermit(r.getPermitId());
         Optional<LedgerPermit> permit2 = ledgerPermitRepository.findOneByPermitId(r.getPermitId());
         Assertions.assertTrue(permit2.isEmpty());
+        //List<LedgerPermit> deleteList = ledgerPermitRepository.findAllDeleted();
+        
     }
 }
 
