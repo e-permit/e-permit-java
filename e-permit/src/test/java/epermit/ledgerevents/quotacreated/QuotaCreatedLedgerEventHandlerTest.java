@@ -37,17 +37,16 @@ public class QuotaCreatedLedgerEventHandlerTest {
 
     @Test
     void handleOkTest() {
-        //when(properties.getIssuerCode()).thenReturn("TR");
         QuotaCreatedLedgerEvent event = new QuotaCreatedLedgerEvent("TR", "UZ", "0");
-        event.setStartNumber(4);
-        event.setEndNumber(40);
+        event.setQuantity(4L);
         event.setPermitType(PermitType.BILITERAL);
         event.setPermitYear(2021);
         handler.handle(event);
         verify(quotaRepository, times(1)).save(captor.capture());
         LedgerQuota quota = captor.getValue();
-        assertEquals(4, quota.getStartNumber());
-        assertEquals(40, quota.getEndNumber());
+        assertEquals(4, quota.getBalance());
+        assertEquals(1, quota.getNextSerial());
+        assertEquals(0, quota.getSpent());
         assertEquals(2021, quota.getPermitYear());
         assertEquals(PermitType.BILITERAL, quota.getPermitType());
     }
@@ -57,10 +56,9 @@ public class QuotaCreatedLedgerEventHandlerTest {
         QuotaCreatedLedgerEvent event = new QuotaCreatedLedgerEvent("TR", "UZ", "0");
         when(quotaRepository.exists(ArgumentMatchers.<Specification<LedgerQuota>>any()))
                 .thenReturn(true);
-        EpermitValidationException ex =
-                Assertions.assertThrows(EpermitValidationException.class, () -> {
-                    handler.handle(event);
-                });
+        EpermitValidationException ex = Assertions.assertThrows(EpermitValidationException.class, () -> {
+            handler.handle(event);
+        });
         assertEquals(ErrorCodes.INVALID_QUOTA_INTERVAL.name(), ex.getErrorCode());
     }
 }

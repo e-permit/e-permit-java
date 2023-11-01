@@ -3,8 +3,6 @@ package epermit.services.it;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -26,18 +24,13 @@ import epermit.PermitPostgresContainer;
 import epermit.entities.Authority;
 import epermit.entities.LedgerPermit;
 import epermit.entities.LedgerQuota;
-import epermit.entities.SerialNumber;
 import epermit.models.enums.PermitType;
-import epermit.models.enums.SerialNumberState;
 import epermit.models.inputs.CreatePermitInput;
 import epermit.models.results.CreatePermitResult;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.LedgerPermitRepository;
 import epermit.repositories.LedgerQuotaRepository;
-import epermit.repositories.PrivateKeyRepository;
-import epermit.repositories.SerialNumberRepository;
 import epermit.services.PermitService;
-import epermit.services.PrivateKeyService;
 
 @Testcontainers
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -59,18 +52,9 @@ public class PermitServiceIT {
 
     @BeforeAll
     @Transactional
-    static void up(@Autowired PrivateKeyService privateKeyService,
-            @Autowired PrivateKeyRepository keyRepository) {
-        if (keyRepository.count() == 0) {
-            privateKeyService.seed();
-        }
-    }
-
-    @BeforeAll
-    @Transactional
     static void setUp(@Autowired AuthorityRepository authorityRepository,
-            @Autowired LedgerQuotaRepository ledgerQuotaRepository,
-            @Autowired SerialNumberRepository serialNumberRepository) {
+            @Autowired LedgerQuotaRepository ledgerQuotaRepository
+            ) {
         Authority authority = new Authority();
         authority.setApiUri("apiUri");
         authority.setCode("FR");
@@ -78,25 +62,12 @@ public class PermitServiceIT {
         authorityRepository.save(authority);
 
         LedgerQuota quota = new LedgerQuota();
-        quota.setActive(true);
-        quota.setEndNumber(100);
+        quota.setBalance(100L);
         quota.setPermitIssuedFor("FR");
         quota.setPermitIssuer("TR");
         quota.setPermitType(PermitType.BILITERAL);
         quota.setPermitYear(2021);
-        quota.setStartNumber(1);
         ledgerQuotaRepository.save(quota);
-        List<SerialNumber> serialNumbers = new ArrayList<>();
-        for (int i = 1; i <= 100; i++) {
-            SerialNumber serialNumber = new SerialNumber();
-            serialNumber.setSerialNumber(i);
-            serialNumber.setAuthorityCode("FR");
-            serialNumber.setPermitType(PermitType.BILITERAL);
-            serialNumber.setPermitYear(2021);
-            serialNumber.setState(SerialNumberState.CREATED);
-            serialNumbers.add(serialNumber);
-        }
-        serialNumberRepository.saveAll(serialNumbers);
     }
 
     @Test

@@ -15,7 +15,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import epermit.commons.EpermitValidationException;
 import epermit.commons.ErrorCodes;
-import epermit.commons.GsonUtil;
 import epermit.entities.LedgerPermit;
 import epermit.repositories.LedgerPermitRepository;
 

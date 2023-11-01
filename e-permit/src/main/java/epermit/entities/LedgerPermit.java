@@ -49,7 +49,7 @@ public class LedgerPermit {
     private String issuedFor;
 
     @Column(name = "serial_number", nullable = false)
-    private int serialNumber;
+    private Long serialNumber;
 
     @Column(name = "permit_type", nullable = false)
     @Enumerated(EnumType.STRING)

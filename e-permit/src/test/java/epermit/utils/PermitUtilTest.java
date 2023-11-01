@@ -24,8 +24,6 @@ import lombok.SneakyThrows;
 
 @ExtendWith(MockitoExtension.class)
 public class PermitUtilTest {
-    @Mock
-    JwsUtil jwsUtil;
 
     @Mock
     EPermitProperties properties;
@@ -43,7 +41,7 @@ public class PermitUtilTest {
         input.setIssuer("TR");
         input.setPermitType(PermitType.BILITERAL);
         input.setPermitYear(2021);
-        input.setSerialNumber(12);
+        input.setSerialNumber(12L);
         String permitId = util.getPermitId(input);
         assertEquals("TR-UA-2021-1-12", permitId);
     }

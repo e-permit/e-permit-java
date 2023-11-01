@@ -42,7 +42,7 @@ public class PermitCreatedLedgerEvent extends LedgerEventBase {
     private int permitYear;
 
     @NotNull
-    private int serialNumber;
+    private Long serialNumber;
 
     @NotNull
     @Pattern(regexp = "^(0?[1-9]|[12][0-9]|3[01])[/](0?[1-9]|1[012])[/]\\d{4}$")

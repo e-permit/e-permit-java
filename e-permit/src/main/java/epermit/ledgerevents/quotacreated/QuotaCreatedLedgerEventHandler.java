@@ -1,17 +1,12 @@
 package epermit.ledgerevents.quotacreated;
 
-import java.util.ArrayList;
-import java.util.List;
-import jakarta.persistence.criteria.Predicate;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import epermit.commons.EpermitValidationException;
-import epermit.commons.ErrorCodes;
 import epermit.entities.LedgerQuota;
 import epermit.ledgerevents.LedgerEventBase;
 import epermit.ledgerevents.LedgerEventHandler;
 import epermit.repositories.LedgerQuotaRepository;
+import epermit.utils.QuotaUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -27,16 +22,13 @@ public class QuotaCreatedLedgerEventHandler implements LedgerEventHandler {
     public <T extends LedgerEventBase> void handle(T claims) {
         log.info("QuotaCreatedEventHandler started with {}", claims);
         QuotaCreatedLedgerEvent event = (QuotaCreatedLedgerEvent) claims;
-        Boolean matched = quotaRepository.exists(filterQuotas(event));
-        if(matched)
-            throw new EpermitValidationException(ErrorCodes.INVALID_QUOTA_INTERVAL);
-        LedgerQuota quota = new LedgerQuota();
-        quota.setQuantity(event.getQuantity());
-        quota.setPermitType(event.getPermitType());
-        quota.setPermitYear(event.getPermitYear());
-        quota.setPermitIssuer(event.getEventConsumer());
-        quota.setPermitIssuedFor(event.getEventProducer());
-        log.info("QuotaCreatedEventHandler ended with {}", quota);
+        LedgerQuota quota = quotaRepository
+                .findOne(QuotaUtil.filterQuotas(event.getEventProducer(), event.getEventConsumer(),
+                        event.getPermitType(), event.getPermitYear()))
+                .orElse(LedgerQuota.builder().permitIssuer(event.getPermitIssuer())
+                        .permitIssuedFor(event.getPermitIssuedFor()).permitType(event.getPermitType())
+                        .permitYear(event.getPermitYear()).build());
+        quota.setBalance(quota.getBalance() + event.getQuantity());
         quotaRepository.save(quota);
     }
 }

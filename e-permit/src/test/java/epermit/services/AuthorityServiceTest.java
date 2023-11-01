@@ -79,8 +79,6 @@ public class AuthorityServiceTest {
         AuthorityConfig config = new AuthorityConfig();
         config.setCode("UZ");
         config.setName("Uzbekistan");
-        PublicJwk publicJwk = GsonUtil.getGson().fromJson(jwk, PublicJwk.class);
-        config.setKeys(List.of(publicJwk));
         when(authorityRepository.findOneByCode("UZ")).thenReturn(null);
         authorityService.create(input, config);
         Authority authority = new Authority();
@@ -88,9 +86,7 @@ public class AuthorityServiceTest {
         authority.setCode("UZ");
         authority.setName("Uzbekistan");
         authority.setApiUri("apiUri");
-        LedgerPublicKey authorityKey = new LedgerPublicKey();
-        authorityKey.setKeyId("1");
-        authorityKey.setJwk(jwk);
+  
        
         verify(authorityRepository, times(1)).save(authority);
     }
@@ -99,18 +95,16 @@ public class AuthorityServiceTest {
     void createQuotaTest() {
         CreateQuotaInput input = new CreateQuotaInput();
         input.setAuthorityCode("TR");
-        input.setEndNumber(20);
+        input.setQuantity(20L);
         input.setPermitType(PermitType.BILITERAL);
         input.setPermitYear(2021);
-        input.setStartNumber(1);
         when(properties.getIssuerCode()).thenReturn("UZ");
         when(ledgerEventUtil.getPreviousEventId("TR")).thenReturn("123");
         when(authorityRepository.findOneByCode("TR")).thenReturn(new Authority());
         authorityService.createQuota(input);
         verify(ledgerEventUtil, times(1)).persistAndPublishEvent(captor.capture());
         QuotaCreatedLedgerEvent event = captor.getValue();
-        assertEquals(1, event.getStartNumber());
-        assertEquals(20, event.getEndNumber());
+        assertEquals(20L, event.getQuantity());
         assertEquals("TR", event.getEventConsumer());
         assertEquals("UZ", event.getEventProducer());
         assertEquals(LedgerEventType.QUOTA_CREATED, event.getEventType());

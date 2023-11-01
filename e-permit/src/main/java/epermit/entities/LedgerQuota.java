@@ -12,13 +12,17 @@ import jakarta.persistence.Table;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
 import epermit.models.enums.PermitType;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "epermit_ledger_quotas")
+@Builder
 public class LedgerQuota {
     @Id
     @GeneratedValue(generator = "UUID")
@@ -41,11 +45,17 @@ public class LedgerQuota {
     @Enumerated(EnumType.STRING)
     private PermitType permitType;
 
-    @Column(name = "quantity", nullable = false)
-    private Long quantity;
+    @Builder.Default
+    @Column(name = "balance", nullable = false)
+    private Long balance = 0L;
 
-    @Column(name = "last_serial", nullable = false)
-    private Long lastSerial;
+    @Builder.Default
+    @Column(name = "spent", nullable = false)
+    private Long spent = 0L;
+
+    @Builder.Default
+    @Column(name = "next_serial", nullable = false)
+    private Long nextSerial = 1L;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)

@@ -3,7 +3,6 @@ package epermit.services;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -24,13 +23,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
-import epermit.entities.SerialNumber;
-import epermit.entities.Authority;
 import epermit.entities.LedgerPermit;
+import epermit.entities.LedgerQuota;
 import epermit.ledgerevents.LedgerEventType;
 import epermit.ledgerevents.LedgerEventUtil;
 import epermit.ledgerevents.permitcreated.PermitCreatedLedgerEvent;
@@ -45,10 +40,9 @@ import epermit.models.enums.PermitType;
 import epermit.models.inputs.CreatePermitInput;
 import epermit.models.inputs.PermitUsedInput;
 import epermit.models.results.CreatePermitResult;
-import epermit.repositories.SerialNumberRepository;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.LedgerPermitRepository;
-import epermit.utils.JwsUtil;
+import epermit.repositories.LedgerQuotaRepository;
 import epermit.utils.PermitUtil;
 
 @ExtendWith(MockitoExtension.class)
@@ -60,6 +54,9 @@ public class PermitServiceTest {
     private LedgerPermitRepository permitRepository;
 
     @Mock
+    private LedgerQuotaRepository quotaRepository;
+
+    @Mock
     PermitUtil permitUtil;
 
     @Mock
@@ -69,13 +66,7 @@ public class PermitServiceTest {
     AuthorityRepository authorityRepository;
 
     @Mock
-    SerialNumberRepository serialNumberRepository;
-
-    @Mock
     EPermitProperties properties;
-
-    @Mock
-    JwsUtil jwsUtil;
 
     @Mock
     LedgerEventUtil ledgerEventUtil;
@@ -83,13 +74,11 @@ public class PermitServiceTest {
     @Captor
     ArgumentCaptor<PermitCreatedLedgerEvent> createdCaptor;
 
-
     @Captor
     ArgumentCaptor<PermitUsedLedgerEvent> usedCaptor;
 
     @Captor
     ArgumentCaptor<PermitRevokedLedgerEvent> revokedCaptor;
-
 
     @InjectMocks
     PermitService permitService;
@@ -128,15 +117,10 @@ public class PermitServiceTest {
         input.setCompanyId("companyId");
         input.setCompanyName("companyName");
         input.setPlateNumber("plateNumber");
-        SerialNumber serialNumber = new SerialNumber();
-        serialNumber.setSerialNumber(1);
-
-        when(serialNumberRepository.findAll(ArgumentMatchers.<Specification<SerialNumber>>any(),
-                ArgumentMatchers.<Pageable>any()))
-                        .thenReturn(new PageImpl<>(List.of(serialNumber)));
+        when(quotaRepository.findOne(ArgumentMatchers.<Specification<LedgerQuota>>any()))
+                .thenReturn(Optional.of(LedgerQuota.builder().balance(5L).build()));
         when(properties.getIssuerCode()).thenReturn("TR");
         when(ledgerEventUtil.getPreviousEventId("UZ")).thenReturn("123");
-        when(permitUtil.generateQrCode(any())).thenReturn("QR");
         when(permitUtil.getPermitId(any())).thenReturn("TR-UZ-2021-1-1");
         CreatePermitResult result = permitService.createPermit(input);
         assertEquals("TR-UZ-2021-1-1", result.getPermitId());
@@ -187,9 +171,8 @@ public class PermitServiceTest {
         permit.setPermitId("TR-UZ-2021-1-1");
         permit.setIssuer("TR");
         permit.setIssuedFor("UZ");
-        SerialNumber serialNumber = new SerialNumber();
-        when(serialNumberRepository.findOne(ArgumentMatchers.<Specification<SerialNumber>>any()))
-                .thenReturn(Optional.of(serialNumber));
+        when(quotaRepository.findOne(ArgumentMatchers.<Specification<LedgerQuota>>any()))
+                .thenReturn(Optional.of(LedgerQuota.builder().balance(5L).build()));
         when(permitRepository.findOneByPermitId("TR-UZ-2021-1-1")).thenReturn(Optional.of(permit));
         permitService.revokePermit("TR-UZ-2021-1-1");
         verify(ledgerEventUtil, times(1)).persistAndPublishEvent(revokedCaptor.capture());

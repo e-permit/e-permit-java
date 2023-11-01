@@ -7,7 +7,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import epermit.models.EPermitProperties;
 import epermit.repositories.AuthorityRepository;
-import epermit.utils.JwsUtil;
 
 @ExtendWith(MockitoExtension.class)
 public class LedgerEventUtilTest {
@@ -16,9 +15,6 @@ public class LedgerEventUtilTest {
 
     @Mock
     ApplicationEventPublisher eventPublisher;
-
-    @Mock
-    JwsUtil jwsUtil;
 
     @Mock
     AuthorityRepository authorityRepository;

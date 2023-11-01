@@ -17,9 +17,7 @@ public class QuotaDto {
 
     private PermitType permitType;
 
-    private int startNumber;
+    private Long balance;
 
-    private int endNumber;
-
-    private Long usedCount;
+    private Long spent;
 }

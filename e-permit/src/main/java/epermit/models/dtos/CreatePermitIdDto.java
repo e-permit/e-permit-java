@@ -9,5 +9,5 @@ public class CreatePermitIdDto {
     private String issuedFor;
     private PermitType permitType;
     private int permitYear;
-    private int serialNumber;
+    private Long serialNumber;
 }

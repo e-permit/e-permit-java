@@ -26,9 +26,7 @@ import epermit.models.inputs.CreateQuotaInput;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.LedgerPermitRepository;
 import epermit.repositories.LedgerQuotaRepository;
-import epermit.repositories.PrivateKeyRepository;
 import epermit.services.AuthorityService;
-import epermit.services.PrivateKeyService;
 
 @Testcontainers
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -53,31 +51,20 @@ public class AuthorityServiceIT {
             PermitPostgresContainer.getInstance();
 
 
-    @BeforeAll
-    @Transactional
-    static void up(@Autowired PrivateKeyService privateKeyService, @Autowired PrivateKeyRepository keyRepository) {
-        if(keyRepository.count() == 0){
-            privateKeyService.seed();
-        }    
-    }
-
     @Test
     void getByCodeTest(){
         AuthorityConfig config = new AuthorityConfig();
         config.setCode("AY");
         config.setName("Ay");
-        config.setKeys(List.of());
         CreateAuthorityInput input = new CreateAuthorityInput();
         input.setApiUri("apiUri");
         authorityService.create(input, config);
         LedgerQuota quota = new LedgerQuota();
-        quota.setActive(true);
         quota.setPermitIssuedFor("AY");
         quota.setPermitIssuer("TR");
         quota.setPermitType(PermitType.BILITERAL);
         quota.setPermitYear(2022);
-        quota.setStartNumber(1);
-        quota.setEndNumber(100);
+        quota.setBalance(100L);
         ledgerQuotaRepository.save(quota);
         LedgerPermit permit = new LedgerPermit();
         permit.setCompanyId("companyId");
@@ -90,19 +77,17 @@ public class AuthorityServiceIT {
         permit.setPermitType(PermitType.BILITERAL);
         permit.setPermitYear(2022);
         permit.setPlateNumber("companyId");
-        permit.setQrCode("companyId");
         permit.setUsed(false);
-        permit.setSerialNumber(100);
+        permit.setSerialNumber(100L);
         ledgerPermitRepository.save(permit);
         AuthorityDto dto = authorityService.getByCode("AY");
-        Assertions.assertEquals(dto.getQuotas().get(0).getUsedCount(), 1L);
+        Assertions.assertEquals(dto.getQuotas().get(0).getSpent(), 1L);
     }
     @Test
     void createTest() {
         AuthorityConfig config = new AuthorityConfig();
         config.setCode("AZ");
         config.setName("Uz");
-        config.setKeys(List.of());
         CreateAuthorityInput input = new CreateAuthorityInput();
         input.setApiUri("apiUri");
         authorityService.create(input, config);
@@ -117,10 +102,9 @@ public class AuthorityServiceIT {
         authorityRepository.save(authority);
         CreateQuotaInput input = new CreateQuotaInput();
         input.setAuthorityCode("UZ");
-        input.setEndNumber(20);
+        input.setQuantity(20L);
         input.setPermitType(PermitType.BILITERAL);
         input.setPermitYear(2021);
-        input.setStartNumber(1);
         authorityService.createQuota(input);
  
         EpermitValidationException ex =

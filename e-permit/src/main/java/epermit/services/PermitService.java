@@ -19,9 +19,11 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import epermit.utils.PermitUtil;
+import epermit.utils.QuotaUtil;
 import epermit.commons.EpermitValidationException;
 import epermit.commons.ErrorCodes;
 import epermit.entities.LedgerPermit;
+import epermit.entities.LedgerQuota;
 import epermit.ledgerevents.LedgerEventUtil;
 import epermit.ledgerevents.permitcreated.PermitCreatedLedgerEvent;
 import epermit.ledgerevents.permitrevoked.PermitRevokedLedgerEvent;
@@ -38,6 +40,7 @@ import epermit.models.inputs.CreatePermitInput;
 import epermit.models.inputs.PermitUsedInput;
 import epermit.models.results.CreatePermitResult;
 import epermit.repositories.LedgerPermitRepository;
+import epermit.repositories.LedgerQuotaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -49,6 +52,7 @@ public class PermitService {
     private final PermitUtil permitUtil;
     private final EPermitProperties properties;
     private final LedgerEventUtil ledgerEventUtil;
+    private final LedgerQuotaRepository quotaRepository;
     private final ModelMapper modelMapper;
     private final LedgerPermitRepository permitRepository;
 
@@ -96,24 +100,21 @@ public class PermitService {
     public CreatePermitResult createPermit(CreatePermitInput input) {
         log.info("Permit create command {}", input);
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        
-        List<SerialNumber> serialNumbers = serialNumberRepository.findAll(filterSerialNumbers(input.getIssuedFor(),
-                input.getPermitYear(), input.getPermitType()), pageable).toList();
-        if (serialNumbers.isEmpty())
-            throw new EpermitValidationException(ErrorCodes.INSUFFICIENT_PERMIT_QUOTA);
-        
+        LedgerQuota quota = quotaRepository.findOne(QuotaUtil.filterQuotas(properties.getIssuerCode(),
+                input.getIssuedFor(), input.getPermitType(), input.getPermitYear()))
+                .orElseThrow(() -> new EpermitValidationException(ErrorCodes.INSUFFICIENT_PERMIT_QUOTA));
         CreatePermitIdDto idInput = new CreatePermitIdDto();
         idInput.setIssuedFor(input.getIssuedFor());
         idInput.setIssuer(properties.getIssuerCode());
         idInput.setPermitType(input.getPermitType());
         idInput.setPermitYear(input.getPermitYear());
-        idInput.setSerialNumber(serialNumber.getSerialNumber());
+        idInput.setSerialNumber(quota.getNextSerial());
         String permitId = permitUtil.getPermitId(idInput);
         String issuer = properties.getIssuerCode();
         String issuedAt = LocalDateTime.now(ZoneOffset.UTC).format(dtf);
         String expireAt = "31/01/" + Integer.toString(input.getPermitYear() + 1);
         String prevEventId = ledgerEventUtil.getPreviousEventId(input.getIssuedFor());
-       
+
         PermitCreatedLedgerEvent e = new PermitCreatedLedgerEvent(issuer, input.getIssuedFor(), prevEventId);
         e.setPermitId(permitId);
         e.setExpireAt(expireAt);
@@ -123,13 +124,13 @@ public class PermitService {
         e.setPermitType(input.getPermitType());
         e.setPermitYear(input.getPermitYear());
         e.setPlateNumber(input.getPlateNumber());
-        e.setSerialNumber();
+        e.setSerialNumber(quota.getNextSerial());
         e.setPermitIssuer(properties.getIssuerCode());
         e.setPermitIssuedFor(input.getIssuedFor());
         if (input != null && !input.getOtherClaims().isEmpty()) {
             e.setOtherClaims(input.getOtherClaims());
         }
-        
+
         ledgerEventUtil.persistAndPublishEvent(e);
         log.info("Permit create finished permit id is {}", permitId);
         return CreatePermitResult.success(permitId);
@@ -149,12 +150,6 @@ public class PermitService {
                 permit.getIssuedFor(), prevEventId);
         e.setPermitId(permit.getPermitId());
 
-        SerialNumber serialNumber = serialNumberRepository
-                .findOne(filterSerialNumber(permit.getIssuedFor(), permit.getPermitYear(),
-                        permit.getPermitType(), permit.getSerialNumber()))
-                .get();
-        serialNumber.setState(SerialNumberState.REVOKED);
-        serialNumberRepository.save(serialNumber);
         ledgerEventUtil.persistAndPublishEvent(e);
     }
 
@@ -231,36 +226,6 @@ public class PermitService {
             }
             // predicates.add(cb.asc(permit.get("serial_number")));
             return cb.and(predicates.toArray(new Predicate[predicates.size()]));
-        };
-        return spec;
-    }
-
-    static Specification<SerialNumber> filterSerialNumbers(String authority, int py,
-            PermitType pt) {
-        Specification<SerialNumber> spec = (sn, cq, cb) -> {
-            List<Predicate> predicates = new ArrayList<Predicate>();
-            predicates.add(cb.equal(sn.get("authorityCode"), authority));
-            predicates.add(cb.equal(sn.get("permitType"), pt));
-            predicates.add(cb.equal(sn.get("permitYear"), py));
-            Predicate p1 = cb.equal(sn.get("state"), SerialNumberState.CREATED);
-            Predicate p2 = cb.equal(sn.get("state"), SerialNumberState.REVOKED);
-            predicates.add(cb.or(p1, p2));
-            Predicate p = cb.and(predicates.toArray(new Predicate[predicates.size()]));
-            return p;
-        };
-        return spec;
-    }
-
-    static Specification<SerialNumber> filterSerialNumber(String authority, int py, PermitType pt,
-            int num) {
-        Specification<SerialNumber> spec = (sn, cq, cb) -> {
-            List<Predicate> predicates = new ArrayList<Predicate>();
-            predicates.add(cb.equal(sn.get("authorityCode"), authority));
-            predicates.add(cb.equal(sn.get("permitType"), pt));
-            predicates.add(cb.equal(sn.get("permitYear"), py));
-            predicates.add(cb.equal(sn.get("serialNumber"), num));
-            Predicate p = cb.and(predicates.toArray(new Predicate[predicates.size()]));
-            return p;
         };
         return spec;
     }

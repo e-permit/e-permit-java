@@ -5,9 +5,12 @@ import org.springframework.stereotype.Service;
 import epermit.commons.EpermitValidationException;
 import epermit.commons.ErrorCodes;
 import epermit.entities.LedgerPermit;
+import epermit.entities.LedgerQuota;
 import epermit.ledgerevents.LedgerEventBase;
 import epermit.ledgerevents.LedgerEventHandler;
 import epermit.repositories.LedgerPermitRepository;
+import epermit.repositories.LedgerQuotaRepository;
+import epermit.utils.QuotaUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class PermitRevokedLedgerEventHandler implements LedgerEventHandler {
     private final LedgerPermitRepository permitRepository;
+    private final LedgerQuotaRepository quotaRepository;
 
     @SneakyThrows
     public <T extends LedgerEventBase> void handle(T claims) {
@@ -30,7 +34,11 @@ public class PermitRevokedLedgerEventHandler implements LedgerEventHandler {
             throw new EpermitValidationException(ErrorCodes.PERMIT_NOTFOUND);
         if (!permit.getIssuedFor().equals(event.getEventConsumer()))
             throw new EpermitValidationException(ErrorCodes.PERMIT_NOTFOUND);
-
+        LedgerQuota quota = quotaRepository.findOne(QuotaUtil.filterQuotas(permit.getIssuer(),
+                permit.getIssuedFor(), permit.getPermitType(), permit.getPermitYear()))
+                .orElseThrow(() -> new EpermitValidationException(ErrorCodes.INSUFFICIENT_PERMIT_QUOTA));
+        quota.setBalance(quota.getBalance() + 1);
+        quota.setSpent(quota.getSpent() - 1);
         permitRepository.delete(permit);
     }
 }
