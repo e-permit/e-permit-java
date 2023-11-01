@@ -21,7 +21,7 @@
     </properties>
     <modules>
         <module>e-permit</module>
-        <module>e-permit-internal-api</module>
+        <module>e-permit-service</module>
     </modules>
     <dependencies>
         <dependency>

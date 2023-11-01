@@ -1,53 +1,28 @@
 version: '3.8'
 services:
-  tr-internal-api:
-    container_name: tr-internal-api
+  tr-service:
+    container_name: tr-service
     build: 
-      context: ../../../e-permit-internal-api
+      context: ../../../e-permit-service
     depends_on:
       - trdb
     env_file:
-      - ../envs/tr-shared.env
+      - ../envs/tr.env
     ports:
       - "3050:8080"
     volumes:
       - /var/log/epermit
-  tr-public-api:
-    container_name: tr-public-api
+
+  uz-service:
+    container_name: uz-service
     build: 
-      context: ../../../e-permit-public-api
-    depends_on:
-      - trdb
-    env_file:
-      - ../envs/tr-shared.env
-      - ../envs/tr-public.env
-    ports:
-      - "3051:8080"
-    volumes:
-      - /var/log/epermit
-  uz-internal-api:
-    container_name: uz-internal-api
-    build: 
-      context: ../../../e-permit-internal-api
+      context: ../../../e-permit-service
     depends_on:
       - uzdb
     env_file:
-      - ../envs/uz-shared.env
+      - ../envs/uz.env
     ports:
       - "3060:8080"
-    volumes:
-      - /var/log/epermit
-  uz-public-api:
-    container_name: uz-public-api
-    build: 
-      context: ../../../e-permit-public-api
-    depends_on:
-      - uzdb
-    env_file:
-      - ../envs/uz-shared.env
-      - ../envs/uz-public.env
-    ports:
-      - "3061:8080"
     volumes:
       - /var/log/epermit
   trdb:

@@ -7,10 +7,10 @@
         <version>${revision}</version>
 	</parent>
 	<groupId>epermit</groupId>
-	<artifactId>e-permit-internal-api</artifactId>
+	<artifactId>e-permit-service</artifactId>
     <version>${revision}</version>
-	<name>e-permit-internal-api</name>
-	<description>E-Permit Internal Api</description>
+	<name>e-permit-service</name>
+	<description>E-Permit Service</description>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

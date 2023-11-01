@@ -1,53 +1,27 @@
 version: '3.8'
 services:
-  tr-internal-api:
-    container_name: tr-internal-api
-    image: ghcr.io/e-permit/internalapi:latest
+  tr-service:
+    container_name: tr-service
+    image: ghcr.io/e-permit/service:latest
     pull_policy: always
     depends_on:
       - trdb
     env_file:
-      - ../envs/tr-shared.env
+      - ../envs/tr.env
     ports:
       - "3050:8080"
     volumes:
       - /var/log/epermit
-  tr-public-api:
-    container_name: tr-public-api
-    image: ghcr.io/e-permit/publicapi:latest
-    pull_policy: always
-    depends_on:
-      - trdb
-    env_file:
-      - ../envs/tr-shared.env
-      - ../envs/tr-public.env
-    ports:
-      - "3051:8080"
-    volumes:
-      - /var/log/epermit
-  uz-internal-api:
-    container_name: uz-internal-api
-    image: ghcr.io/e-permit/internalapi:latest
+  uz-service:
+    container_name: uz-service
+    image: ghcr.io/e-permit/service:latest
     pull_policy: always
     depends_on:
       - uzdb
     env_file:
-      - ../envs/uz-shared.env
+      - ../envs/uz.env
     ports:
       - "3060:8080"
-    volumes:
-      - /var/log/epermit
-  uz-public-api:
-    container_name: uz-public-api
-    image: ghcr.io/e-permit/publicapi:latest
-    pull_policy: always
-    depends_on:
-      - uzdb
-    env_file:
-      - ../envs/uz-shared.env
-      - ../envs/uz-public.env
-    ports:
-      - "3061:8080"
     volumes:
       - /var/log/epermit
   trdb:
