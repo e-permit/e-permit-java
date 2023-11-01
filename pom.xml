@@ -22,7 +22,6 @@
     <modules>
         <module>e-permit</module>
         <module>e-permit-internal-api</module>
-        <module>e-permit-public-api</module>
     </modules>
     <dependencies>
         <dependency>

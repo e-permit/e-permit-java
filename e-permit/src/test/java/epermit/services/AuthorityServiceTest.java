@@ -14,7 +14,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
-import epermit.commons.GsonUtil;
 import epermit.entities.Authority;
 import epermit.ledgerevents.LedgerEventType;
 import epermit.ledgerevents.LedgerEventUtil;

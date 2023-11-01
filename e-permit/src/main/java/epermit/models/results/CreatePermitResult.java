@@ -7,8 +7,6 @@ public class CreatePermitResult {
     private boolean ok;
 
     private String permitId;
-
-    private String qrCode;
     
     public static CreatePermitResult success(String permitId){
         CreatePermitResult r = new CreatePermitResult();

@@ -11,6 +11,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface CreatedEventRepository
         extends JpaRepository<CreatedEvent, UUID> {
       Optional<CreatedEvent> findByEventId(String eventId);
-      List<CreatedEvent> findAllBySendedFalseOrderByCreatedAtAsc();
+      List<CreatedEvent> findAllBySentFalseOrderByCreatedAtAsc();
 }
 

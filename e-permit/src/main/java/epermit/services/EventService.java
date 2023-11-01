@@ -35,7 +35,7 @@ public class EventService {
     @SneakyThrows
     public List<LedgerEventCreated> getUnSendedEvents() {
         List<LedgerEventCreated> list = new ArrayList<>();
-        List<CreatedEvent> events = createdEventRepository.findAllBySendedFalseOrderByCreatedAtAsc();
+        List<CreatedEvent> events = createdEventRepository.findAllBySentFalseOrderByCreatedAtAsc();
         for (CreatedEvent createdEvent : events) {
             list.add(ledgerEventUtil.createAppEvent(createdEvent));
         }

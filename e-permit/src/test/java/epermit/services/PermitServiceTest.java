@@ -124,7 +124,6 @@ public class PermitServiceTest {
         when(permitUtil.getPermitId(any())).thenReturn("TR-UZ-2021-1-1");
         CreatePermitResult result = permitService.createPermit(input);
         assertEquals("TR-UZ-2021-1-1", result.getPermitId());
-        assertEquals("QR", result.getQrCode());
         verify(ledgerEventUtil, times(1)).persistAndPublishEvent(createdCaptor.capture());
         PermitCreatedLedgerEvent event = createdCaptor.getValue();
         assertEquals("TR", event.getEventProducer());
@@ -171,8 +170,6 @@ public class PermitServiceTest {
         permit.setPermitId("TR-UZ-2021-1-1");
         permit.setIssuer("TR");
         permit.setIssuedFor("UZ");
-        when(quotaRepository.findOne(ArgumentMatchers.<Specification<LedgerQuota>>any()))
-                .thenReturn(Optional.of(LedgerQuota.builder().balance(5L).build()));
         when(permitRepository.findOneByPermitId("TR-UZ-2021-1-1")).thenReturn(Optional.of(permit));
         permitService.revokePermit("TR-UZ-2021-1-1");
         verify(ledgerEventUtil, times(1)).persistAndPublishEvent(revokedCaptor.capture());

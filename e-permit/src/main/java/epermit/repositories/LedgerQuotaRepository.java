@@ -14,8 +14,8 @@ import org.springframework.data.repository.query.Param;
 @Repository
 public interface LedgerQuotaRepository
                 extends JpaRepository<LedgerQuota, UUID>, JpaSpecificationExecutor<LedgerQuota> {
-        @Query("SELECT q FROM LedgerQuota q WHERE q.issuer = :issuer and " +
-                        "q.issued_for = :issued_for and q.permit_type=:permit_type and q.permit_year=:permit_year")
-        Optional<LedgerQuota> getQuota(@Param("issuer") String iss, @Param("issued_for") String issFor,
-                        @Param("permit_type") PermitType typ, @Param("permit_year") Integer year);
+        @Query("SELECT q FROM LedgerQuota q WHERE q.permitIssuer = :issuer and " +
+                        "q.permitIssuedFor = :issuedFor and q.permitType=:permitType and q.permitYear=:permitYear")
+        Optional<LedgerQuota> getQuota(@Param("issuer") String iss, @Param("issuedFor") String issFor,
+                        @Param("permitType") PermitType typ, @Param("permitYear") Integer year);
 }
