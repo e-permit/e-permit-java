@@ -108,8 +108,7 @@ public class PermitCreatedLedgerEventHandlerTest {
         event.setPermitId("UZ-TR-2021-1-1");
         when(permitUtil.getPermitId(any())).thenReturn("UZ-TR-2021-1-1");
         when(permitRepository.existsByPermitId(event.getPermitId())).thenReturn(false);
-        when(quotaRepository.findOne(ArgumentMatchers.<Specification<LedgerQuota>>any()))
-                .thenReturn(Optional.of(LedgerQuota.builder().balance(5L).build()));
+        
         EpermitValidationException ex = Assertions.assertThrows(EpermitValidationException.class, () -> {
             handler.handle(event);
         });
