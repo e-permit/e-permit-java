@@ -9,4 +9,10 @@ public class CreateAuthorityInput {
     @NotBlank
     @URL
     private String apiUri;
+
+    @NotBlank
+    private String code;
+
+    @NotBlank
+    private String name;
 }

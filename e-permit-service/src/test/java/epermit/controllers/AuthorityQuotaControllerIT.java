@@ -11,6 +11,8 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -20,17 +22,15 @@ import epermit.AppEventListener;
 import epermit.PermitPostgresContainer;
 import epermit.entities.Authority;
 import epermit.entities.LedgerQuota;
-import epermit.entities.PrivateKey;
 import epermit.models.enums.PermitType;
 import epermit.models.inputs.CreateQuotaInput;
 import epermit.repositories.AuthorityRepository;
-import epermit.repositories.PrivateKeyRepository;
-import epermit.utils.PrivateKeyUtil;
 
 
 @Testcontainers
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
+@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 public class AuthorityQuotaControllerIT {
 
     @LocalServerPort
@@ -42,12 +42,6 @@ public class AuthorityQuotaControllerIT {
     @Autowired
     AuthorityRepository authorityRepository;
 
-    @Autowired
-    PrivateKeyRepository keyRepository;
-
-    @Autowired
-    PrivateKeyUtil keyUtil;
-
     @MockBean
     AppEventListener appEventListener;
 
@@ -58,18 +52,10 @@ public class AuthorityQuotaControllerIT {
         authority.setCode("UZ");
         authority.setName("name");
         LedgerQuota quota = new LedgerQuota();
-        quota.setEndNumber(30);
-        quota.setStartNumber(1);
+        quota.setBalance(30L);
         quota.setPermitType(PermitType.BILITERAL);
         quota.setPermitYear(2021);
         authorityRepository.save(authority);
-        epermit.models.dtos.PrivateKey key = keyUtil.create("1");
-        PrivateKey keyEntity = new PrivateKey();
-        keyEntity.setKeyId(key.getKeyId());
-        keyEntity.setPrivateJwk(key.getPrivateJwk());
-        keyEntity.setSalt(key.getSalt());
-        keyEntity.setEnabled(true);
-        keyRepository.save(keyEntity);
     }
 
     @BeforeEach
@@ -94,10 +80,9 @@ public class AuthorityQuotaControllerIT {
     void createQuotaTest() {
         CreateQuotaInput input = new CreateQuotaInput();
         input.setAuthorityCode("UZ");
-        input.setEndNumber(100);
+        input.setQuantity(100L);
         input.setPermitType(PermitType.BILITERAL);
         input.setPermitYear(2021);
-        input.setStartNumber(1);
         ResponseEntity<Void> r =
                 getTestRestTemplate().postForEntity(getBaseUrl(), input, Void.class);
         assertEquals(HttpStatus.OK, r.getStatusCode());

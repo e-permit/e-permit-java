@@ -60,7 +60,7 @@ public class PermitControllerTest {
     @Test
     void createTest() {
         CreatePermitInput input = new CreatePermitInput();
-        when(permitService.createPermit(input)).thenReturn(CreatePermitResult.success("ABC", "ABC"));
+        when(permitService.createPermit(input)).thenReturn(CreatePermitResult.success("ABC"));
         CreatePermitResult r = controller.createPermit(input);
         assertEquals("ABC", r.getPermitId());
         verify(permitService, times(1)).createPermit(input);

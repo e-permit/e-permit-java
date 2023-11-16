@@ -59,7 +59,7 @@ public class LedgerEventUtil {
 
     public LedgerEventCreated createAppEvent(CreatedEvent createdEvent) {
         LedgerEvent ledgerEvent = ledgerEventRepository.findOneByEventId(createdEvent.getEventId()).get();
-        Authority authority = authorityRepository.findOneByCode(ledgerEvent.getConsumer());
+        Authority authority = authorityRepository.findOneByCode(ledgerEvent.getConsumer()).get();
         LedgerEventCreated appEvent = new LedgerEventCreated();
         appEvent.setId(UUID.randomUUID());
         appEvent.setEventId(createdEvent.getEventId());

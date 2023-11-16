@@ -2,7 +2,6 @@ package epermit.controllers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -13,10 +12,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
-import epermit.models.dtos.AuthorityConfig;
 import epermit.models.dtos.AuthorityDto;
 import epermit.models.inputs.CreateAuthorityInput;
 import epermit.services.AuthorityService;
@@ -26,9 +21,6 @@ import epermit.services.AuthorityService;
 public class AuthorityControllerTest {
     @Mock
     AuthorityService authorityService;
-
-    @Mock
-    RestTemplate restTemplate;
 
     @InjectMocks
     AuthorityController controller;
@@ -56,12 +48,10 @@ public class AuthorityControllerTest {
     void createTest() {
         CreateAuthorityInput input = new CreateAuthorityInput();
         input.setApiUri("apiUri");
-        AuthorityConfig config = new AuthorityConfig();
-        config.setCode("UZ");
-        config.setName("name");
-        when(restTemplate.getForEntity("apiUri/epermit-configuration", AuthorityConfig.class))
-                .thenReturn(new ResponseEntity<>(config, HttpStatus.OK));
+        input.setCode("UZ");
+        input.setName("name");
+
         controller.create(input);
-        verify(authorityService, times(1)).create(eq(input), any());
+        verify(authorityService, times(1)).create(eq(input));
     }
 }

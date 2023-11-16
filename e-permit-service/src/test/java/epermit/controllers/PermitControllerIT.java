@@ -23,7 +23,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -38,27 +39,22 @@ import epermit.commons.GsonUtil;
 import epermit.entities.Authority;
 import epermit.entities.LedgerPermit;
 import epermit.entities.LedgerQuota;
-import epermit.entities.PrivateKey;
-import epermit.entities.SerialNumber;
 import epermit.models.dtos.PermitDto;
 import epermit.models.dtos.PermitListItem;
 import epermit.models.enums.PermitActivityType;
 import epermit.models.enums.PermitType;
-import epermit.models.enums.SerialNumberState;
 import epermit.models.inputs.CreatePermitInput;
 import epermit.models.inputs.PermitUsedInput;
 import epermit.models.results.CreatePermitResult;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.LedgerPermitRepository;
 import epermit.repositories.LedgerQuotaRepository;
-import epermit.repositories.PrivateKeyRepository;
-import epermit.repositories.SerialNumberRepository;
-import epermit.utils.PrivateKeyUtil;
 
 
 @Testcontainers
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
+@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 // @TestPropertySource(properties = {"EPERMIT_VERIFIER_PASSWORD = 123"})
 public class PermitControllerIT {
 
@@ -72,19 +68,10 @@ public class PermitControllerIT {
     AuthorityRepository authorityRepository;
 
     @Autowired
-    PrivateKeyRepository keyRepository;
-
-    @Autowired
     LedgerPermitRepository permitRepository;
 
     @Autowired
     LedgerQuotaRepository ledgerQuotaRepository;
-
-    @Autowired
-    PrivateKeyUtil keyUtil;
-
-    @Autowired
-    SerialNumberRepository serialNumberRepository;
 
     @MockBean
     AppEventListener appEventListener;
@@ -101,32 +88,12 @@ public class PermitControllerIT {
         authority.setName("Uzbekistan");
         authorityRepository.save(authority);
         LedgerQuota quota = new LedgerQuota();
-        quota.setActive(true);
-        quota.setEndNumber(30);
-        quota.setStartNumber(1);
+        quota.setBalance(30L);
         quota.setPermitType(PermitType.BILITERAL);
         quota.setPermitYear(2021);
         quota.setPermitIssuer("TR");
         quota.setPermitIssuedFor("UZ");
         ledgerQuotaRepository.save(quota);
-        List<SerialNumber> serialNumbers = new ArrayList<>();
-        for (int i = 1; i <= 30; i++) {
-            SerialNumber serialNumber = new SerialNumber();
-            serialNumber.setSerialNumber(i);
-            serialNumber.setAuthorityCode("UZ");
-            serialNumber.setPermitType(PermitType.BILITERAL);
-            serialNumber.setPermitYear(2021);
-            serialNumber.setState(SerialNumberState.CREATED);
-            serialNumbers.add(serialNumber);
-        }
-        serialNumberRepository.saveAll(serialNumbers);
-        epermit.models.dtos.PrivateKey key = keyUtil.create("1");
-        PrivateKey keyEntity = new PrivateKey();
-        keyEntity.setKeyId(key.getKeyId());
-        keyEntity.setPrivateJwk(key.getPrivateJwk());
-        keyEntity.setSalt(key.getSalt());
-        keyEntity.setEnabled(true);
-        keyRepository.save(keyEntity);
     }
 
     @Container
@@ -135,10 +102,6 @@ public class PermitControllerIT {
 
     private TestRestTemplate getTestRestTemplate() {
         return testRestTemplate.withBasicAuth("admin", "123456");
-    }
-
-    private TestRestTemplate getTestRestTemplateForVerifier() {
-        return testRestTemplate.withBasicAuth("verifier", "123");
     }
 
     private String getBaseUrl() {
@@ -159,8 +122,7 @@ public class PermitControllerIT {
             permit.setExpireAt("31/01/2022");
             permit.setIssuedAt("03/03/2021");
             permit.setPermitId("ABC");
-            permit.setQrCode("qrCode");
-            permit.setSerialNumber(1);
+            permit.setSerialNumber(1L);
             permitRepository.save(permit);
         }
         HttpHeaders headers = new HttpHeaders();
@@ -196,8 +158,7 @@ public class PermitControllerIT {
         permit.setExpireAt("31/01/2022");
         permit.setIssuedAt("03/03/2021");
         permit.setPermitId("ABC");
-        permit.setQrCode("qrCode");
-        permit.setSerialNumber(1);
+        permit.setSerialNumber(1L);
         permitRepository.save(permit);
         PermitDto dto = getTestRestTemplate().getForObject(getBaseUrl() + "/" + permit.getId(),
                 PermitDto.class);
@@ -232,8 +193,7 @@ public class PermitControllerIT {
         permit.setExpireAt("31/01/2022");
         permit.setIssuedAt("03/03/2021");
         permit.setPermitId("ABC");
-        permit.setQrCode("qrCode");
-        permit.setSerialNumber(1);
+        permit.setSerialNumber(1L);
         permitRepository.save(permit);
         when(restTemplate.postForEntity(anyString(), any(HttpEntity.class), any()))
                 .thenReturn(new ResponseEntity<>(HttpStatus.OK));
@@ -241,15 +201,6 @@ public class PermitControllerIT {
         ResponseEntity<Void> r = getTestRestTemplate().exchange(
                 getBaseUrl() + "/" + permit.getPermitId(), HttpMethod.DELETE, entity, Void.class);
         assertEquals(HttpStatus.OK, r.getStatusCode());
-    }
-
-    @Test
-    void revokeUnauthorizedTest() {
-        HttpEntity<String> entity = new HttpEntity<String>("{}");
-        ResponseEntity<?> r = getTestRestTemplateForVerifier().exchange(getBaseUrl() + "/" + "12",
-                HttpMethod.DELETE, entity, String.class);
-        System.out.println(r.getBody());
-        assertEquals(HttpStatus.FORBIDDEN, r.getStatusCode());
     }
 
     @Test
@@ -270,13 +221,12 @@ public class PermitControllerIT {
         permit.setExpireAt("31/01/2022");
         permit.setIssuedAt("03/03/2021");
         permit.setPermitId("ABC");
-        permit.setQrCode("qrCode");
-        permit.setSerialNumber(1);
+        permit.setSerialNumber(1L);
         permitRepository.save(permit);
         PermitUsedInput input = new PermitUsedInput();
         input.setActivityType(PermitActivityType.ENTRANCE);
         input.setActivityTimestamp(0L);
-        ResponseEntity<?> r = getTestRestTemplateForVerifier().postForEntity(
+        ResponseEntity<?> r = getTestRestTemplate().postForEntity(
                 getBaseUrl() + "/" + permit.getPermitId() + "/activities", input, String.class);
         assertEquals(HttpStatus.OK, r.getStatusCode());
     }

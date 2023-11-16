@@ -5,6 +5,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import java.util.List;
+import java.util.Optional;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -19,7 +21,6 @@ import epermit.ledgerevents.LedgerEventType;
 import epermit.ledgerevents.LedgerEventUtil;
 import epermit.ledgerevents.quotacreated.QuotaCreatedLedgerEvent;
 import epermit.models.EPermitProperties;
-import epermit.models.dtos.AuthorityConfig;
 import epermit.models.dtos.AuthorityDto;
 import epermit.models.enums.PermitType;
 import epermit.models.inputs.CreateAuthorityInput;
@@ -66,7 +67,7 @@ public class AuthorityServiceTest {
     void getByCodeTest() {
         Authority authority = new Authority();
         authority.setCode("UZ");
-        when(authorityRepository.findOneByCode("UZ")).thenReturn(authority);
+        when(authorityRepository.findOneByCode("UZ")).thenReturn(Optional.of(authority));
         AuthorityDto dto = authorityService.getByCode("UZ");
         assertEquals("UZ", dto.getCode());
     }
@@ -75,11 +76,10 @@ public class AuthorityServiceTest {
     void createTest() {
         CreateAuthorityInput input = new CreateAuthorityInput();
         input.setApiUri("apiUri");
-        AuthorityConfig config = new AuthorityConfig();
-        config.setCode("UZ");
-        config.setName("Uzbekistan");
-        when(authorityRepository.findOneByCode("UZ")).thenReturn(null);
-        authorityService.create(input, config);
+        input.setCode("UZ");
+        input.setName("Uzbekistan");
+        when(authorityRepository.findOneByCode("UZ")).thenReturn(Optional.empty());
+        authorityService.create(input);
         Authority authority = new Authority();
         authority.setApiUri("apiUri");
         authority.setCode("UZ");
@@ -99,7 +99,7 @@ public class AuthorityServiceTest {
         input.setPermitYear(2021);
         when(properties.getIssuerCode()).thenReturn("UZ");
         when(ledgerEventUtil.getPreviousEventId("TR")).thenReturn("123");
-        when(authorityRepository.findOneByCode("TR")).thenReturn(new Authority());
+        when(authorityRepository.findOneByCode("TR")).thenReturn(Optional.of(new Authority()));
         authorityService.createQuota(input);
         verify(ledgerEventUtil, times(1)).persistAndPublishEvent(captor.capture());
         QuotaCreatedLedgerEvent event = captor.getValue();

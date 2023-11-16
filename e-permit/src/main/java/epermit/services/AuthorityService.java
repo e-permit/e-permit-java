@@ -4,8 +4,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import epermit.commons.EpermitValidationException;
 import epermit.commons.ErrorCodes;
@@ -13,7 +15,6 @@ import epermit.entities.Authority;
 import epermit.ledgerevents.LedgerEventUtil;
 import epermit.ledgerevents.quotacreated.QuotaCreatedLedgerEvent;
 import epermit.models.EPermitProperties;
-import epermit.models.dtos.AuthorityConfig;
 import epermit.models.dtos.AuthorityDto;
 import epermit.models.dtos.QuotaDto;
 import epermit.models.inputs.CreateAuthorityInput;
@@ -40,7 +41,8 @@ public class AuthorityService {
     }
 
     public AuthorityDto getByCode(String code) {
-        Authority authority = authorityRepository.findOneByCode(code);
+        Authority authority = authorityRepository.findOneByCode(code)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         AuthorityDto dto = modelMapper.map(authority, AuthorityDto.class);
         List<epermit.entities.LedgerQuota> quotaEntities = ledgerQuotaRepository.findAll();
 
@@ -52,16 +54,16 @@ public class AuthorityService {
     }
 
     @Transactional
-    public void create(CreateAuthorityInput input, AuthorityConfig config) {
+    public void create(CreateAuthorityInput input) {
         log.info("Authority create command: {}", input);
-        Authority exist = authorityRepository.findOneByCode(config.getCode());
-        if (exist != null)
+        authorityRepository.findOneByCode(input.getCode()).ifPresent(s -> {
             throw new EpermitValidationException(ErrorCodes.AUTHORITY_ALREADY_EXISTS);
+        });
 
         Authority authority = new Authority();
         authority.setApiUri(input.getApiUri());
-        authority.setCode(config.getCode());
-        authority.setName(config.getName());
+        authority.setCode(input.getCode());
+        authority.setName(input.getName());
 
         log.info("Authority created: {}", authority);
         authorityRepository.save(authority);
@@ -70,9 +72,8 @@ public class AuthorityService {
     @Transactional
     public void createQuota(CreateQuotaInput input) {
         log.info("Quota create command: {}", input);
-        Authority authority = authorityRepository.findOneByCode(input.getAuthorityCode());
-        if (authority == null)
-            throw new EpermitValidationException(ErrorCodes.AUTHORITY_ALREADY_EXISTS);
+        authorityRepository.findOneByCode(input.getAuthorityCode())
+                .orElseThrow(() -> new EpermitValidationException(ErrorCodes.AUTHORITY_NOT_FOUND));
         String issuer = properties.getIssuerCode();
         String prevEventId = ledgerEventUtil.getPreviousEventId(input.getAuthorityCode());
         QuotaCreatedLedgerEvent event = new QuotaCreatedLedgerEvent(issuer, input.getAuthorityCode(), prevEventId);

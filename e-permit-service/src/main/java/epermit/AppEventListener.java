@@ -25,14 +25,14 @@ public class AppEventListener {
     @Async
     @TransactionalEventListener(fallbackExecution = true)
     public void onAppEvent(LedgerEventCreated event) {
-        log.info("onAppEvent is fired. {}", event);
+        log.info("OnAppEvent is fired. {}", event);
         ResponseEntity<?> result = ledgerEventUtil.sendEvent(event);
         if (result.getStatusCode() == HttpStatus.OK) {
-            eventService.handleSendedEvent(event.getEventId());
+            eventService.handleSentEvent(event.getEventId());
         } else if (result.getStatusCode() == HttpStatus.UNPROCESSABLE_ENTITY) {
             ApiErrorResponse error = (ApiErrorResponse) result.getBody();
             if (error != null && error.getDetails().get("errorCode").equals("EVENT_ALREADY_EXISTS")) {
-                eventService.handleSendedEvent(event.getEventId());
+                eventService.handleSentEvent(event.getEventId());
             } else {
                 log.error(GsonUtil.getGson().toJson(result.getBody()));
             }

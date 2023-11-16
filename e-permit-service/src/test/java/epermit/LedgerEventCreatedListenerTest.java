@@ -23,7 +23,6 @@ public class LedgerEventCreatedListenerTest {
     void test(){
         LedgerEventCreated event = new LedgerEventCreated();
         event.setUri("uri");
-        event.setProof("jws");
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         //HttpEntity<String> request = new HttpEntity<String>(event.getJws(), headers);
