@@ -21,7 +21,8 @@
     </properties>
     <modules>
         <module>e-permit</module>
-        <module>e-permit-service</module>
+        <module>e-permit-internal-api</module>
+        <module>e-permit-public-api</module>
     </modules>
     <dependencies>
         <dependency>
@@ -132,14 +133,5 @@
             <version>8.0.0</version>
             <type>pom</type>
         </dependency>
-
-
     </dependencies>
-    <repositories>
-        <repository>
-            <id>bintray</id>
-            <name>bintray</name>
-            <url>https://jcenter.bintray.com</url>
-        </repository>
-    </repositories>
 </project>
