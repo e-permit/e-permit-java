@@ -10,7 +10,9 @@ create_tr_authority()
 {
   cat <<EOF
   {
-    "api_uri": "http://tr-public-api:8080"
+    "code": "TR",
+    "name": "Türkiye",
+    "client_id": "TR/GOV/UBAK/HAULAGE"
   }
 EOF
 }
@@ -19,7 +21,9 @@ create_uz_authority()
 {
   cat <<EOF
   {
-    "api_uri": "http://uz-public-api:8080"
+    "code": "UZ",
+    "name": "Uzbekistan",
+    "client_id": "UZ/GOV/MT/HAULAGE"
   }
 EOF
 }
@@ -29,10 +33,9 @@ create_quota()
   cat <<EOF
   {
     "authority_code": "TR",
-    "permit_type": "BILITERAL",
-    "permit_year": 2022,
-    "start_number": 1,
-    "end_number": 250
+    "permit_type": "BILATERAL",
+    "permit_year": 2023,
+    "quantity": 100
   }
 EOF
 }

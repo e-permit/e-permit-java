@@ -61,7 +61,7 @@ public class AuthorityService {
         });
 
         Authority authority = new Authority();
-        authority.setApiUri(input.getApiUri());
+        authority.setClientId(input.getClient());
         authority.setCode(input.getCode());
         authority.setName(input.getName());
 

@@ -75,17 +75,15 @@ public class AuthorityServiceTest {
     @Test
     void createTest() {
         CreateAuthorityInput input = new CreateAuthorityInput();
-        input.setApiUri("apiUri");
+        input.setClient("apiUri");
         input.setCode("UZ");
         input.setName("Uzbekistan");
         when(authorityRepository.findOneByCode("UZ")).thenReturn(Optional.empty());
         authorityService.create(input);
         Authority authority = new Authority();
-        authority.setApiUri("apiUri");
+        authority.setClientId("apiUri");
         authority.setCode("UZ");
         authority.setName("Uzbekistan");
-        authority.setApiUri("apiUri");
-  
        
         verify(authorityRepository, times(1)).save(authority);
     }
@@ -95,7 +93,7 @@ public class AuthorityServiceTest {
         CreateQuotaInput input = new CreateQuotaInput();
         input.setAuthorityCode("TR");
         input.setQuantity(20L);
-        input.setPermitType(PermitType.BILITERAL);
+        input.setPermitType(PermitType.BILATERAL);
         input.setPermitYear(2021);
         when(properties.getIssuerCode()).thenReturn("UZ");
         when(ledgerEventUtil.getPreviousEventId("TR")).thenReturn("123");
@@ -109,7 +107,7 @@ public class AuthorityServiceTest {
         assertEquals(LedgerEventType.QUOTA_CREATED, event.getEventType());
         assertEquals("TR", event.getPermitIssuer());
         assertEquals("UZ", event.getPermitIssuedFor());
-        assertEquals(PermitType.BILITERAL, event.getPermitType());
+        assertEquals(PermitType.BILATERAL, event.getPermitType());
         assertEquals(2021, event.getPermitYear());
         assertEquals("123", event.getPreviousEventId());
     }

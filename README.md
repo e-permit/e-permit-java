@@ -140,7 +140,7 @@ After handshaking you can define a quota for that country(suppose TR) with:
 ```json
 {
     "authority_code": "TR",
-    "permit_type": "BILITERAL",
+    "permit_type": "BILATERAL",
     "permit_year": 2021,
     "start_number": 1,
     "end_number": 250
@@ -157,7 +157,7 @@ If other country gives you some quota with same way, you can also define permit 
 {
     "issued_for": "TR",
     "permit_year": 2021,
-    "permit_type": "BILITERAL",
+    "permit_type": "BILATERAL",
     "company_name": "TECT",
     "company_id": "123",
     "plate_number": "TECT"
@@ -216,7 +216,7 @@ create_tr_quota()
   cat <<EOF
   {
     "authority_code": "TR",
-    "permit_type": "BILITERAL",
+    "permit_type": "BILATERAL",
     "permit_year": 2021,
     "start_number": 1,
     "end_number": 250
@@ -229,7 +229,7 @@ create_uz_quota()
   cat <<EOF
   {
     "authority_code": "UZ",
-    "permit_type": "BILITERAL",
+    "permit_type": "BILATERAL",
     "permit_year": 2021,
     "start_number": 1,
     "end_number": 100
@@ -243,7 +243,7 @@ create_tr_permit()
   {
     "issued_for": "UZ",
     "permit_year": 2021,
-    "permit_type": "BILITERAL",
+    "permit_type": "BILATERAL",
     "company_name": "TECT",
     "company_id": "123",
     "plate_number": "TECT"

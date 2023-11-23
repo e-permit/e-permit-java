@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.SneakyThrows;
 
 public enum PermitType {
-    BILITERAL("BILATERAL"), TRANSIT("TRANSIT"), THIRDCOUNTRY("THIRDCOUNTRY"), BILITERAL_FEE(
+    BILATERAL("BILATERAL"), TRANSIT("TRANSIT"), THIRDCOUNTRY("THIRDCOUNTRY"), BILATERAL_FEE(
             "BILATERAL_FEE"), TRANSIT_FEE("TRANSIT_FEE"), THIRDCOUNTRY_FEE("THIRDCOUNTRY_FEE");
 
     private final String permitType;

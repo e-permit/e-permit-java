@@ -38,7 +38,7 @@ public class IndexControllerIT {
     @Transactional
     void setUpAuthority() {
         Authority authority = new Authority();
-        authority.setApiUri("apiUri");
+        authority.setClientId("apiUri");
         authority.setCode("UZ");
         authority.setName("name");
         authorityRepository.save(authority);

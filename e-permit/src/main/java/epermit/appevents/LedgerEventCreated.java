@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 public class LedgerEventCreated {
     private UUID id;
-    private String uri;
+    private String url;
     private Map<String, Object> content;
     private String eventId;
 }

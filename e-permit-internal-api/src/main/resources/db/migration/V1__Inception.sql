@@ -1,6 +1,6 @@
 create table epermit_authorities (
     id uuid not null,
-    api_uri varchar(255) not null,
+    client_id varchar(255) not null,
     code varchar(255) not null,
     created_at timestamp not null,
     name varchar(255) not null,

@@ -10,6 +10,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 @Repository
 public interface AuthorityRepository extends JpaRepository<Authority, UUID> {
    Optional<Authority> findOneByCode(String code);
-   Optional<Authority> findOneByApiUri(String apiUri);
+   Optional<Authority> findOneByClientId(String clientId);
 }
 

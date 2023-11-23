@@ -52,7 +52,7 @@ public class AuthorityControllerIT {
     @Test
     void getAllTest() {
         Authority authority = new Authority();
-        authority.setApiUri("apiUri");
+        authority.setClientId("apiUri");
         authority.setCode("UZ");
         authority.setName("name");
         authorityRepository.save(authority);
@@ -67,7 +67,7 @@ public class AuthorityControllerIT {
     @Test
     void getByCodeTest() {
         Authority authority = new Authority();
-        authority.setApiUri("apiUri");
+        authority.setClientId("apiUri");
         authority.setCode("UZ");
         authority.setName("name");
         authorityRepository.save(authority);
@@ -83,7 +83,7 @@ public class AuthorityControllerIT {
     @Test
     void createTest() {
         CreateAuthorityInput input = new CreateAuthorityInput();
-        input.setApiUri("http://localhost");
+        input.setClient("http://localhost");
         input.setCode("UZ");
         input.setName("Uzbekistan");
         ResponseEntity<?> r = getTestRestTemplate().postForEntity(getBaseUrl(), input, String.class);

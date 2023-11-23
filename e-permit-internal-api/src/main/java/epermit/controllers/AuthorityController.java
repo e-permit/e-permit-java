@@ -38,8 +38,6 @@ public class AuthorityController {
     @PostMapping()
     public void create(@RequestBody @Valid CreateAuthorityInput input) {
         log.info("Authority create request. {}", input);
-
         service.create(input);
-
     }
 }

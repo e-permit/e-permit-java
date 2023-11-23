@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -63,7 +64,12 @@ public class LedgerEventUtil {
         LedgerEventCreated appEvent = new LedgerEventCreated();
         appEvent.setId(UUID.randomUUID());
         appEvent.setEventId(createdEvent.getEventId());
-        appEvent.setUri(authority.getApiUri() + "/events/"
+
+        String url = properties.getSecurityServer();
+        if (properties.isDemo()) {
+            url += "/r1/" + authority.getClientId() + "/PublicApi";
+        }
+        appEvent.setUrl(url + "/events/"
                 + ledgerEvent.getEventType().name().toLowerCase().replace("_", "-"));
         appEvent.setContent(GsonUtil.toMap(ledgerEvent.getEventContent()));
         return appEvent;
@@ -112,17 +118,10 @@ public class LedgerEventUtil {
     public ResponseEntity<?> sendEvent(LedgerEventCreated event) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("X-Road-Client", properties.getIssuerClientId());
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(event.getContent(), headers);
-        ResponseEntity<?> result = restTemplate.postForEntity(event.getUri(), request, Object.class);
+        ResponseEntity<?> result = restTemplate.postForEntity(event.getUrl(), request,
+                Object.class);
         return result;
-        /*if (result.getStatusCode() != HttpStatus.OK) {
-            ApiErrorResponse error = (ApiErrorResponse)result.getBody();
-            if(error != null && error.getDetails().get("errorCode").equals("EVENT_ALREADY_EXISTS")){
-                
-            }
-            log.error(GsonUtil.getGson().toJson(result.getBody()));
-            return false;
-        }
-        return true;*/
     }
 }

@@ -8,7 +8,7 @@ import org.hibernate.validator.constraints.URL;
 public class CreateAuthorityInput {
     @NotBlank
     @URL
-    private String apiUri;
+    private String client;
 
     @NotBlank
     private String code;

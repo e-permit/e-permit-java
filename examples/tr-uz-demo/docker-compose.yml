@@ -1,6 +1,7 @@
 version: '3.8'
 services:
   tr-internal-api:
+    container_name: tr-internal-api
     build:
       context: ../../e-permit-internal-api
     depends_on:
@@ -8,6 +9,7 @@ services:
     environment:
       - FLYWAY_ENABLED=true
       - FLYWAY_SCHEMAS=public
+      - EPERMIT_DEMO=true
     env_file:
       - tr.env
     ports:
@@ -15,6 +17,7 @@ services:
     volumes:
       - /var/log/epermit
   tr-public-api:
+    container_name: tr-public-api
     build:
       context: ../../e-permit-public-api
     depends_on:
@@ -25,33 +28,24 @@ services:
       - "3051:8080"
     volumes:
       - /var/log/epermit
+  tr-central-server:
+    image: niis/xroad-central-server
+    ports:
+      - "3052:80"
+      - "3053:4000"
+      - "3054:4001"
+      - "3055:4002"
+      - "3056:8888"
+      - "3057:8889"
 
-  uz-internal-api:
-    build:
-      context: ../../e-permit-internal-api
-    depends_on:
-      - uzdb
+  tr-security-server:
+    image: niis/xroad-security-server
     environment:
-      - FLYWAY_ENABLED=true
-      - FLYWAY_SCHEMAS=public
-    env_file:
-      - uz.env
+      - XROAD_TOKEN_PIN="1234"
     ports:
-      - "3060:8080"
-    volumes:
-      - /var/log/epermit
+      - "3058:4000"
+      - "3059:8080"
 
-  uz-public-api:
-    build:
-      context: ../../e-permit-public-api
-    depends_on:
-      - uzdb
-    env_file:
-      - uz.env
-    ports:
-      - "3060:8080"
-    volumes:
-      - /var/log/epermit
   trdb:
     image: 'postgres:13.1-alpine'
     container_name: trdb
@@ -60,13 +54,61 @@ services:
       - POSTGRES_PASSWORD=compose-postgres
       - POSTGRES_DB=devdb
     ports:
-      - "5434:5432"
+      - "5433:5432"
+  uz-internal-api:
+    container_name: uz-internal-api
+    build:
+      context: ../../e-permit-internal-api
+    depends_on:
+      - uzdb
+    environment:
+      - FLYWAY_ENABLED=true
+      - FLYWAY_SCHEMAS=public
+      - EPERMIT_DEMO=true
+    env_file:
+      - uz.env
+    ports:
+      - "3060:8080"
+    volumes:
+      - /var/log/epermit
+
+  uz-public-api:
+    container_name: uz-public-api
+    build:
+      context: ../../e-permit-public-api
+    depends_on:
+      - uzdb
+    env_file:
+      - uz.env
+    ports:
+      - "3061:8080"
+    volumes:
+      - /var/log/epermit
+
+  uz-central-server:
+    image: niis/xroad-central-server
+    ports:
+      - "3062:80"
+      - "3063:4000"
+      - "3064:4001"
+      - "3065:4002"
+      - "3066:8888"
+      - "3067:8889"
+      
+  uz-security-server:
+    image: niis/xroad-security-server
+    environment:
+      - XROAD_TOKEN_PIN="1234"
+    ports:
+      - "3068:4000"
+      - "3069:8080"
+
   uzdb:
-    image: 'postgres:13.1-alpine'
+    image: 'postgres:16.1-alpine'
     container_name: uzdb
     environment:
       - POSTGRES_USER=compose-postgres
       - POSTGRES_PASSWORD=compose-postgres
       - POSTGRES_DB=devdb
     ports:
-      - "5433:5432"
+      - "5434:5432"

@@ -11,16 +11,14 @@ import lombok.Setter;
 @Setter
 @ConfigurationProperties(prefix = "epermit")
 public class EPermitProperties {
-
-    private String keyPassword;
+    private boolean demo = false;
 
     private String issuerCode;
 
     private String issuerName;
 
-    private String issuerApiUri;
+    private String issuerClientId;
 
-    private String issuerPrivateKey;
+    private String securityServer;
 
-    private String qrcodeVersion;
 }

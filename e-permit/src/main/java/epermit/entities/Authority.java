@@ -30,8 +30,8 @@ public class Authority {
   @Column(name = "name", nullable = false)
   private String name;
 
-  @Column(name = "api_uri", nullable = false)
-  private String apiUri;
+  @Column(name = "client_id", nullable = false)
+  private String clientId;
 
   @CreationTimestamp
   @Column(name = "created_at", nullable = false)

@@ -48,12 +48,12 @@ public class AuthorityQuotaControllerIT {
     @Transactional
     void setUpAuthority() {
         Authority authority = new Authority();
-        authority.setApiUri("apiUri");
+        authority.setClientId("apiUri");
         authority.setCode("UZ");
         authority.setName("name");
         LedgerQuota quota = new LedgerQuota();
         quota.setBalance(30L);
-        quota.setPermitType(PermitType.BILITERAL);
+        quota.setPermitType(PermitType.BILATERAL);
         quota.setPermitYear(2021);
         authorityRepository.save(authority);
     }
@@ -81,7 +81,7 @@ public class AuthorityQuotaControllerIT {
         CreateQuotaInput input = new CreateQuotaInput();
         input.setAuthorityCode("UZ");
         input.setQuantity(100L);
-        input.setPermitType(PermitType.BILITERAL);
+        input.setPermitType(PermitType.BILATERAL);
         input.setPermitYear(2021);
         ResponseEntity<Void> r =
                 getTestRestTemplate().postForEntity(getBaseUrl(), input, Void.class);

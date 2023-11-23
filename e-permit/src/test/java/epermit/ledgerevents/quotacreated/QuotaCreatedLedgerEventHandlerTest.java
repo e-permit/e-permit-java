@@ -33,7 +33,7 @@ public class QuotaCreatedLedgerEventHandlerTest {
     void handleOkTest() {
         QuotaCreatedLedgerEvent event = new QuotaCreatedLedgerEvent("TR", "UZ", "0");
         event.setQuantity(4L);
-        event.setPermitType(PermitType.BILITERAL);
+        event.setPermitType(PermitType.BILATERAL);
         event.setPermitYear(2021);
         handler.handle(event);
         verify(quotaRepository, times(1)).save(captor.capture());
@@ -42,6 +42,6 @@ public class QuotaCreatedLedgerEventHandlerTest {
         assertEquals(1, quota.getNextSerial());
         assertEquals(0, quota.getSpent());
         assertEquals(2021, quota.getPermitYear());
-        assertEquals(PermitType.BILITERAL, quota.getPermitType());
+        assertEquals(PermitType.BILATERAL, quota.getPermitType());
     }
 }

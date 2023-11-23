@@ -47,12 +47,12 @@ public class AuthorityServiceIT {
         CreateAuthorityInput input = new CreateAuthorityInput();
         input.setCode("AY");
         input.setName("Ay");
-        input.setApiUri("apiUri");
+        input.setClient("apiUri");
         authorityService.create(input);
         LedgerQuota quota = new LedgerQuota();
         quota.setPermitIssuedFor("AY");
         quota.setPermitIssuer("TR");
-        quota.setPermitType(PermitType.BILITERAL);
+        quota.setPermitType(PermitType.BILATERAL);
         quota.setPermitYear(2022);
         quota.setBalance(100L);
         ledgerQuotaRepository.save(quota);
@@ -64,7 +64,7 @@ public class AuthorityServiceIT {
         permit.setIssuedFor("AY");
         permit.setIssuer("TR");
         permit.setPermitId("1");
-        permit.setPermitType(PermitType.BILITERAL);
+        permit.setPermitType(PermitType.BILATERAL);
         permit.setPermitYear(2022);
         permit.setPlateNumber("companyId");
         permit.setUsed(false);
@@ -77,21 +77,21 @@ public class AuthorityServiceIT {
         CreateAuthorityInput input = new CreateAuthorityInput();
         input.setCode("AZ");
         input.setName("Uz");
-        input.setApiUri("apiUri");
+        input.setClient("apiUri");
         authorityService.create(input);
     }
 
     @Test
     void createQuotaTest() {
         Authority authority = new Authority();
-        authority.setApiUri("apiUri");
+        authority.setClientId("apiUri");
         authority.setCode("UZ");
         authority.setName("Uz");
         authorityRepository.save(authority);
         CreateQuotaInput input = new CreateQuotaInput();
         input.setAuthorityCode("UZ");
         input.setQuantity(20L);
-        input.setPermitType(PermitType.BILITERAL);
+        input.setPermitType(PermitType.BILATERAL);
         input.setPermitYear(2021);
         authorityService.createQuota(input);
         authorityService.createQuota(input);

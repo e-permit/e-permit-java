@@ -47,7 +47,7 @@ public class AuthorityControllerTest {
     @Test
     void createTest() {
         CreateAuthorityInput input = new CreateAuthorityInput();
-        input.setApiUri("apiUri");
+        input.setClient("apiUri");
         input.setCode("UZ");
         input.setName("name");
 

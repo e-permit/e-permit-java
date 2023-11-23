@@ -81,13 +81,13 @@ public class PermitControllerIT {
     @Transactional
     void setUp() {
         Authority authority = new Authority();
-        authority.setApiUri("http://api.gov");
+        authority.setClientId("http://api.gov");
         authority.setCode("UZ");
         authority.setName("Uzbekistan");
         authorityRepository.save(authority);
         LedgerQuota quota = new LedgerQuota();
         quota.setBalance(30L);
-        quota.setPermitType(PermitType.BILITERAL);
+        quota.setPermitType(PermitType.BILATERAL);
         quota.setPermitYear(2021);
         quota.setPermitIssuer("TR");
         quota.setPermitIssuedFor("UZ");
@@ -114,7 +114,7 @@ public class PermitControllerIT {
             permit.setCompanyName("ABC");
             permit.setCompanyId("1");
             permit.setIssuedFor("UZ");
-            permit.setPermitType(PermitType.BILITERAL);
+            permit.setPermitType(PermitType.BILATERAL);
             permit.setPermitYear(2021);
             permit.setPlateNumber("06AA1234");
             permit.setExpireAt("31/01/2022");
@@ -150,7 +150,7 @@ public class PermitControllerIT {
         permit.setCompanyId("1");
         permit.setIssuer("TR");
         permit.setIssuedFor("UZ");
-        permit.setPermitType(PermitType.BILITERAL);
+        permit.setPermitType(PermitType.BILATERAL);
         permit.setPermitYear(2021);
         permit.setPlateNumber("06AA1234");
         permit.setExpireAt("31/01/2022");
@@ -169,7 +169,7 @@ public class PermitControllerIT {
         input.setCompanyName("ABC");
         input.setCompanyId("123");
         input.setIssuedFor("UZ");
-        input.setPermitType(PermitType.BILITERAL);
+        input.setPermitType(PermitType.BILATERAL);
         input.setPermitYear(2021);
         input.setPlateNumber("06AA1234");
         ResponseEntity<String> r =
@@ -185,7 +185,7 @@ public class PermitControllerIT {
         permit.setCompanyName("ABC");
         permit.setIssuer("TR");
         permit.setIssuedFor("UZ");
-        permit.setPermitType(PermitType.BILITERAL);
+        permit.setPermitType(PermitType.BILATERAL);
         permit.setPermitYear(2021);
         permit.setPlateNumber("06AA1234");
         permit.setExpireAt("31/01/2022");
@@ -204,7 +204,7 @@ public class PermitControllerIT {
     @Test
     void usePermitTest() {
         Authority authority = new Authority();
-        authority.setApiUri("apiUri");
+        authority.setClientId("apiUri");
         authority.setCode("TR");
         authority.setName("Uzbekistan");
         authorityRepository.save(authority);
@@ -213,7 +213,7 @@ public class PermitControllerIT {
         permit.setCompanyName("ABC");
         permit.setIssuer("UZ");
         permit.setIssuedFor("TR");
-        permit.setPermitType(PermitType.BILITERAL);
+        permit.setPermitType(PermitType.BILATERAL);
         permit.setPermitYear(2021);
         permit.setPlateNumber("06AA1234");
         permit.setExpireAt("31/01/2022");

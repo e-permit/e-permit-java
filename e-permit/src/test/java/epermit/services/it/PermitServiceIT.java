@@ -56,7 +56,7 @@ public class PermitServiceIT {
             @Autowired LedgerQuotaRepository ledgerQuotaRepository
             ) {
         Authority authority = new Authority();
-        authority.setApiUri("apiUri");
+        authority.setClientId("apiUri");
         authority.setCode("FR");
         authority.setName("Uz");
         authorityRepository.save(authority);
@@ -65,7 +65,7 @@ public class PermitServiceIT {
         quota.setBalance(100L);
         quota.setPermitIssuedFor("FR");
         quota.setPermitIssuer("TR");
-        quota.setPermitType(PermitType.BILITERAL);
+        quota.setPermitType(PermitType.BILATERAL);
         quota.setPermitYear(2021);
         ledgerQuotaRepository.save(quota);
     }
@@ -76,7 +76,7 @@ public class PermitServiceIT {
         input.setCompanyId("ABC");
         input.setCompanyName("ABC");
         input.setIssuedFor("FR");
-        input.setPermitType(PermitType.BILITERAL);
+        input.setPermitType(PermitType.BILATERAL);
         input.setPermitYear(2021);
         input.setPlateNumber("ABC");
         permitService.createPermit(input);
@@ -88,7 +88,7 @@ public class PermitServiceIT {
         input.setCompanyId("ABC");
         input.setCompanyName("ABC");
         input.setIssuedFor("FR");
-        input.setPermitType(PermitType.BILITERAL);
+        input.setPermitType(PermitType.BILATERAL);
         input.setPermitYear(2021);
         input.setPlateNumber("ABC");
         CreatePermitResult r = permitService.createPermit(input);

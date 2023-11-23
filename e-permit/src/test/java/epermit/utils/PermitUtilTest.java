@@ -37,7 +37,7 @@ public class PermitUtilTest {
         CreatePermitIdDto input = new CreatePermitIdDto();
         input.setIssuedFor("UA");
         input.setIssuer("TR");
-        input.setPermitType(PermitType.BILITERAL);
+        input.setPermitType(PermitType.BILATERAL);
         input.setPermitYear(2021);
         input.setSerialNumber(12L);
         String permitId = util.getPermitId(input);

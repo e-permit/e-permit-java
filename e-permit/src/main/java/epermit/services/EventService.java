@@ -53,7 +53,7 @@ public class EventService {
         List<String> list = headers.get("X-Road-Client");
         if (list != null && !list.isEmpty()) {
             String client = list.get(0).toString();
-            Authority authority = authorityRepository.findOneByApiUri(client)
+            Authority authority = authorityRepository.findOneByClientId(client)
                     .orElseThrow(() -> new EpermitValidationException(ErrorCodes.AUTHORITY_NOT_FOUND));
             if (!authority.getCode().equals(e.getEventProducer())) {
                 throw new EpermitValidationException(ErrorCodes.AUTHORITY_NOT_FOUND);
