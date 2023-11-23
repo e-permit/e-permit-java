@@ -83,7 +83,7 @@ public class AuthorityControllerIT {
     @Test
     void createTest() {
         CreateAuthorityInput input = new CreateAuthorityInput();
-        input.setClient("http://localhost");
+        input.setClientId("http://localhost");
         input.setCode("UZ");
         input.setName("Uzbekistan");
         ResponseEntity<?> r = getTestRestTemplate().postForEntity(getBaseUrl(), input, String.class);

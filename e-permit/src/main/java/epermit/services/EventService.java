@@ -51,16 +51,21 @@ public class EventService {
     public <T extends LedgerEventBase> void handleReceivedEvent(HttpHeaders headers, T e) {
         log.info("Event claims. {}", e);
         List<String> list = headers.get("X-Road-Client");
+        log.info("Header list {}", list);
         if (list != null && !list.isEmpty()) {
             String client = list.get(0).toString();
             Authority authority = authorityRepository.findOneByClientId(client)
-                    .orElseThrow(() -> new EpermitValidationException(ErrorCodes.AUTHORITY_NOT_FOUND));
+                    .orElseThrow(() -> new EpermitValidationException("FindByClient returns null",
+                            ErrorCodes.AUTHORITY_NOT_FOUND));
             if (!authority.getCode().equals(e.getEventProducer())) {
-                throw new EpermitValidationException(ErrorCodes.AUTHORITY_NOT_FOUND);
+                throw new EpermitValidationException("Producer and  code doesn't match",
+                        ErrorCodes.AUTHORITY_NOT_FOUND);
             }
             ledgerEventUtil.handleEvent(e);
+        } else {
+            throw new EpermitValidationException(ErrorCodes.REMOTE_ERROR);
         }
-        throw new EpermitValidationException(ErrorCodes.REMOTE_ERROR);
+
     }
 
     static Specification<LedgerEvent> filterEvents(Long id, String producer, String consumer) {

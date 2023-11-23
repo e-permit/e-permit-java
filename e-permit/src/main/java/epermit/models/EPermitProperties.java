@@ -11,7 +11,6 @@ import lombok.Setter;
 @Setter
 @ConfigurationProperties(prefix = "epermit")
 public class EPermitProperties {
-    private boolean demo = false;
 
     private String issuerCode;
 

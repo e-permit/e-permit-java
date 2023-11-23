@@ -75,7 +75,7 @@ public class AuthorityServiceTest {
     @Test
     void createTest() {
         CreateAuthorityInput input = new CreateAuthorityInput();
-        input.setClient("apiUri");
+        input.setClientId("apiUri");
         input.setCode("UZ");
         input.setName("Uzbekistan");
         when(authorityRepository.findOneByCode("UZ")).thenReturn(Optional.empty());

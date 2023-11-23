@@ -47,7 +47,7 @@ public class AuthorityServiceIT {
         CreateAuthorityInput input = new CreateAuthorityInput();
         input.setCode("AY");
         input.setName("Ay");
-        input.setClient("apiUri");
+        input.setClientId("apiUri");
         authorityService.create(input);
         LedgerQuota quota = new LedgerQuota();
         quota.setPermitIssuedFor("AY");
@@ -77,7 +77,7 @@ public class AuthorityServiceIT {
         CreateAuthorityInput input = new CreateAuthorityInput();
         input.setCode("AZ");
         input.setName("Uz");
-        input.setClient("apiUri");
+        input.setClientId("apiUri");
         authorityService.create(input);
     }
 
