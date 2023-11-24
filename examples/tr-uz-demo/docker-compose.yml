@@ -21,6 +21,8 @@ services:
       context: ../../e-permit-public-api
     depends_on:
       - trdb
+    environment:
+      - SERVER_SERVLET_CONTEXT_PATH=/r1/TR/GOV/UBAK/HAULAGE/Permit/
     env_file:
       - tr.env
     ports:
@@ -76,6 +78,8 @@ services:
       context: ../../e-permit-public-api
     depends_on:
       - uzdb
+    environment:
+      - SERVER_SERVLET_CONTEXT_PATH=/r1/UZ/GOV/MT/HAULAGE/Permit/
     env_file:
       - uz.env
     ports:

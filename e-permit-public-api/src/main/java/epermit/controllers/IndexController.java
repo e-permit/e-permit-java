@@ -12,12 +12,7 @@ import lombok.RequiredArgsConstructor;
 public class IndexController {
     private final BuildProperties buildProperties;
 
-    /*@GetMapping
-    public AuthorityConfig getConfig() {
-        return configService.getConfig();
-    }*/
-
-    @GetMapping("/version")
+    @GetMapping()
     public String getVersion() {
         return buildProperties.getVersion();
     }

@@ -67,7 +67,7 @@ public class LedgerEventUtil {
 
         String url = properties.getSecurityServer();
 
-        //url += "/r1/" + authority.getClientId() + "/PublicApi";
+        url += "/r1/" + authority.getClientId() + "/Permit";
         appEvent.setUrl(url + "/events/"
                 + ledgerEvent.getEventType().name().toLowerCase().replace("_", "-"));
         appEvent.setContent(GsonUtil.toMap(ledgerEvent.getEventContent()));
