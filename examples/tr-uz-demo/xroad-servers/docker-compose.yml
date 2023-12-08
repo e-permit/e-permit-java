@@ -1,9 +1,8 @@
 version: '3.8'
 services:
   tr-central-server:
-    image: niis/xroad-central-server
-    extra_hosts:
-      - "central.xroad.gov.tr:10.6.7.214"
+    container_name: tr-central-server
+    image: niis/xroad-central-server:jammy-7.3.0
     ports:
       - "3052:80"
       - "3053:4000"
@@ -13,6 +12,7 @@ services:
       - "3057:8889"
 
   tr-security-server:
+    container_name: tr-security-server
     image: niis/xroad-security-server
     environment:
       - XROAD_TOKEN_PIN="1234"
