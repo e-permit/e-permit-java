@@ -40,7 +40,6 @@ public class QuotaCreatedLedgerEventHandlerTest {
         LedgerQuota quota = captor.getValue();
         assertEquals(4, quota.getBalance());
         assertEquals(1, quota.getNextSerial());
-        assertEquals(0, quota.getSpent());
         assertEquals(2021, quota.getPermitYear());
         assertEquals(PermitType.BILATERAL, quota.getPermitType());
     }

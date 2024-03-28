@@ -1,6 +1,16 @@
+create table epermit_keys (
+    id uuid not null,
+    key_id varchar(255) not null,
+    jwk varchar(4000) not null,
+    created_at timestamp not null,
+    deleted boolean not null,
+    primary key (id)
+);
+
 create table epermit_authorities (
     id uuid not null,
-    client_id varchar(255) not null,
+    is_xroad boolean not null,
+    public_api_uri varchar(255) not null,
     code varchar(255) not null,
     created_at timestamp not null,
     name varchar(255) not null,
@@ -13,9 +23,9 @@ create table epermit_created_events (
     created_at timestamp not null,
     event_id varchar(255) not null,
     sent boolean not null,
+    error varchar(255) not null,
     primary key (id)
 );
-
 
 create table epermit_ledger_events (
     id uuid not null,
@@ -27,16 +37,19 @@ create table epermit_ledger_events (
     event_type varchar(255) not null,
     previous_event_id varchar(255) not null,
     producer varchar(255) not null,
+    proof varchar(255) not null,
     primary key (id)
 );
 
-create table epermit_ledger_permit_acts (
+create table epermit_ledger_public_keys (
     id uuid not null,
-    activity_details varchar(255),
-    activity_timestamp int8 not null,
-    activity_type varchar(255) not null,
+    owner varchar(255) not null,
+    partner varchar(255) not null,
     created_at timestamp not null,
-    ledger_permit_id uuid,
+    jwk varchar(5000) not null,
+    key_id varchar(255) not null,
+    revoked boolean not null,
+    revoked_at int8,
     primary key (id)
 );
 
@@ -73,12 +86,31 @@ create table epermit_ledger_quotas (
     primary key (id)
 );
 
+create table epermit_ledger_permit_acts (
+    id uuid not null,
+    activity_details varchar(255),
+    activity_timestamp int8 not null,
+    activity_type varchar(255) not null,
+    created_at timestamp not null,
+    ledger_permit_id uuid,
+    primary key (id)
+);
+
+alter table
+    if exists epermit_keys
+add
+    constraint UK_KEY_ID unique (key_id);
+
+alter table
+    if exists epermit_ledger_public_keys
+add
+    constraint UK_CODE_AND_KEY_ID unique (owner, partner, key_id);
 alter table
     if exists epermit_created_events
 add
-    constraint UK_8efluvxhvs8fwwtmsp2fb7h6e unique (event_id);
+    constraint UK_CREATED_EVENTS_EVENT_ID unique (event_id);
 
 alter table
     if exists epermit_ledger_permit_acts
 add
-    constraint FKolfcj4yeybykvnbsh32pv3ovc foreign key (ledger_permit_id) references epermit_ledger_permits;
+    constraint FK_ACTIVITY_TO_PERMIT foreign key (ledger_permit_id) references epermit_ledger_permits;

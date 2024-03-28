@@ -12,6 +12,7 @@ import epermit.PermitPostgresContainer;
 import epermit.entities.Authority;
 import epermit.entities.LedgerPermit;
 import epermit.entities.LedgerQuota;
+import epermit.models.dtos.AuthorityConfig;
 import epermit.models.enums.PermitType;
 import epermit.models.inputs.CreateAuthorityInput;
 import epermit.models.inputs.CreateQuotaInput;
@@ -47,8 +48,8 @@ public class AuthorityServiceIT {
         CreateAuthorityInput input = new CreateAuthorityInput();
         input.setCode("AY");
         input.setName("Ay");
-        input.setClientId("apiUri");
-        authorityService.create(input);
+        input.setPublicApiUri("apiUri");
+        authorityService.create(input, new AuthorityConfig());
         LedgerQuota quota = new LedgerQuota();
         quota.setPermitIssuedFor("AY");
         quota.setPermitIssuer("TR");
@@ -77,14 +78,14 @@ public class AuthorityServiceIT {
         CreateAuthorityInput input = new CreateAuthorityInput();
         input.setCode("AZ");
         input.setName("Uz");
-        input.setClientId("apiUri");
-        authorityService.create(input);
+        input.setPublicApiUri("apiUri");
+        authorityService.create(input, new AuthorityConfig());
     }
 
     @Test
     void createQuotaTest() {
         Authority authority = new Authority();
-        authority.setClientId("apiUri");
+        authority.setPublicApiUri("apiUri");
         authority.setCode("UZ");
         authority.setName("Uz");
         authorityRepository.save(authority);

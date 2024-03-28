@@ -1,4 +1,4 @@
-package epermit.appevents;
+package epermit.models;
 
 import java.util.Map;
 import java.util.UUID;
@@ -10,4 +10,6 @@ public class LedgerEventCreated {
     private String url;
     private Map<String, Object> content;
     private String eventId;
+    private String proof;
+    //private boolean xroad;
 }

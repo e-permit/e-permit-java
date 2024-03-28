@@ -4,6 +4,8 @@
 
 Create ```epermit.env``` file in the working directory and fill below properties: 
 
+keytool -storetype PKCS12 -keystore ./epermit  -genkeypair -alias epermit-key-2 -groupname secp256k1 -keyalg ec -sigalg SHA256withECDSA  -validity 3650
+
 #### epermit.env
 
 ```properties

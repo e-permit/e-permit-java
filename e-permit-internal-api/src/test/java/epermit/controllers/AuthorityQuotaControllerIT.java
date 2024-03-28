@@ -48,7 +48,7 @@ public class AuthorityQuotaControllerIT {
     @Transactional
     void setUpAuthority() {
         Authority authority = new Authority();
-        authority.setClientId("apiUri");
+        authority.setPublicApiUri("apiUri");
         authority.setCode("UZ");
         authority.setName("name");
         LedgerQuota quota = new LedgerQuota();

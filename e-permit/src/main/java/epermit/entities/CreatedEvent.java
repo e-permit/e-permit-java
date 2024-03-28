@@ -31,6 +31,9 @@ public class CreatedEvent {
     @Column(name = "sent", nullable = false)
     private boolean sent = false;
 
+    @Column(name = "error", nullable = true)
+    private String error;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

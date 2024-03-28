@@ -8,8 +8,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
-import epermit.appevents.LedgerEventCreated;
+
 import epermit.ledgerevents.LedgerEventUtil;
+import epermit.models.LedgerEventCreated;
 
 @ExtendWith(MockitoExtension.class)
 public class LedgerEventCreatedListenerTest {

@@ -5,7 +5,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
-import epermit.appevents.LedgerEventCreated;
+
+import epermit.models.LedgerEventCreated;
 import epermit.services.EventService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;

@@ -7,6 +7,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import epermit.ledgerevents.keycreated.KeyCreatedLedgerEvent;
+import epermit.ledgerevents.keyrevoked.KeyRevokedLedgerEvent;
 import epermit.ledgerevents.permitcreated.PermitCreatedLedgerEvent;
 import epermit.ledgerevents.permitrevoked.PermitRevokedLedgerEvent;
 import epermit.ledgerevents.permitused.PermitUsedLedgerEvent;
@@ -41,6 +44,18 @@ public class EventController {
     @PostMapping("/quota-created")
     public void quotaCreated(@RequestHeader HttpHeaders headers,
             @RequestBody @Valid QuotaCreatedLedgerEvent event) {
+        eventService.handleReceivedEvent(headers, event);
+    }
+
+    @PostMapping("/key-created")
+    public void keyCreated(@RequestHeader HttpHeaders headers,
+            @RequestBody @Valid KeyCreatedLedgerEvent event) {
+        eventService.handleReceivedEvent(headers, event);
+    }
+
+    @PostMapping("/key-revoked")
+    public void keyRevoked(@RequestHeader HttpHeaders headers,
+            @RequestBody @Valid KeyRevokedLedgerEvent event) {
         eventService.handleReceivedEvent(headers, event);
     }
 }

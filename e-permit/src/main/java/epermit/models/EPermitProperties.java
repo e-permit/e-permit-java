@@ -1,5 +1,7 @@
 package epermit.models;
 
+import java.util.Optional;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -16,8 +18,8 @@ public class EPermitProperties {
 
     private String issuerName;
 
-    private String issuerClientId;
+    private Optional<String> xroadClientId;
 
-    private String securityServer;
+    private Optional<String> xroadSecurityServer;
 
 }

@@ -30,8 +30,12 @@ public class Authority {
   @Column(name = "name", nullable = false)
   private String name;
 
-  @Column(name = "client_id", nullable = false)
-  private String clientId;
+  // @Column(name = "is_xroad", nullable = false)
+  // private boolean xroad = false;
+
+  // https://public-api or https://security-server/r1/{client}/Permit
+  @Column(name = "public_api_uri", nullable = false)
+  private String publicApiUri;
 
   @CreationTimestamp
   @Column(name = "created_at", nullable = false)

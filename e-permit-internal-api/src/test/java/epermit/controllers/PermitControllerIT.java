@@ -81,7 +81,7 @@ public class PermitControllerIT {
     @Transactional
     void setUp() {
         Authority authority = new Authority();
-        authority.setClientId("http://api.gov");
+        authority.setPublicApiUri("http://api.gov");
         authority.setCode("UZ");
         authority.setName("Uzbekistan");
         authorityRepository.save(authority);
@@ -204,7 +204,7 @@ public class PermitControllerIT {
     @Test
     void usePermitTest() {
         Authority authority = new Authority();
-        authority.setClientId("apiUri");
+        authority.setPublicApiUri("apiUri");
         authority.setCode("TR");
         authority.setName("Uzbekistan");
         authorityRepository.save(authority);

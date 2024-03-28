@@ -21,6 +21,7 @@ import epermit.ledgerevents.LedgerEventType;
 import epermit.ledgerevents.LedgerEventUtil;
 import epermit.ledgerevents.quotacreated.QuotaCreatedLedgerEvent;
 import epermit.models.EPermitProperties;
+import epermit.models.dtos.AuthorityConfig;
 import epermit.models.dtos.AuthorityDto;
 import epermit.models.enums.PermitType;
 import epermit.models.inputs.CreateAuthorityInput;
@@ -75,13 +76,13 @@ public class AuthorityServiceTest {
     @Test
     void createTest() {
         CreateAuthorityInput input = new CreateAuthorityInput();
-        input.setClientId("apiUri");
+        input.setPublicApiUri("apiUri");
         input.setCode("UZ");
         input.setName("Uzbekistan");
         when(authorityRepository.findOneByCode("UZ")).thenReturn(Optional.empty());
-        authorityService.create(input);
+        authorityService.create(input, new AuthorityConfig());
         Authority authority = new Authority();
-        authority.setClientId("apiUri");
+        authority.setPublicApiUri("apiUri");
         authority.setCode("UZ");
         authority.setName("Uzbekistan");
        

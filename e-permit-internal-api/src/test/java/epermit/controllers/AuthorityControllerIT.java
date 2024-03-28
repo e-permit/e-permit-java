@@ -1,6 +1,9 @@
 package epermit.controllers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.util.Optional;
+
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +55,7 @@ public class AuthorityControllerIT {
     @Test
     void getAllTest() {
         Authority authority = new Authority();
-        authority.setClientId("apiUri");
+        authority.setPublicApiUri("apiUri");
         authority.setCode("UZ");
         authority.setName("name");
         authorityRepository.save(authority);
@@ -67,7 +70,7 @@ public class AuthorityControllerIT {
     @Test
     void getByCodeTest() {
         Authority authority = new Authority();
-        authority.setClientId("apiUri");
+        authority.setPublicApiUri("apiUri");
         authority.setCode("UZ");
         authority.setName("name");
         authorityRepository.save(authority);
@@ -83,7 +86,7 @@ public class AuthorityControllerIT {
     @Test
     void createTest() {
         CreateAuthorityInput input = new CreateAuthorityInput();
-        input.setClientId("http://localhost");
+        input.setPublicApiUri("http://localhost");
         input.setCode("UZ");
         input.setName("Uzbekistan");
         ResponseEntity<?> r = getTestRestTemplate().postForEntity(getBaseUrl(), input, String.class);

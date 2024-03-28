@@ -8,7 +8,6 @@ services:
       - trdb
     environment:
       - FLYWAY_ENABLED=true
-      - FLYWAY_SCHEMAS=public
     env_file:
       - tr.env
     ports:
@@ -22,6 +21,8 @@ services:
     depends_on:
       - trdb
     environment:
+      - FLYWAY_ENABLED=true
+      - FLYWAY_SCHEMAS=public
       - SERVER_SERVLET_CONTEXT_PATH=/r1/TR/GOV/UBAK/HAULAGE/Permit/
     env_file:
       - tr.env

@@ -56,7 +56,7 @@ public class PermitServiceIT {
             @Autowired LedgerQuotaRepository ledgerQuotaRepository
             ) {
         Authority authority = new Authority();
-        authority.setClientId("apiUri");
+        authority.setPublicApiUri("apiUri");
         authority.setCode("FR");
         authority.setName("Uz");
         authorityRepository.save(authority);

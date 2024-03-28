@@ -12,7 +12,7 @@ create_tr_authority()
   {
     "code": "TR",
     "name": "Türkiye",
-    "client_id": "TR/GOV/UBAK/HAULAGE"
+    "public_api_uri": "http://tr-public-api:8080"
   }
 EOF
 }
@@ -23,7 +23,7 @@ create_uz_authority()
   {
     "code": "UZ",
     "name": "Uzbekistan",
-    "client_id": "UZ/GOV/MT/HAULAGE"
+    "public_api_uri": "http://uz-public-api:8080"
   }
 EOF
 }
@@ -34,7 +34,7 @@ create_quota()
   {
     "authority_code": "TR",
     "permit_type": "BILATERAL",
-    "permit_year": 2023,
+    "permit_year": 2024,
     "quantity": 100
   }
 EOF

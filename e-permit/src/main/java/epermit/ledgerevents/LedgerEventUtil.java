@@ -1,17 +1,17 @@
 package epermit.ledgerevents;
 
+import java.util.Base64;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-import epermit.appevents.LedgerEventCreated;
+
 import epermit.commons.EpermitValidationException;
 import epermit.commons.ErrorCodes;
 import epermit.commons.GsonUtil;
@@ -19,9 +19,12 @@ import epermit.entities.Authority;
 import epermit.entities.CreatedEvent;
 import epermit.entities.LedgerEvent;
 import epermit.models.EPermitProperties;
+import epermit.models.LedgerEventCreated;
+import epermit.models.results.VerifyProofResult;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.CreatedEventRepository;
 import epermit.repositories.LedgerEventRepository;
+import epermit.services.JwsService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +38,7 @@ public class LedgerEventUtil {
     private final LedgerEventRepository ledgerEventRepository;
     private final AuthorityRepository authorityRepository;
     private final CreatedEventRepository createdEventRepository;
+    private final JwsService jwsService;
     private final Map<String, LedgerEventHandler> eventHandlers;
     private final RestTemplate restTemplate;
 
@@ -50,11 +54,14 @@ public class LedgerEventUtil {
 
     @SneakyThrows
     public <T extends LedgerEventBase> void persistAndPublishEvent(T event) {
+        
+        // if createdEventRepository.exists(event.getEventConsumer()) throw exception
         CreatedEvent createdEvent = new CreatedEvent();
         createdEvent.setEventId(event.getEventId());
         createdEvent.setSent(false);
         createdEventRepository.save(createdEvent);
-        handleEvent(event);
+        String proof = createProof(event);
+        handleEvent(event, proof);
         publishAppEvent(createdEvent);
     }
 
@@ -64,13 +71,11 @@ public class LedgerEventUtil {
         LedgerEventCreated appEvent = new LedgerEventCreated();
         appEvent.setId(UUID.randomUUID());
         appEvent.setEventId(createdEvent.getEventId());
-
-        String url = properties.getSecurityServer();
-
-        url += "/r1/" + authority.getClientId() + "/Permit";
-        appEvent.setUrl(url + "/events/"
+        //appEvent.setXroad(authority.isXroad());
+        appEvent.setUrl(authority.getPublicApiUri() + "/events/"
                 + ledgerEvent.getEventType().name().toLowerCase().replace("_", "-"));
         appEvent.setContent(GsonUtil.toMap(ledgerEvent.getEventContent()));
+        appEvent.setProof(ledgerEvent.getProof());
         return appEvent;
     }
 
@@ -81,7 +86,7 @@ public class LedgerEventUtil {
     }
 
     @SneakyThrows
-    public <T extends LedgerEventBase> void handleEvent(T e) {
+    public <T extends LedgerEventBase> void handleEvent(T e, String proof) {
         log.info("Event handle started {}", e);
         Boolean eventExist = ledgerEventRepository.existsByProducerAndConsumerAndEventId(
                 e.getEventProducer(), e.getEventConsumer(), e.getEventId());
@@ -108,6 +113,7 @@ public class LedgerEventUtil {
         ledgerEvent.setEventType(e.getEventType());
         ledgerEvent.setPreviousEventId(e.getPreviousEventId());
         ledgerEvent.setEventContent(GsonUtil.getGson().toJson(e));
+        ledgerEvent.setProof(proof);
         ledgerEventRepository.save(ledgerEvent);
         LedgerEventHandler eventHandler = eventHandlers.get(e.getEventType().toString() + "_EVENT_HANDLER");
         eventHandler.handle(e);
@@ -117,10 +123,50 @@ public class LedgerEventUtil {
     public ResponseEntity<?> sendEvent(LedgerEventCreated event) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("X-Road-Client", properties.getIssuerClientId());
+        /*if (event.isXroad()) {
+            headers.set("X-Road-Client", properties.getXroadClientId().get());
+        }*/
+        headers.add("Authorization", "Bearer " + event.getProof());
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(event.getContent(), headers);
         ResponseEntity<?> result = restTemplate.postForEntity(event.getUrl(), request,
                 Object.class);
         return result;
     }
+
+    @SneakyThrows
+    public <T extends LedgerEventBase> String createProof(T event) {
+        String jws = jwsService.createJws(event);
+        log.info("Created jws length: {}", jws.length());
+        String[] parts = jws.split("\\.");
+        return parts[0] + "." + parts[2];
+    }
+
+    @SneakyThrows
+    public VerifyProofResult verifyProof(Object e, String authorization) {
+        if (authorization == null) {
+            return VerifyProofResult.fail("HEADER_NOTFOUND");
+        }
+        LedgerEventBase eb = (LedgerEventBase) e;
+        Authority authority = authorityRepository.findOneByCode(eb.getEventProducer())
+          .orElseThrow();
+        if (authority == null) {
+            return VerifyProofResult.fail("AUTHORITY_NOTFOUND");
+        }
+        if (!authorization.toLowerCase().startsWith("bearer")) {
+            return VerifyProofResult.fail("INVALID_AUTH_TYPE");
+        }
+        String proof = authorization.substring(7);
+        String[] proofArr = proof.split("\\.");
+        String payloadJsonStr = GsonUtil.getGson().toJson(e);
+        String payloadBase64 = Base64.getUrlEncoder().withoutPadding().encodeToString(payloadJsonStr.getBytes());
+        String jws = proofArr[0] + "." + payloadBase64 + "." + proofArr[1];
+        log.info("Constructed jws: {}", jws);
+        log.info("Constructed jws length: {}", jws.length());
+        Boolean isValid = jwsService.validateJws(jws);
+        if (!isValid) {
+            return VerifyProofResult.fail("UNAUTHORIZED");
+        }
+        return VerifyProofResult.success(proof);
+    }
+
 }

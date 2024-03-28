@@ -50,6 +50,9 @@ public class LedgerEvent {
     @Column(name = "event_content", nullable = false, length = 10000)
     private String eventContent;
 
+    @Column(name = "proof", nullable = false, length = 1000)
+    private String proof;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

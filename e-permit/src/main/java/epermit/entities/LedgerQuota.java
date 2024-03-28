@@ -50,10 +50,6 @@ public class LedgerQuota {
     private Long balance = 0L;
 
     @Builder.Default
-    @Column(name = "spent", nullable = false)
-    private Long spent = 0L;
-
-    @Builder.Default
     @Column(name = "next_serial", nullable = false)
     private Long nextSerial = 1L;
 

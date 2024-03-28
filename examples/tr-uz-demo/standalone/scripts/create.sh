@@ -9,7 +9,7 @@ create_permit()
   cat <<EOF
   {
     "issued_for": "UZ",
-    "permit_year": 2022,
+    "permit_year": 2024,
     "permit_type": "BILATERAL",
     "company_name": "TECT",
     "company_id": "123",
@@ -18,4 +18,5 @@ create_permit()
 EOF
 }
  
+curl "$TR_URI/permits" -u "$AUTH" -X POST --data "$(create_permit)" -H 'Content-Type: application/json'
 curl "$TR_URI/permits" -u "$AUTH" -X POST --data "$(create_permit)" -H 'Content-Type: application/json'

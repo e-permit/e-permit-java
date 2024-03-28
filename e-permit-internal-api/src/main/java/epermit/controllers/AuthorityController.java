@@ -1,7 +1,10 @@
 package epermit.controllers;
 
 import java.util.List;
-import jakarta.validation.Valid;
+
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -9,9 +12,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
+
+import epermit.commons.EpermitValidationException;
+import epermit.commons.ErrorCodes;
+import epermit.models.dtos.AuthorityConfig;
 import epermit.models.dtos.AuthorityDto;
 import epermit.models.inputs.CreateAuthorityInput;
 import epermit.services.AuthorityService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +32,8 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/authorities")
 public class AuthorityController {
     private final AuthorityService service;
+    private final RestTemplate restTemplate;
+    //private final EPermitProperties properties;
 
     @GetMapping()
     public List<AuthorityDto> getAll() {
@@ -38,6 +49,18 @@ public class AuthorityController {
     @PostMapping()
     public void create(@RequestBody @Valid CreateAuthorityInput input) {
         log.info("Authority create request. {}", input);
-        service.create(input);
+        HttpHeaders headers = new HttpHeaders();
+        // if (input.isXroad()) {
+        //     headers.set("X-Road-Client", properties.getXroadClientId().get());
+        // }
+        ResponseEntity<AuthorityConfig> result = restTemplate
+                .getForEntity(input.getPublicApiUri(), AuthorityConfig.class, headers);
+        if (result.getStatusCode() == HttpStatus.OK) {
+            log.info("Authority config got successfully. Result: {}", result.getBody());
+            service.create(input, result.getBody());
+        } else {
+            throw new EpermitValidationException("Couldn't get authority config",
+                    ErrorCodes.REMOTE_ERROR);
+        }
     }
 }

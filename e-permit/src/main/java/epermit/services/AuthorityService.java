@@ -11,15 +11,19 @@ import org.springframework.web.server.ResponseStatusException;
 
 import epermit.commons.EpermitValidationException;
 import epermit.commons.ErrorCodes;
+import epermit.commons.GsonUtil;
 import epermit.entities.Authority;
+import epermit.entities.LedgerPublicKey;
 import epermit.ledgerevents.LedgerEventUtil;
 import epermit.ledgerevents.quotacreated.QuotaCreatedLedgerEvent;
 import epermit.models.EPermitProperties;
+import epermit.models.dtos.AuthorityConfig;
 import epermit.models.dtos.AuthorityDto;
 import epermit.models.dtos.QuotaDto;
 import epermit.models.inputs.CreateAuthorityInput;
 import epermit.models.inputs.CreateQuotaInput;
 import epermit.repositories.AuthorityRepository;
+import epermit.repositories.LedgerPublicKeyRepository;
 import epermit.repositories.LedgerQuotaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class AuthorityService {
     private final AuthorityRepository authorityRepository;
+    private final LedgerPublicKeyRepository ledgerPublicKeyRepository;
     private final EPermitProperties properties;
     private final LedgerEventUtil ledgerEventUtil;
     private final LedgerQuotaRepository ledgerQuotaRepository;
@@ -54,17 +59,25 @@ public class AuthorityService {
     }
 
     @Transactional
-    public void create(CreateAuthorityInput input) {
+    public void create(CreateAuthorityInput input, AuthorityConfig config) {
         log.info("Authority create command: {}", input);
         authorityRepository.findOneByCode(input.getCode()).ifPresent(s -> {
             throw new EpermitValidationException(ErrorCodes.AUTHORITY_ALREADY_EXISTS);
         });
 
         Authority authority = new Authority();
-        authority.setClientId(input.getClientId());
+        authority.setPublicApiUri(input.getPublicApiUri());
+        //authority.setXroad(input.isXroad());
         authority.setCode(input.getCode());
         authority.setName(input.getName());
-
+        config.getKeys().forEach(k -> {
+            LedgerPublicKey publicKey = new LedgerPublicKey();
+            publicKey.setJwk(GsonUtil.getGson().toJson(k));
+            publicKey.setKeyId(k.getKid());
+            publicKey.setOwner(config.getCode());
+            publicKey.setPartner(properties.getIssuerCode());
+            ledgerPublicKeyRepository.save(publicKey);
+        });
         log.info("Authority created: {}", authority);
         authorityRepository.save(authority);
     }

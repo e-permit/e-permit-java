@@ -6,10 +6,11 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
-import epermit.appevents.LedgerEventCreated;
+
 import epermit.commons.ApiErrorResponse;
 import epermit.commons.GsonUtil;
 import epermit.ledgerevents.LedgerEventUtil;
+import epermit.models.LedgerEventCreated;
 import epermit.services.EventService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +35,9 @@ public class AppEventListener {
             if (error != null && error.getDetails().get("errorCode").equals("EVENT_ALREADY_EXISTS")) {
                 eventService.handleSentEvent(event.getEventId());
             } else {
-                log.error(GsonUtil.getGson().toJson(result.getBody()));
+                String err = GsonUtil.getGson().toJson(result.getBody());
+                log.error(err);
+                eventService.handleEventError(event.getEventId(), err);
             }
         }
         log.info("Sending event is finished");

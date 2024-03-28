@@ -38,7 +38,6 @@ public class PermitRevokedLedgerEventHandler implements LedgerEventHandler {
                 permit.getIssuedFor(), permit.getPermitType(), permit.getPermitYear()))
                 .orElseThrow(() -> new EpermitValidationException(ErrorCodes.INSUFFICIENT_PERMIT_QUOTA));
         quota.setBalance(quota.getBalance() + 1);
-        quota.setSpent(quota.getSpent() - 1);
         permitRepository.delete(permit);
     }
 }

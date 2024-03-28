@@ -5,8 +5,11 @@ import jakarta.validation.constraints.NotBlank;
 
 @Data
 public class CreateAuthorityInput {
+
+    //private boolean xroad;
+
     @NotBlank
-    private String clientId;
+    private String publicApiUri;
 
     @NotBlank
     private String code;
