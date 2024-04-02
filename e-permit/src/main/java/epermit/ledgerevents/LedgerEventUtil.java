@@ -54,13 +54,21 @@ public class LedgerEventUtil {
     }
 
     @SneakyThrows
-    public <T extends LedgerEventBase> void persistAndPublishEvent(T event) {
+    public <T extends LedgerEventBase> void persistAndPublishEvent(T event){
+        persistAndPublishEvent(event, true);
+    }
+
+    @SneakyThrows
+    public <T extends LedgerEventBase> void persistAndPublishEvent(T event, boolean handleEvent) {
         CreatedEvent createdEvent = new CreatedEvent();
         createdEvent.setEventId(event.getEventId());
         createdEvent.setSent(false);
         createdEventRepository.save(createdEvent);
-        String proof = createProof(event);
-        handleEvent(event, proof);
+        if (handleEvent) {
+            String proof = createProof(event);
+            handleEvent(event, proof);
+        }
+
         publishAppEvent(createdEvent);
     }
 
@@ -155,9 +163,31 @@ public class LedgerEventUtil {
         String jws = proofArr[0] + "." + payloadBase64 + "." + proofArr[1];
         Boolean isValid = jwsUtil.validateJws(jws);
         if (!isValid) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid jws");
+            return VerifyProofResult.fail("UNAUTHORIZED");
         }
-        return proof;
+        return VerifyProofResult.success(proof);
+    }
+
+    @SneakyThrows
+    public ResponseEntity<?> sendEvent(LedgerEventCreated event) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.add("Authorization", "Bearer " + event.getProof());
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(event.getContent(), headers);
+        ResponseEntity<?> result = restTemplate.postForEntity(event.getUri(), request, Object.class);
+        return result;
+        /*
+         * if (result.getStatusCode() != HttpStatus.OK) {
+         * ApiErrorResponse error = (ApiErrorResponse)result.getBody();
+         * if(error != null &&
+         * error.getDetails().get("errorCode").equals("EVENT_ALREADY_EXISTS")){
+         * 
+         * }
+         * log.error(GsonUtil.getGson().toJson(result.getBody()));
+         * return false;
+         * }
+         * return true;
+         */
     }
 
 }
