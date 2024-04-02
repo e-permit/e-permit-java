@@ -22,6 +22,7 @@ import epermit.repositories.AuthorityRepository;
 import epermit.repositories.LedgerPublicKeyRepository;
 import epermit.repositories.PrivateKeyRepository;
 import epermit.utils.PrivateKeyUtil;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -92,7 +93,7 @@ public class PrivateKeyService {
             event.setUse(jwk.getUse());
             event.setX(jwk.getX());
             event.setY(jwk.getY());
-            eventUtil.persistAndPublishEvent(event);
+            eventUtil.persistAndPublishEvent(event, false);
         });
         log.info("KeyService create finished {}", key.getKeyId());
 
@@ -101,11 +102,8 @@ public class PrivateKeyService {
     @Transactional
     public void delete(UUID id) {
         log.info("KeyService delete started {}", id);
-        Optional<PrivateKey> keyR = keyRepository.findById(id);
-        if (!keyR.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "KEY_NOTFOUND");
-        }
-        PrivateKey key = keyR.get();
+        PrivateKey key = keyRepository.findById(id)
+          .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "KEY_NOTFOUND"));
         keyRepository.delete(key);
 
         authorityRepository.findAll().forEach(authority -> {
@@ -114,7 +112,7 @@ public class PrivateKeyService {
                     authority.getCode(), prevEventId);
             event.setKeyId(key.getKeyId());
             event.setRevokedAt(Instant.now().getEpochSecond());
-            eventUtil.persistAndPublishEvent(event);
+            eventUtil.persistAndPublishEvent(event, false);
         });
     }
 }
