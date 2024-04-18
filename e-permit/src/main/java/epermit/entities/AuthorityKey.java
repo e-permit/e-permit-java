@@ -6,18 +6,23 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
-
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Data
-@NoArgsConstructor
+@NoArgsConstructor 
 @Entity
-@Table(name = "epermit_keys")
-public class Key {
+@Table(name = "epermit_authority_keys")
+public class AuthorityKey {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(
@@ -25,18 +30,11 @@ public class Key {
         strategy = "org.hibernate.id.UUIDGenerator"
     )
     private UUID id;
-
-    @Column(name = "key_id", nullable = false, unique = true)
+    @Column(name = "key_id", nullable = false)
     private String keyId;
 
     @Column(name = "jwk", nullable = false, length = 5000)
     private String jwk;
-
-    @Column(name = "salt", nullable = false)
-    private String salt;
-
-    @Column(name = "private_jwk", nullable = false, length=4000)
-    private String privateJwk;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)
@@ -47,5 +45,13 @@ public class Key {
 
     @Column(name = "revoked_at", nullable = true)
     private Long revokedAt;
+
+    @ManyToOne
+    @JoinColumn(name = "authority_id") 
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @JsonIgnore
+    private Authority authority;
+
 }
 

@@ -24,7 +24,7 @@ import epermit.models.results.VerifyProofResult;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.CreatedEventRepository;
 import epermit.repositories.LedgerEventRepository;
-import epermit.services.JwsService;
+import epermit.utils.JwsUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +38,7 @@ public class LedgerEventUtil {
     private final LedgerEventRepository ledgerEventRepository;
     private final AuthorityRepository authorityRepository;
     private final CreatedEventRepository createdEventRepository;
-    private final JwsService jwsService;
+    private final JwsUtil jwsUtil;
     private final Map<String, LedgerEventHandler> eventHandlers;
     private final RestTemplate restTemplate;
 
@@ -135,7 +135,7 @@ public class LedgerEventUtil {
 
     @SneakyThrows
     public <T extends LedgerEventBase> String createProof(T event) {
-        String jws = jwsService.createJws(event);
+        String jws = jwsUtil.createJws(event);
         log.info("Created jws length: {}", jws.length());
         String[] parts = jws.split("\\.");
         return parts[0] + "." + parts[2];
@@ -162,7 +162,7 @@ public class LedgerEventUtil {
         String jws = proofArr[0] + "." + payloadBase64 + "." + proofArr[1];
         log.info("Constructed jws: {}", jws);
         log.info("Constructed jws length: {}", jws.length());
-        Boolean isValid = jwsService.validateJws(jws);
+        Boolean isValid = jwsUtil.validateJws(jws);
         if (!isValid) {
             return VerifyProofResult.fail("UNAUTHORIZED");
         }

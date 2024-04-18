@@ -30,6 +30,7 @@ import epermit.models.results.CreatePermitResult;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.LedgerPermitRepository;
 import epermit.repositories.LedgerQuotaRepository;
+import epermit.services.KeyService;
 import epermit.services.PermitService;
 
 @Testcontainers
@@ -46,15 +47,19 @@ public class PermitServiceIT {
     RestTemplate restTemplate;
 
     @Container
-    public static PostgreSQLContainer<PermitPostgresContainer> postgreSQLContainer =
-            PermitPostgresContainer.getInstance();
+    public static PostgreSQLContainer<PermitPostgresContainer> postgreSQLContainer = PermitPostgresContainer
+            .getInstance();
 
+    @BeforeAll
+    @Transactional
+    static void up(@Autowired KeyService keyService) {
+        keyService.seed();
+    }
 
     @BeforeAll
     @Transactional
     static void setUp(@Autowired AuthorityRepository authorityRepository,
-            @Autowired LedgerQuotaRepository ledgerQuotaRepository
-            ) {
+            @Autowired LedgerQuotaRepository ledgerQuotaRepository) {
         Authority authority = new Authority();
         authority.setPublicApiUri("apiUri");
         authority.setCode("FR");
@@ -79,6 +84,7 @@ public class PermitServiceIT {
         input.setPermitType(PermitType.BILATERAL);
         input.setPermitYear(2021);
         input.setPlateNumber("ABC");
+        input.setArrivalCountry("FR");
         permitService.createPermit(input);
     }
 
@@ -91,16 +97,15 @@ public class PermitServiceIT {
         input.setPermitType(PermitType.BILATERAL);
         input.setPermitYear(2021);
         input.setPlateNumber("ABC");
+        input.setArrivalCountry("FR");
         CreatePermitResult r = permitService.createPermit(input);
         Optional<LedgerPermit> permit = ledgerPermitRepository.findOneByPermitId(r.getPermitId());
         Assertions.assertTrue(permit.isPresent());
-        when(restTemplate.postForEntity(anyString(), any(HttpEntity.class), any())).thenReturn(new ResponseEntity<>(HttpStatus.OK));
+        when(restTemplate.postForEntity(anyString(), any(HttpEntity.class), any()))
+                .thenReturn(new ResponseEntity<>(HttpStatus.OK));
         permitService.revokePermit(r.getPermitId());
         Optional<LedgerPermit> permit2 = ledgerPermitRepository.findOneByPermitId(r.getPermitId());
         Assertions.assertTrue(permit2.isEmpty());
-        //List<LedgerPermit> deleteList = ledgerPermitRepository.findAllDeleted();
-        
+
     }
 }
-
-

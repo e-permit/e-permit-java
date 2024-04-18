@@ -5,11 +5,11 @@ import java.util.List;
 import com.google.gson.Gson;
 import org.springframework.stereotype.Service;
 import epermit.commons.GsonUtil;
-import epermit.entities.LedgerPublicKey;
+import epermit.entities.Key;
 import epermit.models.EPermitProperties;
 import epermit.models.dtos.AuthorityConfig;
 import epermit.models.dtos.PublicJwk;
-import epermit.repositories.LedgerPublicKeyRepository;
+import epermit.repositories.KeyRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
@@ -17,7 +17,7 @@ import lombok.SneakyThrows;
 @RequiredArgsConstructor
 public class ConfigService {
     private final EPermitProperties properties;
-    private final LedgerPublicKeyRepository ledgerPublicKeyRepository;
+    private final KeyRepository keyRepository;
 
     @SneakyThrows
     public AuthorityConfig getConfig() {
@@ -26,8 +26,8 @@ public class ConfigService {
         config.setName(properties.getIssuerName());
         Gson gson = GsonUtil.getGson();
         List<PublicJwk> keyDtoList = new ArrayList<>();
-        List<LedgerPublicKey> keys = ledgerPublicKeyRepository
-                .findAllByPartnerAndRevokedFalse(properties.getIssuerCode());
+        List<Key> keys = keyRepository
+                .findAll();
         keys.forEach(key -> {
             keyDtoList.add(gson.fromJson(key.getJwk(), PublicJwk.class));
         });

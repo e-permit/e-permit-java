@@ -1,7 +1,9 @@
-package epermit.services;
+package epermit.utils;
 
-import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.encrypt.Encryptors;
+import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.stereotype.Service;
 
 import com.google.gson.Gson;
@@ -12,11 +14,18 @@ import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.Payload;
 import com.nimbusds.jose.crypto.ECDSAVerifier;
 import com.nimbusds.jose.jwk.ECKey;
+import com.nimbusds.jose.crypto.ECDSASigner;
+import com.nimbusds.jose.JWSSigner;
 
+import epermit.commons.EpermitValidationException;
+import epermit.commons.ErrorCodes;
 import epermit.commons.GsonUtil;
-import epermit.entities.LedgerPublicKey;
+import epermit.entities.Authority;
+import epermit.entities.AuthorityKey;
+import epermit.entities.Key;
 import epermit.models.EPermitProperties;
-import epermit.repositories.LedgerPublicKeyRepository;
+import epermit.repositories.AuthorityRepository;
+import epermit.repositories.KeyRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -24,16 +33,16 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class JwsService {
+public class JwsUtil {
     private final EPermitProperties properties;
-    private final LedgerPublicKeyRepository publicKeyRepository;
-    private final EPermitKeyStore keyStore;
+    private final AuthorityRepository authorityRepository;
+    private final KeyRepository keyRepository;
 
     @SneakyThrows
     public <T> String createJws(T payloadObj) {
-        LedgerPublicKey publicKey = publicKeyRepository
-                .findAllByPartnerAndRevokedFalse(properties.getIssuerCode()).get(0);
-        return createJws(publicKey.getKeyId(), payloadObj);
+        Key key = keyRepository.findFirstByRevokedFalseOrderByCreatedAtDesc()
+                .orElseThrow(() -> new EpermitValidationException(ErrorCodes.KEY_NOTFOUND));
+        return createJws(key.getKeyId(), payloadObj);
     }
 
     @SneakyThrows
@@ -42,7 +51,7 @@ public class JwsService {
         Gson gson = GsonUtil.getGson();
         JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.ES256).keyID(keyId).build();
         Payload payload = new Payload(gson.toJson(payloadObj));
-        String jws = keyStore.sign(keyId, payload, header);
+        String jws = sign(keyId, payload, header);
         log.info("createJws ended with {}", jws);
         return jws;
     }
@@ -58,18 +67,13 @@ public class JwsService {
         String producer = getClaim(jws, "event_producer");
         JWSObject jwsObject = JWSObject.parse(jws);
         String keyId = jwsObject.getHeader().getKeyID();
+        Authority authority = authorityRepository.findOneByCode(producer)
+                .orElseThrow(() -> new EpermitValidationException(ErrorCodes.AUTHORITY_NOT_FOUND));
+        AuthorityKey k = authority.getValidKeyById(keyId);
 
-        Optional<LedgerPublicKey> k = publicKeyRepository.findOneByPartnerAndKeyId(producer, keyId);
-        if (!k.isPresent()) {
-            log.info("The key doesn't found");
-            return false;
-        } else if (k.get().isRevoked()) {
-            log.info("The key is revoked");
-            return false;
-        }
-        log.info("Key jwk {}", k.get().getJwk());
-        ECKey key = ECKey.parse(k.get().getJwk()).toPublicJWK();
-        
+        log.info("Key jwk {}", k.getJwk());
+        ECKey key = ECKey.parse(k.getJwk()).toPublicJWK();
+
         JWSVerifier verifier = new ECDSAVerifier(key);
         Boolean valid = jwsObject.verify(verifier);
         if (!valid) {
@@ -86,4 +90,17 @@ public class JwsService {
         JWSObject jwsObject = JWSObject.parse(jws);
         return (T) jwsObject.getPayload().toJSONObject().get(key);
     }
+
+    @SneakyThrows
+    private String sign(String keyId, Payload payload, JWSHeader header) {
+        Key privateKey = keyRepository.findOneByKeyId(keyId).orElseThrow();
+        TextEncryptor decryptor = Encryptors.text(properties.getKeystorePassword(), privateKey.getSalt());
+        ECKey key = ECKey.parse(decryptor.decrypt(privateKey.getPrivateJwk()));
+        
+        JWSObject jwsObject = new JWSObject(header, payload);
+        JWSSigner signer = new ECDSASigner(key);
+        jwsObject.sign(signer);
+        return jwsObject.serialize();
+    }
 }
+

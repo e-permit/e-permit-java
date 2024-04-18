@@ -15,7 +15,7 @@ public interface CreatedEventRepository
 
   List<CreatedEvent> findAllBySentFalseOrderByCreatedAtAsc();
 
-  @Query("SELECT count(*)>0 FROM CreatedEvent ce, LedgerEvent le\r\n" + //
-      " WHERE ce.eventId = le.id and ce.error IS NOT NULL and le.consumer = :consumer")
-  boolean errorExistsByConsumer(String consumer);
+  /*@Query("SELECT count(*)>0 FROM CreatedEvent ce, LedgerEvent le " +
+      "WHERE ce.eventId = le.id and ce.error IS NOT NULL and le.consumer = :consumer")
+  boolean errorExistsByConsumer(@Param("consumer") String consumer);*/
 }

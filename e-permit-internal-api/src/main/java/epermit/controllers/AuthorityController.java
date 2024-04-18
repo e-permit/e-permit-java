@@ -33,7 +33,6 @@ import lombok.extern.slf4j.Slf4j;
 public class AuthorityController {
     private final AuthorityService service;
     private final RestTemplate restTemplate;
-    //private final EPermitProperties properties;
 
     @GetMapping()
     public List<AuthorityDto> getAll() {
@@ -50,9 +49,6 @@ public class AuthorityController {
     public void create(@RequestBody @Valid CreateAuthorityInput input) {
         log.info("Authority create request. {}", input);
         HttpHeaders headers = new HttpHeaders();
-        // if (input.isXroad()) {
-        //     headers.set("X-Road-Client", properties.getXroadClientId().get());
-        // }
         ResponseEntity<AuthorityConfig> result = restTemplate
                 .getForEntity(input.getPublicApiUri(), AuthorityConfig.class, headers);
         if (result.getStatusCode() == HttpStatus.OK) {

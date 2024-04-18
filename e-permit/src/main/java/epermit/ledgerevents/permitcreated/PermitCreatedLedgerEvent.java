@@ -4,11 +4,12 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
+
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import epermit.commons.Constants;
 import epermit.ledgerevents.LedgerEventBase;
 import epermit.ledgerevents.LedgerEventType;
 import epermit.models.enums.PermitType;
@@ -23,18 +24,16 @@ public class PermitCreatedLedgerEvent extends LedgerEventBase {
     }
 
     @NotNull
-    @Pattern(regexp = "^[A-Z]{2}-[A-Z]{2}-\\d{4}-(1|2|3)-[0-9]+$")
+    @Pattern(regexp = Constants.PERMIT_ID_FORMAT)
     private String permitId;
 
     @NotNull
     private PermitType permitType;
 
     @NotNull
-    @Size(min = 2, max = 2)
     private String permitIssuer;
 
     @NotNull
-    @Size(min = 2, max = 2)
     private String permitIssuedFor;
 
     @NotNull
@@ -42,15 +41,15 @@ public class PermitCreatedLedgerEvent extends LedgerEventBase {
     private int permitYear;
 
     @NotNull
-    private Long serialNumber;
-
-    @NotNull
-    @Pattern(regexp = "^(0?[1-9]|[12][0-9]|3[01])[/](0?[1-9]|1[012])[/]\\d{4}$")
+    @Pattern(regexp = Constants.DATE_FORMAT)
     private String issuedAt;
 
     @NotNull
-    @Pattern(regexp = "^(0?[1-9]|[12][0-9]|3[01])[/](0?[1-9]|1[012])[/]\\d{4}$")
+    @Pattern(regexp = Constants.DATE_FORMAT)
     private String expireAt;
+
+    @NotNull
+    private String plateNumber;
 
     @NotNull
     private String companyName;
@@ -59,10 +58,16 @@ public class PermitCreatedLedgerEvent extends LedgerEventBase {
     private String companyId;
 
     @NotNull
-    private String plateNumber;
+    private String departureCountry;
+
+    @NotNull
+    private String arrivalCountry;
 
     private Map<String, Object> otherClaims;
 
+    @NotNull
+    private String qrCode;
+    
     @AssertTrue(message = "Invalid issued_at")
     private boolean isValidIssuedAt() {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");

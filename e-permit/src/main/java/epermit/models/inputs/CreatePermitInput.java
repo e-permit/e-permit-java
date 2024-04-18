@@ -10,15 +10,23 @@ import lombok.Data;
 public class CreatePermitInput {
     @NotNull
     private String issuedFor;
+
     @NotNull
     private PermitType permitType;
+    
     @NotNull
     private int permitYear;
+    
     @NotNull
     private String plateNumber;
+    
     @NotNull
     private String companyName;
+    
     @NotNull
     private String companyId;
+    
+    private String arrivalCountry;
+    
     private Map<String, Object> otherClaims = new HashMap<>();
 }

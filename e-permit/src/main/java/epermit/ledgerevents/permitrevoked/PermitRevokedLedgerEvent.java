@@ -2,6 +2,7 @@ package epermit.ledgerevents.permitrevoked;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import epermit.commons.Constants;
 import epermit.ledgerevents.LedgerEventBase;
 import epermit.ledgerevents.LedgerEventType;
 import lombok.Getter;
@@ -15,6 +16,6 @@ public class PermitRevokedLedgerEvent extends LedgerEventBase {
     }
 
     @NotNull
-    @Pattern(regexp = "^[A-Z]{2}-[A-Z]{2}-\\d{4}-(1|2|3)-[0-9]+$")
+    @Pattern(regexp = Constants.PERMIT_ID_FORMAT)
     private String permitId;
 }

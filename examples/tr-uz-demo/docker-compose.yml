@@ -6,14 +6,16 @@ services:
       context: ../../e-permit-internal-api
     depends_on:
       - trdb
+      - tr-public-api
     environment:
-      - FLYWAY_ENABLED=true
+      - EPERMIT_ADMIN_PASSWORD=admin
     env_file:
-      - tr.env
+      - ../tr.env
     ports:
       - "3050:8080"
     volumes:
       - /var/log/epermit
+  
   tr-public-api:
     container_name: tr-public-api
     build:
@@ -23,30 +25,12 @@ services:
     environment:
       - FLYWAY_ENABLED=true
       - FLYWAY_SCHEMAS=public
-      - SERVER_SERVLET_CONTEXT_PATH=/r1/TR/GOV/UBAK/HAULAGE/Permit/
     env_file:
-      - tr.env
+      - ../tr.env
     ports:
       - "3051:8080"
     volumes:
       - /var/log/epermit
-  # tr-central-server:
-  #   image: niis/xroad-central-server
-  #   ports:
-  #     - "3052:80"
-  #     - "3053:4000"
-  #     - "3054:4001"
-  #     - "3055:4002"
-  #     - "3056:8888"
-  #     - "3057:8889"
-
-  # tr-security-server:
-  #   image: niis/xroad-security-server
-  #   environment:
-  #     - XROAD_TOKEN_PIN="1234"
-  #   ports:
-  #     - "3058:4000"
-  #     - "3059:8080"
 
   trdb:
     image: 'postgres:13.1-alpine'
@@ -57,17 +41,18 @@ services:
       - POSTGRES_DB=devdb
     ports:
       - "5433:5432"
+  
   uz-internal-api:
     container_name: uz-internal-api
     build:
       context: ../../e-permit-internal-api
     depends_on:
       - uzdb
+      - uz-public-api
     environment:
-      - FLYWAY_ENABLED=true
-      - FLYWAY_SCHEMAS=public
+      - EPERMIT_ADMIN_PASSWORD=admin
     env_file:
-      - uz.env
+      - ../uz.env
     ports:
       - "3060:8080"
     volumes:
@@ -80,31 +65,14 @@ services:
     depends_on:
       - uzdb
     environment:
-      - SERVER_SERVLET_CONTEXT_PATH=/r1/UZ/GOV/MT/HAULAGE/Permit/
+      - FLYWAY_ENABLED=true
+      - FLYWAY_SCHEMAS=public
     env_file:
-      - uz.env
+      - ../uz.env
     ports:
       - "3061:8080"
     volumes:
       - /var/log/epermit
-
-  # uz-central-server:
-  #   image: niis/xroad-central-server
-  #   ports:
-  #     - "3062:80"
-  #     - "3063:4000"
-  #     - "3064:4001"
-  #     - "3065:4002"
-  #     - "3066:8888"
-  #     - "3067:8889"
-      
-  # uz-security-server:
-  #   image: niis/xroad-security-server
-  #   environment:
-  #     - XROAD_TOKEN_PIN="1234"
-  #   ports:
-  #     - "3068:4000"
-  #     - "3069:8080"
 
   uzdb:
     image: 'postgres:13.1-alpine'

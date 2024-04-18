@@ -1,10 +1,12 @@
 package epermit.services.it;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -20,6 +22,7 @@ import epermit.repositories.AuthorityRepository;
 import epermit.repositories.LedgerPermitRepository;
 import epermit.repositories.LedgerQuotaRepository;
 import epermit.services.AuthorityService;
+import epermit.services.KeyService;
 
 @Testcontainers
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -41,6 +44,12 @@ public class AuthorityServiceIT {
     @Container
     public static PostgreSQLContainer<PermitPostgresContainer> postgreSQLContainer = PermitPostgresContainer
             .getInstance();
+
+    @BeforeAll
+    @Transactional
+    static void up(@Autowired KeyService keyService) {
+        keyService.seed();
+    }
 
     @Test
     void getByCodeTest() {
@@ -68,8 +77,10 @@ public class AuthorityServiceIT {
         permit.setPermitType(PermitType.BILATERAL);
         permit.setPermitYear(2022);
         permit.setPlateNumber("companyId");
+        permit.setArrivalCountry("TR");
+        permit.setDepartureCountry("AY");
+        permit.setQrCode("A");
         permit.setUsed(false);
-        permit.setSerialNumber(100L);
         ledgerPermitRepository.save(permit);
     }
 
@@ -94,7 +105,6 @@ public class AuthorityServiceIT {
         input.setQuantity(20L);
         input.setPermitType(PermitType.BILATERAL);
         input.setPermitYear(2021);
-        authorityService.createQuota(input);
         authorityService.createQuota(input);
     }
 }

@@ -1,21 +1,19 @@
 package epermit.services;
 
-import java.security.PrivateKey;
 import java.time.Instant;
-import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import epermit.commons.GsonUtil;
 import epermit.entities.Key;
 import epermit.ledgerevents.LedgerEventUtil;
 import epermit.ledgerevents.keycreated.KeyCreatedLedgerEvent;
 import epermit.ledgerevents.keyrevoked.KeyRevokedLedgerEvent;
 import epermit.models.EPermitProperties;
-import epermit.models.dtos.PublicJwk;
+import epermit.models.dtos.KeyDto;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.KeyRepository;
+import epermit.utils.PrivateKeyUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -26,40 +24,31 @@ import lombok.extern.slf4j.Slf4j;
 public class KeyService {
     private final AuthorityRepository authorityRepository;
     private final KeyRepository keyRepository;
-
+    private final PrivateKeyUtil privateKeyUtil;
     private final EPermitProperties properties;
     private final LedgerEventUtil eventUtil;
-    private final EPermitKeyStore keyStore;
 
     @Transactional
     @SneakyThrows
-    public void sync() {
-        List<PublicJwk> keys = keyStore.getKeys();
-        keys.forEach(jwk -> {
-            if (!keyRepository.existsByKeyId(jwk.getKid())) {
-                String pubJwk = GsonUtil.getGson().toJson(jwk);
-                Key key = new Key();
-                key.setKeyId(jwk.getKid());
-                key.setJwk(pubJwk);
-                keyRepository.save(key);
-                authorityRepository.findAll().forEach(authority -> {
-                    String prevEventId = eventUtil.getPreviousEventId(authority.getCode());
-                    KeyCreatedLedgerEvent event = new KeyCreatedLedgerEvent(properties.getIssuerCode(),
-                            authority.getCode(), prevEventId);
-                    event.setKid(jwk.getKid());
-                    event.setJwk(pubJwk);
-                    eventUtil.persistAndPublishEvent(event);
-                });
-            }
-        });
+    public void seed() {
+        Long keyCount = keyRepository.count();
+        if (keyCount == 0) {
+            KeyDto keyInput = privateKeyUtil.create("1");
+            Key keyEntity = new Key();
+            keyEntity.setKeyId(keyInput.getKeyId());
+            keyEntity.setJwk(keyInput.getJwk());
+            keyEntity.setPrivateJwk(keyInput.getPrivateJwk());
+            keyEntity.setSalt(keyInput.getSalt());
+            keyRepository.save(keyEntity);  
+        }
     }
 
-     @Transactional
-    public void create(String keyId) {
-        log.info("KeyService create started {}", keyId);
-        //epermit.models.dtos.PrivateKey key = keyUtil.create(keyId);
+    @Transactional
+    public void create(KeyDto key) {
+        log.info("KeyService create started {}", key);
         Key keyEntity = new Key();
         keyEntity.setKeyId(key.getKeyId());
+        keyEntity.setJwk(key.getJwk());
         keyEntity.setPrivateJwk(key.getPrivateJwk());
         keyEntity.setSalt(key.getSalt());
         keyRepository.save(keyEntity);
@@ -67,14 +56,9 @@ public class KeyService {
             String prevEventId = eventUtil.getPreviousEventId(authority.getCode());
             KeyCreatedLedgerEvent event = new KeyCreatedLedgerEvent(properties.getIssuerCode(),
                     authority.getCode(), prevEventId);
-            event.setKid(keyId);
-            PublicJwk jwk = GsonUtil.getGson().fromJson(key.getPublicJwk(), PublicJwk.class);
-            event.setAlg(jwk.getAlg());
-            event.setCrv(jwk.getCrv());
-            event.setKty(jwk.getKty());
-            event.setUse(jwk.getUse());
-            event.setX(jwk.getX());
-            event.setY(jwk.getY());
+            event.setAuthority(properties.getIssuerCode());
+            event.setKid(key.getKeyId());
+            event.setJwk(key.getJwk());
             eventUtil.persistAndPublishEvent(event);
         });
         log.info("KeyService create finished {}", key.getKeyId());
@@ -89,6 +73,7 @@ public class KeyService {
             String prevEventId = eventUtil.getPreviousEventId(authority.getCode());
             KeyRevokedLedgerEvent event = new KeyRevokedLedgerEvent(properties.getIssuerCode(),
                     authority.getCode(), prevEventId);
+            event.setAuthority(properties.getIssuerCode());
             event.setKeyId(keyId);
             event.setRevokedAt(Instant.now().getEpochSecond());
             eventUtil.persistAndPublishEvent(event);

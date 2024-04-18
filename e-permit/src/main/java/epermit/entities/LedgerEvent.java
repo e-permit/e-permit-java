@@ -34,7 +34,7 @@ public class LedgerEvent {
     @Column(name = "consumer", nullable = false)
     private String consumer;
 
-    @Column(name = "event_id", nullable = false)
+    @Column(name = "event_id", nullable = false, unique = true)
     private String eventId;
 
     @Column(name = "previous_event_id", nullable = false)

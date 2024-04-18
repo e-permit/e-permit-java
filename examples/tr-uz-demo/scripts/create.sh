@@ -13,7 +13,8 @@ create_permit()
     "permit_type": "BILATERAL",
     "company_name": "TECT",
     "company_id": "123",
-    "plate_number": "TECT"
+    "plate_number": "TECT",
+    "arrival_country": "UZ"
   }
 EOF
 }

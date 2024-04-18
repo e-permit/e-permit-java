@@ -120,7 +120,6 @@ public class PermitControllerIT {
             permit.setExpireAt("31/01/2022");
             permit.setIssuedAt("03/03/2021");
             permit.setPermitId("ABC");
-            permit.setSerialNumber(1L);
             permitRepository.save(permit);
         }
         HttpHeaders headers = new HttpHeaders();
@@ -156,7 +155,6 @@ public class PermitControllerIT {
         permit.setExpireAt("31/01/2022");
         permit.setIssuedAt("03/03/2021");
         permit.setPermitId("ABC");
-        permit.setSerialNumber(1L);
         permitRepository.save(permit);
         PermitDto dto = getTestRestTemplate().getForObject(getBaseUrl() + "/" + permit.getId(),
                 PermitDto.class);
@@ -191,7 +189,6 @@ public class PermitControllerIT {
         permit.setExpireAt("31/01/2022");
         permit.setIssuedAt("03/03/2021");
         permit.setPermitId("ABC");
-        permit.setSerialNumber(1L);
         permitRepository.save(permit);
         when(restTemplate.postForEntity(anyString(), any(HttpEntity.class), any()))
                 .thenReturn(new ResponseEntity<>(HttpStatus.OK));
@@ -219,7 +216,6 @@ public class PermitControllerIT {
         permit.setExpireAt("31/01/2022");
         permit.setIssuedAt("03/03/2021");
         permit.setPermitId("ABC");
-        permit.setSerialNumber(1L);
         permitRepository.save(permit);
         PermitUsedInput input = new PermitUsedInput();
         input.setActivityType(PermitActivityType.ENTRANCE);

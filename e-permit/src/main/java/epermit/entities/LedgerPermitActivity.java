@@ -22,7 +22,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 @Data
-@NoArgsConstructor // JPA
+@NoArgsConstructor 
 @Entity
 @Table(name = "epermit_ledger_permit_acts")
 public class LedgerPermitActivity {

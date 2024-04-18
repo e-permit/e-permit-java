@@ -10,11 +10,9 @@ import lombok.Getter;
 @Getter
 public class LedgerEventBase {
     @NotNull
-    @Size(min = 2, max = 2)
     private String eventProducer;
 
     @NotNull
-    @Size(min = 2, max = 2)
     private String eventConsumer;
 
     @NotNull

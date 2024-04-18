@@ -3,7 +3,6 @@ package epermit.ledgerevents.quotacreated;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import epermit.ledgerevents.LedgerEventBase;
 import epermit.ledgerevents.LedgerEventType;
 import epermit.models.enums.PermitType;
@@ -18,11 +17,9 @@ public class QuotaCreatedLedgerEvent extends LedgerEventBase {
     }
 
     @NotNull
-    @Size(min = 2, max = 2)
     private String permitIssuer;
 
     @NotNull
-    @Size(min = 2, max = 2)
     private String permitIssuedFor;
 
     @NotNull

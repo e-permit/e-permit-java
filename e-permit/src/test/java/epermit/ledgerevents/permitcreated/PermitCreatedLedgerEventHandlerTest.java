@@ -72,28 +72,17 @@ public class PermitCreatedLedgerEventHandlerTest {
         event.setPermitType(PermitType.BILATERAL);
         event.setPermitYear(2021);
         event.setPlateNumber("A");
-        event.setSerialNumber(1L);
+        event.setArrivalCountry("A");
+        event.setDepartureCountry("A");
+        event.setQrCode("A");
         Set<ConstraintViolation<PermitCreatedLedgerEvent>> constraintViolations = validator.validate(event);
-        assertEquals(constraintViolations.size(), 0);
-    }
-
-    @Test
-    void handleInvalidPermitIdTest() {
-        PermitCreatedLedgerEvent event = new PermitCreatedLedgerEvent("UZ", "TR", "0");
-        event.setPermitId("UZ-TR-2021-1-1");
-        when(permitUtil.getPermitId(any())).thenReturn("UZ-TR-2021-1-2");
-        EpermitValidationException ex = Assertions.assertThrows(EpermitValidationException.class, () -> {
-            handler.handle(event);
-        });
-        assertEquals(ErrorCodes.INVALID_PERMITID.name(), ex.getErrorCode());
-        verify(permitRepository, never()).save(any());
+        assertEquals(0, constraintViolations.size());
     }
 
     @Test
     void handlePermitIdAlreadyExistsTest() {
         PermitCreatedLedgerEvent event = new PermitCreatedLedgerEvent("UZ", "TR", "0");
         event.setPermitId("UZ-TR-2021-1-1");
-        when(permitUtil.getPermitId(any())).thenReturn("UZ-TR-2021-1-1");
         when(permitRepository.existsByPermitId(event.getPermitId())).thenReturn(true);
         EpermitValidationException ex = Assertions.assertThrows(EpermitValidationException.class, () -> {
             handler.handle(event);
@@ -106,7 +95,6 @@ public class PermitCreatedLedgerEventHandlerTest {
     void handleInsufficientPermitQuotaTest() {
         PermitCreatedLedgerEvent event = new PermitCreatedLedgerEvent("UZ", "TR", "0");
         event.setPermitId("UZ-TR-2021-1-1");
-        when(permitUtil.getPermitId(any())).thenReturn("UZ-TR-2021-1-1");
         when(permitRepository.existsByPermitId(event.getPermitId())).thenReturn(false);
         
         EpermitValidationException ex = Assertions.assertThrows(EpermitValidationException.class, () -> {
@@ -126,8 +114,6 @@ public class PermitCreatedLedgerEventHandlerTest {
         event.setPermitType(PermitType.BILATERAL);
         event.setPermitYear(2021);
         event.setPlateNumber("A");
-        event.setSerialNumber(1L);
-        when(permitUtil.getPermitId(any())).thenReturn("UZ-TR-2021-1-1");
         when(permitRepository.existsByPermitId("UZ-TR-2021-1-1")).thenReturn(false);
         when(quotaRepository.findOne(ArgumentMatchers.<Specification<LedgerQuota>>any()))
                 .thenReturn(Optional.of(LedgerQuota.builder().balance(5L).build()));
@@ -142,7 +128,6 @@ public class PermitCreatedLedgerEventHandlerTest {
         assertEquals("UZ", p.getIssuer());
         assertEquals("TR", p.getIssuedFor());
         assertEquals(2021, p.getPermitYear());
-        assertEquals(1, p.getSerialNumber());
     }
 
 }

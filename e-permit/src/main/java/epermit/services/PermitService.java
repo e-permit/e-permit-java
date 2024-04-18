@@ -29,6 +29,7 @@ import epermit.ledgerevents.permitrevoked.PermitRevokedLedgerEvent;
 import epermit.ledgerevents.permitused.PermitUsedLedgerEvent;
 import epermit.models.EPermitProperties;
 import epermit.models.dtos.CreatePermitIdDto;
+import epermit.models.dtos.CreatePermitQrCodeDto;
 import epermit.models.dtos.PermitDto;
 import epermit.models.dtos.PermitListItem;
 import epermit.models.dtos.PermitListPageParams;
@@ -112,7 +113,13 @@ public class PermitService {
         String issuedAt = LocalDateTime.now(ZoneOffset.UTC).format(dtf);
         String expireAt = "31/01/" + Integer.toString(input.getPermitYear() + 1);
         String prevEventId = ledgerEventUtil.getPreviousEventId(input.getIssuedFor());
-
+        CreatePermitQrCodeDto qrCodeInput = new CreatePermitQrCodeDto();
+        qrCodeInput.setCompanyName(input.getCompanyName());
+        qrCodeInput.setExpireAt(expireAt);
+        qrCodeInput.setId(permitId);
+        qrCodeInput.setIssuedAt(issuedAt);
+        qrCodeInput.setPlateNumber(input.getPlateNumber());
+        String qrCode = permitUtil.generateQrCode(qrCodeInput);
         PermitCreatedLedgerEvent e = new PermitCreatedLedgerEvent(issuer, input.getIssuedFor(), prevEventId);
         e.setPermitId(permitId);
         e.setExpireAt(expireAt);
@@ -122,9 +129,11 @@ public class PermitService {
         e.setPermitType(input.getPermitType());
         e.setPermitYear(input.getPermitYear());
         e.setPlateNumber(input.getPlateNumber());
-        e.setSerialNumber(quota.getNextSerial());
         e.setPermitIssuer(properties.getIssuerCode());
         e.setPermitIssuedFor(input.getIssuedFor());
+        e.setDepartureCountry(properties.getIssuerCode());
+        e.setArrivalCountry(input.getArrivalCountry());
+        e.setQrCode(qrCode);
         if (input != null && !input.getOtherClaims().isEmpty()) {
             e.setOtherClaims(input.getOtherClaims());
         }

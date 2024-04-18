@@ -1,116 +1,137 @@
-create table epermit_keys (
+create table epermit_authorities (
+    created_at timestamp(6) not null,
+    updated_at timestamp(6) not null,
     id uuid not null,
-    key_id varchar(255) not null,
-    jwk varchar(4000) not null,
-    created_at timestamp not null,
-    deleted boolean not null,
+    code varchar(255) not null unique,
+    name varchar(255) not null,
+    public_api_uri varchar(255) not null,
     primary key (id)
 );
 
-create table epermit_authorities (
+create table epermit_authority_keys (
+    revoked boolean not null,
+    created_at timestamp(6) not null,
+    revoked_at bigint,
+    authority_id uuid,
     id uuid not null,
-    is_xroad boolean not null,
-    public_api_uri varchar(255) not null,
-    code varchar(255) not null,
-    created_at timestamp not null,
-    name varchar(255) not null,
-    updated_at timestamp not null,
+    jwk varchar(5000) not null,
+    key_id varchar(255) not null,
     primary key (id)
 );
 
 create table epermit_created_events (
-    id uuid not null,
-    created_at timestamp not null,
-    event_id varchar(255) not null,
     sent boolean not null,
-    error varchar(255) not null,
+    created_at timestamp(6) not null,
+    id uuid not null,
+    error varchar(255),
+    event_id varchar(255) not null unique,
+    primary key (id)
+);
+
+create table epermit_keys (
+    revoked boolean not null,
+    created_at timestamp(6) not null,
+    revoked_at bigint,
+    id uuid not null,
+    private_jwk varchar(4000) not null,
+    jwk varchar(4000) not null,
+    key_id varchar(255) not null unique,
+    salt varchar(255) not null,
     primary key (id)
 );
 
 create table epermit_ledger_events (
+    created_at timestamp(6) not null,
+    event_timestamp bigint not null,
     id uuid not null,
-    consumer varchar(255) not null,
-    created_at timestamp not null,
+    proof varchar(1000) not null,
     event_content varchar(10000) not null,
-    event_id varchar(255) not null,
-    event_timestamp int8 not null,
-    event_type varchar(255) not null,
+    consumer varchar(255) not null,
+    event_id varchar(255) not null unique,
+    event_type varchar(255) not null check (
+        event_type in (
+            'PERMIT_CREATED',
+            'PERMIT_USED',
+            'PERMIT_REVOKED',
+            'QUOTA_CREATED',
+            'KEY_CREATED',
+            'KEY_REVOKED'
+        )
+    ),
     previous_event_id varchar(255) not null,
     producer varchar(255) not null,
-    proof varchar(255) not null,
     primary key (id)
 );
 
-create table epermit_ledger_public_keys (
+create table epermit_ledger_permit_acts (
+    activity_timestamp bigint not null,
+    created_at timestamp(6) not null,
     id uuid not null,
-    owner varchar(255) not null,
-    partner varchar(255) not null,
-    created_at timestamp not null,
-    jwk varchar(5000) not null,
-    key_id varchar(255) not null,
-    revoked boolean not null,
-    revoked_at int8,
+    ledger_permit_id uuid,
+    activity_details varchar(255),
+    activity_type varchar(255) not null check (activity_type in ('ENTRANCE', 'EXIT')),
     primary key (id)
 );
 
 create table epermit_ledger_permits (
+    permit_year integer not null,
+    revoked boolean not null,
+    used boolean not null,
+    created_at timestamp(6) not null,
+    revoked_at bigint,
+    arrival_country varchar(10) not null,
+    departure_country varchar(10) not null,
     id uuid not null,
     company_id varchar(100) not null,
     company_name varchar(200) not null,
-    created_at timestamp not null,
-    deleted boolean not null,
+    qr_code varchar(5000) not null,
     expire_at varchar(255) not null,
     issued_at varchar(255) not null,
     issued_for varchar(255) not null,
     issuer varchar(255) not null,
     other_claims varchar(255),
-    permit_id varchar(255) not null,
-    permit_type varchar(255) not null,
-    permit_year int4 not null,
+    permit_id varchar(255) not null unique,
+    permit_type varchar(255) not null check (
+        permit_type in (
+            'BILATERAL',
+            'TRANSIT',
+            'THIRDCOUNTRY',
+            'BILATERAL_FEE',
+            'TRANSIT_FEE',
+            'THIRDCOUNTRY_FEE'
+        )
+    ),
     plate_number varchar(255) not null,
-    serial_number bigint not null,
-    used boolean not null,
     primary key (id)
 );
 
 create table epermit_ledger_quotas (
-    id uuid not null,
-    created_at timestamp not null,
+    permit_year integer not null,
     balance bigint not null,
+    created_at timestamp(6) not null,
     next_serial bigint not null,
-    spent bigint not null,
+    id uuid not null,
     permit_issued_for varchar(255) not null,
     permit_issuer varchar(255) not null,
-    permit_type varchar(255) not null,
-    permit_year int4 not null,
+    permit_type varchar(255) not null check (
+        permit_type in (
+            'BILATERAL',
+            'TRANSIT',
+            'THIRDCOUNTRY',
+            'BILATERAL_FEE',
+            'TRANSIT_FEE',
+            'THIRDCOUNTRY_FEE'
+        )
+    ),
     primary key (id)
 );
 
-create table epermit_ledger_permit_acts (
-    id uuid not null,
-    activity_details varchar(255),
-    activity_timestamp int8 not null,
-    activity_type varchar(255) not null,
-    created_at timestamp not null,
-    ledger_permit_id uuid,
-    primary key (id)
-);
-
 alter table
-    if exists epermit_keys
+    if exists epermit_authority_keys
 add
-    constraint UK_KEY_ID unique (key_id);
-
-alter table
-    if exists epermit_ledger_public_keys
-add
-    constraint UK_CODE_AND_KEY_ID unique (owner, partner, key_id);
-alter table
-    if exists epermit_created_events
-add
-    constraint UK_CREATED_EVENTS_EVENT_ID unique (event_id);
+    constraint FKg8khfcvvxkgbcceulq4ji92wp foreign key (authority_id) references epermit_authorities;
 
 alter table
     if exists epermit_ledger_permit_acts
 add
-    constraint FK_ACTIVITY_TO_PERMIT foreign key (ledger_permit_id) references epermit_ledger_permits;
+    constraint FKolfcj4yeybykvnbsh32pv3ovc foreign key (ledger_permit_id) references epermit_ledger_permits;
