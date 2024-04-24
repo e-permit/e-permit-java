@@ -9,8 +9,10 @@ services:
       - tr-public-api
     environment:
       - EPERMIT_ADMIN_PASSWORD=admin
+      - FLYWAY_ENABLED=true
+      - FLYWAY_SCHEMAS=public
     env_file:
-      - ../tr.env
+      - tr.env
     ports:
       - "3050:8080"
     volumes:
@@ -22,18 +24,15 @@ services:
       context: ../../e-permit-public-api
     depends_on:
       - trdb
-    environment:
-      - FLYWAY_ENABLED=true
-      - FLYWAY_SCHEMAS=public
     env_file:
-      - ../tr.env
+      - tr.env
     ports:
       - "3051:8080"
     volumes:
       - /var/log/epermit
 
   trdb:
-    image: 'postgres:13.1-alpine'
+    image: 'postgres:16.2-alpine'
     container_name: trdb
     environment:
       - POSTGRES_USER=compose-postgres
@@ -51,8 +50,10 @@ services:
       - uz-public-api
     environment:
       - EPERMIT_ADMIN_PASSWORD=admin
+      - FLYWAY_ENABLED=true
+      - FLYWAY_SCHEMAS=public
     env_file:
-      - ../uz.env
+      - uz.env
     ports:
       - "3060:8080"
     volumes:
@@ -64,18 +65,15 @@ services:
       context: ../../e-permit-public-api
     depends_on:
       - uzdb
-    environment:
-      - FLYWAY_ENABLED=true
-      - FLYWAY_SCHEMAS=public
     env_file:
-      - ../uz.env
+      - uz.env
     ports:
       - "3061:8080"
     volumes:
       - /var/log/epermit
 
   uzdb:
-    image: 'postgres:13.1-alpine'
+    image: 'postgres:16.2-alpine'
     container_name: uzdb
     environment:
       - POSTGRES_USER=compose-postgres

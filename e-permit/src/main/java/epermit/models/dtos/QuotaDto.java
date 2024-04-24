@@ -19,5 +19,5 @@ public class QuotaDto {
 
     private Long balance;
 
-    private Long spent;
+    private Long nextSerial;
 }

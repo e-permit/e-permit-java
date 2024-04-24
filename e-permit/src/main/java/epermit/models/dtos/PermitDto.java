@@ -18,8 +18,6 @@ public class PermitDto {
 
     private String qrCode;
 
-    private int serialNumber;
-
     private PermitType permitType;
 
     private int permitYear;
@@ -33,6 +31,10 @@ public class PermitDto {
     private String companyName;
 
     private String companyId;
+    
+    private String departureCountry;
+    
+    private String arrivalCountry;
 
     private String claims;
 

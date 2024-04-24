@@ -107,7 +107,6 @@
             <version>1.70</version>
         </dependency>
 
-
         <dependency>
             <groupId>org.modelmapper</groupId>
             <artifactId>modelmapper</artifactId>
@@ -133,6 +132,12 @@
             <groupId>org.hsqldb</groupId>
             <artifactId>hsqldb</artifactId>
             <scope>test</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/io.swagger.core.v3/swagger-annotations -->
+        <dependency>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-annotations</artifactId>
+            <version>2.2.21</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/com.itextpdf/itext7-core -->

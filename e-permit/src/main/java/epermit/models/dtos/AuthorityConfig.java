@@ -11,8 +11,6 @@ public class AuthorityConfig {
     private String name;
 
     private String version;
-
-    private boolean xroad;
   
     private List<PublicJwk> keys = new ArrayList<>();
 }

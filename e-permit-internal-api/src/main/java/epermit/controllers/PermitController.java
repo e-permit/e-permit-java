@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import jakarta.validation.Valid;
+
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
@@ -19,9 +21,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import epermit.commons.GsonUtil;
 import epermit.models.dtos.PermitDto;
 import epermit.models.dtos.PermitListItem;
 import epermit.models.dtos.PermitListPageParams;
@@ -41,17 +41,16 @@ import lombok.extern.slf4j.Slf4j;
 public class PermitController {
     private final PermitService permitService;
 
-    @GetMapping("/all")
-    public List<PermitListItem> getAll(@RequestParam Map<String, Object> params) {
-        PermitListParams input = GsonUtil.fromMap(params, PermitListParams.class);
-        List<PermitListItem> r = permitService.getAll(input);
+    @GetMapping()
+    public Page<PermitListItem> getPage(@ParameterObject PermitListPageParams input) {
+        Page<PermitListItem> r = permitService.getPage(input);
         return r;
     }
 
-    @GetMapping()
-    public Page<PermitListItem> getPage(@RequestParam Map<String, Object> params) {
-        PermitListPageParams input = GsonUtil.fromMap(params, PermitListPageParams.class);
-        Page<PermitListItem> r = permitService.getPage(input);
+    
+    @GetMapping("/all")
+    public List<PermitListItem> getAll(@ParameterObject PermitListParams input) {
+        List<PermitListItem> r = permitService.getAll(input);
         return r;
     }
 

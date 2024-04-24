@@ -14,8 +14,6 @@ public class PermitListItem {
 
     private String permitId;
 
-    private int serialNumber;
-
     private PermitType permitType;
 
     private int permitYear;
@@ -29,6 +27,10 @@ public class PermitListItem {
     private String companyName;
 
     private String companyId;
+
+    private String departureCountry;
+    
+    private String arrivalCountry;
 
     private String claims;
 

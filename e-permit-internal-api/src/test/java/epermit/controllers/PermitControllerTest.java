@@ -20,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import epermit.models.dtos.PermitDto;
 import epermit.models.dtos.PermitListItem;
+import epermit.models.dtos.PermitListPageParams;
 import epermit.models.inputs.CreatePermitInput;
 import epermit.models.inputs.PermitUsedInput;
 import epermit.models.results.CreatePermitResult;
@@ -42,7 +43,7 @@ public class PermitControllerTest {
         }
         Page<PermitListItem> pagedList = new PageImpl<>(permits);
         when(permitService.getPage(any())).thenReturn(pagedList);
-        Page<PermitListItem> result = controller.getPage(Map.of());
+        Page<PermitListItem> result = controller.getPage(new PermitListPageParams());
         assertEquals(10, result.getTotalElements());
     }
 
