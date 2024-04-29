@@ -47,13 +47,4 @@ public class PrivateKeyUtil {
         log.info("Key created jwk: {}, salt: {}", key.toPublicJWK().toJSONString(), salt);
         return k;
     }
-
-    @SneakyThrows
-    public ECKey getKey() {
-        Key privateKey = keyRepository.findFirstByRevokedFalseOrderByCreatedAtDesc()
-                .orElseThrow(() -> new EpermitValidationException(ErrorCodes.KEY_NOTFOUND));
-        TextEncryptor decryptor = Encryptors.text(properties.getKeystorePassword(), privateKey.getSalt());
-        ECKey key = ECKey.parse(decryptor.decrypt(privateKey.getPrivateJwk()));
-        return key;
-    }
 }

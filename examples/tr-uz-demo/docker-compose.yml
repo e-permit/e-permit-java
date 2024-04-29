@@ -6,7 +6,6 @@ services:
       context: ../../e-permit-internal-api
     depends_on:
       - trdb
-      - tr-public-api
     environment:
       - EPERMIT_ADMIN_PASSWORD=admin
       - FLYWAY_ENABLED=true
@@ -47,7 +46,6 @@ services:
       context: ../../e-permit-internal-api
     depends_on:
       - uzdb
-      - uz-public-api
     environment:
       - EPERMIT_ADMIN_PASSWORD=admin
       - FLYWAY_ENABLED=true

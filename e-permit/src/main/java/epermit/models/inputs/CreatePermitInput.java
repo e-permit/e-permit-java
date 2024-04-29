@@ -11,32 +11,32 @@ import lombok.Data;
 public class CreatePermitInput {
 
     @NotNull
-    @Schema(name = "issued_for", description = "Permit issued for", example = "TR" )
+    @Schema(name = "issued_for", description = "Permit issued for", example = "UZ" )
     private String issuedFor;
 
     @NotNull
-    @Schema(description = "Permit type", example = "BILATERAL" )
+    @Schema(name = "permit_type", description = "Permit type", example = "BILATERAL" )
     private PermitType permitType;
     
     @NotNull
-    @Schema(description = "Permit year", example = "2024" )
+    @Schema(name = "permit_year", description = "Permit year", example = "2024" )
     private int permitYear;
     
     @NotNull
-    @Schema(description = "Plate number", example = "06TEST" )
+    @Schema(name = "plate_number", description = "Plate number", example = "06TEST" )
     private String plateNumber;
     
     @NotNull
-    @Schema(description = "Company name", example = "ABC" )
+    @Schema(name = "company_name", description = "Company name", example = "ABC" )
     private String companyName;
     
     @NotNull
-    @Schema(description = "Company identifier", example = "1234" )
+    @Schema(name = "company_id", description = "Company identifier", example = "1234" )
     private String companyId;
     
-    @Schema(description = "Arrival country", example = "TR" )
+    @Schema(name = "arrival_country", description = "Arrival country", example = "UZ" )
     private String arrivalCountry;
     
-    @Schema(description = "Other data", example = "{}" )
+    @Schema(hidden = true )
     private Map<String, Object> otherClaims = new HashMap<>();
 }

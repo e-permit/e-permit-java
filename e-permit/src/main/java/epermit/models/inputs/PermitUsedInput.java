@@ -8,11 +8,11 @@ import lombok.Data;
 @Data
 public class PermitUsedInput {
     @NotNull
-    @Schema(description = "Activity type", example = "ENTRANCE" )
+    @Schema(name = "activity_type", description = "Activity type", example = "ENTRANCE" )
     private PermitActivityType activityType;
     @NotNull
-    @Schema(description = "Activity time", example = "1713529299" )
+    @Schema(name = "activity_timestamp", description = "Activity time", example = "1713529299" )
     private Long activityTimestamp;
-    @Schema(description = "Activity details", example = "ABC Customs" )
+    @Schema(name = "activity_details", description = "Activity details", example = "ABC Customs" )
     private String activityDetails;
 }

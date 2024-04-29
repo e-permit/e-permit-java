@@ -53,7 +53,6 @@ public class AuthorityServiceIT {
 
     @Test
     void getByCodeTest() {
-
         CreateAuthorityInput input = new CreateAuthorityInput();
         input.setCode("AY");
         input.setName("Ay");
@@ -101,10 +100,9 @@ public class AuthorityServiceIT {
         authority.setName("Uz");
         authorityRepository.save(authority);
         CreateQuotaInput input = new CreateQuotaInput();
-        input.setAuthorityCode("UZ");
         input.setQuantity(20L);
         input.setPermitType(PermitType.BILATERAL);
         input.setPermitYear(2021);
-        authorityService.createQuota(input);
+        authorityService.createQuota("UZ", input);
     }
 }

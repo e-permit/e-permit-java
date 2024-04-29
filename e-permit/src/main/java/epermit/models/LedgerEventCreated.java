@@ -11,5 +11,4 @@ public class LedgerEventCreated {
     private Map<String, Object> content;
     private String eventId;
     private String proof;
-    //private boolean xroad;
 }

@@ -32,7 +32,6 @@ create_quota()
 {
   cat <<EOF
   {
-    "authority_code": "TR",
     "permit_type": "BILATERAL",
     "permit_year": 2024,
     "quantity": 100
@@ -42,4 +41,4 @@ EOF
 
 curl "$TR_URI/authorities" -u "$AUTH" -H 'Content-Type: application/json' -X POST --data "$(create_uz_authority)" 
 curl "$UZ_URI/authorities" -u "$AUTH" -H 'Content-Type: application/json' -X POST --data "$(create_tr_authority)" 
-curl "$UZ_URI/authority_quotas" -H 'Content-Type: application/json' -u "$AUTH" -X POST --data "$(create_quota)" 
+curl "$UZ_URI/authorities/TR/quotas" -H 'Content-Type: application/json' -u "$AUTH" -X POST --data "$(create_quota)" 

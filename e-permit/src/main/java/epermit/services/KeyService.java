@@ -5,6 +5,8 @@ import java.time.Instant;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import epermit.commons.EpermitValidationException;
+import epermit.commons.ErrorCodes;
 import epermit.entities.Key;
 import epermit.ledgerevents.LedgerEventUtil;
 import epermit.ledgerevents.keycreated.KeyCreatedLedgerEvent;
@@ -39,13 +41,18 @@ public class KeyService {
             keyEntity.setJwk(keyInput.getJwk());
             keyEntity.setPrivateJwk(keyInput.getPrivateJwk());
             keyEntity.setSalt(keyInput.getSalt());
-            keyRepository.save(keyEntity);  
+            keyRepository.save(keyEntity);
         }
     }
 
     @Transactional
-    public void create(KeyDto key) {
-        log.info("KeyService create started {}", key);
+    public void create(String keyId) {
+        log.info("KeyService create started {}", keyId);
+
+        if (keyRepository.findOneByKeyId(keyId).isPresent()) {
+            throw new EpermitValidationException(ErrorCodes.KEYID_ALREADY_EXISTS);
+        }
+        KeyDto key = privateKeyUtil.create(keyId);
         Key keyEntity = new Key();
         keyEntity.setKeyId(key.getKeyId());
         keyEntity.setJwk(key.getJwk());
@@ -68,7 +75,13 @@ public class KeyService {
     @Transactional
     public void revoke(String keyId) {
         log.info("KeyService delete started {}", keyId);
-
+        if(keyRepository.findAllByRevokedFalse().size() < 2){
+            throw new EpermitValidationException(ErrorCodes.INSUFFICIENT_KEY);
+        }
+        Key key = keyRepository.findOneByKeyIdAndRevokedFalse(keyId)
+                .orElseThrow(() -> new EpermitValidationException(ErrorCodes.KEY_NOTFOUND));
+        key.setRevoked(true);
+        key.setRevokedAt(Instant.now().getEpochSecond());
         authorityRepository.findAll().forEach(authority -> {
             String prevEventId = eventUtil.getPreviousEventId(authority.getCode());
             KeyRevokedLedgerEvent event = new KeyRevokedLedgerEvent(properties.getIssuerCode(),

@@ -2,7 +2,6 @@ package epermit.controllers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -22,6 +21,7 @@ import org.springframework.web.client.RestTemplate;
 import epermit.models.dtos.AuthorityConfig;
 import epermit.models.dtos.AuthorityDto;
 import epermit.models.inputs.CreateAuthorityInput;
+import epermit.models.inputs.CreateQuotaInput;
 import epermit.services.AuthorityService;
 
 @ExtendWith(MockitoExtension.class)
@@ -68,5 +68,12 @@ public class AuthorityControllerTest {
                 .thenReturn(new ResponseEntity<>(config, HttpStatus.OK));
         controller.create(input);
         verify(authorityService, times(1)).create(eq(input), eq(config));
+    }
+
+    @Test
+    void createQuotaTest() {
+        CreateQuotaInput input = new CreateQuotaInput();
+        controller.createQuota("TR", input);
+        verify(authorityService, times(1)).createQuota("TR", input);
     }
 }

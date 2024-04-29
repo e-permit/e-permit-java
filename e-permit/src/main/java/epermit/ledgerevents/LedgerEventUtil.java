@@ -54,8 +54,6 @@ public class LedgerEventUtil {
 
     @SneakyThrows
     public <T extends LedgerEventBase> void persistAndPublishEvent(T event) {
-        
-        // if createdEventRepository.exists(event.getEventConsumer()) throw exception
         CreatedEvent createdEvent = new CreatedEvent();
         createdEvent.setEventId(event.getEventId());
         createdEvent.setSent(false);
@@ -71,7 +69,6 @@ public class LedgerEventUtil {
         LedgerEventCreated appEvent = new LedgerEventCreated();
         appEvent.setId(UUID.randomUUID());
         appEvent.setEventId(createdEvent.getEventId());
-        //appEvent.setXroad(authority.isXroad());
         appEvent.setUrl(authority.getPublicApiUri() + "/events/"
                 + ledgerEvent.getEventType().name().toLowerCase().replace("_", "-"));
         appEvent.setContent(GsonUtil.toMap(ledgerEvent.getEventContent()));
@@ -123,9 +120,6 @@ public class LedgerEventUtil {
     public ResponseEntity<?> sendEvent(LedgerEventCreated event) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        /*if (event.isXroad()) {
-            headers.set("X-Road-Client", properties.getXroadClientId().get());
-        }*/
         headers.add("Authorization", "Bearer " + event.getProof());
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(event.getContent(), headers);
         ResponseEntity<?> result = restTemplate.postForEntity(event.getUrl(), request,

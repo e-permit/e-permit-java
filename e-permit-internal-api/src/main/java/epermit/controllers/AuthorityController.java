@@ -19,7 +19,12 @@ import epermit.commons.ErrorCodes;
 import epermit.models.dtos.AuthorityConfig;
 import epermit.models.dtos.AuthorityDto;
 import epermit.models.inputs.CreateAuthorityInput;
+import epermit.models.inputs.CreateQuotaInput;
 import epermit.services.AuthorityService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -30,22 +35,27 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 @RequestMapping("/authorities")
+@Tag(name = "Authorities", description = "Authority Management APIs")
 public class AuthorityController {
     private final AuthorityService service;
     private final RestTemplate restTemplate;
 
     @GetMapping()
+    @Operation(summary = "Get all authorities", description = "Returns all known authorities")
     public List<AuthorityDto> getAll() {
         return service.getAll();
     }
 
     @GetMapping("/{code}")
-    public AuthorityDto getByCode(@PathVariable("code") String code) {
+    @Operation(summary = "Get authority by code", description = "Get a Authority object by specifying its code")
+    public AuthorityDto getByCode(
+            @Parameter(description = "Authority code", example = "TR") @PathVariable("code") String code) {
         return service.getByCode(code);
     }
 
     @SneakyThrows
     @PostMapping()
+    @Operation(summary = "Create authority", description = "Create new authority")
     public void create(@RequestBody @Valid CreateAuthorityInput input) {
         log.info("Authority create request. {}", input);
         HttpHeaders headers = new HttpHeaders();
@@ -58,5 +68,14 @@ public class AuthorityController {
             throw new EpermitValidationException("Couldn't get authority config",
                     ErrorCodes.REMOTE_ERROR);
         }
+    }
+
+    @PostMapping("/{code}/quotas")
+    @Operation(summary = "Create quota", description = "Create quota for given authority")
+    public void createQuota(
+            @Parameter(description = "Authority code", example = "UZ") @PathVariable("code") String code,
+            @RequestBody @Valid CreateQuotaInput input) {
+        log.info("Authority quota create request. {}", input);
+        service.createQuota(code, input);
     }
 }

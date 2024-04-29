@@ -92,14 +92,13 @@ public class AuthorityServiceTest {
     @Test
     void createQuotaTest() {
         CreateQuotaInput input = new CreateQuotaInput();
-        input.setAuthorityCode("TR");
         input.setQuantity(20L);
         input.setPermitType(PermitType.BILATERAL);
         input.setPermitYear(2021);
         when(properties.getIssuerCode()).thenReturn("UZ");
         when(ledgerEventUtil.getPreviousEventId("TR")).thenReturn("123");
         when(authorityRepository.findOneByCode("TR")).thenReturn(Optional.of(new Authority()));
-        authorityService.createQuota(input);
+        authorityService.createQuota("TR", input);
         verify(ledgerEventUtil, times(1)).persistAndPublishEvent(captor.capture());
         QuotaCreatedLedgerEvent event = captor.getValue();
         assertEquals(20L, event.getQuantity());

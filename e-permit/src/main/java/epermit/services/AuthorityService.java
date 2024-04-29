@@ -78,17 +78,17 @@ public class AuthorityService {
     }
 
     @Transactional
-    public void createQuota(CreateQuotaInput input) {
+    public void createQuota(String authorityCode, CreateQuotaInput input) {
         log.info("Quota create command: {}", input);
-        authorityRepository.findOneByCode(input.getAuthorityCode())
+        authorityRepository.findOneByCode(authorityCode)
                 .orElseThrow(() -> new EpermitValidationException(ErrorCodes.AUTHORITY_NOT_FOUND));
         String issuer = properties.getIssuerCode();
-        String prevEventId = ledgerEventUtil.getPreviousEventId(input.getAuthorityCode());
-        QuotaCreatedLedgerEvent event = new QuotaCreatedLedgerEvent(issuer, input.getAuthorityCode(), prevEventId);
+        String prevEventId = ledgerEventUtil.getPreviousEventId(authorityCode);
+        QuotaCreatedLedgerEvent event = new QuotaCreatedLedgerEvent(issuer, authorityCode, prevEventId);
         event.setQuantity(input.getQuantity());
         event.setPermitType(input.getPermitType());
         event.setPermitYear(input.getPermitYear());
-        event.setPermitIssuer(input.getAuthorityCode());
+        event.setPermitIssuer(authorityCode);
         event.setPermitIssuedFor(issuer);
         ledgerEventUtil.persistAndPublishEvent(event);
         log.info("Quota created: {}", event);

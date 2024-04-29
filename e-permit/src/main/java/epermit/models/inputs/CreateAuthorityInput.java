@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotBlank;
 public class CreateAuthorityInput {
 
     @NotBlank
-    @Schema(description = "The public api url of authority", example = "https://example.gov" )
+    @Schema(name = "public_api_uri", description = "The public api url of authority", example = "https://example.gov" )
     private String publicApiUri;
 
     @NotBlank

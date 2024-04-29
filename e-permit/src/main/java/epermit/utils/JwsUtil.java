@@ -40,7 +40,7 @@ public class JwsUtil {
 
     @SneakyThrows
     public <T> String createJws(T payloadObj) {
-        Key key = keyRepository.findFirstByRevokedFalseOrderByCreatedAtDesc()
+        Key key = keyRepository.findFirstByRevokedFalseOrderByCreatedAtAsc()
                 .orElseThrow(() -> new EpermitValidationException(ErrorCodes.KEY_NOTFOUND));
         return createJws(key.getKeyId(), payloadObj);
     }

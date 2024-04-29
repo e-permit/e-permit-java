@@ -2,8 +2,6 @@ package epermit.controllers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.Optional;
-
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +20,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import epermit.PermitPostgresContainer;
 import epermit.entities.Authority;
 import epermit.models.dtos.AuthorityDto;
+import epermit.models.enums.PermitType;
 import epermit.models.inputs.CreateAuthorityInput;
+import epermit.models.inputs.CreateQuotaInput;
 import epermit.repositories.AuthorityRepository;
 
 @Testcontainers
@@ -93,5 +93,16 @@ public class AuthorityControllerIT {
         assertEquals(HttpStatus.OK, r.getStatusCode());
         AuthorityDto authority = getTestRestTemplate().getForObject(getBaseUrl() + "/UZ", AuthorityDto.class);
         assertEquals("UZ", authority.getCode());
+    }
+
+    @Test
+    void createQuotaTest() {
+        CreateQuotaInput input = new CreateQuotaInput();
+        input.setQuantity(100L);
+        input.setPermitType(PermitType.BILATERAL);
+        input.setPermitYear(2021);
+        ResponseEntity<Void> r =
+                getTestRestTemplate().postForEntity(getBaseUrl() + "/UZ/quotas", input, Void.class);
+        assertEquals(HttpStatus.OK, r.getStatusCode());
     }
 }
