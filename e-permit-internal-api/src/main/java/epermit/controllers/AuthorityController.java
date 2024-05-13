@@ -73,7 +73,7 @@ public class AuthorityController {
     @PostMapping("/{code}/quotas")
     @Operation(summary = "Create quota", description = "Create quota for given authority")
     public void createQuota(
-            @Parameter(description = "Authority code", example = "UZ") @PathVariable("code") String code,
+            @Parameter(description = "Authority code", example = "TR") @PathVariable("code") String code,
             @RequestBody @Valid CreateQuotaInput input) {
         log.info("Authority quota create request. {}", input);
         service.createQuota(code, input);

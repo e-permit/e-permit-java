@@ -84,6 +84,14 @@ public class PermitService {
         return Optional.of(mapPermit(permitR.get()));
     }
 
+    public Optional<PermitDto> getByQrCode(String qrCode) {
+        Optional<LedgerPermit> permitR = permitRepository.findOneByQrCode(qrCode);
+        if (permitR.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(mapPermit(permitR.get()));
+    }
+
     public List<PermitListItem> getAll(PermitListParams input) {
         List<epermit.entities.LedgerPermit> entities = permitRepository.findAll(filterAllPermits(input));
         return entities.stream().map(x -> modelMapper.map(x, PermitListItem.class)).toList();

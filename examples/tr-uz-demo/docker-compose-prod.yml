@@ -2,8 +2,7 @@ version: '3.8'
 services:
   tr-internal-api:
     container_name: tr-internal-api
-    build:
-      context: ../../e-permit-internal-api
+    image: ghcr.io/e-permit/internalapi:latest
     depends_on:
       - trdb
     environment:
@@ -20,8 +19,7 @@ services:
   
   tr-public-api:
     container_name: tr-public-api
-    build:
-      context: ../../e-permit-public-api
+    image: ghcr.io/e-permit/publicapi:latest
     depends_on:
       - trdb
     env_file:
@@ -43,8 +41,7 @@ services:
   
   uz-internal-api:
     container_name: uz-internal-api
-    build:
-      context: ../../e-permit-internal-api
+    image: ghcr.io/e-permit/internalapi:latest
     depends_on:
       - uzdb
     environment:
@@ -61,8 +58,7 @@ services:
 
   uz-public-api:
     container_name: uz-public-api
-    build:
-      context: ../../e-permit-public-api
+    image: ghcr.io/e-permit/publicapi:latest
     depends_on:
       - uzdb
     env_file:

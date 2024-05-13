@@ -11,7 +11,7 @@ import lombok.Data;
 public class CreatePermitInput {
 
     @NotNull
-    @Schema(name = "issued_for", description = "Permit issued for", example = "UZ" )
+    @Schema(name = "issued_for", description = "Permit issued for", example = "TR" )
     private String issuedFor;
 
     @NotNull
@@ -34,7 +34,7 @@ public class CreatePermitInput {
     @Schema(name = "company_id", description = "Company identifier", example = "1234" )
     private String companyId;
     
-    @Schema(name = "arrival_country", description = "Arrival country", example = "UZ" )
+    @Schema(name = "arrival_country", description = "Arrival country", example = "TR" )
     private String arrivalCountry;
     
     @Schema(hidden = true )

@@ -15,6 +15,9 @@ public interface LedgerPermitRepository
           extends JpaRepository<LedgerPermit, UUID>, JpaSpecificationExecutor<LedgerPermit> {
      Optional<LedgerPermit> findOneByPermitId(String permitId);
 
+     Optional<LedgerPermit> findOneByQrCode(String qrCode);
+
+
      boolean existsByPermitId(String permitId);
 
      @Query(value = "SELECT * FROM epermit_ledger_permits", nativeQuery = true)
