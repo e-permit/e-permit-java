@@ -19,6 +19,7 @@ import epermit.ledgerevents.quotacreated.QuotaCreatedLedgerEvent;
 import epermit.models.EPermitProperties;
 import epermit.models.dtos.AuthorityConfig;
 import epermit.models.dtos.AuthorityDto;
+import epermit.models.dtos.AuthorityListItem;
 import epermit.models.dtos.QuotaDto;
 import epermit.models.inputs.CreateAuthorityInput;
 import epermit.models.inputs.CreateQuotaInput;
@@ -37,17 +38,18 @@ public class AuthorityService {
     private final LedgerQuotaRepository ledgerQuotaRepository;
     private final ModelMapper modelMapper;
 
-    public List<AuthorityDto> getAll() {
+    public List<AuthorityListItem> getAll() {
         List<epermit.entities.Authority> all = authorityRepository.findAll();
-        return all.stream().map(x -> modelMapper.map(x, AuthorityDto.class))
+        return all.stream().map(x -> modelMapper.map(x, AuthorityListItem.class))
                 .collect(Collectors.toList());
     }
 
     public AuthorityDto getByCode(String code) {
+        List<epermit.entities.LedgerQuota> quotaEntities = ledgerQuotaRepository.findAll();
         Authority authority = authorityRepository.findOneByCode(code)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
         AuthorityDto dto = modelMapper.map(authority, AuthorityDto.class);
-        List<epermit.entities.LedgerQuota> quotaEntities = ledgerQuotaRepository.findAll();
 
         List<QuotaDto> quotas = quotaEntities.stream().filter(
                 x -> x.getPermitIssuer().equals(code) || x.getPermitIssuedFor().equals(code))

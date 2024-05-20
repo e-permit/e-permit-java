@@ -18,6 +18,7 @@ import epermit.commons.EpermitValidationException;
 import epermit.commons.ErrorCodes;
 import epermit.models.dtos.AuthorityConfig;
 import epermit.models.dtos.AuthorityDto;
+import epermit.models.dtos.AuthorityListItem;
 import epermit.models.inputs.CreateAuthorityInput;
 import epermit.models.inputs.CreateQuotaInput;
 import epermit.services.AuthorityService;
@@ -42,7 +43,7 @@ public class AuthorityController {
 
     @GetMapping()
     @Operation(summary = "Get all authorities", description = "Returns all known authorities")
-    public List<AuthorityDto> getAll() {
+    public List<AuthorityListItem> getAll() {
         return service.getAll();
     }
 

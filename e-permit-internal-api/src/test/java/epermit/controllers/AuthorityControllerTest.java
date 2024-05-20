@@ -20,6 +20,7 @@ import org.springframework.web.client.RestTemplate;
 
 import epermit.models.dtos.AuthorityConfig;
 import epermit.models.dtos.AuthorityDto;
+import epermit.models.dtos.AuthorityListItem;
 import epermit.models.inputs.CreateAuthorityInput;
 import epermit.models.inputs.CreateQuotaInput;
 import epermit.services.AuthorityService;
@@ -38,9 +39,9 @@ public class AuthorityControllerTest {
 
     @Test
     void getAllTest() {
-        AuthorityDto authority = new AuthorityDto();
+        AuthorityListItem authority = new AuthorityListItem();
         when(authorityService.getAll()).thenReturn(List.of(authority));
-        List<AuthorityDto> dtos = controller.getAll();
+        List<AuthorityListItem> dtos = controller.getAll();
         assertNotNull(dtos);
         assertEquals(1, dtos.size());
     }

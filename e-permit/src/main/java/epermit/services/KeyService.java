@@ -1,7 +1,10 @@
 package epermit.services;
 
 import java.time.Instant;
+import java.util.List;
+import java.util.stream.Collectors;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +32,14 @@ public class KeyService {
     private final PrivateKeyUtil privateKeyUtil;
     private final EPermitProperties properties;
     private final LedgerEventUtil eventUtil;
+    private final ModelMapper modelMapper;
+
+
+    public List<KeyDto> getAll() {
+        List<epermit.entities.Key> all = keyRepository.findAll();
+        return all.stream().map(x -> modelMapper.map(x, KeyDto.class))
+                .collect(Collectors.toList());
+    }
 
     @Transactional
     @SneakyThrows

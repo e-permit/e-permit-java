@@ -68,7 +68,7 @@ public class PermitController {
     }
 
     @GetMapping("/{id}/pdf")
-    @Operation(summary = "Get permit pdf", description = "Get permit pdf by specified permit id")
+    @Operation(summary = "Get permit pdf", description = "Get permit pdf(base64) by specified permit id")
     public String getBase64PdfById(
             @Parameter(description = "Permit Identifier", example = "TR-UZ-2024-1-1") @PathVariable("id") String id) {
         return Base64.getEncoder().encodeToString(permitService.generatePdf(id));

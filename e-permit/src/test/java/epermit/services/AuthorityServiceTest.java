@@ -23,6 +23,7 @@ import epermit.ledgerevents.quotacreated.QuotaCreatedLedgerEvent;
 import epermit.models.EPermitProperties;
 import epermit.models.dtos.AuthorityConfig;
 import epermit.models.dtos.AuthorityDto;
+import epermit.models.dtos.AuthorityListItem;
 import epermit.models.enums.PermitType;
 import epermit.models.inputs.CreateAuthorityInput;
 import epermit.models.inputs.CreateQuotaInput;
@@ -60,7 +61,7 @@ public class AuthorityServiceTest {
         Authority authority = new Authority();
         authority.setCode("UA");
         when(authorityRepository.findAll()).thenReturn(List.of(authority));
-        List<AuthorityDto> dtos = authorityService.getAll();
+        List<AuthorityListItem> dtos = authorityService.getAll();
         assertEquals(1, dtos.size());
     }
 
