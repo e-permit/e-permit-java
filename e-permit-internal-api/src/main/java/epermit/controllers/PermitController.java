@@ -62,7 +62,7 @@ public class PermitController {
 
     @GetMapping("/find/{id}")
     @Operation(summary = "Find permit", description = "Find permit by specified permit id")
-    public Optional<PermitDto> getByPermitId(
+    public PermitDto getByPermitId(
             @Parameter(description = "Permit Identifier", example = "TR-UZ-2024-1-1") @PathVariable("id") String id) {
         return permitService.getByPermitId(id);
     }

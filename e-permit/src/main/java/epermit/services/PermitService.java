@@ -15,8 +15,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
 import epermit.utils.PermitUtil;
 import epermit.utils.QuotaUtil;
 import epermit.commons.EpermitValidationException;
@@ -72,24 +75,21 @@ public class PermitService {
     }
 
     public PermitDto getById(UUID id) {
-        PermitDto dto = mapPermit(permitRepository.findById(id).get());
-        return dto;
+        LedgerPermit permit = permitRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        return mapPermit(permit);
     }
 
-    public Optional<PermitDto> getByPermitId(String id) {
-        Optional<LedgerPermit> permitR = permitRepository.findOneByPermitId(id);
-        if (permitR.isEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.of(mapPermit(permitR.get()));
+    public PermitDto getByPermitId(String id) {
+        LedgerPermit permit = permitRepository.findOneByPermitId(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        return mapPermit(permit);
     }
 
-    public Optional<PermitDto> getByQrCode(String qrCode) {
-        Optional<LedgerPermit> permitR = permitRepository.findOneByQrCode(qrCode);
-        if (permitR.isEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.of(mapPermit(permitR.get()));
+    public PermitDto getByQrCode(String qrCode) {
+        LedgerPermit permit = permitRepository.findOneByQrCode(qrCode)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        return mapPermit(permit);
     }
 
     public List<PermitListItem> getAll(PermitListParams input) {
@@ -154,10 +154,8 @@ public class PermitService {
     @Transactional
     public void revokePermit(String permitId) {
         log.info("Revoke permit started {}", permitId);
-        Optional<LedgerPermit> permitR = permitRepository.findOneByPermitId(permitId);
-        if (permitR.isEmpty())
-            throw new EpermitValidationException(ErrorCodes.PERMIT_NOTFOUND);
-        LedgerPermit permit = permitR.get();
+        LedgerPermit permit = permitRepository.findOneByPermitId(permitId)
+                .orElseThrow(() -> new EpermitValidationException(ErrorCodes.PERMIT_NOTFOUND));
         if (!permit.getIssuer().equals(properties.getIssuerCode()))
             throw new EpermitValidationException(ErrorCodes.PERMIT_NOTFOUND);
         String prevEventId = ledgerEventUtil.getPreviousEventId(permit.getIssuedFor());
@@ -211,6 +209,9 @@ public class PermitService {
             if (input.getPermitYear() != null) {
                 predicates.add(cb.equal(permit.get("permitYear"), input.getPermitYear()));
             }
+            if (input.getUsed() != null) {
+                predicates.add(cb.equal(permit.get("used"), input.getUsed()));
+            }
             return cb.and(predicates.toArray(new Predicate[predicates.size()]));
         };
         return spec;
@@ -239,7 +240,6 @@ public class PermitService {
                 LocalDateTime createdAtTime = LocalDateTime.parse(input.getCreatedAt(), formatter);
                 predicates.add(cb.greaterThan(permit.get("createdAt"), createdAtTime));
             }
-            // predicates.add(cb.asc(permit.get("serial_number")));
             return cb.and(predicates.toArray(new Predicate[predicates.size()]));
         };
         return spec;

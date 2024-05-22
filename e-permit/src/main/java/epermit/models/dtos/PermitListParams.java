@@ -19,4 +19,6 @@ public class PermitListParams {
     @JsonProperty("permit_type")
     private PermitType permitType;
 
+    @JsonProperty("used")
+    private Boolean used;
 }

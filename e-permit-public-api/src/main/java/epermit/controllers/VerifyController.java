@@ -1,7 +1,5 @@
 package epermit.controllers;
 
-import java.util.Optional;
-
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,7 +19,7 @@ public class VerifyController {
 
     @GetMapping("/{qrCode}")
     @Operation(summary = "Verify permit", description = "Find permit by specified qr code")
-    public Optional<PermitDto> verify(
+    public PermitDto verify(
             @Parameter(description = "Permit Identifier", example = "TR-UZ-2024-1-1") @PathVariable("qrCode") String qrCode) {
         return permitService.getByQrCode(qrCode);
     }
