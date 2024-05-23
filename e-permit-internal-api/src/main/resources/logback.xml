@@ -41,15 +41,13 @@
             <appender name="ASYNC GELF" class="ch.qos.logback.classic.AsyncAppender">
                 <appender-ref ref="GELF" />
             </appender>
+            <root>
+                <appender-ref ref="ASYNC GELF" />
+            </root>
         </then>
     </if>
 
     <root level="INFO">
         <appender-ref ref="CONSOLE" />
-        <if condition='isDefined("EPERMIT_GRAYLOG_HOST")'>
-            <then>
-                <appender-ref ref="ASYNC GELF" />
-            </then>
-        </if>
     </root>
 </configuration>
