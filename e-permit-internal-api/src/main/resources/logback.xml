@@ -1,13 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <springProperty scope="context" name="environment" source="spring.profiles.active" />
-    <appender name="Console"
+    <appender name="CONSOLE"
         class="ch.qos.logback.core.ConsoleAppender">
-        <layout class="ch.qos.logback.classic.PatternLayout">
-            <Pattern>
-                %d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n
-            </Pattern>
-        </layout>
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <timestamp>
+                    <fieldName>timestamp</fieldName>
+                    <timeZone>UTC</timeZone>
+                </timestamp>
+                <pattern>
+                    <pattern>
+                        {
+                        "env": "${environment}",
+                        }
+                    </pattern>
+                </pattern>
+                <logLevel>
+                    <fieldName>level</fieldName>
+                </logLevel>
+                <loggerName>
+                    <fieldName>logger</fieldName>
+                </loggerName>
+                <message>
+                    <fieldName>message</fieldName>
+                </message>
+                <throwableClassName>
+                    <fieldName>exception_class</fieldName>
+                </throwableClassName>
+                <stackTrace>
+                    <fieldName>stack_trace</fieldName>
+                    <!-- maxLength - limit the length of the stack trace -->
+                    <throwableConverter
+                        class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                        <maxDepthPerThrowable>200</maxDepthPerThrowable>
+                        <maxLength>5000</maxLength>
+                        <rootCauseFirst>true</rootCauseFirst>
+                    </throwableConverter>
+                </stackTrace>
+                <mdc />
+            </providers>
+        </encoder>
     </appender>
     <if condition='isDefined("EPERMIT_GRAYLOG_HOST")'>
         <then>
@@ -41,13 +74,21 @@
             <appender name="ASYNC GELF" class="ch.qos.logback.classic.AsyncAppender">
                 <appender-ref ref="GELF" />
             </appender>
-            <root>
-                <appender-ref ref="ASYNC GELF" />
-            </root>
         </then>
     </if>
 
-    <root level="INFO">
-        <appender-ref ref="CONSOLE" />
-    </root>
+    <if condition='isDefined("EPERMIT_GRAYLOG_HOST")'>
+        <then>
+            <root>
+                <appender-ref ref="CONSOLE" />
+                <appender-ref ref="ASYNC GELF" />
+            </root>
+        </then>
+        <else>
+            <root level="INFO">
+                <appender-ref ref="CONSOLE" />
+            </root>
+        </else>
+    </if>
+
 </configuration>

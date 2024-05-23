@@ -3,6 +3,7 @@ package epermit.controllers;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import epermit.models.dtos.AuthorityConfig;
@@ -21,5 +22,10 @@ public class IndexController {
         AuthorityConfig config = configService.getConfig();
         config.setVersion(buildProperties.getVersion());
         return config;
+    }
+    
+    @GetMapping("favicon.ico")
+    @ResponseBody
+    void returnNoFavicon() {
     }
 }

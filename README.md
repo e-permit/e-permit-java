@@ -21,6 +21,9 @@ SPRING_DATASOURCE_DRIVER=<db driver>
 SPRING_DATASOURCE_DIALECT=<dialect>
 EPERMIT_ISSUER_CODE=<Country code>
 EPERMIT_ISSUER_NAME=<Country name>
+# Optional
+EPERMIT_GRAYLOG_HOST=<host>
+EPERMIT_GRAYLOG_PORT=<port>
 ```
 
 ### 2. Run the Public API using Docker Compose
@@ -57,8 +60,6 @@ services:
       - epermit.env
     ports:
       - "8080:8080"
-    volumes:
-      - /var/log/epermit
 ```
 
 ### API Endpoints

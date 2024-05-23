@@ -1,5 +1,6 @@
 package epermit.controllers;
 
+import org.slf4j.MDC;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,7 +24,9 @@ public class VerifyController {
     @Operation(summary = "Verify permit", description = "Find permit by specified qr code")
     public PermitDto verify(
             @Parameter(description = "Permit Qr Code", example = "ey...") @PathVariable("qrCode") String qrCode) {
+        MDC.put("qrCode", qrCode);
         log.info("Qr Code verify request: {}", qrCode);
+        MDC.remove("qrCode");
         return permitService.getByQrCode(qrCode);
     }
 }
