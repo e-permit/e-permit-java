@@ -10,7 +10,9 @@ import epermit.services.PermitService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/verify")
@@ -20,7 +22,8 @@ public class VerifyController {
     @GetMapping("/{qrCode}")
     @Operation(summary = "Verify permit", description = "Find permit by specified qr code")
     public PermitDto verify(
-            @Parameter(description = "Permit Identifier", example = "TR-UZ-2024-1-1") @PathVariable("qrCode") String qrCode) {
+            @Parameter(description = "Permit Qr Code", example = "ey...") @PathVariable("qrCode") String qrCode) {
+        log.info("Qr Code verify request: {}", qrCode);
         return permitService.getByQrCode(qrCode);
     }
 }
