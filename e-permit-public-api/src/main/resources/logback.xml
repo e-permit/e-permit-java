@@ -13,7 +13,7 @@
                 <pattern>
                     <pattern>
                         {
-                        "env": "${environment}",
+                        "env": "${environment}"
                         }
                     </pattern>
                 </pattern>
