@@ -42,7 +42,6 @@ public class EventService {
         createdEventRepository.save(event);
     }
 
-    @Transactional
     @SneakyThrows
     public List<LedgerEventCreated> getUnSendedEvents() {
         List<LedgerEventCreated> list = new ArrayList<>();
