@@ -24,7 +24,6 @@ import epermit.models.EPermitProperties;
 import epermit.models.dtos.AuthorityConfig;
 import epermit.models.dtos.AuthorityDto;
 import epermit.models.dtos.AuthorityListItem;
-import epermit.models.enums.PermitType;
 import epermit.models.inputs.CreateAuthorityInput;
 import epermit.models.inputs.CreateQuotaInput;
 import epermit.repositories.AuthorityRepository;
@@ -94,7 +93,7 @@ public class AuthorityServiceTest {
     void createQuotaTest() {
         CreateQuotaInput input = new CreateQuotaInput();
         input.setQuantity(20L);
-        input.setPermitType(PermitType.BILATERAL);
+        input.setPermitType(1);
         input.setPermitYear(2021);
         when(properties.getIssuerCode()).thenReturn("UZ");
         when(ledgerEventUtil.getPreviousEventId("TR")).thenReturn("123");
@@ -108,7 +107,7 @@ public class AuthorityServiceTest {
         assertEquals(LedgerEventType.QUOTA_CREATED, event.getEventType());
         assertEquals("TR", event.getPermitIssuer());
         assertEquals("UZ", event.getPermitIssuedFor());
-        assertEquals(PermitType.BILATERAL, event.getPermitType());
+        assertEquals(1, event.getPermitType());
         assertEquals(2021, event.getPermitYear());
         assertEquals("123", event.getPreviousEventId());
     }

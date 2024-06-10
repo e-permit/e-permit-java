@@ -84,7 +84,7 @@ Once the services are up and running, you can execute the following scripts usin
 
 ```json
 {
-    "permit_type": "BILATERAL",
+    "permit_type": "1",
     "permit_year": 2024,
     "quantity": 100
 }
@@ -98,7 +98,7 @@ Once the services are up and running, you can execute the following scripts usin
 {
     "issued_for": "<country code>",
     "permit_year": 2024,
-    "permit_type": "BILATERAL",
+    "permit_type": "1",
     "company_name": "TEST",
     "company_id": "123",
     "plate_number": "TEST",

@@ -18,4 +18,7 @@ public class PermitRevokedLedgerEvent extends LedgerEventBase {
     @NotNull
     @Pattern(regexp = Constants.PERMIT_ID_FORMAT)
     private String permitId;
+
+    @NotNull
+    private Long revokedAt;
 }

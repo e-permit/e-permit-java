@@ -2,7 +2,6 @@ package epermit.models.dtos;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import epermit.models.enums.PermitType;
 import lombok.Data;
 
 @Data
@@ -17,7 +16,7 @@ public class PermitListParams {
     private Integer permitYear;
 
     @JsonProperty("permit_type")
-    private PermitType permitType;
+    private Integer permitType;
 
     @JsonProperty("used")
     private Boolean used;

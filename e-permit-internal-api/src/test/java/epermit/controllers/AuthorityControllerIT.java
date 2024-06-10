@@ -3,24 +3,36 @@ package epermit.controllers;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.Assert;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import static org.springframework.test.web.client.ExpectedCount.once;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
+
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.web.client.RestTemplate;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import epermit.PermitPostgresContainer;
+import epermit.commons.GsonUtil;
 import epermit.entities.Authority;
+import epermit.models.dtos.AuthorityConfig;
 import epermit.models.dtos.AuthorityDto;
-import epermit.models.enums.PermitType;
+import epermit.models.dtos.PublicJwk;
 import epermit.models.inputs.CreateAuthorityInput;
 import epermit.models.inputs.CreateQuotaInput;
 import epermit.repositories.AuthorityRepository;
@@ -34,11 +46,21 @@ public class AuthorityControllerIT {
     @LocalServerPort
     private int port;
 
+    private MockRestServiceServer mockServer;
+
     @Autowired
     private TestRestTemplate testRestTemplate;
 
     @Autowired
+    RestTemplate restTemplate;
+
+    @Autowired
     AuthorityRepository authorityRepository;
+
+    @BeforeEach
+    void setUp() {
+        mockServer = MockRestServiceServer.createServer(restTemplate);
+    }
 
     @Container
     public static PostgreSQLContainer<PermitPostgresContainer> postgreSQLContainer = PermitPostgresContainer
@@ -89,6 +111,20 @@ public class AuthorityControllerIT {
         input.setPublicApiUri("http://localhost");
         input.setCode("UZ");
         input.setName("Uzbekistan");
+        AuthorityConfig config = new AuthorityConfig();
+        config.setCode("UZ");
+        config.setName("Uzbekistan");
+        PublicJwk jwk = new PublicJwk();
+        jwk.setCrv("crv");
+        jwk.setKid("1");
+        jwk.setKty("kty");
+        jwk.setUse("sig");
+        jwk.setX("x");
+        jwk.setY("y");
+        config.setKeys(List.of(jwk));
+         String configJson = GsonUtil.getGson().toJson(config);
+        mockServer.expect(once(), requestTo("http://localhost"))
+                .andRespond(withSuccess(configJson, MediaType.APPLICATION_JSON));
         ResponseEntity<?> r = getTestRestTemplate().postForEntity(getBaseUrl(), input, String.class);
         assertEquals(HttpStatus.OK, r.getStatusCode());
         AuthorityDto authority = getTestRestTemplate().getForObject(getBaseUrl() + "/UZ", AuthorityDto.class);
@@ -97,12 +133,16 @@ public class AuthorityControllerIT {
 
     @Test
     void createQuotaTest() {
+        Authority authority = new Authority();
+        authority.setPublicApiUri("http://api.gov");
+        authority.setCode("UZ");
+        authority.setName("Uzbekistan");
+        authorityRepository.save(authority);
         CreateQuotaInput input = new CreateQuotaInput();
         input.setQuantity(100L);
-        input.setPermitType(PermitType.BILATERAL);
+        input.setPermitType(1);
         input.setPermitYear(2021);
-        ResponseEntity<Void> r =
-                getTestRestTemplate().postForEntity(getBaseUrl() + "/UZ/quotas", input, Void.class);
+        ResponseEntity<Void> r = getTestRestTemplate().postForEntity(getBaseUrl() + "/UZ/quotas", input, Void.class);
         assertEquals(HttpStatus.OK, r.getStatusCode());
     }
 }

@@ -5,7 +5,6 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import epermit.ledgerevents.LedgerEventBase;
 import epermit.ledgerevents.LedgerEventType;
-import epermit.models.enums.PermitType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -27,7 +26,7 @@ public class QuotaCreatedLedgerEvent extends LedgerEventBase {
     private int permitYear;
 
     @NotNull
-    private PermitType permitType;
+    private Integer permitType;
 
     @NotNull
     @Min(1)

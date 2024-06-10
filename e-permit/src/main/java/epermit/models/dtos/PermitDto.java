@@ -2,7 +2,6 @@ package epermit.models.dtos;
 
 import java.util.ArrayList;
 import java.util.List;
-import epermit.models.enums.PermitType;
 import lombok.Data;
 
 @Data
@@ -16,7 +15,7 @@ public class PermitDto {
 
     private String qrCode;
 
-    private PermitType permitType;
+    private Integer permitType;
 
     private int permitYear;
 

@@ -1,7 +1,6 @@
 package epermit.models.dtos;
 
 import java.util.UUID;
-import epermit.models.enums.PermitType;
 import lombok.Data;
 
 @Data
@@ -14,7 +13,7 @@ public class PermitListItem {
 
     private String permitId;
 
-    private PermitType permitType;
+    private Integer permitType;
 
     private int permitYear;
 

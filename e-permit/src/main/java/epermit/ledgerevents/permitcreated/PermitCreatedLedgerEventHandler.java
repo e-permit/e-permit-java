@@ -7,9 +7,9 @@ import epermit.entities.LedgerPermit;
 import epermit.entities.LedgerQuota;
 import epermit.ledgerevents.LedgerEventBase;
 import epermit.ledgerevents.LedgerEventHandler;
+import epermit.models.PermitId;
 import epermit.repositories.LedgerPermitRepository;
 import epermit.repositories.LedgerQuotaRepository;
-import epermit.utils.QuotaUtil;
 
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
@@ -31,14 +31,23 @@ public class PermitCreatedLedgerEventHandler implements LedgerEventHandler {
         boolean exist = permitRepository.existsByPermitId(event.getPermitId());
         if (exist)
             throw new EpermitValidationException(ErrorCodes.PERMITID_ALREADY_EXISTS);
-        LedgerQuota quota = quotaRepository.findOne(QuotaUtil.filterQuotas(event.getPermitIssuer(),
-                event.getPermitIssuedFor(), event.getPermitType(), event.getPermitYear()))
+
+        PermitId permitId = PermitId.parse(event.getPermitId());
+        LedgerQuota quota = quotaRepository.findOneByParams(event.getPermitIssuer(),
+                event.getPermitIssuedFor(), event.getPermitType(), event.getPermitYear())
                 .orElseThrow(() -> new EpermitValidationException(ErrorCodes.INSUFFICIENT_PERMIT_QUOTA));
-        if (quota.getBalance() <= 0) {
+        if (permitId.getSerialNumber() > quota.getBalance()) {
             throw new EpermitValidationException(ErrorCodes.INSUFFICIENT_PERMIT_QUOTA);
         }
-        quota.setBalance(quota.getBalance() - 1);
-        quota.setNextSerial(quota.getNextSerial() + 1);
+
+        if (permitId.getVersion() != 1) {
+            PermitId exPermitId = permitId.toBuilder().version(permitId.getVersion() - 1).build();
+            LedgerPermit exPermit = permitRepository.findOneByPermitId(exPermitId.toString()).get();
+            if (!exPermit.isRevoked())
+                throw new EpermitValidationException(ErrorCodes.PERMIT_NOTFOUND);
+            permitRepository.save(exPermit);
+        }
+
         LedgerPermit permit = new LedgerPermit();
         permit.setCompanyId(event.getCompanyId());
         permit.setCompanyName(event.getCompanyName());
@@ -58,6 +67,5 @@ public class PermitCreatedLedgerEventHandler implements LedgerEventHandler {
         }
         log.info("PermitCreatedEventFactory ended with {}", permit);
         permitRepository.save(permit);
-        quotaRepository.save(quota);
     }
 }

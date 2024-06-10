@@ -6,20 +6,19 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
 import java.util.Optional;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.jpa.domain.Specification;
 
 import epermit.commons.EpermitValidationException;
 import epermit.commons.ErrorCodes;
 import epermit.entities.LedgerPermit;
-import epermit.entities.LedgerQuota;
 import epermit.repositories.LedgerPermitRepository;
 import epermit.repositories.LedgerQuotaRepository;
 
@@ -41,11 +40,9 @@ public class PermitRevokedLedgerEventHandlerTest {
         p.setPermitId("UZ-TR-2021-1-1");
         p.setIssuer("UZ");
         p.setIssuedFor("TR");
-        when(quotaRepository.findOne(ArgumentMatchers.<Specification<LedgerQuota>>any()))
-                .thenReturn(Optional.of(LedgerQuota.builder().balance(5L).build()));
         when(permitRepository.findOneByPermitId(event.getPermitId())).thenReturn(Optional.of(p));
         handler.handle(event);
-        verify(permitRepository, times(1)).delete(p);
+        verify(permitRepository, times(1)).save(p);
     }
 
     @Test

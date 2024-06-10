@@ -3,6 +3,8 @@ package epermit.services;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -26,6 +28,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.web.client.RestTemplate;
 import epermit.entities.LedgerPermit;
 import epermit.entities.LedgerQuota;
+import epermit.entities.SerialNumber;
 import epermit.ledgerevents.LedgerEventType;
 import epermit.ledgerevents.LedgerEventUtil;
 import epermit.ledgerevents.permitcreated.PermitCreatedLedgerEvent;
@@ -36,13 +39,13 @@ import epermit.models.dtos.PermitDto;
 import epermit.models.dtos.PermitListItem;
 import epermit.models.dtos.PermitListPageParams;
 import epermit.models.enums.PermitActivityType;
-import epermit.models.enums.PermitType;
 import epermit.models.inputs.CreatePermitInput;
 import epermit.models.inputs.PermitUsedInput;
 import epermit.models.results.CreatePermitResult;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.LedgerPermitRepository;
 import epermit.repositories.LedgerQuotaRepository;
+import epermit.repositories.SerialNumberRepository;
 import epermit.utils.PermitUtil;
 
 @ExtendWith(MockitoExtension.class)
@@ -64,6 +67,9 @@ public class PermitServiceTest {
 
     @Mock
     AuthorityRepository authorityRepository;
+
+    @Mock
+    SerialNumberRepository serialNumberRepository;
 
     @Mock
     EPermitProperties properties;
@@ -111,17 +117,16 @@ public class PermitServiceTest {
     @Test
     void createPermitTest() {
         CreatePermitInput input = new CreatePermitInput();
-        input.setPermitType(PermitType.BILATERAL);
+        input.setPermitType(1);
         input.setPermitYear(2021);
         input.setIssuedFor("UZ");
         input.setCompanyId("companyId");
         input.setCompanyName("companyName");
         input.setPlateNumber("plateNumber");
-        when(quotaRepository.findOne(ArgumentMatchers.<Specification<LedgerQuota>>any()))
-                .thenReturn(Optional.of(LedgerQuota.builder().balance(5L).build()));
+         when(serialNumberRepository.findOneByParams(anyString(), anyString(), anyInt(), anyInt() ))
+                .thenReturn(Optional.of(SerialNumber.builder().nextSerial(1L).build()));      
         when(properties.getIssuerCode()).thenReturn("TR");
         when(ledgerEventUtil.getPreviousEventId("UZ")).thenReturn("123");
-        when(permitUtil.getPermitId(any())).thenReturn("TR-UZ-2021-1-1");
         CreatePermitResult result = permitService.createPermit(input);
         assertEquals("TR-UZ-2021-1-1", result.getPermitId());
         verify(ledgerEventUtil, times(1)).persistAndPublishEvent(createdCaptor.capture());
@@ -131,7 +136,7 @@ public class PermitServiceTest {
         assertEquals(LedgerEventType.PERMIT_CREATED, event.getEventType());
         assertEquals("TR", event.getPermitIssuer());
         assertEquals("UZ", event.getPermitIssuedFor());
-        assertEquals(PermitType.BILATERAL, event.getPermitType());
+        assertEquals(Integer.valueOf(1), event.getPermitType());
         assertEquals(2021, event.getPermitYear());
         assertEquals("123", event.getPreviousEventId());
     }

@@ -30,6 +30,7 @@ public class AuthorityKey {
         strategy = "org.hibernate.id.UUIDGenerator"
     )
     private UUID id;
+    
     @Column(name = "key_id", nullable = false)
     private String keyId;
 

@@ -12,7 +12,6 @@ import jakarta.validation.constraints.Pattern;
 import epermit.commons.Constants;
 import epermit.ledgerevents.LedgerEventBase;
 import epermit.ledgerevents.LedgerEventType;
-import epermit.models.enums.PermitType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -28,7 +27,7 @@ public class PermitCreatedLedgerEvent extends LedgerEventBase {
     private String permitId;
 
     @NotNull
-    private PermitType permitType;
+    private Integer permitType;
 
     @NotNull
     private String permitIssuer;
@@ -63,10 +62,10 @@ public class PermitCreatedLedgerEvent extends LedgerEventBase {
     @NotNull
     private String arrivalCountry;
 
-    private Map<String, Object> otherClaims;
-
     @NotNull
     private String qrCode;
+
+    private Map<String, Object> otherClaims;
     
     @AssertTrue(message = "Invalid issued_at")
     private boolean isValidIssuedAt() {

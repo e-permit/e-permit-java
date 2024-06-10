@@ -12,7 +12,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import epermit.entities.LedgerQuota;
 import epermit.models.EPermitProperties;
-import epermit.models.enums.PermitType;
 import epermit.repositories.LedgerQuotaRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,14 +32,13 @@ public class QuotaCreatedLedgerEventHandlerTest {
     void handleOkTest() {
         QuotaCreatedLedgerEvent event = new QuotaCreatedLedgerEvent("TR", "UZ", "0");
         event.setQuantity(4L);
-        event.setPermitType(PermitType.BILATERAL);
+        event.setPermitType(1);
         event.setPermitYear(2021);
         handler.handle(event);
         verify(quotaRepository, times(1)).save(captor.capture());
         LedgerQuota quota = captor.getValue();
         assertEquals(4, quota.getBalance());
-        assertEquals(1, quota.getNextSerial());
         assertEquals(2021, quota.getPermitYear());
-        assertEquals(PermitType.BILATERAL, quota.getPermitType());
+        assertEquals(1, quota.getPermitType());
     }
 }

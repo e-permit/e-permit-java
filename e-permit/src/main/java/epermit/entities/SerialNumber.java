@@ -1,11 +1,8 @@
 package epermit.entities;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -13,8 +10,6 @@ import jakarta.persistence.Table;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
 
-import epermit.commons.QuotaEventListConverter;
-import epermit.models.dtos.QuotaEvent;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,9 +19,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "epermit_ledger_quotas")
+@Table(name = "epermit_serial_numbers")
 @Builder
-public class LedgerQuota {
+public class SerialNumber {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(
@@ -48,13 +43,8 @@ public class LedgerQuota {
     private Integer permitType;
 
     @Builder.Default
-    @Column(name = "balance", nullable = false)
-    private Long balance = 0L;
-
-    @Builder.Default
-    @Column(name = "events", nullable = false)
-    @Convert(converter = QuotaEventListConverter.class)
-    private List<QuotaEvent> events = new ArrayList<>();
+    @Column(name = "next_serial", nullable = false)
+    private Long nextSerial = 1L;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)

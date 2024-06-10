@@ -3,7 +3,6 @@ package epermit.utils;
 import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.StringJoiner;
 import org.springframework.stereotype.Component;
 import com.itextpdf.barcodes.Barcode39;
 import com.itextpdf.barcodes.BarcodeQRCode;
@@ -13,7 +12,6 @@ import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.element.Paragraph;
 import epermit.entities.LedgerPermit;
-import epermit.models.dtos.CreatePermitIdDto;
 import epermit.models.dtos.CreatePermitQrCodeDto;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -24,14 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class PermitUtil {
     private final JwsUtil jwsUtil;
-
-    public String getPermitId(CreatePermitIdDto input) {
-        StringJoiner joiner = new StringJoiner("-");
-        String permitId = joiner.add(input.getIssuer()).add(input.getIssuedFor())
-                .add(Integer.toString(input.getPermitYear())).add(input.getPermitType().getCode())
-                .add(Long.toString(input.getSerialNumber())).toString();
-        return permitId;
-    }
 
     public String generateQrCode(CreatePermitQrCodeDto input) {
         log.info("generateQrCode started with {}", input);

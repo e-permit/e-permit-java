@@ -3,13 +3,13 @@ package epermit.models.enums;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.SneakyThrows;
 
-public enum PermitType {
+public enum PermitType2 {
     BILATERAL("BILATERAL"), TRANSIT("TRANSIT"), THIRDCOUNTRY("THIRDCOUNTRY"), BILATERAL_FEE(
             "BILATERAL_FEE"), TRANSIT_FEE("TRANSIT_FEE"), THIRDCOUNTRY_FEE("THIRDCOUNTRY_FEE");
 
     private final String permitType;
 
-    private PermitType(String permitType) {
+    private PermitType2(String permitType) {
         this.permitType = permitType;
     }
 

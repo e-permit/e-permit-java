@@ -3,12 +3,11 @@ package epermit.entities;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
@@ -16,7 +15,6 @@ import jakarta.persistence.Table;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
-import epermit.models.enums.PermitType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -38,6 +36,9 @@ public class LedgerPermit {
     @Column(name = "permit_id", nullable = false, unique = true)
     private String permitId;
 
+    @Column(name = "previous", nullable = true)
+    private String previous;
+
     @Column(name = "issuer", nullable = false)
     private String issuer;
 
@@ -45,8 +46,7 @@ public class LedgerPermit {
     private String issuedFor;
 
     @Column(name = "permit_type", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private PermitType permitType;
+    private Integer permitType;
 
     @Column(name = "permit_year", nullable = false)
     private int permitYear;

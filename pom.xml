@@ -17,7 +17,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>20</java.version>
-        <revision>3.0.0</revision>
+        <revision>2.5.0</revision>
     </properties>
     <modules>
         <module>e-permit</module>
@@ -91,7 +91,7 @@
         <dependency>
             <groupId>com.nimbusds</groupId>
             <artifactId>nimbus-jose-jwt</artifactId>
-            <version>9.38-rc3</version>
+            <version>9.39.3</version>
         </dependency>
         <dependency>
             <groupId>org.modelmapper</groupId>

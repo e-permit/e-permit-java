@@ -15,7 +15,6 @@ import epermit.entities.Authority;
 import epermit.entities.LedgerPermit;
 import epermit.entities.LedgerQuota;
 import epermit.models.dtos.AuthorityConfig;
-import epermit.models.enums.PermitType;
 import epermit.models.inputs.CreateAuthorityInput;
 import epermit.models.inputs.CreateQuotaInput;
 import epermit.repositories.AuthorityRepository;
@@ -61,7 +60,7 @@ public class AuthorityServiceIT {
         LedgerQuota quota = new LedgerQuota();
         quota.setPermitIssuedFor("AY");
         quota.setPermitIssuer("TR");
-        quota.setPermitType(PermitType.BILATERAL);
+        quota.setPermitType(1);
         quota.setPermitYear(2022);
         quota.setBalance(100L);
         ledgerQuotaRepository.save(quota);
@@ -73,7 +72,7 @@ public class AuthorityServiceIT {
         permit.setIssuedFor("AY");
         permit.setIssuer("TR");
         permit.setPermitId("1");
-        permit.setPermitType(PermitType.BILATERAL);
+        permit.setPermitType(1);
         permit.setPermitYear(2022);
         permit.setPlateNumber("companyId");
         permit.setArrivalCountry("TR");
@@ -101,7 +100,7 @@ public class AuthorityServiceIT {
         authorityRepository.save(authority);
         CreateQuotaInput input = new CreateQuotaInput();
         input.setQuantity(20L);
-        input.setPermitType(PermitType.BILATERAL);
+        input.setPermitType(1);
         input.setPermitYear(2021);
         authorityService.createQuota("UZ", input);
     }

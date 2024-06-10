@@ -40,7 +40,6 @@ import epermit.entities.LedgerQuota;
 import epermit.models.dtos.PermitDto;
 import epermit.models.dtos.PermitListItem;
 import epermit.models.enums.PermitActivityType;
-import epermit.models.enums.PermitType;
 import epermit.models.inputs.CreatePermitInput;
 import epermit.models.inputs.PermitUsedInput;
 import epermit.models.results.CreatePermitResult;
@@ -53,7 +52,6 @@ import epermit.repositories.LedgerQuotaRepository;
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
-// @TestPropertySource(properties = {"EPERMIT_VERIFIER_PASSWORD = 123"})
 public class PermitControllerIT {
 
     @LocalServerPort
@@ -87,7 +85,7 @@ public class PermitControllerIT {
         authorityRepository.save(authority);
         LedgerQuota quota = new LedgerQuota();
         quota.setBalance(30L);
-        quota.setPermitType(PermitType.BILATERAL);
+        quota.setPermitType(1);
         quota.setPermitYear(2021);
         quota.setPermitIssuer("TR");
         quota.setPermitIssuedFor("UZ");
@@ -108,18 +106,21 @@ public class PermitControllerIT {
 
     @Test
     void getAllTest() {
-        for (int i = 0; i < 25; i++) {
+        for (Integer i = 0; i < 25; i++) {
             LedgerPermit permit = new LedgerPermit();
             permit.setIssuer("TR");
             permit.setCompanyName("ABC");
             permit.setCompanyId("1");
             permit.setIssuedFor("UZ");
-            permit.setPermitType(PermitType.BILATERAL);
+            permit.setPermitType(1);
             permit.setPermitYear(2021);
             permit.setPlateNumber("06AA1234");
             permit.setExpireAt("31/01/2022");
             permit.setIssuedAt("03/03/2021");
-            permit.setPermitId("ABC");
+            permit.setPermitId("TR-UZ-2021-1-" + i.toString());
+            permit.setDepartureCountry("TR");
+            permit.setArrivalCountry("UZ");
+            permit.setQrCode("QR");
             permitRepository.save(permit);
         }
         HttpHeaders headers = new HttpHeaders();
@@ -149,12 +150,15 @@ public class PermitControllerIT {
         permit.setCompanyId("1");
         permit.setIssuer("TR");
         permit.setIssuedFor("UZ");
-        permit.setPermitType(PermitType.BILATERAL);
+        permit.setPermitType(1);
         permit.setPermitYear(2021);
         permit.setPlateNumber("06AA1234");
         permit.setExpireAt("31/01/2022");
         permit.setIssuedAt("03/03/2021");
         permit.setPermitId("ABC");
+        permit.setDepartureCountry("TR");
+        permit.setArrivalCountry("UZ");
+        permit.setQrCode("QR");
         permitRepository.save(permit);
         PermitDto dto = getTestRestTemplate().getForObject(getBaseUrl() + "/" + permit.getId(),
                 PermitDto.class);
@@ -167,9 +171,10 @@ public class PermitControllerIT {
         input.setCompanyName("ABC");
         input.setCompanyId("123");
         input.setIssuedFor("UZ");
-        input.setPermitType(PermitType.BILATERAL);
+        input.setPermitType(1);
         input.setPermitYear(2021);
         input.setPlateNumber("06AA1234");
+        input.setArrivalCountry("UZ");
         ResponseEntity<String> r =
                 getTestRestTemplate().postForEntity(getBaseUrl(), input, String.class);
         GsonUtil.getGson().fromJson(r.getBody(), CreatePermitResult.class);
@@ -183,12 +188,15 @@ public class PermitControllerIT {
         permit.setCompanyName("ABC");
         permit.setIssuer("TR");
         permit.setIssuedFor("UZ");
-        permit.setPermitType(PermitType.BILATERAL);
+        permit.setPermitType(1);
         permit.setPermitYear(2021);
         permit.setPlateNumber("06AA1234");
         permit.setExpireAt("31/01/2022");
         permit.setIssuedAt("03/03/2021");
         permit.setPermitId("ABC");
+        permit.setDepartureCountry("TR");
+        permit.setArrivalCountry("UZ");
+        permit.setQrCode("QR");
         permitRepository.save(permit);
         when(restTemplate.postForEntity(anyString(), any(HttpEntity.class), any()))
                 .thenReturn(new ResponseEntity<>(HttpStatus.OK));
@@ -210,12 +218,15 @@ public class PermitControllerIT {
         permit.setCompanyName("ABC");
         permit.setIssuer("UZ");
         permit.setIssuedFor("TR");
-        permit.setPermitType(PermitType.BILATERAL);
+        permit.setPermitType(1);
         permit.setPermitYear(2021);
         permit.setPlateNumber("06AA1234");
         permit.setExpireAt("31/01/2022");
         permit.setIssuedAt("03/03/2021");
         permit.setPermitId("ABC");
+        permit.setDepartureCountry("TR");
+        permit.setArrivalCountry("UZ");
+        permit.setQrCode("QR");
         permitRepository.save(permit);
         PermitUsedInput input = new PermitUsedInput();
         input.setActivityType(PermitActivityType.ENTRANCE);

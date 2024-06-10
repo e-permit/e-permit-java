@@ -2,6 +2,8 @@ package epermit.ledgerevents.permitcreated;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -28,7 +30,6 @@ import epermit.commons.EpermitValidationException;
 import epermit.commons.ErrorCodes;
 import epermit.entities.LedgerPermit;
 import epermit.entities.LedgerQuota;
-import epermit.models.enums.PermitType;
 import epermit.repositories.LedgerPermitRepository;
 import epermit.repositories.LedgerQuotaRepository;
 import epermit.utils.PermitUtil;
@@ -69,7 +70,7 @@ public class PermitCreatedLedgerEventHandlerTest {
         event.setPermitId("UZ-TR-2021-1-1");
         event.setPermitIssuedFor("TR");
         event.setPermitIssuer("UZ");
-        event.setPermitType(PermitType.BILATERAL);
+        event.setPermitType(1);
         event.setPermitYear(2021);
         event.setPlateNumber("A");
         event.setArrivalCountry("A");
@@ -111,18 +112,20 @@ public class PermitCreatedLedgerEventHandlerTest {
         event.setIssuedAt("A");
         event.setCompanyName("A");
         event.setPermitId("UZ-TR-2021-1-1");
-        event.setPermitType(PermitType.BILATERAL);
+        event.setPermitType(1);
         event.setPermitYear(2021);
         event.setPlateNumber("A");
+        event.setPermitIssuer("UZ");
+        event.setPermitIssuedFor("TR");
         when(permitRepository.existsByPermitId("UZ-TR-2021-1-1")).thenReturn(false);
-        when(quotaRepository.findOne(ArgumentMatchers.<Specification<LedgerQuota>>any()))
+        when(quotaRepository.findOneByParams(anyString(), anyString(), anyInt(), anyInt() ))
                 .thenReturn(Optional.of(LedgerQuota.builder().balance(5L).build()));
         handler.handle(event);
         verify(permitRepository).save(captor.capture());
         LedgerPermit p = captor.getValue();
         assertEquals("A", p.getExpireAt());
         assertEquals("UZ-TR-2021-1-1", p.getPermitId());
-        assertEquals(PermitType.BILATERAL, p.getPermitType());
+        assertEquals(1, p.getPermitType());
         assertEquals("A", p.getCompanyName());
         assertEquals("A", p.getIssuedAt());
         assertEquals("UZ", p.getIssuer());

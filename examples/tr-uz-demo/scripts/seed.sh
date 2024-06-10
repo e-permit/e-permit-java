@@ -32,7 +32,7 @@ create_quota()
 {
   cat <<EOF
   {
-    "permit_type": "BILATERAL",
+    "permit_type": "1",
     "permit_year": 2024,
     "quantity": 100
   }

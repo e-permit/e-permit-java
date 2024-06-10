@@ -1,6 +1,5 @@
 package epermit.utils;
 
-
 import static org.junit.Assert.assertEquals;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,8 +14,7 @@ import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.element.Paragraph;
 import epermit.models.EPermitProperties;
-import epermit.models.dtos.CreatePermitIdDto;
-import epermit.models.enums.PermitType;
+import epermit.models.PermitId;
 import epermit.repositories.AuthorityRepository;
 import lombok.SneakyThrows;
 
@@ -34,13 +32,13 @@ public class PermitUtilTest {
 
     @Test
     void getPermitIdTest() {
-        CreatePermitIdDto input = new CreatePermitIdDto();
-        input.setIssuedFor("UA");
-        input.setIssuer("TR");
-        input.setPermitType(PermitType.BILATERAL);
-        input.setPermitYear(2021);
-        input.setSerialNumber(12L);
-        String permitId = util.getPermitId(input);
+        PermitId input = PermitId.builder().issuedFor("UA")
+                .issuer("TR")
+                .permitType(1)
+                .permitYear(2021)
+                .serialNumber(12L).build();
+        String permitId = input.toString();
+        assertEquals("TR", PermitId.parse(permitId).getIssuer());
         assertEquals("TR-UA-2021-1-12", permitId);
     }
 
@@ -52,7 +50,8 @@ public class PermitUtilTest {
             PdfDocument pdf = new PdfDocument(writer);
             Document document = new Document(pdf);
             String line = "E-PERMIT(06BB2746)";
-            BarcodeQRCode qrCode = new BarcodeQRCode("0.eyJhbGciOiJFUzI1NiIsImtpZCI6IjEifQ.eyJpZCI6IlVaLVRSLTIwMjEtMS0xIiwiaWF0IjoiMjcvNS8yMDIxIiwiZXhwIjoiMzEvMS8yMDIyIiwicG4iOiJkIiwiY24iOiJkIn0.I8-dgCtal8ajgAIIaL2NLvFUboCrnIfoqz__1doK_Q1-kIoPgYbbfqm8BDfXk9INdPAUyc1R-FvQrVsgr3D2Cw");
+            BarcodeQRCode qrCode = new BarcodeQRCode(
+                    "0.eyJhbGciOiJFUzI1NiIsImtpZCI6IjEifQ.eyJpZCI6IlVaLVRSLTIwMjEtMS0xIiwiaWF0IjoiMjcvNS8yMDIxIiwiZXhwIjoiMzEvMS8yMDIyIiwicG4iOiJkIiwiY24iOiJkIn0.I8-dgCtal8ajgAIIaL2NLvFUboCrnIfoqz__1doK_Q1-kIoPgYbbfqm8BDfXk9INdPAUyc1R-FvQrVsgr3D2Cw");
             Barcode39 barCode = new Barcode39(pdf);
             barCode.setCode("TR-UZ-2022-1-1");
             barCode.setAltText("TR-UZ-2022-1-1");

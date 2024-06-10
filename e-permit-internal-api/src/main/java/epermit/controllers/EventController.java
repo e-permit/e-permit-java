@@ -22,6 +22,6 @@ public class EventController {
     @GetMapping()
     @Operation(summary = "Get events", description = "Returns all created events")
     public List<CreatedEvent> getAll() {
-        return createdEventRepository.findAll();
+        return createdEventRepository.findAllBySentFalseOrderByCreatedAtAsc();
     }
 }

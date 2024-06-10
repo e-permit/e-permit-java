@@ -1,19 +1,24 @@
 package epermit.services;
 
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeMap;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+
+import com.google.gson.reflect.TypeToken;
 
 import epermit.commons.EpermitValidationException;
 import epermit.commons.ErrorCodes;
 import epermit.commons.GsonUtil;
 import epermit.entities.Authority;
 import epermit.entities.AuthorityKey;
+import epermit.entities.LedgerQuota;
 import epermit.ledgerevents.LedgerEventUtil;
 import epermit.ledgerevents.quotacreated.QuotaCreatedLedgerEvent;
 import epermit.models.EPermitProperties;
@@ -21,6 +26,7 @@ import epermit.models.dtos.AuthorityConfig;
 import epermit.models.dtos.AuthorityDto;
 import epermit.models.dtos.AuthorityListItem;
 import epermit.models.dtos.QuotaDto;
+import epermit.models.dtos.QuotaEvent;
 import epermit.models.inputs.CreateAuthorityInput;
 import epermit.models.inputs.CreateQuotaInput;
 import epermit.repositories.AuthorityRepository;
@@ -50,10 +56,10 @@ public class AuthorityService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         AuthorityDto dto = modelMapper.map(authority, AuthorityDto.class);
-
         List<QuotaDto> quotas = quotaEntities.stream().filter(
                 x -> x.getPermitIssuer().equals(code) || x.getPermitIssuedFor().equals(code))
                 .map(x -> modelMapper.map(x, QuotaDto.class)).collect(Collectors.toList());
+
         dto.setQuotas(quotas);
         return dto;
     }

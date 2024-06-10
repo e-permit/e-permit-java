@@ -34,7 +34,7 @@ create table epermit_keys (
     revoked_at bigint,
     id uuid not null,
     private_jwk varchar(4000) not null,
-    jwk varchar(4000) not null,
+    jwk varchar(5000) not null,
     key_id varchar(255) not null unique,
     salt varchar(255) not null,
     primary key (id)
@@ -74,6 +74,7 @@ create table epermit_ledger_permit_acts (
 );
 
 create table epermit_ledger_permits (
+    permit_type integer not null,
     permit_year integer not null,
     revoked boolean not null,
     used boolean not null,
@@ -91,38 +92,31 @@ create table epermit_ledger_permits (
     issuer varchar(255) not null,
     other_claims varchar(255),
     permit_id varchar(255) not null unique,
-    permit_type varchar(255) not null check (
-        permit_type in (
-            'BILATERAL',
-            'TRANSIT',
-            'THIRDCOUNTRY',
-            'BILATERAL_FEE',
-            'TRANSIT_FEE',
-            'THIRDCOUNTRY_FEE'
-        )
-    ),
     plate_number varchar(255) not null,
+    previous varchar(255),
     primary key (id)
 );
 
 create table epermit_ledger_quotas (
+    permit_type integer not null,
     permit_year integer not null,
     balance bigint not null,
+    created_at timestamp(6) not null,
+    id uuid not null,
+    events varchar(255) not null,
+    permit_issued_for varchar(255) not null,
+    permit_issuer varchar(255) not null,
+    primary key (id)
+);
+
+create table epermit_serial_numbers (
+    permit_type integer not null,
+    permit_year integer not null,
     created_at timestamp(6) not null,
     next_serial bigint not null,
     id uuid not null,
     permit_issued_for varchar(255) not null,
     permit_issuer varchar(255) not null,
-    permit_type varchar(255) not null check (
-        permit_type in (
-            'BILATERAL',
-            'TRANSIT',
-            'THIRDCOUNTRY',
-            'BILATERAL_FEE',
-            'TRANSIT_FEE',
-            'THIRDCOUNTRY_FEE'
-        )
-    ),
     primary key (id)
 );
 

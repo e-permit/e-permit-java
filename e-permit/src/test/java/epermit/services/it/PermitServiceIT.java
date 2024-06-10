@@ -24,7 +24,6 @@ import epermit.PermitPostgresContainer;
 import epermit.entities.Authority;
 import epermit.entities.LedgerPermit;
 import epermit.entities.LedgerQuota;
-import epermit.models.enums.PermitType;
 import epermit.models.inputs.CreatePermitInput;
 import epermit.models.results.CreatePermitResult;
 import epermit.repositories.AuthorityRepository;
@@ -70,7 +69,7 @@ public class PermitServiceIT {
         quota.setBalance(100L);
         quota.setPermitIssuedFor("FR");
         quota.setPermitIssuer("TR");
-        quota.setPermitType(PermitType.BILATERAL);
+        quota.setPermitType(1);
         quota.setPermitYear(2021);
         ledgerQuotaRepository.save(quota);
     }
@@ -81,7 +80,7 @@ public class PermitServiceIT {
         input.setCompanyId("ABC");
         input.setCompanyName("ABC");
         input.setIssuedFor("FR");
-        input.setPermitType(PermitType.BILATERAL);
+        input.setPermitType(1);
         input.setPermitYear(2021);
         input.setPlateNumber("ABC");
         input.setArrivalCountry("FR");
@@ -94,7 +93,7 @@ public class PermitServiceIT {
         input.setCompanyId("ABC");
         input.setCompanyName("ABC");
         input.setIssuedFor("FR");
-        input.setPermitType(PermitType.BILATERAL);
+        input.setPermitType(1);
         input.setPermitYear(2021);
         input.setPlateNumber("ABC");
         input.setArrivalCountry("FR");
@@ -105,7 +104,8 @@ public class PermitServiceIT {
                 .thenReturn(new ResponseEntity<>(HttpStatus.OK));
         permitService.revokePermit(r.getPermitId());
         Optional<LedgerPermit> permit2 = ledgerPermitRepository.findOneByPermitId(r.getPermitId());
-        Assertions.assertTrue(permit2.isEmpty());
+        Assertions.assertTrue(permit2.isPresent());
+        Assertions.assertTrue(permit2.get().isRevoked());
 
     }
 }

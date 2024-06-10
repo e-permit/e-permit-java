@@ -10,7 +10,7 @@ create_permit()
   {
     "issued_for": "UZ",
     "permit_year": 2024,
-    "permit_type": "BILATERAL",
+    "permit_type": "1",
     "company_name": "TECT",
     "company_id": "123",
     "plate_number": "TECT",
@@ -19,5 +19,7 @@ create_permit()
 EOF
 }
  
-curl "$TR_URI/permits" -u "$AUTH" -X POST --data "$(create_permit)" -H 'Content-Type: application/json'
-curl "$TR_URI/permits" -u "$AUTH" -X POST --data "$(create_permit)" -H 'Content-Type: application/json'
+for i in {1..100}
+do
+  curl "$TR_URI/permits" -u "$AUTH" -X POST --data "$(create_permit)" -H 'Content-Type: application/json'
+done
