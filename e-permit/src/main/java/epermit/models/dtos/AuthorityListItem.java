@@ -8,6 +8,6 @@ public class AuthorityListItem {
 
   private String name;
 
-  private String apiUri;
+  private String publicApiUri;
 }
 

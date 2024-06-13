@@ -101,7 +101,7 @@ public class AuthorityControllerIT {
         var body = r.getBody();
         Assert.assertNotNull("", body);
         assertEquals("UZ", body.getCode());
-        assertEquals("apiUri", body.getApiUri());
+        assertEquals("apiUri", body.getPublicApiUri());
         assertEquals("name", body.getName());
     }
 

@@ -17,8 +17,6 @@ public class PermitId {
     private Integer permitType;
     private Integer permitYear;
     private Long serialNumber;
-    @Builder.Default
-    private Integer version = 1;
 
     @SneakyThrows
     public static PermitId parse(String id) {
@@ -34,9 +32,6 @@ public class PermitId {
         permitId.permitYear(Integer.parseInt(parts[2]));
         permitId.permitType(Integer.parseInt(parts[3]));
         permitId.serialNumber(Long.parseLong(parts[4]));
-        if (parts.length == 6) {
-            permitId.version(Integer.parseInt(parts[5].substring(1)));
-        }
         return permitId.build();
     }
 
@@ -46,9 +41,6 @@ public class PermitId {
         joiner.add(this.getIssuer()).add(this.getIssuedFor())
                 .add(Integer.toString(this.getPermitYear())).add(this.getPermitType().toString())
                 .add(Long.toString(this.getSerialNumber()));
-        if (this.version != 1) {
-            joiner.add("v" + this.version.toString());
-        }
         return joiner.toString();
     }
 }

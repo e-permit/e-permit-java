@@ -92,8 +92,8 @@ create table epermit_ledger_permits (
     issuer varchar(255) not null,
     other_claims varchar(255),
     permit_id varchar(255) not null unique,
-    plate_number varchar(255) not null,
-    previous varchar(255),
+    plate_number varchar(255),
+    plate_number2 varchar(255),
     primary key (id)
 );
 

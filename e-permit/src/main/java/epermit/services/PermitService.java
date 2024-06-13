@@ -107,31 +107,27 @@ public class PermitService {
     public CreatePermitResult createPermit(CreatePermitInput input) {
         log.info("Permit create command {}", input);
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        PermitId permitId = null;
-        if (input.getPrevPermitId() != null) {
-            PermitId exPermitId = PermitId.parse(input.getPrevPermitId());
-            permitId = exPermitId.toBuilder().version(exPermitId.getVersion() + 1).build();
-        } else {
-            SerialNumber serialNumber = serialNumberRepository.findOneByParams(properties.getIssuerCode(),
-                    input.getIssuedFor(), input.getPermitType(), input.getPermitYear())
-                    .orElse(SerialNumber.builder()
-                            .permitIssuer(properties.getIssuerCode())
-                            .permitIssuedFor(input.getIssuedFor())
-                            .permitType(input.getPermitType())
-                            .permitYear(input.getPermitYear())
-                            .nextSerial(1L)
-                            .build());
-            permitId = PermitId.builder()
-                    .issuedFor(input.getIssuedFor()).issuer(properties.getIssuerCode())
-                    .permitType(input.getPermitType())
-                    .permitYear(input.getPermitYear()).serialNumber(serialNumber.getNextSerial()).build();
-            serialNumber.setNextSerial(serialNumber.getNextSerial() + 1);
-            serialNumberRepository.save(serialNumber);
-        }
+
+        SerialNumber serialNumber = serialNumberRepository.findOneByParams(properties.getIssuerCode(),
+                input.getIssuedFor(), input.getPermitType(), input.getPermitYear())
+                .orElse(SerialNumber.builder()
+                        .permitIssuer(properties.getIssuerCode())
+                        .permitIssuedFor(input.getIssuedFor())
+                        .permitType(input.getPermitType())
+                        .permitYear(input.getPermitYear())
+                        .nextSerial(1L)
+                        .build());
+        PermitId permitId = PermitId.builder()
+                .issuedFor(input.getIssuedFor()).issuer(properties.getIssuerCode())
+                .permitType(input.getPermitType())
+                .permitYear(input.getPermitYear()).serialNumber(serialNumber.getNextSerial()).build();
+        serialNumber.setNextSerial(serialNumber.getNextSerial() + 1);
+        serialNumberRepository.save(serialNumber);
+
         String issuer = properties.getIssuerCode();
         String issuedAt = LocalDateTime.now(ZoneOffset.UTC).format(dtf);
         String expireAt = "31/01/" + Integer.toString(input.getPermitYear() + 1);
-        if( input.getExpireAt() != null){
+        if (input.getExpireAt() != null) {
             expireAt = input.getExpireAt();
         }
         String prevEventId = ledgerEventUtil.getPreviousEventId(input.getIssuedFor());
@@ -151,6 +147,7 @@ public class PermitService {
         e.setPermitType(input.getPermitType());
         e.setPermitYear(input.getPermitYear());
         e.setPlateNumber(input.getPlateNumber());
+        e.setPlateNumber2(input.getPlateNumber2());
         e.setPermitIssuer(properties.getIssuerCode());
         e.setPermitIssuedFor(input.getIssuedFor());
         e.setDepartureCountry(properties.getIssuerCode());

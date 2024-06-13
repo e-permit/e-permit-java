@@ -36,9 +36,6 @@ public class LedgerPermit {
     @Column(name = "permit_id", nullable = false, unique = true)
     private String permitId;
 
-    @Column(name = "previous", nullable = true)
-    private String previous;
-
     @Column(name = "issuer", nullable = false)
     private String issuer;
 
@@ -57,8 +54,11 @@ public class LedgerPermit {
     @Column(name = "expire_at", nullable = false)
     private String expireAt;
 
-    @Column(name = "plate_number", nullable = false)
+    @Column(name = "plate_number", nullable = true)
     private String plateNumber;
+
+    @Column(name = "plate_number2", nullable = true)
+    private String plateNumber2;
 
     @Column(name = "company_name", nullable = false, length = 200)
     private String companyName;

@@ -30,7 +30,7 @@ public class IndexController {
 
     @GetMapping("/authorities")
     public List<String> getAuthorities() {
-        return authorityService.getAll().stream().map(x -> x.getApiUri()).toList();
+        return authorityService.getAll().stream().map(x -> x.getPublicApiUri()).toList();
     }
 
     @GetMapping("favicon.ico")

@@ -22,9 +22,11 @@ public class CreatePermitInput {
     @Schema(name = "permit_year", description = "Permit year", example = "2024" )
     private int permitYear;
     
-    @NotNull
     @Schema(name = "plate_number", description = "Plate number", example = "06TEST" )
     private String plateNumber;
+
+    @Schema(name = "plate_number2", description = "Plate number 2", example = "06TEST" )
+    private String plateNumber2;
     
     @NotNull
     @Schema(name = "company_name", description = "Company name", example = "ABC" )
@@ -37,9 +39,6 @@ public class CreatePermitInput {
     @NotNull
     @Schema(name = "arrival_country", description = "Arrival country", example = "TR" )
     private String arrivalCountry;
-        
-    @Schema(hidden = true, name = "ex_permit_id", description = "Ex permit id")
-    private String prevPermitId;
 
     @Schema(hidden = true, name = "expires_at", description = "Expires at")
     private String expireAt;

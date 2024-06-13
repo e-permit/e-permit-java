@@ -1,6 +1,5 @@
 package epermit.utils;
 
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.encrypt.Encryptors;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
@@ -49,7 +48,10 @@ public class JwsUtil {
     public <T> String createJws(String keyId, T payloadObj) {
         log.info("createJws invoked with {} and key_id {}", payloadObj, keyId);
         Gson gson = GsonUtil.getGson();
-        JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.ES256).keyID(keyId).build();
+        JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.ES256)
+                .keyID(keyId)
+                .customParam("authority", properties.getIssuerCode())
+                .build();
         Payload payload = new Payload(gson.toJson(payloadObj));
         String jws = sign(keyId, payload, header);
         log.info("createJws ended with {}", jws);
@@ -96,11 +98,10 @@ public class JwsUtil {
         Key privateKey = keyRepository.findOneByKeyId(keyId).orElseThrow();
         TextEncryptor decryptor = Encryptors.text(properties.getKeystorePassword(), privateKey.getSalt());
         ECKey key = ECKey.parse(decryptor.decrypt(privateKey.getPrivateJwk()));
-        
+
         JWSObject jwsObject = new JWSObject(header, payload);
         JWSSigner signer = new ECDSASigner(key);
         jwsObject.sign(signer);
         return jwsObject.serialize();
     }
 }
-

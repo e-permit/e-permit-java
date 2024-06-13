@@ -11,7 +11,7 @@ public class AuthorityDto {
 
   private String name;
 
-  private String apiUri;
+  private String publicApiUri;
 
   private List<QuotaDto> quotas = new ArrayList<>();
 

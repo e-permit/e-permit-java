@@ -56,11 +56,8 @@ public class EventService {
     public <T extends LedgerEventBase> void handleReceivedEvent(HttpHeaders headers, T e) {
         String authorization = headers.getFirst(HttpHeaders.AUTHORIZATION);
         log.info("Event jws. {}", authorization);
-        VerifyProofResult r = ledgerEventUtil.verifyProof(e, authorization);
-        if (!r.isValid()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED");
-        }
-        ledgerEventUtil.handleEvent(e, r.getProof());
+        String proof = ledgerEventUtil.verifyProof(e, authorization);
+        ledgerEventUtil.handleEvent(e, proof);
     }
 
     static Specification<LedgerEvent> filterEvents(Long id, String producer, String consumer) {

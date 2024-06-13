@@ -47,8 +47,9 @@ public class PermitCreatedLedgerEvent extends LedgerEventBase {
     @Pattern(regexp = Constants.DATE_FORMAT)
     private String expireAt;
 
-    @NotNull
     private String plateNumber;
+
+    private String plateNumber2;
 
     @NotNull
     private String companyName;

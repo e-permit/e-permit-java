@@ -7,10 +7,12 @@ import java.util.UUID;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 
 import epermit.commons.EpermitValidationException;
 import epermit.commons.ErrorCodes;
@@ -130,37 +132,33 @@ public class LedgerEventUtil {
     @SneakyThrows
     public <T extends LedgerEventBase> String createProof(T event) {
         String jws = jwsUtil.createJws(event);
-        log.info("Created jws length: {}", jws.length());
         String[] parts = jws.split("\\.");
         return parts[0] + "." + parts[2];
     }
 
     @SneakyThrows
-    public VerifyProofResult verifyProof(Object e, String authorization) {
+    public String verifyProof(Object e, String authorization) {
         if (authorization == null) {
-            return VerifyProofResult.fail("HEADER_NOTFOUND");
-        }
-        LedgerEventBase eb = (LedgerEventBase) e;
-        Authority authority = authorityRepository.findOneByCode(eb.getEventProducer())
-          .orElseThrow();
-        if (authority == null) {
-            return VerifyProofResult.fail("AUTHORITY_NOTFOUND");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authorization header not found");
         }
         if (!authorization.toLowerCase().startsWith("bearer")) {
-            return VerifyProofResult.fail("INVALID_AUTH_TYPE");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid authorization type");
         }
+        LedgerEventBase eb = (LedgerEventBase) e;
+        authorityRepository
+                .findOneByCode(eb.getEventProducer())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid authority"));
+
         String proof = authorization.substring(7);
         String[] proofArr = proof.split("\\.");
         String payloadJsonStr = GsonUtil.getGson().toJson(e);
         String payloadBase64 = Base64.getUrlEncoder().withoutPadding().encodeToString(payloadJsonStr.getBytes());
         String jws = proofArr[0] + "." + payloadBase64 + "." + proofArr[1];
-        log.info("Constructed jws: {}", jws);
-        log.info("Constructed jws length: {}", jws.length());
         Boolean isValid = jwsUtil.validateJws(jws);
         if (!isValid) {
-            return VerifyProofResult.fail("UNAUTHORIZED");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid jws");
         }
-        return VerifyProofResult.success(proof);
+        return proof;
     }
 
 }

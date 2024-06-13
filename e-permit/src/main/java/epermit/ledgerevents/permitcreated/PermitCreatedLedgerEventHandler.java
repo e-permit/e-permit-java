@@ -40,14 +40,6 @@ public class PermitCreatedLedgerEventHandler implements LedgerEventHandler {
             throw new EpermitValidationException(ErrorCodes.INSUFFICIENT_PERMIT_QUOTA);
         }
 
-        if (permitId.getVersion() != 1) {
-            PermitId exPermitId = permitId.toBuilder().version(permitId.getVersion() - 1).build();
-            LedgerPermit exPermit = permitRepository.findOneByPermitId(exPermitId.toString()).get();
-            if (!exPermit.isRevoked())
-                throw new EpermitValidationException(ErrorCodes.PERMIT_NOTFOUND);
-            permitRepository.save(exPermit);
-        }
-
         LedgerPermit permit = new LedgerPermit();
         permit.setCompanyId(event.getCompanyId());
         permit.setCompanyName(event.getCompanyName());
@@ -59,6 +51,7 @@ public class PermitCreatedLedgerEventHandler implements LedgerEventHandler {
         permit.setPermitType(event.getPermitType());
         permit.setPermitYear(event.getPermitYear());
         permit.setPlateNumber(event.getPlateNumber());
+        permit.setPlateNumber2(event.getPlateNumber2());
         permit.setDepartureCountry(event.getDepartureCountry());
         permit.setArrivalCountry(event.getArrivalCountry());
         permit.setQrCode(event.getQrCode());

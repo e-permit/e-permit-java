@@ -25,6 +25,8 @@ public class PermitDto {
 
     private String plateNumber;
 
+    private String plateNumber2;
+
     private String companyName;
 
     private String companyId;

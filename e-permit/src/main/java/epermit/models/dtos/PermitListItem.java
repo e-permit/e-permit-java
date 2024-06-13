@@ -23,6 +23,8 @@ public class PermitListItem {
 
     private String plateNumber;
 
+    private String plateNumber2;
+
     private String companyName;
 
     private String companyId;
