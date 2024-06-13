@@ -1,6 +1,6 @@
 #!/bin/bash 
 CT="Content-Type: application/json"
-UZ_URI="http://localhost:3060"
+B_URI="http://localhost:3060"
 AUTH="admin:admin"
 
 permit_used()
@@ -14,4 +14,4 @@ permit_used()
 EOF
 }
 
-curl "$UZ_URI/permits/TR-UZ-2024-1-1/activities" -u "$AUTH" -X POST --data "$(permit_used)" -H 'Content-Type: application/json'
+curl "$B_URI/permits/A-B-2024-1-1/activities" -u "$AUTH" -X POST --data "$(permit_used)" -H 'Content-Type: application/json'

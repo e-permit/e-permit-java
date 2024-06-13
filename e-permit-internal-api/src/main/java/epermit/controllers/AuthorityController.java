@@ -50,7 +50,7 @@ public class AuthorityController {
     @GetMapping("/{code}")
     @Operation(summary = "Get authority by code", description = "Get a Authority object by specifying its code")
     public AuthorityDto getByCode(
-            @Parameter(description = "Authority code", example = "TR") @PathVariable("code") String code) {
+            @Parameter(description = "Authority code", example = "A") @PathVariable("code") String code) {
         return service.getByCode(code);
     }
 
@@ -74,7 +74,7 @@ public class AuthorityController {
     @PostMapping("/{code}/quotas")
     @Operation(summary = "Create quota", description = "Create quota for given authority")
     public void createQuota(
-            @Parameter(description = "Authority code", example = "TR") @PathVariable("code") String code,
+            @Parameter(description = "Authority code", example = "A") @PathVariable("code") String code,
             @RequestBody @Valid CreateQuotaInput input) {
         log.info("Authority quota create request. {}", input);
         service.createQuota(code, input);

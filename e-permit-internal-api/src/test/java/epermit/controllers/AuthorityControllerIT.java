@@ -78,7 +78,7 @@ public class AuthorityControllerIT {
     void getAllTest() {
         Authority authority = new Authority();
         authority.setPublicApiUri("apiUri");
-        authority.setCode("UZ");
+        authority.setCode("B");
         authority.setName("name");
         authorityRepository.save(authority);
         ResponseEntity<AuthorityDto[]> r = getTestRestTemplate().getForEntity(getBaseUrl(), AuthorityDto[].class);
@@ -93,14 +93,14 @@ public class AuthorityControllerIT {
     void getByCodeTest() {
         Authority authority = new Authority();
         authority.setPublicApiUri("apiUri");
-        authority.setCode("UZ");
+        authority.setCode("B");
         authority.setName("name");
         authorityRepository.save(authority);
-        ResponseEntity<AuthorityDto> r = getTestRestTemplate().getForEntity(getBaseUrl() + "/UZ", AuthorityDto.class);
+        ResponseEntity<AuthorityDto> r = getTestRestTemplate().getForEntity(getBaseUrl() + "/B", AuthorityDto.class);
         assertEquals(HttpStatus.OK, r.getStatusCode());
         var body = r.getBody();
         Assert.assertNotNull("", body);
-        assertEquals("UZ", body.getCode());
+        assertEquals("B", body.getCode());
         assertEquals("apiUri", body.getPublicApiUri());
         assertEquals("name", body.getName());
     }
@@ -109,11 +109,11 @@ public class AuthorityControllerIT {
     void createTest() {
         CreateAuthorityInput input = new CreateAuthorityInput();
         input.setPublicApiUri("http://localhost");
-        input.setCode("UZ");
-        input.setName("Uzbekistan");
+        input.setCode("B");
+        input.setName("B");
         AuthorityConfig config = new AuthorityConfig();
-        config.setCode("UZ");
-        config.setName("Uzbekistan");
+        config.setCode("B");
+        config.setName("B");
         PublicJwk jwk = new PublicJwk();
         jwk.setCrv("crv");
         jwk.setKid("1");
@@ -127,22 +127,22 @@ public class AuthorityControllerIT {
                 .andRespond(withSuccess(configJson, MediaType.APPLICATION_JSON));
         ResponseEntity<?> r = getTestRestTemplate().postForEntity(getBaseUrl(), input, String.class);
         assertEquals(HttpStatus.OK, r.getStatusCode());
-        AuthorityDto authority = getTestRestTemplate().getForObject(getBaseUrl() + "/UZ", AuthorityDto.class);
-        assertEquals("UZ", authority.getCode());
+        AuthorityDto authority = getTestRestTemplate().getForObject(getBaseUrl() + "/B", AuthorityDto.class);
+        assertEquals("B", authority.getCode());
     }
 
     @Test
     void createQuotaTest() {
         Authority authority = new Authority();
         authority.setPublicApiUri("http://api.gov");
-        authority.setCode("UZ");
-        authority.setName("Uzbekistan");
+        authority.setCode("B");
+        authority.setName("B");
         authorityRepository.save(authority);
         CreateQuotaInput input = new CreateQuotaInput();
         input.setQuantity(100L);
         input.setPermitType(1);
         input.setPermitYear(2021);
-        ResponseEntity<Void> r = getTestRestTemplate().postForEntity(getBaseUrl() + "/UZ/quotas", input, Void.class);
+        ResponseEntity<Void> r = getTestRestTemplate().postForEntity(getBaseUrl() + "/B/quotas", input, Void.class);
         assertEquals(HttpStatus.OK, r.getStatusCode());
     }
 }

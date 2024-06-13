@@ -15,13 +15,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import epermit.models.CreatePermitResult;
 import epermit.models.dtos.PermitDto;
 import epermit.models.dtos.PermitListItem;
 import epermit.models.dtos.PermitListPageParams;
 import epermit.models.dtos.PermitListParams;
 import epermit.models.inputs.CreatePermitInput;
 import epermit.models.inputs.PermitUsedInput;
-import epermit.models.results.CreatePermitResult;
 import epermit.services.PermitService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -62,14 +63,14 @@ public class PermitController {
     @GetMapping("/find/{id}")
     @Operation(summary = "Find permit", description = "Find permit by specified permit id")
     public PermitDto getByPermitId(
-            @Parameter(description = "Permit Identifier", example = "TR-UZ-2024-1-1") @PathVariable("id") String id) {
+            @Parameter(description = "Permit Identifier", example = "A-B-2024-1-1") @PathVariable("id") String id) {
         return permitService.getByPermitId(id);
     }
 
     @GetMapping("/{id}/pdf")
     @Operation(summary = "Get permit pdf", description = "Get permit pdf(base64) by specified permit id")
     public String getBase64PdfById(
-            @Parameter(description = "Permit Identifier", example = "TR-UZ-2024-1-1") @PathVariable("id") String id) {
+            @Parameter(description = "Permit Identifier", example = "A-B-2024-1-1") @PathVariable("id") String id) {
         return Base64.getEncoder().encodeToString(permitService.generatePdf(id));
     }
 
@@ -83,7 +84,7 @@ public class PermitController {
     @DeleteMapping("/{id}")
     @Operation(summary = "Revoke permit", description = "Revoke permit by permit id")
     public void revoke(
-            @Parameter(description = "Permit Identifier", example = "TR-UZ-2024-1-1") @PathVariable("id") String id) {
+            @Parameter(description = "Permit Identifier", example = "A-B-2024-1-1") @PathVariable("id") String id) {
         log.info("Revoke permit request. {}", id);
         permitService.revokePermit(id);
     }
@@ -91,7 +92,7 @@ public class PermitController {
     @PostMapping("/{id}/activities")
     @Operation(summary = "Add permit activity", description = "Add permit activity by permit id")
     public void setUsed(
-            @Parameter(description = "Permit Identifier", example = "TR-UZ-2024-1-1") @PathVariable("id") String id,
+            @Parameter(description = "Permit Identifier", example = "A-B-2024-1-1") @PathVariable("id") String id,
             @RequestBody @Valid PermitUsedInput input) {
         log.info("Permit used request. {}, {}", id, input);
         permitService.permitUsed(id, input);

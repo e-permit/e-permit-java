@@ -37,12 +37,12 @@ import epermit.commons.GsonUtil;
 import epermit.entities.Authority;
 import epermit.entities.LedgerPermit;
 import epermit.entities.LedgerQuota;
+import epermit.models.CreatePermitResult;
 import epermit.models.dtos.PermitDto;
 import epermit.models.dtos.PermitListItem;
 import epermit.models.enums.PermitActivityType;
 import epermit.models.inputs.CreatePermitInput;
 import epermit.models.inputs.PermitUsedInput;
-import epermit.models.results.CreatePermitResult;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.LedgerPermitRepository;
 import epermit.repositories.LedgerQuotaRepository;
@@ -80,15 +80,15 @@ public class PermitControllerIT {
     void setUp() {
         Authority authority = new Authority();
         authority.setPublicApiUri("http://api.gov");
-        authority.setCode("UZ");
-        authority.setName("Uzbekistan");
+        authority.setCode("B");
+        authority.setName("B");
         authorityRepository.save(authority);
         LedgerQuota quota = new LedgerQuota();
         quota.setBalance(30L);
         quota.setPermitType(1);
         quota.setPermitYear(2021);
-        quota.setPermitIssuer("TR");
-        quota.setPermitIssuedFor("UZ");
+        quota.setPermitIssuer("A");
+        quota.setPermitIssuedFor("B");
         ledgerQuotaRepository.save(quota);
     }
 
@@ -108,18 +108,18 @@ public class PermitControllerIT {
     void getAllTest() {
         for (Integer i = 0; i < 25; i++) {
             LedgerPermit permit = new LedgerPermit();
-            permit.setIssuer("TR");
+            permit.setIssuer("A");
             permit.setCompanyName("ABC");
             permit.setCompanyId("1");
-            permit.setIssuedFor("UZ");
+            permit.setIssuedFor("B");
             permit.setPermitType(1);
             permit.setPermitYear(2021);
             permit.setPlateNumber("06AA1234");
             permit.setExpireAt("31/01/2022");
             permit.setIssuedAt("03/03/2021");
-            permit.setPermitId("TR-UZ-2021-1-" + i.toString());
-            permit.setDepartureCountry("TR");
-            permit.setArrivalCountry("UZ");
+            permit.setPermitId("A-B-2021-1-" + i.toString());
+            permit.setDepartureCountry("A");
+            permit.setArrivalCountry("B");
             permit.setQrCode("QR");
             permitRepository.save(permit);
         }
@@ -127,7 +127,7 @@ public class PermitControllerIT {
         headers.set(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(getBaseUrl())
-                .queryParam("issued_for", "UZ").queryParam("page", 2);
+                .queryParam("issued_for", "B").queryParam("page", 2);
 
         HttpEntity<?> entity = new HttpEntity<>(headers);
 
@@ -148,16 +148,16 @@ public class PermitControllerIT {
         LedgerPermit permit = new LedgerPermit();
         permit.setCompanyName("ABC");
         permit.setCompanyId("1");
-        permit.setIssuer("TR");
-        permit.setIssuedFor("UZ");
+        permit.setIssuer("A");
+        permit.setIssuedFor("B");
         permit.setPermitType(1);
         permit.setPermitYear(2021);
         permit.setPlateNumber("06AA1234");
         permit.setExpireAt("31/01/2022");
         permit.setIssuedAt("03/03/2021");
         permit.setPermitId("ABC");
-        permit.setDepartureCountry("TR");
-        permit.setArrivalCountry("UZ");
+        permit.setDepartureCountry("A");
+        permit.setArrivalCountry("B");
         permit.setQrCode("QR");
         permitRepository.save(permit);
         PermitDto dto = getTestRestTemplate().getForObject(getBaseUrl() + "/" + permit.getId(),
@@ -170,11 +170,11 @@ public class PermitControllerIT {
         CreatePermitInput input = new CreatePermitInput();
         input.setCompanyName("ABC");
         input.setCompanyId("123");
-        input.setIssuedFor("UZ");
+        input.setIssuedFor("B");
         input.setPermitType(1);
         input.setPermitYear(2021);
         input.setPlateNumber("06AA1234");
-        input.setArrivalCountry("UZ");
+        input.setArrivalCountry("B");
         ResponseEntity<String> r =
                 getTestRestTemplate().postForEntity(getBaseUrl(), input, String.class);
         GsonUtil.getGson().fromJson(r.getBody(), CreatePermitResult.class);
@@ -186,16 +186,16 @@ public class PermitControllerIT {
         LedgerPermit permit = new LedgerPermit();
         permit.setCompanyId("123");
         permit.setCompanyName("ABC");
-        permit.setIssuer("TR");
-        permit.setIssuedFor("UZ");
+        permit.setIssuer("A");
+        permit.setIssuedFor("B");
         permit.setPermitType(1);
         permit.setPermitYear(2021);
         permit.setPlateNumber("06AA1234");
         permit.setExpireAt("31/01/2022");
         permit.setIssuedAt("03/03/2021");
         permit.setPermitId("ABC");
-        permit.setDepartureCountry("TR");
-        permit.setArrivalCountry("UZ");
+        permit.setDepartureCountry("A");
+        permit.setArrivalCountry("B");
         permit.setQrCode("QR");
         permitRepository.save(permit);
         when(restTemplate.postForEntity(anyString(), any(HttpEntity.class), any()))
@@ -210,22 +210,22 @@ public class PermitControllerIT {
     void usePermitTest() {
         Authority authority = new Authority();
         authority.setPublicApiUri("apiUri");
-        authority.setCode("TR");
-        authority.setName("Uzbekistan");
+        authority.setCode("A");
+        authority.setName("A");
         authorityRepository.save(authority);
         LedgerPermit permit = new LedgerPermit();
         permit.setCompanyId("123");
         permit.setCompanyName("ABC");
-        permit.setIssuer("UZ");
-        permit.setIssuedFor("TR");
+        permit.setIssuer("B");
+        permit.setIssuedFor("A");
         permit.setPermitType(1);
         permit.setPermitYear(2021);
         permit.setPlateNumber("06AA1234");
         permit.setExpireAt("31/01/2022");
         permit.setIssuedAt("03/03/2021");
         permit.setPermitId("ABC");
-        permit.setDepartureCountry("TR");
-        permit.setArrivalCountry("UZ");
+        permit.setDepartureCountry("A");
+        permit.setArrivalCountry("B");
         permit.setQrCode("QR");
         permitRepository.save(permit);
         PermitUsedInput input = new PermitUsedInput();

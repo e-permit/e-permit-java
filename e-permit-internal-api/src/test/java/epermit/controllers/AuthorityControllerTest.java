@@ -50,8 +50,8 @@ public class AuthorityControllerTest {
     void getByCodeTest() {
         AuthorityDto authority = new AuthorityDto();
         authority.setCode("UA");
-        when(authorityService.getByCode("TR")).thenReturn(authority);
-        AuthorityDto dto = controller.getByCode("TR");
+        when(authorityService.getByCode("A")).thenReturn(authority);
+        AuthorityDto dto = controller.getByCode("A");
         assertNotNull(dto);
         assertEquals("UA", dto.getCode());
     }
@@ -60,10 +60,10 @@ public class AuthorityControllerTest {
     void createTest() {
         CreateAuthorityInput input = new CreateAuthorityInput();
         input.setPublicApiUri("apiUri");
-        input.setCode("UZ");
+        input.setCode("B");
         input.setName("name");
         AuthorityConfig config = new AuthorityConfig();
-        config.setCode("UZ");
+        config.setCode("B");
         config.setName("name");
         when(restTemplate.getForEntity("apiUri", AuthorityConfig.class, new HttpHeaders()))
                 .thenReturn(new ResponseEntity<>(config, HttpStatus.OK));
@@ -74,7 +74,7 @@ public class AuthorityControllerTest {
     @Test
     void createQuotaTest() {
         CreateQuotaInput input = new CreateQuotaInput();
-        controller.createQuota("TR", input);
-        verify(authorityService, times(1)).createQuota("TR", input);
+        controller.createQuota("A", input);
+        verify(authorityService, times(1)).createQuota("A", input);
     }
 }

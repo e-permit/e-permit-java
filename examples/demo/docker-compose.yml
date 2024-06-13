@@ -1,33 +1,35 @@
 version: '3.8'
 services:
-  tr-internal-api:
-    container_name: tr-internal-api
-    image: ghcr.io/e-permit/internalapi:latest
+  a-internal-api:
+    container_name: a-internal-api
+    build:
+      context: ../../e-permit-internal-api
     depends_on:
-      - trdb
+      - adb
     environment:
       - EPERMIT_ADMIN_PASSWORD=admin
       - EPERMIT_KEYSTORE_PASSWORD=admin
       - FLYWAY_ENABLED=true
       - FLYWAY_SCHEMAS=public
     env_file:
-      - tr.env
+      - a.env
     ports:
       - "3050:8080"
   
-  tr-public-api:
-    container_name: tr-public-api
-    image: ghcr.io/e-permit/publicapi:latest
+  a-public-api:
+    container_name: a-public-api
+    build:
+      context: ../../e-permit-public-api
     depends_on:
-      - trdb
+      - adb
     env_file:
-      - tr.env
+      - a.env
     ports:
       - "3051:8080"
 
-  trdb:
+  adb:
     image: 'postgres:16.2-alpine'
-    container_name: trdb
+    container_name: adb
     environment:
       - POSTGRES_USER=compose-postgres
       - POSTGRES_PASSWORD=compose-postgres
@@ -35,34 +37,36 @@ services:
     ports:
       - "5433:5432"
   
-  uz-internal-api:
-    container_name: uz-internal-api
-    image: ghcr.io/e-permit/internalapi:latest
+  b-internal-api:
+    container_name: b-internal-api
+    build:
+      context: ../../e-permit-internal-api
     depends_on:
-      - uzdb
+      - bdb
     environment:
       - EPERMIT_ADMIN_PASSWORD=admin
       - EPERMIT_KEYSTORE_PASSWORD=admin
       - FLYWAY_ENABLED=true
       - FLYWAY_SCHEMAS=public
     env_file:
-      - uz.env
+      - b.env
     ports:
       - "3060:8080"
 
-  uz-public-api:
-    container_name: uz-public-api
-    image: ghcr.io/e-permit/publicapi:latest
+  b-public-api:
+    container_name: b-public-api
+    build:
+      context: ../../e-permit-public-api
     depends_on:
-      - uzdb
+      - bdb
     env_file:
-      - uz.env
+      - b.env
     ports:
       - "3061:8080"
 
-  uzdb:
+  bdb:
     image: 'postgres:16.2-alpine'
-    container_name: uzdb
+    container_name: bdb
     environment:
       - POSTGRES_USER=compose-postgres
       - POSTGRES_PASSWORD=compose-postgres

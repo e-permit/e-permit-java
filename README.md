@@ -106,7 +106,7 @@ Once the services are up and running, you can execute the following scripts usin
 }
 ```
 
-Full demo can be found at: https://github.com/e-permit/e-permit-java/tree/x-road/examples/tr-uz-demo
+Full demo can be found at: https://github.com/e-permit/e-permit-java/tree/x-road/examples/demo
 
 ## Build
 

@@ -32,14 +32,14 @@ public class PermitUtilTest {
 
     @Test
     void getPermitIdTest() {
-        PermitId input = PermitId.builder().issuedFor("UA")
-                .issuer("TR")
+        PermitId input = PermitId.builder().issuedFor("B")
+                .issuer("A")
                 .permitType(1)
                 .permitYear(2021)
                 .serialNumber(12L).build();
         String permitId = input.toString();
-        assertEquals("TR", PermitId.parse(permitId).getIssuer());
-        assertEquals("TR-UA-2021-1-12", permitId);
+        assertEquals("A", PermitId.parse(permitId).getIssuer());
+        assertEquals("A-B-2021-1-12", permitId);
     }
 
     @Test
@@ -53,8 +53,8 @@ public class PermitUtilTest {
             BarcodeQRCode qrCode = new BarcodeQRCode(
                     "0.eyJhbGciOiJFUzI1NiIsImtpZCI6IjEifQ.eyJpZCI6IlVaLVRSLTIwMjEtMS0xIiwiaWF0IjoiMjcvNS8yMDIxIiwiZXhwIjoiMzEvMS8yMDIyIiwicG4iOiJkIiwiY24iOiJkIn0.I8-dgCtal8ajgAIIaL2NLvFUboCrnIfoqz__1doK_Q1-kIoPgYbbfqm8BDfXk9INdPAUyc1R-FvQrVsgr3D2Cw");
             Barcode39 barCode = new Barcode39(pdf);
-            barCode.setCode("TR-UZ-2022-1-1");
-            barCode.setAltText("TR-UZ-2022-1-1");
+            barCode.setCode("A-B-2022-1-1");
+            barCode.setAltText("A-B-2022-1-1");
             var barCodeImg = new Image(barCode.createFormXObject(pdf)).setMarginLeft(20);
             var qrCodeImg = new Image(qrCode.createFormXObject(pdf)).setWidth(200);
             document.add(new Paragraph(line).setTextAlignment(null).setMarginLeft(45));

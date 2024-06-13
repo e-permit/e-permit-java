@@ -30,11 +30,11 @@ public class PermitUsedLedgerEventHandlerTest {
 
     @Test
     void handleOkTest() {
-        PermitUsedLedgerEvent event = new PermitUsedLedgerEvent("TR", "UZ", "0");
+        PermitUsedLedgerEvent event = new PermitUsedLedgerEvent("A", "B", "0");
         LedgerPermit p = new LedgerPermit();
-        p.setPermitId("UZ-TR-2021-1-1");
-        p.setIssuer("UZ");
-        p.setIssuedFor("TR");
+        p.setPermitId("B-A-2021-1-1");
+        p.setIssuer("B");
+        p.setIssuedFor("A");
         when(permitRepository.findOneByPermitId(event.getPermitId())).thenReturn(Optional.of(p));
         handler.handle(event);
         verify(permitRepository, times(1)).save(any());
@@ -44,7 +44,7 @@ public class PermitUsedLedgerEventHandlerTest {
 
     @Test
     void handlePermitNotFoundTest() {
-        PermitUsedLedgerEvent event = new PermitUsedLedgerEvent("TR", "UZ", "0");
+        PermitUsedLedgerEvent event = new PermitUsedLedgerEvent("A", "B", "0");
         when(permitRepository.findOneByPermitId(event.getPermitId())).thenReturn(Optional.empty());
         EpermitValidationException ex =
                 Assertions.assertThrows(EpermitValidationException.class, () -> {
@@ -56,11 +56,11 @@ public class PermitUsedLedgerEventHandlerTest {
 
     @Test
     void handleInvalidIssuerTest() {
-        PermitUsedLedgerEvent event = new PermitUsedLedgerEvent("TR", "UZ", "0");
+        PermitUsedLedgerEvent event = new PermitUsedLedgerEvent("A", "B", "0");
         LedgerPermit p = new LedgerPermit();
-        p.setPermitId("UZ-TR-2021-1-1");
-        p.setIssuer("UZ2");
-        p.setIssuedFor("TR");
+        p.setPermitId("B-A-2021-1-1");
+        p.setIssuer("B2");
+        p.setIssuedFor("A");
         when(permitRepository.findOneByPermitId(event.getPermitId())).thenReturn(Optional.of(p));
         EpermitValidationException ex =
                 Assertions.assertThrows(EpermitValidationException.class, () -> {
@@ -72,11 +72,11 @@ public class PermitUsedLedgerEventHandlerTest {
 
     @Test
     void handleInvalidIssuedForTest() {
-        PermitUsedLedgerEvent event = new PermitUsedLedgerEvent("TR", "UZ", "0");
+        PermitUsedLedgerEvent event = new PermitUsedLedgerEvent("A", "B", "0");
         LedgerPermit p = new LedgerPermit();
-        p.setPermitId("UZ-TR-2021-1-1");
-        p.setIssuer("UZ");
-        p.setIssuedFor("TR2");
+        p.setPermitId("B-A-2021-1-1");
+        p.setIssuer("B");
+        p.setIssuedFor("A2");
         when(permitRepository.findOneByPermitId(event.getPermitId())).thenReturn(Optional.of(p));
         EpermitValidationException ex =
                 Assertions.assertThrows(EpermitValidationException.class, () -> {

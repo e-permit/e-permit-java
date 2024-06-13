@@ -24,8 +24,8 @@ import epermit.PermitPostgresContainer;
 import epermit.entities.Authority;
 import epermit.entities.LedgerPermit;
 import epermit.entities.LedgerQuota;
+import epermit.models.CreatePermitResult;
 import epermit.models.inputs.CreatePermitInput;
-import epermit.models.results.CreatePermitResult;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.LedgerPermitRepository;
 import epermit.repositories.LedgerQuotaRepository;
@@ -61,14 +61,14 @@ public class PermitServiceIT {
             @Autowired LedgerQuotaRepository ledgerQuotaRepository) {
         Authority authority = new Authority();
         authority.setPublicApiUri("apiUri");
-        authority.setCode("FR");
-        authority.setName("Uz");
+        authority.setCode("B");
+        authority.setName("B");
         authorityRepository.save(authority);
 
         LedgerQuota quota = new LedgerQuota();
         quota.setBalance(100L);
-        quota.setPermitIssuedFor("FR");
-        quota.setPermitIssuer("TR");
+        quota.setPermitIssuedFor("B");
+        quota.setPermitIssuer("A");
         quota.setPermitType(1);
         quota.setPermitYear(2021);
         ledgerQuotaRepository.save(quota);
@@ -79,11 +79,11 @@ public class PermitServiceIT {
         CreatePermitInput input = new CreatePermitInput();
         input.setCompanyId("ABC");
         input.setCompanyName("ABC");
-        input.setIssuedFor("FR");
+        input.setIssuedFor("B");
         input.setPermitType(1);
         input.setPermitYear(2021);
         input.setPlateNumber("ABC");
-        input.setArrivalCountry("FR");
+        input.setArrivalCountry("B");
         permitService.createPermit(input);
     }
 
@@ -92,11 +92,11 @@ public class PermitServiceIT {
         CreatePermitInput input = new CreatePermitInput();
         input.setCompanyId("ABC");
         input.setCompanyName("ABC");
-        input.setIssuedFor("FR");
+        input.setIssuedFor("B");
         input.setPermitType(1);
         input.setPermitYear(2021);
         input.setPlateNumber("ABC");
-        input.setArrivalCountry("FR");
+        input.setArrivalCountry("B");
         CreatePermitResult r = permitService.createPermit(input);
         Optional<LedgerPermit> permit = ledgerPermitRepository.findOneByPermitId(r.getPermitId());
         Assertions.assertTrue(permit.isPresent());

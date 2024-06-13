@@ -58,7 +58,7 @@ public class AuthorityServiceTest {
     @SneakyThrows
     void getAllTest() {
         Authority authority = new Authority();
-        authority.setCode("UA");
+        authority.setCode("C");
         when(authorityRepository.findAll()).thenReturn(List.of(authority));
         List<AuthorityListItem> dtos = authorityService.getAll();
         assertEquals(1, dtos.size());
@@ -67,24 +67,24 @@ public class AuthorityServiceTest {
     @Test
     void getByCodeTest() {
         Authority authority = new Authority();
-        authority.setCode("UZ");
-        when(authorityRepository.findOneByCode("UZ")).thenReturn(Optional.of(authority));
-        AuthorityDto dto = authorityService.getByCode("UZ");
-        assertEquals("UZ", dto.getCode());
+        authority.setCode("B");
+        when(authorityRepository.findOneByCode("B")).thenReturn(Optional.of(authority));
+        AuthorityDto dto = authorityService.getByCode("B");
+        assertEquals("B", dto.getCode());
     }
 
     @Test
     void createTest() {
         CreateAuthorityInput input = new CreateAuthorityInput();
         input.setPublicApiUri("apiUri");
-        input.setCode("UZ");
-        input.setName("Uzbekistan");
-        when(authorityRepository.findOneByCode("UZ")).thenReturn(Optional.empty());
+        input.setCode("B");
+        input.setName("CountryB");
+        when(authorityRepository.findOneByCode("B")).thenReturn(Optional.empty());
         authorityService.create(input, new AuthorityConfig());
         Authority authority = new Authority();
         authority.setPublicApiUri("apiUri");
-        authority.setCode("UZ");
-        authority.setName("Uzbekistan");
+        authority.setCode("B");
+        authority.setName("CountryB");
        
         verify(authorityRepository, times(1)).save(authority);
     }
@@ -95,18 +95,18 @@ public class AuthorityServiceTest {
         input.setQuantity(20L);
         input.setPermitType(1);
         input.setPermitYear(2021);
-        when(properties.getIssuerCode()).thenReturn("UZ");
-        when(ledgerEventUtil.getPreviousEventId("TR")).thenReturn("123");
-        when(authorityRepository.findOneByCode("TR")).thenReturn(Optional.of(new Authority()));
-        authorityService.createQuota("TR", input);
+        when(properties.getIssuerCode()).thenReturn("B");
+        when(ledgerEventUtil.getPreviousEventId("A")).thenReturn("123");
+        when(authorityRepository.findOneByCode("A")).thenReturn(Optional.of(new Authority()));
+        authorityService.createQuota("A", input);
         verify(ledgerEventUtil, times(1)).persistAndPublishEvent(captor.capture());
         QuotaCreatedLedgerEvent event = captor.getValue();
         assertEquals(20L, event.getQuantity());
-        assertEquals("TR", event.getEventConsumer());
-        assertEquals("UZ", event.getEventProducer());
+        assertEquals("A", event.getEventConsumer());
+        assertEquals("B", event.getEventProducer());
         assertEquals(LedgerEventType.QUOTA_CREATED, event.getEventType());
-        assertEquals("TR", event.getPermitIssuer());
-        assertEquals("UZ", event.getPermitIssuedFor());
+        assertEquals("A", event.getPermitIssuer());
+        assertEquals("B", event.getPermitIssuedFor());
         assertEquals(1, event.getPermitType());
         assertEquals(2021, event.getPermitYear());
         assertEquals("123", event.getPreviousEventId());

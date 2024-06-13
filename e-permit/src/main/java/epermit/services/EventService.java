@@ -2,21 +2,19 @@ package epermit.services;
 
 import java.util.ArrayList;
 import java.util.List;
-import jakarta.persistence.criteria.Predicate;
+
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import epermit.entities.CreatedEvent;
 import epermit.entities.LedgerEvent;
 import epermit.ledgerevents.LedgerEventBase;
 import epermit.ledgerevents.LedgerEventUtil;
 import epermit.models.LedgerEventCreated;
-import epermit.models.results.VerifyProofResult;
 import epermit.repositories.CreatedEventRepository;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;

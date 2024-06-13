@@ -1,7 +1,6 @@
 package epermit.ledgerevents.keycreated;
 
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import epermit.ledgerevents.LedgerEventBase;
 import epermit.ledgerevents.LedgerEventType;
 import lombok.Getter;

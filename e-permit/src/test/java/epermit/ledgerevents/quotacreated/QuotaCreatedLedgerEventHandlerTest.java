@@ -30,7 +30,7 @@ public class QuotaCreatedLedgerEventHandlerTest {
 
     @Test
     void handleOkTest() {
-        QuotaCreatedLedgerEvent event = new QuotaCreatedLedgerEvent("TR", "UZ", "0");
+        QuotaCreatedLedgerEvent event = new QuotaCreatedLedgerEvent("A", "B", "0");
         event.setQuantity(4L);
         event.setPermitType(1);
         event.setPermitYear(2021);

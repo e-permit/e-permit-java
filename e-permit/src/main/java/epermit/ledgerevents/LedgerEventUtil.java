@@ -22,7 +22,6 @@ import epermit.entities.CreatedEvent;
 import epermit.entities.LedgerEvent;
 import epermit.models.EPermitProperties;
 import epermit.models.LedgerEventCreated;
-import epermit.models.results.VerifyProofResult;
 import epermit.repositories.AuthorityRepository;
 import epermit.repositories.CreatedEventRepository;
 import epermit.repositories.LedgerEventRepository;

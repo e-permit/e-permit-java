@@ -10,21 +10,16 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 import java.util.Set;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
-import jakarta.validation.ValidatorFactory;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.jpa.domain.Specification;
 
 import epermit.commons.EpermitValidationException;
 import epermit.commons.ErrorCodes;
@@ -33,6 +28,10 @@ import epermit.entities.LedgerQuota;
 import epermit.repositories.LedgerPermitRepository;
 import epermit.repositories.LedgerQuotaRepository;
 import epermit.utils.PermitUtil;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 
 @ExtendWith(MockitoExtension.class)
 public class PermitCreatedLedgerEventHandlerTest {
@@ -62,14 +61,14 @@ public class PermitCreatedLedgerEventHandlerTest {
 
     @Test
     void handleValidationTest() {
-        PermitCreatedLedgerEvent event = new PermitCreatedLedgerEvent("UZ", "TR", "0");
+        PermitCreatedLedgerEvent event = new PermitCreatedLedgerEvent("B", "A", "0");
         event.setExpireAt("03/03/2021");
         event.setIssuedAt("03/02/2021");
         event.setCompanyName("A");
         event.setCompanyId("companyId");
-        event.setPermitId("UZ-TR-2021-1-1");
-        event.setPermitIssuedFor("TR");
-        event.setPermitIssuer("UZ");
+        event.setPermitId("B-A-2021-1-1");
+        event.setPermitIssuedFor("A");
+        event.setPermitIssuer("B");
         event.setPermitType(1);
         event.setPermitYear(2021);
         event.setPlateNumber("A");
@@ -82,8 +81,8 @@ public class PermitCreatedLedgerEventHandlerTest {
 
     @Test
     void handlePermitIdAlreadyExistsTest() {
-        PermitCreatedLedgerEvent event = new PermitCreatedLedgerEvent("UZ", "TR", "0");
-        event.setPermitId("UZ-TR-2021-1-1");
+        PermitCreatedLedgerEvent event = new PermitCreatedLedgerEvent("B", "A", "0");
+        event.setPermitId("B-A-2021-1-1");
         when(permitRepository.existsByPermitId(event.getPermitId())).thenReturn(true);
         EpermitValidationException ex = Assertions.assertThrows(EpermitValidationException.class, () -> {
             handler.handle(event);
@@ -94,8 +93,8 @@ public class PermitCreatedLedgerEventHandlerTest {
 
     @Test
     void handleInsufficientPermitQuotaTest() {
-        PermitCreatedLedgerEvent event = new PermitCreatedLedgerEvent("UZ", "TR", "0");
-        event.setPermitId("UZ-TR-2021-1-1");
+        PermitCreatedLedgerEvent event = new PermitCreatedLedgerEvent("B", "A", "0");
+        event.setPermitId("B-A-2021-1-1");
         when(permitRepository.existsByPermitId(event.getPermitId())).thenReturn(false);
         
         EpermitValidationException ex = Assertions.assertThrows(EpermitValidationException.class, () -> {
@@ -107,29 +106,29 @@ public class PermitCreatedLedgerEventHandlerTest {
 
     @Test
     void handleOkTest() {
-        PermitCreatedLedgerEvent event = new PermitCreatedLedgerEvent("UZ", "TR", "0");
+        PermitCreatedLedgerEvent event = new PermitCreatedLedgerEvent("B", "A", "0");
         event.setExpireAt("A");
         event.setIssuedAt("A");
         event.setCompanyName("A");
-        event.setPermitId("UZ-TR-2021-1-1");
+        event.setPermitId("B-A-2021-1-1");
         event.setPermitType(1);
         event.setPermitYear(2021);
         event.setPlateNumber("A");
-        event.setPermitIssuer("UZ");
-        event.setPermitIssuedFor("TR");
-        when(permitRepository.existsByPermitId("UZ-TR-2021-1-1")).thenReturn(false);
+        event.setPermitIssuer("B");
+        event.setPermitIssuedFor("A");
+        when(permitRepository.existsByPermitId("B-A-2021-1-1")).thenReturn(false);
         when(quotaRepository.findOneByParams(anyString(), anyString(), anyInt(), anyInt() ))
                 .thenReturn(Optional.of(LedgerQuota.builder().balance(5L).build()));
         handler.handle(event);
         verify(permitRepository).save(captor.capture());
         LedgerPermit p = captor.getValue();
         assertEquals("A", p.getExpireAt());
-        assertEquals("UZ-TR-2021-1-1", p.getPermitId());
+        assertEquals("B-A-2021-1-1", p.getPermitId());
         assertEquals(1, p.getPermitType());
         assertEquals("A", p.getCompanyName());
         assertEquals("A", p.getIssuedAt());
-        assertEquals("UZ", p.getIssuer());
-        assertEquals("TR", p.getIssuedFor());
+        assertEquals("B", p.getIssuer());
+        assertEquals("A", p.getIssuedFor());
         assertEquals(2021, p.getPermitYear());
     }
 

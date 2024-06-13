@@ -12,10 +12,10 @@ public class CreateAuthorityInput {
     private String publicApiUri;
 
     @NotBlank
-    @Schema(description = "Authority code, for countries it is two letter country code", example = "TR" )
+    @Schema(description = "Authority code, for countries it is two letter country code", example = "A" )
     private String code;
 
     @NotBlank
-    @Schema(description = "Authority name", example = "TÜRKİYE" )
+    @Schema(description = "Authority name", example = "CountryA" )
     private String name;
 }

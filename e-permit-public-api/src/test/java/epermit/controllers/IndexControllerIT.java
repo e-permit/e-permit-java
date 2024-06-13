@@ -39,7 +39,7 @@ public class IndexControllerIT {
     void setUpAuthority() {
         Authority authority = new Authority();
         authority.setPublicApiUri("apiUri");
-        authority.setCode("UZ");
+        authority.setCode("B");
         authority.setName("name");
         authorityRepository.save(authority);
     }

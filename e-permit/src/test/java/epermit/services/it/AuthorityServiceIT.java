@@ -59,7 +59,7 @@ public class AuthorityServiceIT {
         authorityService.create(input, new AuthorityConfig());
         LedgerQuota quota = new LedgerQuota();
         quota.setPermitIssuedFor("AY");
-        quota.setPermitIssuer("TR");
+        quota.setPermitIssuer("A");
         quota.setPermitType(1);
         quota.setPermitYear(2022);
         quota.setBalance(100L);
@@ -70,12 +70,12 @@ public class AuthorityServiceIT {
         permit.setExpireAt("companyId");
         permit.setIssuedAt("companyId");
         permit.setIssuedFor("AY");
-        permit.setIssuer("TR");
+        permit.setIssuer("A");
         permit.setPermitId("1");
         permit.setPermitType(1);
         permit.setPermitYear(2022);
         permit.setPlateNumber("companyId");
-        permit.setArrivalCountry("TR");
+        permit.setArrivalCountry("A");
         permit.setDepartureCountry("AY");
         permit.setQrCode("A");
         permit.setUsed(false);
@@ -85,8 +85,8 @@ public class AuthorityServiceIT {
     @Test
     void createTest() {
         CreateAuthorityInput input = new CreateAuthorityInput();
-        input.setCode("AZ");
-        input.setName("Uz");
+        input.setCode("C");
+        input.setName("C");
         input.setPublicApiUri("apiUri");
         authorityService.create(input, new AuthorityConfig());
     }
@@ -95,13 +95,13 @@ public class AuthorityServiceIT {
     void createQuotaTest() {
         Authority authority = new Authority();
         authority.setPublicApiUri("apiUri");
-        authority.setCode("UZ");
-        authority.setName("Uz");
+        authority.setCode("B");
+        authority.setName("B");
         authorityRepository.save(authority);
         CreateQuotaInput input = new CreateQuotaInput();
         input.setQuantity(20L);
         input.setPermitType(1);
         input.setPermitYear(2021);
-        authorityService.createQuota("UZ", input);
+        authorityService.createQuota("B", input);
     }
 }
