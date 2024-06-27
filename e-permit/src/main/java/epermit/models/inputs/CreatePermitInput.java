@@ -40,7 +40,7 @@ public class CreatePermitInput {
     @Schema(name = "arrival_country", description = "Arrival country", example = "A" )
     private String arrivalCountry;
 
-    @Schema(hidden = true, name = "expires_at", description = "Expires at")
+    @Schema(name = "expire_at", description = "Expires at (nullable), default: last day of upcoming year's January", example= "02/01/2023")
     private String expireAt;
     
     @Schema(hidden = true )
