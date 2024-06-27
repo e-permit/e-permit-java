@@ -34,7 +34,7 @@ create_quota()
   {
     "permit_type": "1",
     "permit_year": 2024,
-    "quantity": 100
+    "quantity": 10
   }
 EOF
 }

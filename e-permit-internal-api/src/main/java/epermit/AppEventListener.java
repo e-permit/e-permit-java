@@ -32,13 +32,18 @@ public class AppEventListener {
             eventService.handleSentEvent(event.getEventId());
         } else if (result.getStatusCode() == HttpStatus.UNPROCESSABLE_ENTITY) {
             ApiErrorResponse error = (ApiErrorResponse) result.getBody();
-            if (error != null && error.getDetails().get("errorCode").equals("EVENT_ALREADY_EXISTS")) {
-                eventService.handleSentEvent(event.getEventId());
-            } else {
-                String err = GsonUtil.getGson().toJson(result.getBody());
-                log.error(err);
-                eventService.handleEventError(event.getEventId(), err);
-            }
+            if(error != null){
+                var errorCode = error.getDetails().get("errorCode");
+                if (errorCode.equals("EVENT_ALREADY_EXISTS")) {
+                    eventService.handleSentEvent(event.getEventId());
+                } else if (errorCode.equals("PREVIOUS_EVENT_NOTFOUND")) {
+                    eventService.handleEventError(event.getEventId(), "Previous event not found");
+                } else {
+                    String err = GsonUtil.getGson().toJson(result.getBody());
+                    log.error(err);
+                    eventService.handleEventError(event.getEventId(), err);
+                }
+            }  
         }
         log.info("Sending event is finished");
     }

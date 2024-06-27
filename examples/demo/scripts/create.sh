@@ -19,7 +19,7 @@ create_permit()
 EOF
 }
  
-for i in {1..100}
+for i in {1..11}
 do
   curl "$A_URI/permits" -u "$AUTH" -X POST --data "$(create_permit)" -H 'Content-Type: application/json'
 done

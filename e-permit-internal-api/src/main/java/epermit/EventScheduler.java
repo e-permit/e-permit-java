@@ -29,6 +29,7 @@ public class EventScheduler {
         log.info(String.format("Found %d unsended events", list.size()));
         for (LedgerEventCreated event : list) {
             eventPublisher.publishEvent(event);
+            Thread.sleep(100);
             log.info( String.format("Event published id: %s", event.getEventId()));
         }
     }
