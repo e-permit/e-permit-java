@@ -1,8 +1,8 @@
 on:
   push:
-    branches: [ "x-road" ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ "x-road" ]
+    branches: [ "main" ]
 permissions:
   packages: write
 jobs:
