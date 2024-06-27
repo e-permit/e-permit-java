@@ -36,6 +36,8 @@ public class PermitUsedLedgerEventHandler implements LedgerEventHandler {
         LedgerPermitActivity activity = new LedgerPermitActivity();
         activity.setActivityType(event.getActivityType());
         activity.setActivityTimestamp(event.getActivityTimestamp());
+        activity.setActivityDetails(event.getActivityDetails());
+
         permit.addActivity(activity);
         log.info("PermitUsedEventHandler ended with {}", activity);
         permitRepository.save(permit);
