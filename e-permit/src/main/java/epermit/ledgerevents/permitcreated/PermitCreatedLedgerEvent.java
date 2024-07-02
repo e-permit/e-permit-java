@@ -45,7 +45,7 @@ public class PermitCreatedLedgerEvent extends LedgerEventBase {
 
     @NotNull
     @Pattern(regexp = Constants.DATE_FORMAT)
-    private String expireAt;
+    private String expiresAt;
 
     private String plateNumber;
 
@@ -76,11 +76,11 @@ public class PermitCreatedLedgerEvent extends LedgerEventBase {
                 || iat.equals(LocalDate.now(ZoneOffset.UTC));
     }
 
-    @AssertTrue(message = "Invalid expire_at")
-    private boolean isValidExpireAt() {
+    @AssertTrue(message = "Invalid expires_at")
+    private boolean isValidExpiresAt() {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         LocalDate iat = LocalDate.parse(this.issuedAt, dtf);
-        LocalDate exp = LocalDate.parse(this.expireAt, dtf);
+        LocalDate exp = LocalDate.parse(this.expiresAt, dtf);
         return iat.isBefore(exp);
     }
 

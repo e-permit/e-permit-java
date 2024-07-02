@@ -50,8 +50,8 @@ public class LedgerPermit {
     @Column(name = "issued_at", nullable = false)
     private String issuedAt;
 
-    @Column(name = "expire_at", nullable = false)
-    private String expireAt;
+    @Column(name = "expires_at", nullable = false)
+    private String expiresAt;
 
     @Column(name = "plate_number", nullable = true)
     private String plateNumber;

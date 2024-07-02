@@ -38,6 +38,10 @@ public class PermitDto {
     private String claims;
 
     private boolean used;
+    
+    private boolean revoked;
+
+    private Long revokedAt;
 
     private List<PermitActivityDto> activities = new ArrayList<>();
 }

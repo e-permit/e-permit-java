@@ -29,7 +29,7 @@ public class PermitUtil {
         Map<String, String> claims = new HashMap<>();
         claims.put("id", input.getId());
         claims.put("iat", input.getIssuedAt());
-        claims.put("exp", input.getExpireAt());
+        claims.put("exp", input.getExpiresAt());
         claims.put("pn", input.getPlateNumber());
         claims.put("cn", input.getCompanyName());
         String jws = jwsUtil.createJws(claims);

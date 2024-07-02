@@ -115,7 +115,7 @@ public class PermitControllerIT {
             permit.setPermitType(1);
             permit.setPermitYear(2021);
             permit.setPlateNumber("06AA1234");
-            permit.setExpireAt("31/01/2022");
+            permit.setExpiresAt("31/01/2022");
             permit.setIssuedAt("03/03/2021");
             permit.setPermitId("A-B-2021-1-" + i.toString());
             permit.setDepartureCountry("A");
@@ -153,7 +153,7 @@ public class PermitControllerIT {
         permit.setPermitType(1);
         permit.setPermitYear(2021);
         permit.setPlateNumber("06AA1234");
-        permit.setExpireAt("31/01/2022");
+        permit.setExpiresAt("31/01/2022");
         permit.setIssuedAt("03/03/2021");
         permit.setPermitId("ABC");
         permit.setDepartureCountry("A");
@@ -191,7 +191,7 @@ public class PermitControllerIT {
         permit.setPermitType(1);
         permit.setPermitYear(2021);
         permit.setPlateNumber("06AA1234");
-        permit.setExpireAt("31/01/2022");
+        permit.setExpiresAt("31/01/2022");
         permit.setIssuedAt("03/03/2021");
         permit.setPermitId("ABC");
         permit.setDepartureCountry("A");
@@ -221,7 +221,7 @@ public class PermitControllerIT {
         permit.setPermitType(1);
         permit.setPermitYear(2021);
         permit.setPlateNumber("06AA1234");
-        permit.setExpireAt("31/01/2022");
+        permit.setExpiresAt("31/01/2022");
         permit.setIssuedAt("03/03/2021");
         permit.setPermitId("ABC");
         permit.setDepartureCountry("A");

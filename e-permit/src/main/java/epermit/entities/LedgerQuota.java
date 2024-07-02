@@ -52,6 +52,14 @@ public class LedgerQuota {
     private Long balance = 0L;
 
     @Builder.Default
+    @Column(name = "issued_count", nullable = false)
+    private Long issuedCount = 0L;
+
+    @Builder.Default
+    @Column(name = "revoked_count", nullable = false)
+    private Long revokedCount = 0L;
+
+    @Builder.Default
     @Column(name = "events", nullable = false)
     @Convert(converter = QuotaEventListConverter.class)
     private List<QuotaEvent> events = new ArrayList<>();

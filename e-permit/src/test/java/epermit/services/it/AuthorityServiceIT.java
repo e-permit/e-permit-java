@@ -67,7 +67,7 @@ public class AuthorityServiceIT {
         LedgerPermit permit = new LedgerPermit();
         permit.setCompanyId("companyId");
         permit.setCompanyName("companyId");
-        permit.setExpireAt("companyId");
+        permit.setExpiresAt("companyId");
         permit.setIssuedAt("companyId");
         permit.setIssuedFor("AY");
         permit.setIssuer("A");

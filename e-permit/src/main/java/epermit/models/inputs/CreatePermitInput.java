@@ -41,7 +41,7 @@ public class CreatePermitInput {
     private String arrivalCountry;
 
     @Schema(hidden = true, name = "expires_at", description = "Expires at")
-    private String expireAt;
+    private String expiresAt;
     
     @Schema(hidden = true )
     private Map<String, Object> otherClaims = new HashMap<>();

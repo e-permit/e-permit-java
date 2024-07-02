@@ -62,7 +62,7 @@ public class PermitCreatedLedgerEventHandlerTest {
     @Test
     void handleValidationTest() {
         PermitCreatedLedgerEvent event = new PermitCreatedLedgerEvent("B", "A", "0");
-        event.setExpireAt("03/03/2021");
+        event.setExpiresAt("03/03/2021");
         event.setIssuedAt("03/02/2021");
         event.setCompanyName("A");
         event.setCompanyId("companyId");
@@ -107,7 +107,7 @@ public class PermitCreatedLedgerEventHandlerTest {
     @Test
     void handleOkTest() {
         PermitCreatedLedgerEvent event = new PermitCreatedLedgerEvent("B", "A", "0");
-        event.setExpireAt("A");
+        event.setExpiresAt("A");
         event.setIssuedAt("A");
         event.setCompanyName("A");
         event.setPermitId("B-A-2021-1-1");
@@ -122,7 +122,7 @@ public class PermitCreatedLedgerEventHandlerTest {
         handler.handle(event);
         verify(permitRepository).save(captor.capture());
         LedgerPermit p = captor.getValue();
-        assertEquals("A", p.getExpireAt());
+        assertEquals("A", p.getExpiresAt());
         assertEquals("B-A-2021-1-1", p.getPermitId());
         assertEquals(1, p.getPermitType());
         assertEquals("A", p.getCompanyName());

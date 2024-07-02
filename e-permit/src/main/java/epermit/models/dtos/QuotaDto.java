@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import lombok.Data;
-import lombok.Getter;
 
 @Data
 public class QuotaDto {
@@ -19,10 +18,7 @@ public class QuotaDto {
 
     private Long balance;
 
-    private Long nextSerial;
-
-    @Getter(lazy=true)
-    private final Long issuedCount = nextSerial - 1;
+    private Long issuedCount;
 
     private Long revokedCount;
 

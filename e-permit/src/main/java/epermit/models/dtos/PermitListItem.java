@@ -1,6 +1,7 @@
 package epermit.models.dtos;
 
 import java.util.UUID;
+
 import lombok.Data;
 
 @Data
@@ -34,6 +35,10 @@ public class PermitListItem {
     private String arrivalCountry;
 
     private String claims;
+
+    private boolean revoked;
+
+    private Long revokedAt;
 
     private boolean used;
 }

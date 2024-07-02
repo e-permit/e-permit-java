@@ -89,6 +89,9 @@ public class PermitService {
     public PermitDto getByQrCode(String qrCode) {
         LedgerPermit permit = permitRepository.findOneByQrCode(qrCode)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        if(permit.isRevoked()){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
         return mapPermit(permit);
     }
 
@@ -127,20 +130,20 @@ public class PermitService {
         String issuer = properties.getIssuerCode();
         String issuedAt = LocalDateTime.now(ZoneOffset.UTC).format(dtf);
         String expireAt = "31/01/" + Integer.toString(input.getPermitYear() + 1);
-        if (input.getExpireAt() != null) {
-            expireAt = input.getExpireAt();
+        if (input.getExpiresAt() != null) {
+            expireAt = input.getExpiresAt();
         }
         String prevEventId = ledgerEventUtil.getPreviousEventId(input.getIssuedFor());
         CreatePermitQrCodeDto qrCodeInput = new CreatePermitQrCodeDto();
         qrCodeInput.setCompanyName(input.getCompanyName());
-        qrCodeInput.setExpireAt(expireAt);
+        qrCodeInput.setExpiresAt(expireAt);
         qrCodeInput.setId(permitId.toString());
         qrCodeInput.setIssuedAt(issuedAt);
         qrCodeInput.setPlateNumber(input.getPlateNumber());
         String qrCode = permitUtil.generateQrCode(qrCodeInput);
         PermitCreatedLedgerEvent e = new PermitCreatedLedgerEvent(issuer, input.getIssuedFor(), prevEventId);
         e.setPermitId(permitId.toString());
-        e.setExpireAt(expireAt);
+        e.setExpiresAt(expireAt);
         e.setIssuedAt(issuedAt);
         e.setCompanyId(input.getCompanyId());
         e.setCompanyName(input.getCompanyName());
