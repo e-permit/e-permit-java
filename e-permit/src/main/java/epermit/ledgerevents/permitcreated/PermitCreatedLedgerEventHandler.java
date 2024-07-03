@@ -36,7 +36,7 @@ public class PermitCreatedLedgerEventHandler implements LedgerEventHandler {
         LedgerQuota quota = quotaRepository.findOneByParams(event.getPermitIssuer(),
                 event.getPermitIssuedFor(), event.getPermitType(), event.getPermitYear())
                 .orElseThrow(() -> new EpermitValidationException(ErrorCodes.INSUFFICIENT_PERMIT_QUOTA));
-        if (permitId.getSerialNumber() < 1 || permitId.getSerialNumber() > quota.getBalance()) {
+        if (permitId.getSerialNumber() < 1 || permitId.getSerialNumber() > quota.getTotalQuota()) {
             throw new EpermitValidationException(ErrorCodes.INVALID_PERMIT_QUOTA_RANGE);
         }
         quota.setIssuedCount(quota.getIssuedCount() + 1);

@@ -66,7 +66,7 @@ public class PermitServiceIT {
         authorityRepository.save(authority);
 
         LedgerQuota quota = new LedgerQuota();
-        quota.setBalance(100L);
+        quota.setTotalQuota(100L);
         quota.setPermitIssuedFor("B");
         quota.setPermitIssuer("A");
         quota.setPermitType(1);

@@ -46,7 +46,7 @@ public class PermitRevokedLedgerEventHandlerTest {
         p.setPermitType(1);
         p.setPermitYear(2021);
         when(quotaRepository.findOneByParams(anyString(), anyString(), anyInt(), anyInt() ))
-                .thenReturn(Optional.of(LedgerQuota.builder().balance(5L).build()));
+                .thenReturn(Optional.of(LedgerQuota.builder().totalQuota(5L).build()));
         
         when(permitRepository.findOneByPermitId(event.getPermitId())).thenReturn(Optional.of(p));
         handler.handle(event);

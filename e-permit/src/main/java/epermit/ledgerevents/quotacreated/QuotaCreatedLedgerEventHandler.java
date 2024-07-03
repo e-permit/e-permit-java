@@ -29,7 +29,7 @@ public class QuotaCreatedLedgerEventHandler implements LedgerEventHandler {
                 .orElse(LedgerQuota.builder().permitIssuer(event.getPermitIssuer())
                         .permitIssuedFor(event.getPermitIssuedFor()).permitType(event.getPermitType())
                         .permitYear(event.getPermitYear()).build());
-        quota.setBalance(quota.getBalance() + event.getQuantity());
+        quota.setTotalQuota(quota.getTotalQuota() + event.getQuantity());
         
         QuotaEvent quotaEvent = new QuotaEvent();
         quotaEvent.setQuantity(event.getQuantity());

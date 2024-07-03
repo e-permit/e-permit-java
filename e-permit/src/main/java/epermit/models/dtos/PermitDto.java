@@ -21,7 +21,7 @@ public class PermitDto {
 
     private String issuedAt;
 
-    private String expireAt;
+    private String expiresAt;
 
     private String plateNumber;
 

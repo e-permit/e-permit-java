@@ -16,7 +16,7 @@ public class QuotaDto {
 
     private Integer permitType;
 
-    private Long balance;
+    private Long totalQuota;
 
     private Long issuedCount;
 

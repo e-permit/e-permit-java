@@ -20,7 +20,7 @@ public class EventController {
     private final CreatedEventRepository createdEventRepository;
 
     @GetMapping()
-    @Operation(summary = "Get events", description = "Returns all created events")
+    @Operation(summary = "Get events", description = "Returns all pending events")
     public List<CreatedEvent> getAll() {
         return createdEventRepository.findAllBySentFalseOrderByCreatedAtAsc();
     }

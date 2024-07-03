@@ -62,7 +62,7 @@ public class AuthorityServiceIT {
         quota.setPermitIssuer("A");
         quota.setPermitType(1);
         quota.setPermitYear(2022);
-        quota.setBalance(100L);
+        quota.setTotalQuota(100L);
         ledgerQuotaRepository.save(quota);
         LedgerPermit permit = new LedgerPermit();
         permit.setCompanyId("companyId");

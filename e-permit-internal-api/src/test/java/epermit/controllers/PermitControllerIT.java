@@ -84,7 +84,7 @@ public class PermitControllerIT {
         authority.setName("B");
         authorityRepository.save(authority);
         LedgerQuota quota = new LedgerQuota();
-        quota.setBalance(30L);
+        quota.setTotalQuota(30L);
         quota.setPermitType(1);
         quota.setPermitYear(2021);
         quota.setPermitIssuer("A");
