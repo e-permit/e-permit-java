@@ -100,7 +100,7 @@ create table epermit_ledger_permits (
 create table epermit_ledger_quotas (
     permit_type integer not null,
     permit_year integer not null,
-    balance bigint not null,
+    total_quota bigint not null,
     issued_count bigint not null,
     revoked_count bigint not null,
     created_at timestamp(6) not null,

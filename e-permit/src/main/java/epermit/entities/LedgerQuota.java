@@ -48,8 +48,8 @@ public class LedgerQuota {
     private Integer permitType;
 
     @Builder.Default
-    @Column(name = "balance", nullable = false)
-    private Long balance = 0L;
+    @Column(name = "total_quota", nullable = false)
+    private Long totalQuota = 0L;
 
     @Builder.Default
     @Column(name = "issued_count", nullable = false)

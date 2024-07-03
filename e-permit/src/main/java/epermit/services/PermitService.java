@@ -172,6 +172,8 @@ public class PermitService {
                 .orElseThrow(() -> new EpermitValidationException(ErrorCodes.PERMIT_NOTFOUND));
         if (!permit.getIssuer().equals(properties.getIssuerCode()))
             throw new EpermitValidationException(ErrorCodes.PERMIT_NOTFOUND);
+        if (permit.isRevoked())
+            throw new EpermitValidationException(ErrorCodes.PERMIT_ALREADY_REVOKED);
         String prevEventId = ledgerEventUtil.getPreviousEventId(permit.getIssuedFor());
         PermitRevokedLedgerEvent e = new PermitRevokedLedgerEvent(properties.getIssuerCode(),
                 permit.getIssuedFor(), prevEventId);
