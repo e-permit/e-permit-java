@@ -20,7 +20,7 @@ public class PermitListItem {
 
     private String issuedAt;
 
-    private String expireAt;
+    private String expiresAt;
 
     private String plateNumber;
 
