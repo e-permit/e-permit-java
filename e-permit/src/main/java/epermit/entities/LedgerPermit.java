@@ -59,10 +59,10 @@ public class LedgerPermit {
     @Column(name = "plate_number2", nullable = true)
     private String plateNumber2;
 
-    @Column(name = "company_name", nullable = false, length = 200)
+    @Column(name = "company_name", nullable = false, length = 500)
     private String companyName;
 
-    @Column(name = "company_id", nullable = false, length = 100)
+    @Column(name = "company_id", nullable = false)
     private String companyId;
 
     @Column(name = "departure_country", nullable = false, length = 10)

@@ -42,7 +42,7 @@ public class Authority {
   @Column(name = "name", nullable = false)
   private String name;
 
-  @Column(name = "public_api_uri", nullable = false)
+  @Column(name = "public_api_uri", nullable = false, length = 1000)
   private String publicApiUri;
 
   @CreationTimestamp

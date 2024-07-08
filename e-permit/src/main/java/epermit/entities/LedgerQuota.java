@@ -60,7 +60,7 @@ public class LedgerQuota {
     private Long revokedCount = 0L;
 
     @Builder.Default
-    @Column(name = "events", nullable = false)
+    @Column(name = "events", nullable = false, length = 1000)
     @Convert(converter = QuotaEventListConverter.class)
     private List<QuotaEvent> events = new ArrayList<>();
 

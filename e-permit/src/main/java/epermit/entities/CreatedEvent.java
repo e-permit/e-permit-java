@@ -31,7 +31,7 @@ public class CreatedEvent {
     @Column(name = "sent", nullable = false)
     private boolean sent = false;
 
-    @Column(name = "error", nullable = true)
+    @Column(name = "error", nullable = true, length = 1000)
     private String error;
 
     @CreationTimestamp

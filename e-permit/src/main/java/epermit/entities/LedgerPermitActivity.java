@@ -41,7 +41,7 @@ public class LedgerPermitActivity {
     @Column(name = "activity_timestamp", nullable = false)
     private Long activityTimestamp;
 
-    @Column(name = "activity_details", nullable = true)
+    @Column(name = "activity_details", nullable = true, length = 1000)
     private String activityDetails;
 
     @CreationTimestamp
