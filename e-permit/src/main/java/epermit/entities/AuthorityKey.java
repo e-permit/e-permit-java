@@ -34,7 +34,7 @@ public class AuthorityKey {
     @Column(name = "key_id", nullable = false)
     private String keyId;
 
-    @Column(name = "jwk", nullable = false, length = 5000)
+    @Column(name = "jwk", nullable = false, length = 4000)
     private String jwk;
 
     @CreationTimestamp

@@ -29,7 +29,7 @@ public class Key {
     @Column(name = "key_id", nullable = false, unique = true)
     private String keyId;
 
-    @Column(name = "jwk", nullable = false, length = 5000)
+    @Column(name = "jwk", nullable = false, length = 4000)
     private String jwk;
 
     @Column(name = "salt", nullable = false)
