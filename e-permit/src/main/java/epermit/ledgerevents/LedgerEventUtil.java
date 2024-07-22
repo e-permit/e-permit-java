@@ -122,6 +122,10 @@ public class LedgerEventUtil {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.add("Authorization", "Bearer " + event.getProof());
+        /*if (properties.getXroadUrl().isPresent() &&
+                event.getUrl().startsWith(properties.getXroadUrl().get())) {
+            headers.add("X-Road-Client", properties.getXroadClientId().get());
+        }*/
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(event.getContent(), headers);
         ResponseEntity<?> result = restTemplate.postForEntity(event.getUrl(), request,
                 Object.class);
