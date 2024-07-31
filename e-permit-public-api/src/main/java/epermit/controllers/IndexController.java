@@ -3,6 +3,7 @@ package epermit.controllers;
 import java.util.List;
 
 import org.springframework.boot.info.BuildProperties;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -13,6 +14,7 @@ import epermit.services.AuthorityService;
 import epermit.services.ConfigService;
 import lombok.RequiredArgsConstructor;
 
+@CrossOrigin
 @RestController
 @RequiredArgsConstructor
 @RequestMapping
