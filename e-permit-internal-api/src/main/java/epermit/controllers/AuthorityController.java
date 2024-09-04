@@ -16,7 +16,6 @@ import org.springframework.web.client.RestTemplate;
 
 import epermit.commons.EpermitValidationException;
 import epermit.commons.ErrorCodes;
-import epermit.models.EPermitProperties;
 import epermit.models.dtos.AuthorityConfig;
 import epermit.models.dtos.AuthorityDto;
 import epermit.models.dtos.AuthorityListItem;
@@ -41,7 +40,6 @@ import lombok.extern.slf4j.Slf4j;
 public class AuthorityController {
     private final AuthorityService service;
     private final RestTemplate restTemplate;
-    private final EPermitProperties properties;
 
     @GetMapping()
     @Operation(summary = "Get all authorities", description = "Returns all known authorities")

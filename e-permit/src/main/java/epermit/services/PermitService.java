@@ -89,7 +89,7 @@ public class PermitService {
     public PermitDto getByQrCode(String qrCode) {
         LedgerPermit permit = permitRepository.findOneByQrCode(qrCode)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        if(permit.isRevoked()){
+        if (permit.isRevoked()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
         return mapPermit(permit);
@@ -174,6 +174,8 @@ public class PermitService {
             throw new EpermitValidationException(ErrorCodes.PERMIT_NOTFOUND);
         if (permit.isRevoked())
             throw new EpermitValidationException(ErrorCodes.PERMIT_ALREADY_REVOKED);
+        if (permit.isUsed())
+            throw new EpermitValidationException(ErrorCodes.PERMIT_USED);
         String prevEventId = ledgerEventUtil.getPreviousEventId(permit.getIssuedFor());
         PermitRevokedLedgerEvent e = new PermitRevokedLedgerEvent(properties.getIssuerCode(),
                 permit.getIssuedFor(), prevEventId);
@@ -187,6 +189,8 @@ public class PermitService {
         log.info("Permit used started {}", input);
         LedgerPermit permit = permitRepository.findOneByPermitId(permitId)
                 .orElseThrow(() -> new EpermitValidationException(ErrorCodes.PERMIT_NOTFOUND));
+        if (permit.isRevoked())
+            throw new EpermitValidationException(ErrorCodes.PERMIT_ALREADY_REVOKED);
         if (!permit.getIssuedFor().equals(properties.getIssuerCode()))
             throw new EpermitValidationException(ErrorCodes.PERMIT_NOTFOUND);
         String prevEventId = ledgerEventUtil.getPreviousEventId(permit.getIssuer());

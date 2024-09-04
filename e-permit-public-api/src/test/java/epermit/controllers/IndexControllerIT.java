@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
@@ -15,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import epermit.PermitPostgresContainer;
 import epermit.entities.Authority;
 import epermit.models.dtos.IndexDto;
 import epermit.repositories.AuthorityRepository;;
@@ -50,8 +50,9 @@ public class IndexControllerIT {
     }
 
     @Container
-    public static PostgreSQLContainer<PermitPostgresContainer> postgreSQLContainer =
-            PermitPostgresContainer.getInstance();
+    @ServiceConnection
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(
+            "postgres:15-alpine");
 
     private TestRestTemplate getTestRestTemplate() {
         return testRestTemplate.withBasicAuth("admin", "123456");

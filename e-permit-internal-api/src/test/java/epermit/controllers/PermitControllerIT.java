@@ -1,19 +1,23 @@
 package epermit.controllers;
 
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import org.junit.Assert;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -21,8 +25,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -31,7 +33,6 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import epermit.AppEventListener;
-import epermit.PermitPostgresContainer;
 import epermit.RestResponsePage;
 import epermit.commons.GsonUtil;
 import epermit.entities.Authority;
@@ -47,11 +48,11 @@ import epermit.repositories.AuthorityRepository;
 import epermit.repositories.LedgerPermitRepository;
 import epermit.repositories.LedgerQuotaRepository;
 
-
 @Testcontainers
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, properties = {
+        "spring.security.user.password=123456"
+})
 @ActiveProfiles("test")
-@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 public class PermitControllerIT {
 
     @LocalServerPort
@@ -92,9 +93,19 @@ public class PermitControllerIT {
         ledgerQuotaRepository.save(quota);
     }
 
+    @AfterEach
+    @Transactional
+    void setDown() {
+        permitRepository.deleteAll();
+        authorityRepository.deleteAll();
+        ledgerQuotaRepository.deleteAll();
+    }
+
     @Container
-    public static PostgreSQLContainer<PermitPostgresContainer> postgreSQLContainer =
-            PermitPostgresContainer.getInstance();
+    @ServiceConnection
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(
+            "postgres:15-alpine");
+
 
     private TestRestTemplate getTestRestTemplate() {
         return testRestTemplate.withBasicAuth("admin", "123456");
@@ -131,16 +142,15 @@ public class PermitControllerIT {
 
         HttpEntity<?> entity = new HttpEntity<>(headers);
 
-        ParameterizedTypeReference<RestResponsePage<PermitListItem>> responseType =
-                new ParameterizedTypeReference<RestResponsePage<PermitListItem>>() {};
+        ParameterizedTypeReference<RestResponsePage<PermitListItem>> responseType = new ParameterizedTypeReference<RestResponsePage<PermitListItem>>() {
+        };
         ResponseEntity<RestResponsePage<PermitListItem>> result = getTestRestTemplate()
                 .exchange(builder.toUriString(), HttpMethod.GET, entity, responseType);
         assertEquals(HttpStatus.OK, result.getStatusCode());
-         var body = result.getBody();
+        var body = result.getBody();
         Assert.assertNotNull("Null body", body);
         assertEquals(25, body.getTotalElements());
         assertEquals(5, body.getContent().size());
-
     }
 
     @Test
@@ -175,8 +185,7 @@ public class PermitControllerIT {
         input.setPermitYear(2021);
         input.setPlateNumber("06AA1234");
         input.setArrivalCountry("B");
-        ResponseEntity<String> r =
-                getTestRestTemplate().postForEntity(getBaseUrl(), input, String.class);
+        ResponseEntity<String> r = getTestRestTemplate().postForEntity(getBaseUrl(), input, String.class);
         GsonUtil.getGson().fromJson(r.getBody(), CreatePermitResult.class);
         assertEquals(HttpStatus.OK, r.getStatusCode());
     }

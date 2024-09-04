@@ -3,8 +3,13 @@ package epermit.controllers;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.Assert;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
+
 import static org.springframework.test.web.client.ExpectedCount.once;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
@@ -16,18 +21,18 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import epermit.PermitPostgresContainer;
+
 import epermit.commons.GsonUtil;
 import epermit.entities.Authority;
 import epermit.models.dtos.AuthorityConfig;
@@ -38,9 +43,10 @@ import epermit.models.inputs.CreateQuotaInput;
 import epermit.repositories.AuthorityRepository;
 
 @Testcontainers
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, properties = {
+        "spring.security.user.password=123456"
+})
 @ActiveProfiles("test")
-@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 public class AuthorityControllerIT {
 
     @LocalServerPort
@@ -62,9 +68,16 @@ public class AuthorityControllerIT {
         mockServer = MockRestServiceServer.createServer(restTemplate);
     }
 
+    @AfterEach
+    @Transactional
+    void setDown() {
+        authorityRepository.deleteAll();
+    }
+
     @Container
-    public static PostgreSQLContainer<PermitPostgresContainer> postgreSQLContainer = PermitPostgresContainer
-            .getInstance();
+    @ServiceConnection
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(
+            "postgres:15-alpine");
 
     private TestRestTemplate getTestRestTemplate() {
         return testRestTemplate.withBasicAuth("admin", "123456");
@@ -86,7 +99,6 @@ public class AuthorityControllerIT {
         var body = r.getBody();
         Assert.assertNotNull("Null body", body);
         assertEquals(1, body.length);
-
     }
 
     @Test
@@ -122,7 +134,7 @@ public class AuthorityControllerIT {
         jwk.setX("x");
         jwk.setY("y");
         config.setKeys(List.of(jwk));
-         String configJson = GsonUtil.getGson().toJson(config);
+        String configJson = GsonUtil.getGson().toJson(config);
         mockServer.expect(once(), requestTo("http://localhost"))
                 .andRespond(withSuccess(configJson, MediaType.APPLICATION_JSON));
         ResponseEntity<?> r = getTestRestTemplate().postForEntity(getBaseUrl(), input, String.class);

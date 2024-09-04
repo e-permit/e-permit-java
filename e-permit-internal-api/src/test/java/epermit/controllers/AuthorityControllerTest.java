@@ -26,7 +26,6 @@ import epermit.models.inputs.CreateQuotaInput;
 import epermit.services.AuthorityService;
 
 @ExtendWith(MockitoExtension.class)
-
 public class AuthorityControllerTest {
     @Mock
     RestTemplate restTemplate;
