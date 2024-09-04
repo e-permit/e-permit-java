@@ -2,6 +2,7 @@ package epermit.models.dtos;
 
 import java.util.UUID;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 @Data
@@ -36,9 +37,11 @@ public class PermitListItem {
 
     private String claims;
 
+    @Schema(description = "This field is set to true if the permit is revoked")
     private boolean revoked;
 
     private Long revokedAt;
 
+    @Schema(description = "This field is set to true if the permit is used once")
     private boolean used;
 }
