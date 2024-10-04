@@ -3,6 +3,31 @@
 
 A Java-based implementation of the e-permit system.
 
+> [!WARNING]
+> 
+> Production environment
+>
+> Database
+
+> - Should be stable(don't use docker-compose for the database)
+> - Should not allow manual changes
+> - Should be backed up
+> - Should be different from the test database
+
+> Passwords
+
+> - Should be strong
+> - Should be different from test
+> - Should not be shared with anyone else
+> - Keystore password should be backed up
+
+> APIS
+
+> - Internal api should be on the intranet(not internet)
+> - Public api should be on the internet
+
+
+
 **Quickstart**
 -------------
 

@@ -24,9 +24,10 @@ public class EventScheduler {
     @Scheduled(fixedDelay = 3 * 60 * 1000)
     @SneakyThrows
     public void unsentEventsTask() {
-        log.info("Unsent events task started");
         List<LedgerEventCreated> list = eventService.getUnSendedEvents();
-        log.info(String.format("Found %d unsended events", list.size()));
+        if(!list.isEmpty()){
+           log.info(String.format("Found %d unsended events", list.size()));
+        }
         for (LedgerEventCreated event : list) {
             eventPublisher.publishEvent(event);
             Thread.sleep(100);
