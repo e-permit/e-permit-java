@@ -1,8 +1,8 @@
 # **e-permit-java**
 
 A Java-based implementation of the e-permit system.
-
-> **⚠️ Production Environment Guidelines**
+<details>
+   <summary>⚠️ Production Environment Guidelines</summary>
 
 ### Database
 - Must be stable (do not use Docker Compose for the database).
@@ -21,6 +21,8 @@ A Java-based implementation of the e-permit system.
 - The internal API should be hosted on the intranet, not the internet.
 - The public API should be accessible over the internet and use HTTPS to ensure secure communication.
 
+</details>
+
 ## **Quickstart**
 
 Follow these steps to set up and run the e-permit system:
@@ -38,7 +40,8 @@ SPRING_DATASOURCE_DRIVER=<db_driver>
 SPRING_DATASOURCE_DIALECT=<dialect>
 EPERMIT_ISSUER_CODE=<country_code>
 EPERMIT_ISSUER_NAME=<country_name>
-# Optional
+
+# Optional if graylog exists
 EPERMIT_GRAYLOG_HOST=<host>
 EPERMIT_GRAYLOG_PORT=<port>
 ```
@@ -64,6 +67,7 @@ services:
       - epermit.env
     ports:
       - "8080:8080"
+    # Optional if extra certificates are needed
     volumes:
       - ./certs:/opt/certs
 ```
@@ -123,7 +127,7 @@ After starting the services, you can use the following endpoints with the Intern
 }
 ```
 
-For a complete demonstration, refer to the [e-permit demo](https://github.com/e-permit/e-permit-java/tree/x-road/examples/demo).
+For a complete demonstration, refer to the [e-permit demo](https://github.com/e-permit/e-permit-java/tree/main/examples/demo).
 
 ## **Build**
 
