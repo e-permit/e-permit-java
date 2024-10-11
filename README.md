@@ -35,7 +35,7 @@ To get started, follow these steps:
 
 ### 1. Create an `epermit.env` file
 
-Create a file named `epermit.env` in the working directory with the following properties:
+> Create a file named `epermit.env` in the working directory with the following properties:
 
 ```properties
 SPRING_PROFILES_ACTIVE=dev
@@ -51,27 +51,15 @@ EPERMIT_GRAYLOG_HOST=<host>
 EPERMIT_GRAYLOG_PORT=<port>
 ```
 
-### 2. Run the Public API using Docker Compose
+> [!TIP]
+>
+> Create certs folder in the working directory and copy the `*.crt` files to it if you want to add custom certificates to the truststore.
+
+### 2. Run the Internal API using Docker Compose
 
 Create a `docker-compose.yml` file in the working directory with the following content:
 
 ```yaml
-version: '3.8'
-services:
-  public-api:
-    image: ghcr.io/e-permit/publicapi:latest
-    env_file: 
-      - epermit.env
-    ports:
-      - "8080:8080"
-```
-
-### 3. Run the Internal API using Docker Compose
-
-Create a `docker-compose.yml` file in the working directory with the following content:
-
-```yaml
-version: '3.8'
 services:
   internal-api:
     container_name: internal-api
@@ -82,6 +70,22 @@ services:
       - FLYWAY_ENABLED=true
       - FLYWAY_SCHEMAS=public
     env_file:
+      - epermit.env
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./certs:/opt/certs
+```
+
+### 3. Run the Public API using Docker Compose
+
+Create a `docker-compose.yml` file in the working directory with the following content:
+
+```yaml
+services:
+  public-api:
+    image: ghcr.io/e-permit/publicapi:latest
+    env_file: 
       - epermit.env
     ports:
       - "8080:8080"
@@ -138,5 +142,5 @@ Full demo can be found at: https://github.com/e-permit/e-permit-java/tree/x-road
 To build the project, run the following command:
 
 ```
-mvn package
+mvn clean package
 ```

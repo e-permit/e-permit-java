@@ -1,7 +1,5 @@
 #!/bin/sh
 
-# Use JAVA_HOME to dynamically set the truststore path
-# TRUSTSTORE_PATH=$JAVA_HOME/lib/security/cacerts
 PASSWORD=changeit
 
 # Import all custom certificates from /opt/certs into the truststore
