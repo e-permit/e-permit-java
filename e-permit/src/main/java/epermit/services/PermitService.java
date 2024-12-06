@@ -232,6 +232,19 @@ public class PermitService {
             if (input.getUsed() != null) {
                 predicates.add(cb.equal(permit.get("used"), input.getUsed()));
             }
+            if (input.getRevoked() != null) {
+                predicates.add(cb.equal(permit.get("revoked"), input.getRevoked()));
+            }
+            if (input.getStartDate() != null) {
+                DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
+                LocalDateTime startDate = LocalDateTime.parse(input.getStartDate(), formatter);
+                predicates.add(cb.greaterThan(permit.get("createdAt"), startDate));
+            }
+            if (input.getEndDate() != null) {
+                DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
+                LocalDateTime endDate = LocalDateTime.parse(input.getEndDate(), formatter);
+                predicates.add(cb.lessThan(permit.get("createdAt"), endDate));
+            }
             return cb.and(predicates.toArray(new Predicate[predicates.size()]));
         };
         return spec;

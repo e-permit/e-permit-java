@@ -6,7 +6,7 @@
     <parent>
         <groupId>epermit</groupId>
         <artifactId>e-permit-parent</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.1</version>
     </parent>
     <groupId>epermit</groupId>
     <artifactId>e-permit-internal-api</artifactId>
@@ -56,6 +56,10 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-postgresql</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>

@@ -6,11 +6,11 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.UuidGenerator;
+
 import epermit.ledgerevents.LedgerEventType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,11 +21,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "epermit_ledger_events")
 public class LedgerEvent {
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(
-        name = "UUID",
-        strategy = "org.hibernate.id.UUIDGenerator"
-    )
+    @UuidGenerator
     private UUID id;
 
     @Column(name = "producer", nullable = false)

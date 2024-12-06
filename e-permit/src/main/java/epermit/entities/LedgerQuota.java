@@ -7,11 +7,10 @@ import java.util.UUID;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.UuidGenerator;
 
 import epermit.commons.QuotaEventListConverter;
 import epermit.models.dtos.QuotaEvent;
@@ -28,11 +27,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class LedgerQuota {
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(
-        name = "UUID",
-        strategy = "org.hibernate.id.UUIDGenerator"
-    )
+    @UuidGenerator
     private UUID id;
 
     @Column(name = "permit_issuer", nullable = false)

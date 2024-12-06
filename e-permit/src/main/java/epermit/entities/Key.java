@@ -4,11 +4,10 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.UuidGenerator;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,11 +18,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "epermit_keys")
 public class Key {
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(
-        name = "UUID",
-        strategy = "org.hibernate.id.UUIDGenerator"
-    )
+    @UuidGenerator
     private UUID id;
 
     @Column(name = "key_id", nullable = false, unique = true)
