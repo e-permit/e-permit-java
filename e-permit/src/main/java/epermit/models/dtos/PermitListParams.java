@@ -13,4 +13,10 @@ public class PermitListParams {
     private Integer permitType;
 
     private Boolean used;
+
+    private Boolean revoked;
+
+    private String startDate;
+
+    private String endDate;
 }
