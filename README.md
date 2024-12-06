@@ -1,77 +1,59 @@
-**e-permit-java**
-================
+# **e-permit-java**
 
 A Java-based implementation of the e-permit system.
+<details>
+   <summary>⚠️ Production Environment Guidelines</summary>
 
-> [!WARNING]
-> 
-> Production environment
->
-> Database
+### Database
+- Must be stable (do not use Docker Compose for the database).
+- Manual changes should be restricted.
+- Regular backups are required.
+- The production database should be separate from the test database.
 
-> - Should be stable(don't use docker-compose for the database)
-> - Should not allow manual changes
-> - Should be backed up
-> - Should be different from the test database
+### Passwords
+- Use strong, unique passwords for the production environment.
+- Production passwords should differ from those used in test environments.
+- Passwords should not be shared with anyone.
+- The keystore password must be backed up securely.
 
-> Passwords
+### APIs
+- Use container orchestration solutions, such as Kubernetes, whenever possible.
+- The internal API should be hosted on the intranet, not the internet.
+- The public API should be accessible over the internet and use HTTPS to ensure secure communication.
 
-> - Should be strong
-> - Should be different from test
-> - Should not be shared with anyone else
-> - Keystore password should be backed up
+</details>
 
-> APIS
+## **Quickstart**
 
-> - Internal api should be on the intranet(not internet)
-> - Public api should be on the internet
+Follow these steps to set up and run the e-permit system:
 
+### 1. Create an `epermit.env` File
 
-
-**Quickstart**
--------------
-
-To get started, follow these steps:
-
-### 1. Create an `epermit.env` file
-
-Create a file named `epermit.env` in the working directory with the following properties:
+Create a file named `epermit.env` in your working directory and add the following properties:
 
 ```properties
 SPRING_PROFILES_ACTIVE=dev
-SPRING_DATASOURCE_URL=<db url>
-SPRING_DATASOURCE_USERNAME=<db user>
-SPRING_DATASOURCE_PASSWORD=<db pwd>
-SPRING_DATASOURCE_DRIVER=<db driver>
+SPRING_DATASOURCE_URL=<db_url>
+SPRING_DATASOURCE_USERNAME=<db_user>
+SPRING_DATASOURCE_PASSWORD=<db_pwd>
+SPRING_DATASOURCE_DRIVER=<db_driver>
 SPRING_DATASOURCE_DIALECT=<dialect>
-EPERMIT_ISSUER_CODE=<Country code>
-EPERMIT_ISSUER_NAME=<Country name>
-# Optional
+EPERMIT_ISSUER_CODE=<country_code>
+EPERMIT_ISSUER_NAME=<country_name>
+
+# Optional if graylog exists
 EPERMIT_GRAYLOG_HOST=<host>
 EPERMIT_GRAYLOG_PORT=<port>
 ```
 
-### 2. Run the Public API using Docker Compose
+> **💡 Tip**:  
+> Create a `certs` folder in your working directory and place `*.crt` files in it if you need to add custom certificates to the truststore.
+
+### 2. Run the Internal API with Docker Compose
 
 Create a `docker-compose.yml` file in the working directory with the following content:
 
 ```yaml
-version: '3.8'
-services:
-  public-api:
-    image: ghcr.io/e-permit/publicapi:latest
-    env_file: 
-      - epermit.env
-    ports:
-      - "8080:8080"
-```
-
-### 3. Run the Internal API using Docker Compose
-
-Create a `docker-compose.yml` file in the working directory with the following content:
-
-```yaml
-version: '3.8'
 services:
   internal-api:
     container_name: internal-api
@@ -85,27 +67,42 @@ services:
       - epermit.env
     ports:
       - "8080:8080"
+    # Optional if extra certificates are needed
+    volumes:
+      - ./certs:/opt/certs
 ```
 
-### API Endpoints
+### 3. Run the Public API with Docker Compose
 
-Once the services are up and running, you can execute the following scripts using the Internal API endpoints:
+Create a `docker-compose.yml` file in the working directory with the following content:
 
-#### Handshake:
+```yaml
+services:
+  public-api:
+    image: ghcr.io/e-permit/publicapi:latest
+    env_file: 
+      - epermit.env
+    ports:
+      - "8080:8080"
+```
 
+### **API Endpoints**
+
+After starting the services, you can use the following endpoints with the Internal API:
+
+#### Handshake
 `POST /authorities`
 
 ```json
 {
-    "code": "<country code>",
-    "name": "<country name>",
-    "public_api_uri": "https://..."
+    "code": "<country_code>",
+    "name": "<country_name>",
+    "public_api_uri": "https://<public_api_uri>"
 }
 ```
 
-#### Create Quota:
-
-`POST /authorities/<country code>/quotas`
+#### Create Quota
+`POST /authorities/<country_code>/quotas`
 
 ```json
 {
@@ -115,28 +112,34 @@ Once the services are up and running, you can execute the following scripts usin
 }
 ```
 
-#### Create Permit:
-
+#### Create Permit
 `POST /permits`
 
 ```json
 {
-    "issued_for": "<country code>",
+    "issued_for": "<country_code>",
     "permit_year": 2024,
     "permit_type": 1,
     "company_name": "TEST",
     "company_id": "123",
     "plate_number": "TEST",
-    "arrival_country": "<country code>"
+    "arrival_country": "<country_code>"
 }
 ```
 
-Full demo can be found at: https://github.com/e-permit/e-permit-java/tree/x-road/examples/demo
+For a complete demonstration, refer to the [e-permit demo](https://github.com/e-permit/e-permit-java/tree/main/examples/demo).
 
-## Build
+## **Build**
 
-To build the project, run the following command:
+To build the project, first clone the repository and navigate to the project directory. Then, run the following command:
 
+```bash
+mvn clean package
 ```
-mvn package
-```
+
+### **Prerequisites**
+
+Ensure you have the following dependencies installed:
+
+- Maven: Version 3.9.9 or higher
+- Java: Version 21 or higher
