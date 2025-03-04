@@ -268,6 +268,18 @@ public class PermitService {
             if (input.getPermitYear() != null) {
                 predicates.add(cb.equal(permit.get("permitYear"), input.getPermitYear()));
             }
+            if (input.getPermitId() != null) {
+                predicates.add(cb.equal(permit.get("permitId"), input.getPermitId()));
+            }
+            if (input.getCompanyId() != null) {
+                predicates.add(cb.equal(permit.get("companyId"), input.getCompanyId()));
+            }
+            if (input.getPlateNumber() != null) {
+                predicates.add(cb.equal(permit.get("plateNumber"), input.getPlateNumber()));
+            }
+            if (input.getPlateNumber2() != null) {
+                predicates.add(cb.equal(permit.get("plateNumber2"), input.getPlateNumber2()));
+            }
             if (input.getCreatedAt() != null) {
                 DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
                 LocalDateTime createdAtTime = LocalDateTime.parse(input.getCreatedAt(), formatter);
