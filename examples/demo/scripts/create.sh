@@ -9,7 +9,7 @@ create_permit()
   cat <<EOF
   {
     "issued_for": "B",
-    "permit_year": 2024,
+    "permit_year": 2025,
     "permit_type": "1",
     "company_name": "TECT",
     "company_id": "123",

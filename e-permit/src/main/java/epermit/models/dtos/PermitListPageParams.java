@@ -12,6 +12,14 @@ public class PermitListPageParams {
 
     private Integer permitType;
 
+    private String permitId;
+
+    private String companyId;
+
+    private String plateNumber;
+
+    private String plateNumber2;
+
     private String issuedAt;
 
     private String createdAt;

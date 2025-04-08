@@ -2,12 +2,20 @@ package epermit.services;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
+import epermit.commons.ApiErrorResponse;
+import epermit.commons.GsonUtil;
 import epermit.entities.CreatedEvent;
 import epermit.entities.LedgerEvent;
 import epermit.ledgerevents.LedgerEventBase;
@@ -25,6 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 public class EventService {
     private final LedgerEventUtil ledgerEventUtil;
     private final CreatedEventRepository createdEventRepository;
+    private final RestTemplate restTemplate;
 
     @Transactional
     public void handleSentEvent(String eventId) {
@@ -41,7 +50,7 @@ public class EventService {
     }
 
     @SneakyThrows
-    public List<LedgerEventCreated> getUnSendedEvents() {
+    public List<LedgerEventCreated> getUnSentEvents() {
         List<LedgerEventCreated> list = new ArrayList<>();
         List<CreatedEvent> events = createdEventRepository.findAllBySentFalseOrderByCreatedAtAsc();
         for (CreatedEvent createdEvent : events) {
@@ -56,6 +65,36 @@ public class EventService {
         log.info("Event jws. {}", authorization);
         String proof = ledgerEventUtil.verifyProof(e, authorization);
         ledgerEventUtil.handleEvent(e, proof);
+    }
+
+    @SneakyThrows
+    public void sendEvent(LedgerEventCreated event) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.add("Authorization", "Bearer " + event.getProof());
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(event.getContent(), headers);
+        ResponseEntity<?> result = restTemplate.postForEntity(event.getUrl(), request,
+                Object.class);
+        if (result.getStatusCode() == HttpStatus.OK) {
+            handleSentEvent(event.getEventId());
+        } else {
+            if (result.getStatusCode() == HttpStatus.UNPROCESSABLE_ENTITY) {
+                ApiErrorResponse error = (ApiErrorResponse) result.getBody();
+                if (error != null) {
+                    var errorCode = error.getDetails().get("errorCode");
+                    if (errorCode.equals("EVENT_ALREADY_EXISTS")) {
+                        handleSentEvent(event.getEventId());
+                    } else if (errorCode.equals("PREVIOUS_EVENT_NOTFOUND")) {
+                        handleEventError(event.getEventId(), "Previous event not found");
+                    } else {
+                        String err = GsonUtil.getGson().toJson(result.getBody());
+                        log.error(err);
+                        handleEventError(event.getEventId(), err);
+                    }
+                }
+            }
+            log.error("Unknown error: " + result.toString());
+        }
     }
 
     static Specification<LedgerEvent> filterEvents(Long id, String producer, String consumer) {
