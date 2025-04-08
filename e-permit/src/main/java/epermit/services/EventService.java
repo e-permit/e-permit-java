@@ -9,7 +9,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
@@ -77,10 +76,10 @@ public class EventService {
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(event.getContent(), headers);
             restTemplate.postForEntity(event.getUrl(), request, Object.class);
             handleSentEvent(event.getEventId());
-        }catch(HttpClientErrorException e) {
+        } catch (HttpClientErrorException e) {
             if (e.getStatusCode() == HttpStatus.UNPROCESSABLE_ENTITY) {
-                Object body = e.getResponseBodyAs(Object.class);
-                ApiErrorResponse error = (ApiErrorResponse) body;
+                String errBody = e.getResponseBodyAsString();
+                ApiErrorResponse error = GsonUtil.getGson().fromJson(errBody, ApiErrorResponse.class);
                 if (error != null) {
                     var errorCode = error.getDetails().get("errorCode");
                     if (errorCode.equals("EVENT_ALREADY_EXISTS")) {
@@ -88,13 +87,13 @@ public class EventService {
                     } else if (errorCode.equals("PREVIOUS_EVENT_NOTFOUND")) {
                         handleEventError(event.getEventId(), "Previous event not found");
                     } else {
-                        String err = GsonUtil.getGson().toJson(body);
-                        log.error(err);
-                        handleEventError(event.getEventId(), err);
+                        log.error(errBody);
+                        handleEventError(event.getEventId(), errBody);
                     }
                 }
-            }else {
+            } else {
                 log.error(e.getMessage(), e);
+                handleEventError(event.getEventId(), e.getMessage());
             }
         }
     }
