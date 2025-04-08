@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import epermit.commons.ApiErrorResponse;
@@ -69,17 +70,17 @@ public class EventService {
 
     @SneakyThrows
     public void sendEvent(LedgerEventCreated event) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.add("Authorization", "Bearer " + event.getProof());
-        HttpEntity<Map<String, Object>> request = new HttpEntity<>(event.getContent(), headers);
-        ResponseEntity<?> result = restTemplate.postForEntity(event.getUrl(), request,
-                Object.class);
-        if (result.getStatusCode() == HttpStatus.OK) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.add("Authorization", "Bearer " + event.getProof());
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(event.getContent(), headers);
+            restTemplate.postForEntity(event.getUrl(), request, Object.class);
             handleSentEvent(event.getEventId());
-        } else {
-            if (result.getStatusCode() == HttpStatus.UNPROCESSABLE_ENTITY) {
-                ApiErrorResponse error = (ApiErrorResponse) result.getBody();
+        }catch(HttpClientErrorException e) {
+            if (e.getStatusCode() == HttpStatus.UNPROCESSABLE_ENTITY) {
+                Object body = e.getResponseBodyAs(Object.class);
+                ApiErrorResponse error = (ApiErrorResponse) body;
                 if (error != null) {
                     var errorCode = error.getDetails().get("errorCode");
                     if (errorCode.equals("EVENT_ALREADY_EXISTS")) {
@@ -87,13 +88,14 @@ public class EventService {
                     } else if (errorCode.equals("PREVIOUS_EVENT_NOTFOUND")) {
                         handleEventError(event.getEventId(), "Previous event not found");
                     } else {
-                        String err = GsonUtil.getGson().toJson(result.getBody());
+                        String err = GsonUtil.getGson().toJson(body);
                         log.error(err);
                         handleEventError(event.getEventId(), err);
                     }
                 }
+            }else {
+                log.error(e.getMessage(), e);
             }
-            log.error("Unknown error: " + result.toString());
         }
     }
 
