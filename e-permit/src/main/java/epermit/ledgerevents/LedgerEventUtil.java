@@ -5,13 +5,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
+
 import org.springframework.web.server.ResponseStatusException;
 
 import epermit.commons.EpermitValidationException;
@@ -41,7 +37,6 @@ public class LedgerEventUtil {
     private final CreatedEventRepository createdEventRepository;
     private final JwsUtil jwsUtil;
     private final Map<String, LedgerEventHandler> eventHandlers;
-    private final RestTemplate restTemplate;
 
     public String getPreviousEventId(String consumer) {
         String previousEventId = "0";
@@ -115,21 +110,6 @@ public class LedgerEventUtil {
         ledgerEventRepository.save(ledgerEvent);
         LedgerEventHandler eventHandler = eventHandlers.get(e.getEventType().toString() + "_EVENT_HANDLER");
         eventHandler.handle(e);
-    }
-
-    @SneakyThrows
-    public ResponseEntity<?> sendEvent(LedgerEventCreated event) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.add("Authorization", "Bearer " + event.getProof());
-        /*if (properties.getXroadUrl().isPresent() &&
-                event.getUrl().startsWith(properties.getXroadUrl().get())) {
-            headers.add("X-Road-Client", properties.getXroadClientId().get());
-        }*/
-        HttpEntity<Map<String, Object>> request = new HttpEntity<>(event.getContent(), headers);
-        ResponseEntity<?> result = restTemplate.postForEntity(event.getUrl(), request,
-                Object.class);
-        return result;
     }
 
     @SneakyThrows

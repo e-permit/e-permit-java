@@ -1,7 +1,6 @@
 package epermit;
 
 import java.util.List;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -19,19 +18,20 @@ import lombok.extern.slf4j.Slf4j;
 public class EventScheduler {
 
     private final EventService eventService;
-    private final ApplicationEventPublisher eventPublisher;
 
     @Scheduled(fixedDelay = 3 * 60 * 1000)
     @SneakyThrows
     public void unsentEventsTask() {
-        List<LedgerEventCreated> list = eventService.getUnSendedEvents();
+        List<LedgerEventCreated> list = eventService.getUnSentEvents();
         if(!list.isEmpty()){
            log.info(String.format("Found %d unsended events", list.size()));
         }
         for (LedgerEventCreated event : list) {
-            eventPublisher.publishEvent(event);
-            Thread.sleep(100);
-            log.info( String.format("Event published id: %s", event.getEventId()));
+            try {
+                eventService.sendEvent(event);
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
         }
     }
 }
