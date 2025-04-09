@@ -7,6 +7,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,11 +20,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
+import epermit.entities.LedgerQuota;
+import epermit.models.EPermitProperties;
 import epermit.models.dtos.AuthorityConfig;
 import epermit.models.dtos.AuthorityDto;
 import epermit.models.dtos.AuthorityListItem;
 import epermit.models.inputs.CreateAuthorityInput;
 import epermit.models.inputs.CreateQuotaInput;
+import epermit.repositories.LedgerQuotaRepository;
 import epermit.services.AuthorityService;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,6 +37,12 @@ public class AuthorityControllerTest {
 
     @Mock
     AuthorityService authorityService;
+
+    @Mock
+    EPermitProperties properties;
+
+    @Mock
+    LedgerQuotaRepository ledgerQuotaRepository;
 
     @InjectMocks
     AuthorityController controller;
@@ -73,7 +84,14 @@ public class AuthorityControllerTest {
     @Test
     void createQuotaTest() {
         CreateQuotaInput input = new CreateQuotaInput();
+        input.setPermitType(1);
+        input.setPermitYear(2025);
+        LedgerQuota quota = new LedgerQuota();
+        quota.setId(UUID.randomUUID());
+        when(properties.getIssuerCode()).thenReturn("B");
+        when(ledgerQuotaRepository.findOneByParams("A", "B", 1, 2025)).thenReturn(Optional.of(quota));
         controller.createQuota("A", input);
+        
         verify(authorityService, times(1)).createQuota("A", input);
     }
 }

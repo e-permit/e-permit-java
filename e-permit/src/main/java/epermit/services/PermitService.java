@@ -153,7 +153,7 @@ public class PermitService {
         e.setPlateNumber2(input.getPlateNumber2());
         e.setPermitIssuer(properties.getIssuerCode());
         e.setPermitIssuedFor(input.getIssuedFor());
-        e.setDepartureCountry(properties.getIssuerCode());
+        e.setDepartureCountry(input.getDepartureCountry());
         e.setArrivalCountry(input.getArrivalCountry());
         e.setQrCode(qrCode);
         if (input != null && !input.getOtherClaims().isEmpty()) {

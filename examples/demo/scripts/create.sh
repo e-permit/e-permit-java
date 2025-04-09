@@ -14,7 +14,8 @@ create_permit()
     "company_name": "TECT",
     "company_id": "123",
     "plate_number": "TECT",
-    "arrival_country": "B"
+    "departure_country": "C",
+    "arrival_country": "D"
   }
 EOF
 }

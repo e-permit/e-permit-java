@@ -60,6 +60,11 @@ public class CreatePermitInput {
 
     @NotNull
     @Size(max = 10)
+    @Schema(name = "departure_country", description = "Departure country")
+    private String departureCountry;
+
+    @NotNull
+    @Size(max = 10)
     @Schema(name = "arrival_country", description = "Arrival country")
     private String arrivalCountry;
 

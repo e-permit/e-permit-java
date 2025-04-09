@@ -2,6 +2,7 @@ package epermit.controllers;
 
 import java.util.List;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,11 +17,14 @@ import org.springframework.web.client.RestTemplate;
 
 import epermit.commons.EpermitValidationException;
 import epermit.commons.ErrorCodes;
+import epermit.entities.LedgerQuota;
+import epermit.models.EPermitProperties;
 import epermit.models.dtos.AuthorityConfig;
 import epermit.models.dtos.AuthorityDto;
 import epermit.models.dtos.AuthorityListItem;
 import epermit.models.inputs.CreateAuthorityInput;
 import epermit.models.inputs.CreateQuotaInput;
+import epermit.repositories.LedgerQuotaRepository;
 import epermit.services.AuthorityService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -39,7 +43,10 @@ import lombok.extern.slf4j.Slf4j;
 @Tag(name = "Authorities", description = "Authority Management APIs")
 public class AuthorityController {
     private final AuthorityService service;
+    private final LedgerQuotaRepository ledgerQuotaRepository;
+    private final EPermitProperties properties;
     private final RestTemplate restTemplate;
+
 
     @GetMapping()
     @Operation(summary = "Get all authorities", description = "Returns all known authorities")
@@ -74,10 +81,15 @@ public class AuthorityController {
 
     @PostMapping("/{code}/quotas")
     @Operation(summary = "Create quota", description = "Create quota for given authority")
-    public void createQuota(
+    public String createQuota(
             @Parameter(description = "Authority code", example = "A") @PathVariable("code") String code,
             @RequestBody @Valid CreateQuotaInput input) {
         log.info("Authority quota create request. {}", input);
         service.createQuota(code, input);
+        String issuer = properties.getIssuerCode();
+        LedgerQuota quota = ledgerQuotaRepository
+                .findOneByParams(code, issuer,  input.getPermitType(), input.getPermitYear())
+                .orElseThrow();
+        return quota.getId().toString();
     }
 }

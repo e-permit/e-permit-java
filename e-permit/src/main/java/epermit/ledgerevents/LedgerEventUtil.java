@@ -124,7 +124,7 @@ public class LedgerEventUtil {
         if (authorization == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authorization header not found");
         }
-        if (!authorization.toLowerCase().startsWith("bearer")) {
+        if (!authorization.toLowerCase().startsWith("bearer ")) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid authorization type");
         }
         LedgerEventBase eb = (LedgerEventBase) e;

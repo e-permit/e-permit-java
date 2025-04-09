@@ -19,7 +19,7 @@ public class EventScheduler {
 
     private final EventService eventService;
 
-    @Scheduled(fixedDelay = 3 * 60 * 1000)
+    @Scheduled(fixedDelay = 60 * 1000)
     @SneakyThrows
     public void unsentEventsTask() {
         List<LedgerEventCreated> list = eventService.getUnSentEvents();

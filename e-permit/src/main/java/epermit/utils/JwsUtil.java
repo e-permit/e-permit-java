@@ -1,5 +1,7 @@
 package epermit.utils;
 
+import java.util.Date;
+
 import org.springframework.security.crypto.encrypt.Encryptors;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.stereotype.Service;
@@ -12,6 +14,8 @@ import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.Payload;
 import com.nimbusds.jose.crypto.ECDSAVerifier;
 import com.nimbusds.jose.jwk.ECKey;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jose.crypto.ECDSASigner;
 import com.nimbusds.jose.JWSSigner;
 
@@ -49,7 +53,6 @@ public class JwsUtil {
         Gson gson = GsonUtil.getGson();
         JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.ES256)
                 .keyID(keyId)
-                .customParam("authority", properties.getIssuerCode())
                 .build();
         Payload payload = new Payload(gson.toJson(payloadObj));
         String jws = sign(keyId, payload, header);
@@ -102,5 +105,54 @@ public class JwsUtil {
         JWSSigner signer = new ECDSASigner(key);
         jwsObject.sign(signer);
         return jwsObject.serialize();
+    }
+
+    @SneakyThrows
+    public String createJwt(String aud) {
+        Key keyEntity = keyRepository.findFirstByRevokedFalseOrderByCreatedAtAsc()
+                .orElseThrow(() -> new EpermitValidationException(ErrorCodes.KEY_NOTFOUND));
+        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+                .issuer(properties.getIssuerCode())
+                .audience(aud)
+                .expirationTime(new Date(new Date().getTime() + 60 * 1000))
+                .build();
+        SignedJWT signedJWT = new SignedJWT(
+                new JWSHeader.Builder(JWSAlgorithm.ES256).keyID(keyEntity.getKeyId()).build(),
+                claimsSet);
+        Key privateKey = keyRepository.findOneByKeyId(keyEntity.getKeyId()).orElseThrow();
+        TextEncryptor decryptor = Encryptors.text(properties.getKeystorePassword(), privateKey.getSalt());
+        ECKey key = ECKey.parse(decryptor.decrypt(privateKey.getPrivateJwk()));
+        JWSSigner signer = new ECDSASigner(key);
+        signedJWT.sign(signer);
+        return signedJWT.serialize();
+    }
+
+    @SneakyThrows
+    public Boolean verifyJwt(String jwt) {
+        // Parse the JWT
+        SignedJWT signedJWT = SignedJWT.parse(jwt);
+
+        String keyId = signedJWT.getHeader().getKeyID();
+        JWTClaimsSet claims = signedJWT.getJWTClaimsSet();
+        String issuer = claims.getIssuer();
+        String audience = claims.getAudience().getFirst();
+        if(!properties.getIssuerCode().equals(audience)){
+            return false;
+        }
+        Authority authority = authorityRepository.findOneByCode(issuer)
+                .orElseThrow(() -> new EpermitValidationException(ErrorCodes.AUTHORITY_NOT_FOUND));
+        AuthorityKey k = authority.getValidKeyById(keyId);
+        ECKey ecPublicJWK = ECKey.parse(k.getJwk()).toPublicJWK();
+        JWSVerifier verifier = new ECDSAVerifier(ecPublicJWK);
+
+        boolean signatureValid = signedJWT.verify(verifier);
+
+        if (!signatureValid) {
+            return false;
+        }
+
+        boolean notExpired = new Date().before(claims.getExpirationTime());
+
+        return notExpired;
     }
 }
