@@ -114,7 +114,7 @@ public class JwsUtil {
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
                 .issuer(properties.getIssuerCode())
                 .audience(aud)
-                .expirationTime(new Date(new Date().getTime() + 60 * 1000))
+                .expirationTime(new Date(new Date().getTime() + 60* 60 * 1000))
                 .build();
         SignedJWT signedJWT = new SignedJWT(
                 new JWSHeader.Builder(JWSAlgorithm.ES256).keyID(keyEntity.getKeyId()).build(),
