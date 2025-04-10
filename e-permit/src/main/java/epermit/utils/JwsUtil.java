@@ -137,6 +137,7 @@ public class JwsUtil {
         String issuer = claims.getIssuer();
         String audience = claims.getAudience().getFirst();
         if(!properties.getIssuerCode().equals(audience)){
+            log.info("Invalid JWT audience {}", jwt);
             return false;
         }
         Authority authority = authorityRepository.findOneByCode(issuer)
@@ -148,6 +149,7 @@ public class JwsUtil {
         boolean signatureValid = signedJWT.verify(verifier);
 
         if (!signatureValid) {
+            log.info("Invalid JWT signature {}", jwt);
             return false;
         }
 
