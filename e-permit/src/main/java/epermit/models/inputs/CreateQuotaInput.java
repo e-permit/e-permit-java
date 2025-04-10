@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 public class CreateQuotaInput {
     @NotNull
-    @Schema(name = "permit_year",description = "Quota year", example = "2024" )
+    @Schema(name = "permit_year",description = "Quota year", example = "2025" )
     private int permitYear;
     @NotNull
     @Schema(name = "permit_type", description = "Permit type", example = "1" )

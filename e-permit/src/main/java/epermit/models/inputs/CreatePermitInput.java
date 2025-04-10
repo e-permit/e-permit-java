@@ -17,11 +17,11 @@ import lombok.Data;
         {
             "issued_for": "A",
             "permit_type": 1,
-            "permit_year": 2024,
+            "permit_year": 2025,
             "plate_number": "TEST",
             "company_name": "ABC",
             "company_id": "123",
-            "departure_country": "C"
+            "departure_country": "C",
             "arrival_country": "D"
         }
         """
@@ -59,7 +59,6 @@ public class CreatePermitInput {
     @Schema(name = "company_id", description = "Company identifier")
     private String companyId;
 
-    @NotNull
     @Size(max = 10)
     @Schema(name = "departure_country", description = "Departure country")
     private String departureCountry;
@@ -70,7 +69,7 @@ public class CreatePermitInput {
     private String arrivalCountry;
 
     @Pattern(regexp = Constants.DATE_FORMAT)
-    @Schema(name = "expires_at", description = "Expires at", pattern = "dd/MM/yyyy", example = "01/01/2024")
+    @Schema(name = "expires_at", description = "Expires at", pattern = "dd/MM/yyyy", example = "01/01/2025")
     private String expiresAt;
 
     @Schema(description = "Other custom fields", example ="""

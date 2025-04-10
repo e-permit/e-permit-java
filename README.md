@@ -107,7 +107,7 @@ After starting the services, you can use the following endpoints with the Intern
 ```json
 {
     "permit_type": 1,
-    "permit_year": 2024,
+    "permit_year": 2025,
     "quantity": 100
 }
 ```
@@ -118,7 +118,7 @@ After starting the services, you can use the following endpoints with the Intern
 ```json
 {
     "issued_for": "<country_code>",
-    "permit_year": 2024,
+    "permit_year": 2025,
     "permit_type": 1,
     "company_name": "TEST",
     "company_id": "123",
