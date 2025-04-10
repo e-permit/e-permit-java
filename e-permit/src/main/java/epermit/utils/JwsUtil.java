@@ -154,7 +154,9 @@ public class JwsUtil {
         }
 
         boolean notExpired = new Date().before(claims.getExpirationTime());
-
+        if(!notExpired){
+            log.info("Invalid JWT expire time {}", jwt);
+        }
         return notExpired;
     }
 }
