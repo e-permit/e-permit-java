@@ -123,9 +123,13 @@ After starting the services, you can use the following endpoints with the Intern
     "company_name": "TEST",
     "company_id": "123",
     "plate_number": "TEST",
+    "departure_country": "<country_code>",
     "arrival_country": "<country_code>"
 }
 ```
+
+#### Health Check
+`GET /healthcheck`
 
 For a complete demonstration, refer to the [e-permit demo](https://github.com/e-permit/e-permit-java/tree/main/examples/demo).
 

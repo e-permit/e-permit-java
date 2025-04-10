@@ -21,7 +21,8 @@ import lombok.Data;
             "plate_number": "TEST",
             "company_name": "ABC",
             "company_id": "123",
-            "arrival_country": "A"
+            "departure_country": "C"
+            "arrival_country": "D"
         }
         """
 )
