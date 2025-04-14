@@ -24,6 +24,10 @@ public class PermitListPageParams {
 
     private String createdAt;
 
+    private String startDate;
+
+    private String endDate;
+
     private Integer page = 0;
 
 }

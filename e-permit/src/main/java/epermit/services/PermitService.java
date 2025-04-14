@@ -239,6 +239,9 @@ public class PermitService {
             if (input.getRevoked() != null) {
                 predicates.add(cb.equal(permit.get("revoked"), input.getRevoked()));
             }
+            if (input.getIssuedAt() != null) {
+                predicates.add(cb.equal(permit.get("issuedAt"), input.getIssuedAt()));
+            }
             if (input.getStartDate() != null) {
                 DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
                 LocalDateTime startDate = LocalDateTime.parse(input.getStartDate(), formatter);
@@ -288,6 +291,16 @@ public class PermitService {
                 DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
                 LocalDateTime createdAtTime = LocalDateTime.parse(input.getCreatedAt(), formatter);
                 predicates.add(cb.greaterThan(permit.get("createdAt"), createdAtTime));
+            }
+            if (input.getStartDate() != null) {
+                DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
+                LocalDateTime startDate = LocalDateTime.parse(input.getStartDate(), formatter);
+                predicates.add(cb.greaterThan(permit.get("createdAt"), startDate));
+            }
+            if (input.getEndDate() != null) {
+                DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
+                LocalDateTime endDate = LocalDateTime.parse(input.getEndDate(), formatter);
+                predicates.add(cb.lessThan(permit.get("createdAt"), endDate));
             }
             return cb.and(predicates.toArray(new Predicate[predicates.size()]));
         };

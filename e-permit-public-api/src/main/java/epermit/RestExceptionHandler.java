@@ -11,11 +11,11 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
+
 import epermit.commons.ApiErrorResponse;
 import epermit.commons.EpermitValidationException;
-import epermit.commons.ErrorCodes;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -41,14 +41,10 @@ public class RestExceptionHandler {
         return new ApiErrorResponse(ex);
     }
 
-    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    @ExceptionHandler(ResourceAccessException.class)
-    public ApiErrorResponse handleValidationExceptions(ResourceAccessException ex) {
-        EpermitValidationException e =
-                new EpermitValidationException("Remote Access Eror", ErrorCodes.REMOTE_ERROR);
-        ApiErrorResponse apiError = new ApiErrorResponse(e);
-        addLog(apiError, ex);
-        return apiError;
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ApiErrorResponse handleNotFoundExceptions(NoResourceFoundException ex) {
+        return new ApiErrorResponse(ex);
     }
 
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)

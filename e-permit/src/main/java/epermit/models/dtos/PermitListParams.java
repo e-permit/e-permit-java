@@ -16,6 +16,8 @@ public class PermitListParams {
 
     private Boolean revoked;
 
+    private String issuedAt;
+
     private String startDate;
 
     private String endDate;
