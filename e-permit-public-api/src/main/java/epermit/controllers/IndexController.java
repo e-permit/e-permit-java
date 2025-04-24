@@ -75,8 +75,8 @@ public class IndexController {
                 .findTopByProducerAndConsumerOrderByCreatedAtDesc(properties.getIssuerCode(), issuer)
                 .orElse(new LedgerEvent());
         HealthCheckRemoteResult result = new HealthCheckRemoteResult();
-        result.setToLastEventId(to.getEventId());
-        result.setFromLastEventId(from.getEventId());
+        result.setToLastEventId(to.getEventId() == null ? "0" : to.getEventId());
+        result.setFromLastEventId(from.getEventId() == null ? "0" : from.getEventId());
         return result;
     }
 

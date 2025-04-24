@@ -114,16 +114,18 @@ public class AuthorityService {
                         .exchange(authority.getPublicApiUri() + "/healthcheck", HttpMethod.GET, entity,
                                 HealthCheckRemoteResult.class);
                 HealthCheckRemoteResult r = resp.getBody();
-                if (!to.getEventId().equals(r.getFromLastEventId())) {
+                String toEventId = to.getEventId() == null ? "0" : to.getEventId();
+                String fromEventId = from.getEventId() == null ? "0" : from.getEventId();
+                if (!toEventId.equals(r.getFromLastEventId())) {
                     log.info("Event sync problem from {} with {} to {} with {}",
-                            authority.getCode(), r.getFromLastEventId(), properties.getIssuerCode(), to.getEventId());
+                            authority.getCode(), r.getFromLastEventId(), properties.getIssuerCode(), toEventId);
                     resultItem.setOk(false);
                     resultItem.setProblem(
                             "Event sync problem from " + authority.getCode() + " to " + properties.getIssuerCode());
                 }
-                if (!from.getEventId().equals(r.getToLastEventId())) {
+                if (!fromEventId.equals(r.getToLastEventId())) {
                     log.info("Event sync problem from {} with {} to {} with {}",
-                         properties.getIssuerCode(), from.getEventId(), authority.getCode(), r.getToLastEventId());
+                         properties.getIssuerCode(), fromEventId, authority.getCode(), r.getToLastEventId());
                     resultItem.setOk(false);
                     resultItem.setProblem(
                             "Event sync problem from " + properties.getIssuerCode() + " to " + authority.getCode());
