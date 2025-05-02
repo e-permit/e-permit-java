@@ -46,15 +46,14 @@ public class AuthorityController {
     private final EPermitProperties properties;
     private final RestTemplate restTemplate;
 
-
     @GetMapping()
-    @Operation(summary = "Get all authorities", description = "Returns all known authorities")
+    @Operation(summary = "Get all authorities", description = "This endpoint is used to get all integrated authorities.")
     public List<AuthorityListItem> getAll() {
         return service.getAll();
     }
 
     @GetMapping("/{code}")
-    @Operation(summary = "Get authority by code", description = "Get a Authority object by specifying its code")
+    @Operation(summary = "Get authority by code", description = "Get an authority object by specifying its code")
     public AuthorityDto getByCode(
             @Parameter(description = "Authority code", example = "A") @PathVariable("code") String code) {
         return service.getByCode(code);
@@ -87,7 +86,7 @@ public class AuthorityController {
         service.createQuota(code, input);
         String issuer = properties.getIssuerCode();
         LedgerQuota quota = ledgerQuotaRepository
-                .findOneByParams(code, issuer,  input.getPermitType(), input.getPermitYear())
+                .findOneByParams(code, issuer, input.getPermitType(), input.getPermitYear())
                 .orElseThrow();
         return quota.getId().toString();
     }

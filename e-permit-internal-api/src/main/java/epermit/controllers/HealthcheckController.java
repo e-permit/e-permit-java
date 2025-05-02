@@ -13,12 +13,12 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/healthcheck")
-@Tag(name = "Health Check", description = "Health Check all authorities")
+@Tag(name = "Health Check", description = "Health Check")
 public class HealthcheckController {
     private final AuthorityService authorityService;
 
     @GetMapping()
-    @Operation(summary = "Health Check", description = "Health Check all authorities")
+    @Operation(summary = "Health check all known authorities", description = "Status of all remote authorities")
     public HealthCheckResult healthcheck() {
         return authorityService.healthcheck();
     }

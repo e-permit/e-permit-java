@@ -19,9 +19,18 @@ public class SwaggerConfig {
     public OpenAPI uosOpenAPI() {
 
         Info info = new Info()
-                .title(env.getProperty("e-permit"))
+                .title("E-Permit Internal API(" + env.getProperty("EPERMIT_ISSUER_NAME") + ")")
                 .version(buildProperties.getVersion())
-                .description(env.getProperty("e-permit internal api"));
+                .description("""
+                 APIs for managing authorities, quotas, keys, permits, and health checks for the e-permit system.
+        
+                    - 200: Success
+                    - 400: Bad Request
+                    - 401: Unauthorized
+                    - 404: Not found
+                    - 422: Validation Error
+                    - 500: Internal Server Error      
+                        """);
 
         return new OpenAPI().info(info);
     }
