@@ -1,12 +1,12 @@
 # e-permit-java
 
-**e-permit-java** is a Java-based implementation of the e-Permit system for electronic permit exchange between authorities. It provides two main RESTful services (Public API and Internal API) and uses a PostgreSQL database for storing data. This documentation serves as an implementation guide for developers and operators to set up, configure, and understand the e-permit system.
+**e-permit-java** is a java-based implementation of the e-permit core system for electronic permit exchange between authorities. It provides two main RESTful services (Public API and Internal API) and uses a PostgreSQL database for storing data. This documentation serves as an implementation guide for developers and operators to set up, configure, and understand the e-permit system.
 
-> **💡 Tip:** If yo are new to e-permit concept read the e-permit specifications and broader context, refer to the [e-permit documentation site](https://e-permit.github.io).
+> **💡 Tip:** If yo are new to e-permit concepts read the e-permit specification [e-permit documentation site](https://e-permit.github.io).
 
 ## Architecture
 
-The e-permit system consists of two services and a database, as shown in the architecture diagram below:
+The e-permit core system consists of two services and a database, as shown in the architecture diagram below:
 
 - **Public API:** A service exposed to other authorities for secure data exchange.
 - **Internal API:** A service used by the local authority's internal systems to manage permits, quotas, and usage.
@@ -18,7 +18,7 @@ Each service is provided as a Docker image for easy deployment. Typically, the I
 
 ## Quickstart
 
-Follow these steps to set up and run the e-permit system quickly using Docker:
+Follow these steps to set up and run the e-permit system quickly using Docker Compose:
 
 1. **Create an `epermit.env` Environment File**  
    Create a file named **`epermit.env`** in your working directory and add the following configuration properties (with values specific to your environment):
@@ -53,7 +53,6 @@ Follow these steps to set up and run the e-permit system quickly using Docker:
    Create a **`docker-compose.yml`** file in the same directory with the following content. This will set up the Internal API, Public API, and (for development/testing) a PostgreSQL database service:
 
    ```yaml
-   version: '3.8'
    services:
      internal-api:
        container_name: internal-api
@@ -107,74 +106,36 @@ Follow these steps to set up and run the e-permit system quickly using Docker:
 
    This will launch the Internal API, Public API, and the database container. The Internal API will be listening on port **8081** (mapped to container's 8080), and the Public API on port **8080**.
 
-Once the services are up and running, you can use the following endpoints with the Internal API:
+Once the services are up and running, you can explore the swagger on http://localhost:8081/swagger-ui.html and use the following endpoints with the Internal API:
 
 #### Handshake
 
-The authority should first handshake with the other authorities. So that they can send message to each other. Let's say you have an authority named `A` and another authority named `B`. `A` should call the internal API with the public API URI of `B`:
+Authorities must first shake hands with other authorities. This way, they can send messages to each other. Let's say you have an authority named `A` and another authority named `B`. `A` and `B` must define the other authority's public api through their own internal api. This way, the two authorities will know each other's digital identities. For example, authority `A` can define authority `B` to its system as follows:
+
 
 `POST /authorities`
 
 ```json
 {
-    "code": "<authority_code>", // it should be B
-    "name": "<authority_name>", // it should be B
-    "public_api_uri": "https://<public_api_uri>" // it should be the public API URI of B
+    "code": "B", 
+    "name": "<authority_name>",
+    "public_api_uri": "https://<public_api_uri>" 
 }
 ```
 
-After handshake is from A to B and B to A. Then you can use the following endpoints with the Internal API:
-
-#### Create Quota
-
-To create a quota, use the following endpoint:
-
-`POST /authorities/<authority_code>/quotas`
-
-```json
-{
-    "permit_type": 1,
-    "permit_year": 2025,
-    "quantity": 100
-}
-```
-
-#### Create Permit
-
-To create a permit, use the following endpoint:
-
-`POST /permits`
-
-```json
-{
-    "issued_for": "<authority_code>",
-    "permit_year": 2025,
-    "permit_type": 1,
-    "company_name": "TEST",
-    "company_id": "123",
-    "plate_number": "TEST",
-    "departure_country": "<country_code>",
-    "arrival_country": "<country_code>"
-}
-```
+After the definition of both parties is completed, authorities can send messages to each other. This way, they can define permit quotas, issue permits and send activity(entry/exit) of permits.
 
 For the full example [e-permit demo](https://github.com/e-permit/e-permit-java/tree/main/examples/demo).
 
 ## Public API
 
-The **Public API** is the service that allows external authorities (other countries) to communicate with your e-permit system. In other words, this API is exposed publicly for inter-country data exchange. Each country must deploy a Public API service that conforms to the e-permit specifications and is accessible over the internet via HTTPS.
-
-Key points about the Public API:
-
-- **Purpose:** It enables secure exchange of permit data between countries. All communication is encrypted (TLS) and messages are digitally signed.
-- **Public Key Exchange:** Every authority needs to generate its own private/public key pair (for digital signatures). The Public API is responsible for sharing the authority’s **public key** with other countries. (The implementation will automatically generate an initial key pair during the first startup and store the keys in the database. The private key is stored encrypted using the provided keystore password.)
-- **Usage:** Other countries' systems will call your Public API to submit requests (e.g. permit applications, quota requests) and to verify permits. Likewise, your system will call their Public APIs for the same purposes.
+The **Public API** is the service that allows external authorities (other countries) to communicate with your e-permit core system. In other words, this API is exposed publicly for inter-country data exchange. Each country must deploy a Public API that conforms to the e-permit specifications and is accessible over the internet via HTTPS.
 
 The main functions provided by the Public API include:
 
 - **Distributing Public Keys:** Offering your authority’s public key to other countries. Outgoing messages from your country are signed (sealed) with your private key, and the receiving country uses the public key (retrieved via this API) to authenticate the message’s signature.
 - **Permit Verification:** Verifying an electronic permit via a QR code. The Public API exposes an endpoint (e.g. `GET /verify/{qrCode}`) that allows a permit’s QR code to be validated by the issuing country’s system. A foreign authority can scan the permit’s QR code and call this endpoint to confirm the permit’s authenticity and details.
-- **Handling Foreign Requests:** Accepting incoming permit or quota requests from other countries. For example, when another country’s Internal API submits a request for a permit or quota allocation, it will be received and processed by your Public API.
+- **Handling Incomming Messages:** Accepting incoming permit or quota messages from other authorities. For example, when another country’s Internal API sends a message for a permit creation or quota allocation, it will be received and processed by your Public API.
 
 > **Note:** Ensure the Public API endpoint is secured with TLS (HTTPS) and accessible on the internet, as it will be contacted by external parties. Keep your private signing key secure and only share the public certificate via this API.
 
@@ -199,7 +160,7 @@ For convenience during development or testing, the Internal API includes a Swagg
 
 This implementation uses **structured logging** in JSON format, making it easy to aggregate and analyze logs.
 
-- By default, logs are written to the console (stdout) in JSON. If you run the services in Docker, you can collect these logs using a logging driver or an aggregator (for example, **Fluentd** or Elastic Beats).
+- By default, logs are written to the console (stdout) in JSON. If you run the services in Docker, you can collect these logs using a logging driver or an aggregator (for example, **Fluentd**).
 - The system can optionally send logs to a **Graylog** server. If Graylog host and port are provided (via `EPERMIT_GRAYLOG_HOST` and `EPERMIT_GRAYLOG_PORT` in the environment), the services will emit logs to Graylog in addition to the console. This allows for centralized log management across multiple instances.
 
 Log entries are structured (key-value pairs in JSON) to include context about requests, making it easier to filter and search in log management systems.
@@ -224,7 +185,7 @@ All defined error codes and their meanings can be found in the source code (see 
 Each service provides a health check endpoint to verify that it is running correctly. This mechanism can be used both for internal monitoring and for other authorities to check the availability of your API service:
 
 - The **Internal API** exposes a health check at an endpoint such as `GET /healthcheck` (on port 8081 by default). Hitting this URL will return a simple status (e.g., HTTP 200 OK with a status message) if the service is healthy.
-- The **Public API** similarly can have a health/status endpoint (depending on the implementation) to allow monitoring its availability.
+- The **Public API** also provides a health check at `GET /healthcheck` (on port 8080 by default). This endpoint can be used by other countries to check if your Public API is accessible.
 
 These health checks can be used in load balancers or uptime monitoring tools to automatically verify that the e-permit services are up and responsive. In the context of inter-country operations, an authority’s system might periodically call the other country’s health endpoint to ensure their Public API is accessible.
 
