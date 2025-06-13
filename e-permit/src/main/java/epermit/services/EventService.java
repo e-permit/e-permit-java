@@ -79,10 +79,9 @@ public class EventService {
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(event.getContent(), headers);
             ResponseEntity<Object> response = restTemplate.postForEntity(event.getUrl(), request, Object.class);
             if(response.getStatusCode() == HttpStatus.OK) {
-                log.info("Event is sent url: {} error: {}", event.getUrl(), response.toString());
                 handleSentEvent(event.getEventId());
             }else{
-               log.error("Error when sending event: {}", response.toString());
+               log.error("Error when sending event url : {} : {}", event.getUrl(), response.toString());
             }
       
         } catch (HttpClientErrorException e) {
