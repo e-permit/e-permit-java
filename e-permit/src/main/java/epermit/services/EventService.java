@@ -8,7 +8,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
@@ -75,8 +77,13 @@ public class EventService {
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.add("Authorization", "Bearer " + event.getProof());
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(event.getContent(), headers);
-            restTemplate.postForEntity(event.getUrl(), request, Object.class);
-            handleSentEvent(event.getEventId());
+            ResponseEntity<Object> response = restTemplate.postForEntity(event.getUrl(), request, Object.class);
+            if(response.getStatusCode() == HttpStatus.OK) {
+                handleSentEvent(event.getEventId());
+            }else{
+               log.error("Error when sending event: {}", response.toString());
+            }
+      
         } catch (HttpClientErrorException e) {
             if (e.getStatusCode() == HttpStatus.UNPROCESSABLE_ENTITY) {
                 String errBody = e.getResponseBodyAsString();
