@@ -70,6 +70,7 @@ public class EventService {
     @SneakyThrows
     public void sendEvent(LedgerEventCreated event) {
         try {
+            log.info("Send event fired: {}",  event);
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.add("Authorization", "Bearer " + event.getProof());
