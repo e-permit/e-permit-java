@@ -82,6 +82,7 @@ public class EventService {
                 handleSentEvent(event.getEventId());
             }else{
                log.error("Error when sending event url : {} : {}", event.getUrl(), response.toString());
+               handleEventError(event.getEventId(), response.toString());
             }
       
         } catch (HttpClientErrorException e) {
