@@ -30,4 +30,7 @@ public class PermitListPageParams {
 
     private Integer page = 0;
 
+    private Boolean used;
+
+    private Boolean revoked;
 }
