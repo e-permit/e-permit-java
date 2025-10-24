@@ -275,6 +275,12 @@ public class PermitService {
             if (input.getPermitYear() != null) {
                 predicates.add(cb.equal(permit.get("permitYear"), input.getPermitYear()));
             }
+            if (input.getUsed() != null) {
+                predicates.add(cb.equal(permit.get("used"), input.getUsed()));
+            }
+            if (input.getRevoked() != null) {
+                predicates.add(cb.equal(permit.get("revoked"), input.getRevoked()));
+            }
             if (input.getPermitId() != null) {
                 predicates.add(cb.equal(permit.get("permitId"), input.getPermitId()));
             }
