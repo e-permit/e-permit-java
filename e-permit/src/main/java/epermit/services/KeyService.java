@@ -93,6 +93,7 @@ public class KeyService {
                 .orElseThrow(() -> new EpermitValidationException(ErrorCodes.KEY_NOTFOUND));
         key.setRevoked(true);
         key.setRevokedAt(Instant.now().getEpochSecond());
+        keyRepository.save(key);
         authorityRepository.findAll().forEach(authority -> {
             String prevEventId = eventUtil.getPreviousEventId(authority.getCode());
             KeyRevokedLedgerEvent event = new KeyRevokedLedgerEvent(properties.getIssuerCode(),
