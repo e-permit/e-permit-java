@@ -81,7 +81,7 @@ public class PermitCreatedLedgerEvent extends LedgerEventBase {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         LocalDate iat = LocalDate.parse(this.issuedAt, dtf);
         LocalDate exp = LocalDate.parse(this.expiresAt, dtf);
-        return iat.isBefore(exp);
+        return iat.isBefore(exp) || iat.isEqual(exp);
     }
 
     @AssertTrue(message = "Invalid permit issuer or issued_for")
