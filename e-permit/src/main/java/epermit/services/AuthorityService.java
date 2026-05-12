@@ -84,8 +84,8 @@ public class AuthorityService {
         result.setOk(true);
         result.setAuthorities(new ArrayList<>());
         RestTemplate restTemplate = new RestTemplateBuilder()
-                .setConnectTimeout(Duration.ofSeconds(3))
-                .setReadTimeout(Duration.ofSeconds(3))
+                .connectTimeout(Duration.ofSeconds(3))
+                .readTimeout(Duration.ofSeconds(3))
                 .messageConverters(new MappingJackson2HttpMessageConverter(objectMapper))
                 .build();
         List<epermit.entities.Authority> all = authorityRepository.findAll();

@@ -1,9 +1,12 @@
 package epermit.models.inputs;
 
+import java.time.Year;
+import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.Map;
 
 import epermit.commons.Constants;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -78,4 +81,11 @@ public class CreatePermitInput {
             }
             """)
     private Map<String, Object> otherClaims = new HashMap<>();
+
+    @AssertTrue(message = "Invalid permit_year")
+    private boolean isValidPermitYear() {
+        int currentYear = Year.now(ZoneOffset.UTC).getValue();
+        return currentYear == this.permitYear;
+    }
+
 }

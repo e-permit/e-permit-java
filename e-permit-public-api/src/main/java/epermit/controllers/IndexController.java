@@ -55,19 +55,7 @@ public class IndexController {
     @GetMapping("/healthcheck")
     @SneakyThrows
     public HealthCheckRemoteResult healthcheck(@RequestHeader HttpHeaders headers) {
-        String authorization = headers.getFirst(HttpHeaders.AUTHORIZATION);
-        if (authorization == null) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authorization header not found");
-        }
-        if (!authorization.toLowerCase().startsWith("bearer ")) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid authorization type");
-        }
-        String jwt = authorization.substring(7);
-        if (!jwsUtil.verifyJwt(jwt)) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authorization failed");
-        }
-        SignedJWT signedJWT = SignedJWT.parse(jwt);
-        String issuer = signedJWT.getJWTClaimsSet().getIssuer();
+        String issuer = verifyJwt(headers);
         LedgerEvent to = ledgerEventRepository
                 .findTopByProducerAndConsumerOrderByCreatedAtDesc(issuer, properties.getIssuerCode())
                 .orElse(new LedgerEvent());
@@ -83,5 +71,23 @@ public class IndexController {
     @GetMapping("favicon.ico")
     @ResponseBody
     void returnNoFavicon() {
+    }
+
+    @SneakyThrows
+    private String verifyJwt(HttpHeaders headers) {
+         String authorization = headers.getFirst(HttpHeaders.AUTHORIZATION);
+        if (authorization == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authorization header not found");
+        }
+        if (!authorization.toLowerCase().startsWith("bearer ")) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid authorization type");
+        }
+        String jwt = authorization.substring(7);
+        if (!jwsUtil.verifyJwt(jwt)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authorization failed");
+        }
+        SignedJWT signedJWT = SignedJWT.parse(jwt);
+        String issuer = signedJWT.getJWTClaimsSet().getIssuer();
+        return issuer;
     }
 }
