@@ -37,4 +37,5 @@ secrets.yml
 .sts4-cache
 epermit.env
 .env
+.vscode/
 

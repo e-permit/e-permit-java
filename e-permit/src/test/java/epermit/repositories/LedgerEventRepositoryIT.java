@@ -18,7 +18,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import epermit.entities.CreatedEvent;
 import epermit.entities.LedgerEvent;
 import epermit.ledgerevents.LedgerEventType;
-import lombok.extern.slf4j.Slf4j;
 
 @Testcontainers
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)

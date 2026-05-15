@@ -4,6 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+
+import java.time.Year;
+
 import org.junit.Assert;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -84,7 +87,7 @@ public class PermitControllerIT {
         LedgerQuota quota = new LedgerQuota();
         quota.setTotalQuota(30L);
         quota.setPermitType(1);
-        quota.setPermitYear(2021);
+        quota.setPermitYear(Year.now().getValue());
         quota.setPermitIssuer("A");
         quota.setPermitIssuedFor("B");
         ledgerQuotaRepository.save(quota);
@@ -179,7 +182,7 @@ public class PermitControllerIT {
         input.setCompanyId("123");
         input.setIssuedFor("B");
         input.setPermitType(1);
-        input.setPermitYear(2021);
+        input.setPermitYear(Year.now().getValue());
         input.setPlateNumber("06AA1234");
         input.setArrivalCountry("B");
         ResponseEntity<String> r = getTestRestTemplate().postForEntity(getBaseUrl(), input, String.class);
@@ -195,7 +198,7 @@ public class PermitControllerIT {
         permit.setIssuer("A");
         permit.setIssuedFor("B");
         permit.setPermitType(1);
-        permit.setPermitYear(2021);
+        permit.setPermitYear(Year.now().getValue());
         permit.setPlateNumber("06AA1234");
         permit.setExpiresAt("31/01/2022");
         permit.setIssuedAt("03/03/2021");

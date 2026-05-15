@@ -65,6 +65,22 @@ public class AuthorityService {
                 .collect(Collectors.toList());
     }
 
+    public List<AuthorityDto> getAllInDetail() {
+        List<AuthorityDto> result = new ArrayList<>();
+        List<epermit.entities.Authority> all = authorityRepository.findAll();
+        List<epermit.entities.LedgerQuota> quotaEntities = ledgerQuotaRepository.findAll();
+        all.forEach(authority -> {
+            AuthorityDto dto = modelMapper.map(authority, AuthorityDto.class);
+            List<QuotaDto> quotas = quotaEntities.stream().filter(
+                    x -> x.getPermitIssuer().equals(authority.getCode()) || x.getPermitIssuedFor().equals(authority.getCode()))
+                    .map(x -> modelMapper.map(x, QuotaDto.class)).collect(Collectors.toList());
+
+            dto.setQuotas(quotas);
+            result.add(dto);
+        });
+        return result;
+    }
+
     public AuthorityDto getByCode(String code) {
         List<epermit.entities.LedgerQuota> quotaEntities = ledgerQuotaRepository.findAll();
         Authority authority = authorityRepository.findOneByCode(code)
@@ -125,7 +141,7 @@ public class AuthorityService {
                 }
                 if (!fromEventId.equals(r.getToLastEventId())) {
                     log.info("Event sync problem from {} with {} to {} with {}",
-                         properties.getIssuerCode(), fromEventId, authority.getCode(), r.getToLastEventId());
+                            properties.getIssuerCode(), fromEventId, authority.getCode(), r.getToLastEventId());
                     resultItem.setOk(false);
                     resultItem.setProblem(
                             "Event sync problem from " + properties.getIssuerCode() + " to " + authority.getCode());

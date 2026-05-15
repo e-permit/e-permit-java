@@ -52,6 +52,12 @@ public class AuthorityController {
         return service.getAll();
     }
 
+    @GetMapping("/in-detail")
+    @Operation(summary = "Get all authorities in detail", description = "This endpoint is used to get all integrated authorities in detail.")
+    public List<AuthorityDto> getAllInDetail() {
+        return service.getAllInDetail();
+    }
+
     @GetMapping("/{code}")
     @Operation(summary = "Get authority by code", description = "Get an authority object by specifying its code")
     public AuthorityDto getByCode(

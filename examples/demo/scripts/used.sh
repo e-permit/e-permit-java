@@ -14,4 +14,4 @@ permit_used()
 EOF
 }
 
-curl "$B_URI/permits/A-B-2025-1-1/activities" -u "$AUTH" -X POST --data "$(permit_used)" -H 'Content-Type: application/json'
+curl "$B_URI/permits/A-B-2026-1-1/activities" -u "$AUTH" -X POST --data "$(permit_used)" -H 'Content-Type: application/json'
