@@ -85,19 +85,11 @@ public class LedgerEventUtil {
                 e.getEventProducer(), e.getEventConsumer(), e.getEventId());
         if (eventExist)
             throw new EpermitValidationException(ErrorCodes.EVENT_ALREADY_EXISTS);
-
-        if (e.getPreviousEventId().equals("0")) {
-            Boolean genesisEventExist = ledgerEventRepository
-                    .existsByProducerAndConsumer(e.getEventProducer(), e.getEventConsumer());
-            if (genesisEventExist)
-                throw new EpermitValidationException(ErrorCodes.GENESIS_EVENT_ALREADY_EXISTS);
-            log.info("First event received");
-        } else {
-            Boolean previousEventExist = ledgerEventRepository.existsByProducerAndConsumerAndEventId(
+        Boolean previousEventIdUsed = ledgerEventRepository.existsByProducerAndConsumerAndPreviousEventId(
                     e.getEventProducer(), e.getEventConsumer(), e.getPreviousEventId());
-            if (!previousEventExist)
-                throw new EpermitValidationException(ErrorCodes.PREVIOUS_EVENT_NOTFOUND);
-        }
+        if(previousEventIdUsed)
+            throw new EpermitValidationException(ErrorCodes.PREVIOUS_EVENTID_USED);
+ 
         LedgerEvent ledgerEvent = new LedgerEvent();
         ledgerEvent.setEventId(e.getEventId());
         ledgerEvent.setConsumer(e.getEventConsumer());
