@@ -25,7 +25,7 @@ public class PermitRevokedLedgerEventHandler implements LedgerEventHandler {
     public <T extends LedgerEventBase> void handle(T claims) {
         log.info("PermitRevokedEventHandler started with {}", claims);
         PermitRevokedLedgerEvent event = (PermitRevokedLedgerEvent) claims;
-        LedgerPermit permit = permitRepository.findOneByPermitId(event.getPermitId())
+        LedgerPermit permit = permitRepository.findOneForUpdateByPermitId(event.getPermitId())
                 .orElseThrow(() -> new EpermitValidationException(ErrorCodes.PERMIT_NOTFOUND));
         if (!permit.getIssuer().equals(event.getEventProducer()))
             throw new EpermitValidationException(ErrorCodes.PERMIT_NOTFOUND);
@@ -33,7 +33,7 @@ public class PermitRevokedLedgerEventHandler implements LedgerEventHandler {
             throw new EpermitValidationException(ErrorCodes.PERMIT_NOTFOUND);
         if (permit.isRevoked())
             throw new EpermitValidationException(ErrorCodes.PERMIT_ALREADY_REVOKED);
-        LedgerQuota quota = quotaRepository.findOneByParams(permit.getIssuer(),
+        LedgerQuota quota = quotaRepository.findOneForUpdateByParams(permit.getIssuer(),
                         permit.getIssuedFor(), permit.getPermitType(), permit.getPermitYear())
                 .orElseThrow(() -> new EpermitValidationException(ErrorCodes.INSUFFICIENT_PERMIT_QUOTA));
         quota.setRevokedCount(quota.getRevokedCount() + 1);

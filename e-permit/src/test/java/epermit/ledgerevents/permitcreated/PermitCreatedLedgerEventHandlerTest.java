@@ -117,7 +117,7 @@ public class PermitCreatedLedgerEventHandlerTest {
         event.setPermitIssuer("B");
         event.setPermitIssuedFor("A");
         when(permitRepository.existsByPermitId("B-A-2021-1-1")).thenReturn(false);
-        when(quotaRepository.findOneByParams(anyString(), anyString(), anyInt(), anyInt() ))
+        when(quotaRepository.findOneForUpdateByParams(anyString(), anyString(), anyInt(), anyInt() ))
                 .thenReturn(Optional.of(LedgerQuota.builder().totalQuota(5L).build()));
         handler.handle(event);
         verify(permitRepository).save(captor.capture());

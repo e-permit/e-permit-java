@@ -45,10 +45,10 @@ public class PermitRevokedLedgerEventHandlerTest {
         p.setIssuedFor("A");
         p.setPermitType(1);
         p.setPermitYear(2021);
-        when(quotaRepository.findOneByParams(anyString(), anyString(), anyInt(), anyInt() ))
+        when(quotaRepository.findOneForUpdateByParams(anyString(), anyString(), anyInt(), anyInt() ))
                 .thenReturn(Optional.of(LedgerQuota.builder().totalQuota(5L).build()));
         
-        when(permitRepository.findOneByPermitId(event.getPermitId())).thenReturn(Optional.of(p));
+        when(permitRepository.findOneForUpdateByPermitId(event.getPermitId())).thenReturn(Optional.of(p));
         handler.handle(event);
         verify(permitRepository, times(1)).save(p);
     }
@@ -56,7 +56,7 @@ public class PermitRevokedLedgerEventHandlerTest {
     @Test
     void handlePermitNotFoundTest() {
         PermitRevokedLedgerEvent event = new PermitRevokedLedgerEvent("B", "A", "0");
-        when(permitRepository.findOneByPermitId(event.getPermitId())).thenReturn(Optional.empty());
+        when(permitRepository.findOneForUpdateByPermitId(event.getPermitId())).thenReturn(Optional.empty());
         EpermitValidationException ex = Assertions.assertThrows(EpermitValidationException.class, () -> {
             handler.handle(event);
         });
@@ -73,7 +73,7 @@ public class PermitRevokedLedgerEventHandlerTest {
         p.setIssuedFor("A");
         p.setPermitType(1);
         p.setPermitYear(2021);
-        when(permitRepository.findOneByPermitId(event.getPermitId())).thenReturn(Optional.of(p));
+        when(permitRepository.findOneForUpdateByPermitId(event.getPermitId())).thenReturn(Optional.of(p));
         EpermitValidationException ex = Assertions.assertThrows(EpermitValidationException.class, () -> {
             handler.handle(event);
         });
@@ -88,7 +88,7 @@ public class PermitRevokedLedgerEventHandlerTest {
         p.setPermitId("B-A-2021-1-1");
         p.setIssuer("B");
         p.setIssuedFor("A2");
-        when(permitRepository.findOneByPermitId(event.getPermitId())).thenReturn(Optional.of(p));
+        when(permitRepository.findOneForUpdateByPermitId(event.getPermitId())).thenReturn(Optional.of(p));
         EpermitValidationException ex = Assertions.assertThrows(EpermitValidationException.class, () -> {
             handler.handle(event);
         });

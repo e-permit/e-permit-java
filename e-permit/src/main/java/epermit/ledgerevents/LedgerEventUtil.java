@@ -85,10 +85,6 @@ public class LedgerEventUtil {
                 e.getEventProducer(), e.getEventConsumer(), e.getEventId());
         if (eventExist)
             throw new EpermitValidationException(ErrorCodes.EVENT_ALREADY_EXISTS);
-        Boolean previousEventIdUsed = ledgerEventRepository.existsByProducerAndConsumerAndPreviousEventId(
-                    e.getEventProducer(), e.getEventConsumer(), e.getPreviousEventId());
-        if(previousEventIdUsed)
-            throw new EpermitValidationException(ErrorCodes.PREVIOUS_EVENTID_USED);
  
         LedgerEvent ledgerEvent = new LedgerEvent();
         ledgerEvent.setEventId(e.getEventId());

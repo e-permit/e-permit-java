@@ -24,7 +24,7 @@ public class QuotaCreatedLedgerEventHandler implements LedgerEventHandler {
         QuotaCreatedLedgerEvent event = (QuotaCreatedLedgerEvent) claims;
    
         LedgerQuota quota = quotaRepository
-                .findOneByParams(event.getPermitIssuer(), event.getPermitIssuedFor(),
+                .findOneForUpdateByParams(event.getPermitIssuer(), event.getPermitIssuedFor(),
                         event.getPermitType(), event.getPermitYear())
                 .orElse(LedgerQuota.builder().permitIssuer(event.getPermitIssuer())
                         .permitIssuedFor(event.getPermitIssuedFor()).permitType(event.getPermitType())

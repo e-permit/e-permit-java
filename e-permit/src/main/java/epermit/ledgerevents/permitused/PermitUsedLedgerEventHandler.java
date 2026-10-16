@@ -25,7 +25,7 @@ public class PermitUsedLedgerEventHandler implements LedgerEventHandler {
     public <T extends LedgerEventBase> void handle(T claims) {
         log.info("PermitUsedEventHandler started with {}", claims);
         PermitUsedLedgerEvent event = (PermitUsedLedgerEvent) claims;
-        LedgerPermit permit = permitRepository.findOneByPermitId(event.getPermitId())
+        LedgerPermit permit = permitRepository.findOneForUpdateByPermitId(event.getPermitId())
                 .orElseThrow(() -> new EpermitValidationException(ErrorCodes.PERMIT_NOTFOUND));
         if (!permit.getIssuer().equals(event.getEventConsumer()))
             throw new EpermitValidationException(ErrorCodes.PERMIT_NOTFOUND);
