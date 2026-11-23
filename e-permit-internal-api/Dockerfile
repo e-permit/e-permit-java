@@ -1,16 +1,15 @@
 # Use Eclipse Temurin JDK 21 on Alpine
-FROM eclipse-temurin:21-jdk-alpine
+FROM eclipse-temurin:25-jdk-jammy
 
 # Create a group and user for the application
-RUN addgroup -S epermit && adduser -S epermit -G epermit
+RUN groupadd --system epermit && useradd --system --gid epermit --no-create-home epermit
 
 # Create a directory for custom certificates and set ownership
 RUN mkdir -p /opt/certs \
     && chown epermit:epermit /opt/certs
 
 # Copy the JAR file to the container and set ownership
-ADD target/e-permit-internal-api.jar /app.jar
-RUN chown epermit:epermit /app.jar
+COPY --chown=epermit:epermit  target/e-permit-internal-api.jar /app.jar
 
 # Expose the application's port
 EXPOSE 8080
