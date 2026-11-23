@@ -25,8 +25,8 @@ public class KeyRevokedLedgerEventHandler implements LedgerEventHandler {
     public <T extends LedgerEventBase> void handle(T claims) {
         log.info("KeyRevokedLedgerEvent started with {}", claims);
         KeyRevokedLedgerEvent e = (KeyRevokedLedgerEvent) claims;
-        if (!e.getAuthority().equals(properties.getIssuerCode())) {
-            Authority authority = authorityRepository.findOneByCode(e.getAuthority()).orElseThrow();
+        if (!e.getEventProducer().equals(properties.getIssuerCode())) {
+            Authority authority = authorityRepository.findOneByCode(e.getEventProducer()).orElseThrow();
             if(authority.getValidKeys().size() == 1){
                 throw new EpermitValidationException(ErrorCodes.INSUFFICIENT_KEY);
             }
@@ -34,7 +34,7 @@ public class KeyRevokedLedgerEventHandler implements LedgerEventHandler {
             AuthorityKey key = authority.getValidKeyById(e.getKeyId());
             key.setRevoked(true);
             key.setRevokedAt(e.getRevokedAt());
-           
+
             log.info("KeyCreatedEventHandler ended with {}", key.getJwk());
             authorityRepository.save(authority);
         }

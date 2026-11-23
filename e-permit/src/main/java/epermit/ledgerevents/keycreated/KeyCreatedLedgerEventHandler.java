@@ -25,15 +25,15 @@ public class KeyCreatedLedgerEventHandler implements LedgerEventHandler {
         log.info("KeyCreatedEventHandler started with {}", claims);
         KeyCreatedLedgerEvent e = (KeyCreatedLedgerEvent) claims;
         // Key events should only be handled by consumer
-        if (!e.getAuthority().equals(properties.getIssuerCode())) {
-            Authority authority = authorityRepository.findOneByCode(e.getAuthority())
+        if (!e.getEventProducer().equals(properties.getIssuerCode())) {
+            Authority authority = authorityRepository.findOneByCode(e.getEventProducer())
                     .orElseThrow(() -> new EpermitValidationException(ErrorCodes.AUTHORITY_NOT_FOUND));
             boolean keyExist = authority.getKeys().stream()
                     .anyMatch((k) -> k.getKeyId().equals(e.getKid()));
             if (keyExist) {
                 throw new EpermitValidationException(ErrorCodes.KEYID_ALREADY_EXISTS);
             }
-           
+
             AuthorityKey key = new AuthorityKey();
             key.setKeyId(e.getKid());
             key.setJwk(e.getJwk());

@@ -74,7 +74,6 @@ public class KeyService {
             String prevEventId = eventUtil.getPreviousEventId(authority.getCode());
             KeyCreatedLedgerEvent event = new KeyCreatedLedgerEvent(properties.getIssuerCode(),
                     authority.getCode(), prevEventId);
-            event.setAuthority(properties.getIssuerCode());
             event.setKid(key.getKeyId());
             event.setJwk(key.getJwk());
             eventUtil.persistAndPublishEvent(event);
@@ -98,7 +97,6 @@ public class KeyService {
             String prevEventId = eventUtil.getPreviousEventId(authority.getCode());
             KeyRevokedLedgerEvent event = new KeyRevokedLedgerEvent(properties.getIssuerCode(),
                     authority.getCode(), prevEventId);
-            event.setAuthority(properties.getIssuerCode());
             event.setKeyId(keyId);
             event.setRevokedAt(Instant.now().getEpochSecond());
             eventUtil.persistAndPublishEvent(event);

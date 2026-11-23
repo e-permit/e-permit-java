@@ -38,4 +38,4 @@ secrets.yml
 epermit.env
 .env
 .vscode/
-
+.devcontainer/

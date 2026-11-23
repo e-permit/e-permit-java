@@ -35,9 +35,9 @@ public class EventScheduler {
         }
     }
 
-    @Scheduled(fixedDelay = 60* 60 * 1000)
+    /*@Scheduled(fixedDelay = 60* 60 * 1000)
     @SneakyThrows
     public void getUnsentEventsAndHandleTask() {
-        // 
-    }
+        //
+    }*/
 }

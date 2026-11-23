@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21-jdk-alpine
+FROM eclipse-temurin:25-jdk-jammy
 RUN addgroup -S epermit && adduser -S epermit -G epermit
 USER epermit
 ADD target/e-permit-public-api.jar /app.jar

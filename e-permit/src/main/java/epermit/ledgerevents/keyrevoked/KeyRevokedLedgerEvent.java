@@ -14,9 +14,6 @@ public class KeyRevokedLedgerEvent extends LedgerEventBase {
     }
 
     @NotNull
-    private String authority;
-
-    @NotNull
     private String keyId;
 
     @NotNull

@@ -14,9 +14,6 @@ public class KeyCreatedLedgerEvent extends LedgerEventBase {
     }
 
     @NotNull
-    private String authority;
-
-    @NotNull
     private String kid;
 
     @NotNull
