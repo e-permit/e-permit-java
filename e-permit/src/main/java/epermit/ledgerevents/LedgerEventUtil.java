@@ -81,11 +81,20 @@ public class LedgerEventUtil {
     @SneakyThrows
     public <T extends LedgerEventBase> void handleEvent(T e, String proof) {
         log.info("Event handle started {}", e);
+        if (!"0".equals(e.getPreviousEventId())) {
+           ledgerEventRepository.lockEvent(e.getEventProducer(), e.getEventConsumer(), e.getPreviousEventId())
+                       .orElseThrow(() -> new EpermitValidationException(ErrorCodes.PREVIOUS_EVENTID_USED)); // unknown parent / out of order
+        }
         Boolean eventExist = ledgerEventRepository.existsByProducerAndConsumerAndEventId(
                 e.getEventProducer(), e.getEventConsumer(), e.getEventId());
+
         if (eventExist)
             throw new EpermitValidationException(ErrorCodes.EVENT_ALREADY_EXISTS);
- 
+
+        Boolean previousEventIdUsed = ledgerEventRepository.existsByProducerAndConsumerAndPreviousEventId(
+                                e.getEventProducer(), e.getEventConsumer(), e.getPreviousEventId());
+        if(previousEventIdUsed)
+            throw new EpermitValidationException(ErrorCodes.PREVIOUS_EVENTID_USED);
         LedgerEvent ledgerEvent = new LedgerEvent();
         ledgerEvent.setEventId(e.getEventId());
         ledgerEvent.setConsumer(e.getEventConsumer());
